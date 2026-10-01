@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">Renderiza interfaces declaradas por scripts con Jetpack Compose y Material 3</string>
+</resources>

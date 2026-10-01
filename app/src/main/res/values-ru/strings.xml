@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">Отрисовывает объявленный скриптом интерфейс средствами Jetpack Compose и Material 3</string>
+</resources>
