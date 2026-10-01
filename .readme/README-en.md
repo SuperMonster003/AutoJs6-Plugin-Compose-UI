@@ -67,7 +67,7 @@ Core capabilities the plugin is set to deliver:
 - Chained modifiers: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` keeps operation order, and scoped operations are validated on the host side
 - Two hosting surfaces: activity content of `"ui";` scripts (`compose.mount`) and floating windows of any script (`compose.floaty`)
 - In-process rendering: the renderer runs inside the host process without any cross-process UI bridge, so events and state updates stay low-latency
-- Pure bytecode APK: no native libraries and no ABI variants, one package fits every device
+- Single package: no ABI variants and no first-party native code (only the AndroidX graphics-path helper bundled with Compose, built in for all four ABIs), one APK fits every device
 
 ******
 
@@ -128,7 +128,7 @@ Runtime requirements and limits of the plugin:
 
 - AutoJs6 version: 6.8.0 (5308) or later; older hosts flag the plugin as incompatible in the plugin center
 - Android version: 7.0 (API 24) or later
-- Processor architecture: any (pure bytecode APK, no native libraries)
+- Processor architecture: arm64-v8a / armeabi-v7a / x86_64 / x86 (all four built into the single APK, no per-architecture download)
 - Compose version: bundled with the plugin (BOM 2026.09.00), independent of the host's Compose runtime
 - Contract version: 1; host and plugin negotiate the contract version and refuse to load with a clear error when it does not match
 

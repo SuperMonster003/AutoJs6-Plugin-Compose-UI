@@ -19,7 +19,10 @@ data class ComposeUiPluginRuntimeInfo(
     val engine: String get() = ComposeUiPlugin.ENGINE
     val variant: String get() = ComposeUiPlugin.VARIANT
 
-    /** Empty on purpose: the plugin ships no native code and runs on any ABI (roadmap D22). */
+    /**
+     * Empty on purpose (roadmap D22): the plugin has no native code of its own, and the single APK carries the
+     * Compose graphics-path helper for every Android ABI, so no device is excluded.
+     */
     val supportedAbis: Array<String> get() = emptyArray()
 
     val requiresHostVersion: Long get() = ComposeUiPlugin.REQUIRED_HOST_VERSION

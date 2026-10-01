@@ -17,7 +17,7 @@
     "チェーン式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` は操作順序を保持し, スコープ限定の操作はホスト側で検証されます",
     "2 つの表示面: `\"ui\";` スクリプトの Activity コンテンツ (`compose.mount`) と任意のスクリプトのフローティングウィンドウ (`compose.floaty`)",
     "プロセス内描画: レンダラーはホストプロセス内で動作し, プロセス間の UI ブリッジがないためイベントと状態更新の遅延が小さい",
-    "純粋なバイトコード APK: ネイティブライブラリなし, ABI 区分なし, 単一パッケージで全デバイスに対応"
+    "単一パッケージ: ABI の区分なし, プラグイン独自のネイティブコードなし (Compose に同梱される AndroidX graphics-path ヘルパーのみ, 4 つの ABI すべてを内蔵), 1 つの APK で全デバイスに対応"
   ],
   "h3_usage": "使い方",
   "usage_steps": [
@@ -41,7 +41,7 @@
   "compatibility_points": [
     "AutoJs6 のバージョン: {{ required_host_version_name }} ({{ required_host_version_code }}) 以降. それより古いホストではプラグインセンターに非互換と表示されます",
     "Android のバージョン: {{ min_android_version }} (API {{ android_min_sdk }}) 以降",
-    "プロセッサアーキテクチャ: 制限なし (純粋なバイトコード APK, ネイティブライブラリなし)",
+    "プロセッサアーキテクチャ: arm64-v8a / armeabi-v7a / x86_64 / x86 (単一の APK に 4 つすべてを内蔵, アーキテクチャ別の選択は不要)",
     "Compose のバージョン: プラグインに同梱 (BOM {{ compose_bom }}). ホストの Compose ランタイムには依存しません",
     "契約バージョン: {{ plugin_contract_version }}. ホストとプラグインは契約バージョンを照合し, 不一致の場合は明確なエラーを出して読み込みを拒否します"
   ],

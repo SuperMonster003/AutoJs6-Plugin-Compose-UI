@@ -28,7 +28,7 @@ import java.util.zip.ZipFile
 /**
  * Verifies the host-facing activation and discovery contract against the installed APK: the Wake
  * Activity, the INFO service with a real `getInfo()` round trip (empty ABI list, host floor in the
- * capabilities), the renderer factory meta-data, and the pure-bytecode packaging of roadmap D22.
+ * capabilities), the renderer factory meta-data, and the single universal APK packaging of roadmap D22.
  */
 @RunWith(AndroidJUnit4::class)
 class ComposeUiPluginContractTest {
@@ -106,7 +106,7 @@ class ComposeUiPluginContractTest {
             assertEquals(expectedVersionCode, info.versionCode)
             assertEquals(context.getString(R.string.plugin_version_date), info.versionDate)
             assertTrue(info.versionDate?.isNotBlank() == true)
-            // Roadmap D22: no native code, so no ABI restriction is reported.
+            // Roadmap D22: no first-party native code and every ABI in the single APK, so no restriction is reported.
             val supportedAbis = requireNotNull(info.supportedAbis) { "supportedAbis must not be null" }
             assertArrayEquals(emptyArray<String>(), supportedAbis)
             assertCapabilities(requireNotNull(info.capabilities))
@@ -114,14 +114,19 @@ class ComposeUiPluginContractTest {
     }
 
     @Test
-    fun theApkShipsNoNativeLibraries() {
+    fun theApkIsOneUniversalPackageWithOnlyTheComposeGraphicsPathHelper() {
+        // Roadmap D22 (amended by the P0.1 evidence): no first-party native code and no ABI split, but Compose
+        // ui-graphics brings androidx.graphics:graphics-path with one small library per ABI; it must load on the
+        // running device (16 KB page devices reject 4 KB aligned libraries).
         val applicationInfo = context.applicationInfo
         val apks = listOfNotNull(applicationInfo.sourceDir) + applicationInfo.splitSourceDirs.orEmpty()
-        assertEquals("a pure bytecode plugin is a single APK", 1, apks.size)
-        val nativeEntries = apks.flatMap { apk ->
-            ZipFile(apk).use { zip -> zip.entries().asSequence().map { it.name }.filter { it.startsWith("lib/") }.toList() }
+        assertEquals("the plugin is a single universal APK", 1, apks.size)
+        val nativeEntries = ZipFile(apks.single()).use { zip ->
+            zip.entries().asSequence().map { it.name }.filter { it.startsWith("lib/") }.toList()
         }
-        assertTrue("no lib/ entries are expected (roadmap D22), found $nativeEntries", nativeEntries.isEmpty())
+        val expected = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86").map { "lib/$it/libandroidx.graphics.path.so" }
+        assertEquals(expected.toSet(), nativeEntries.toSet())
+        System.loadLibrary("androidx.graphics.path")
     }
 
     @Test

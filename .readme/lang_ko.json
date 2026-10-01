@@ -17,7 +17,7 @@
     "체인형 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')`는 연산 순서를 유지하며, 범위 한정 연산은 호스트 쪽에서 검증됩니다",
     "두 가지 표시 면: `\"ui\";` 스크립트의 Activity 콘텐츠 (`compose.mount`)와 모든 스크립트의 플로팅 창 (`compose.floaty`)",
     "프로세스 내 렌더링: 렌더러가 호스트 프로세스 안에서 실행되고 프로세스 간 UI 브리지가 없어 이벤트와 상태 갱신의 지연이 낮습니다",
-    "순수 바이트코드 APK: 네이티브 라이브러리 없음, ABI 구분 없음, 하나의 패키지로 모든 기기 지원"
+    "단일 패키지: ABI 구분 없음, 플러그인 자체 네이티브 코드 없음 (Compose에 포함된 AndroidX graphics-path 보조 라이브러리만 네 가지 ABI로 내장), 하나의 APK로 모든 기기 지원"
   ],
   "h3_usage": "사용 방법",
   "usage_steps": [
@@ -41,7 +41,7 @@
   "compatibility_points": [
     "AutoJs6 버전: {{ required_host_version_name }} ({{ required_host_version_code }}) 이상. 더 낮은 버전의 호스트는 플러그인 센터에서 비호환으로 표시합니다",
     "Android 버전: {{ min_android_version }} (API {{ android_min_sdk }}) 이상",
-    "프로세서 아키텍처: 제한 없음 (순수 바이트코드 APK, 네이티브 라이브러리 없음)",
+    "프로세서 아키텍처: arm64-v8a / armeabi-v7a / x86_64 / x86 (네 가지 모두 단일 APK에 내장, 아키텍처별 선택 불필요)",
     "Compose 버전: 플러그인에 포함 (BOM {{ compose_bom }}), 호스트의 Compose 런타임에 의존하지 않습니다",
     "계약 버전: {{ plugin_contract_version }}. 호스트와 플러그인은 계약 버전을 협상하며, 일치하지 않으면 명확한 오류와 함께 로드를 거부합니다"
   ],

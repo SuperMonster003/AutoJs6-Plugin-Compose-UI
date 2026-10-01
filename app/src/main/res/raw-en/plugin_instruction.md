@@ -13,7 +13,7 @@ The current version is a P0 development preview. The repository contains a build
 
 - AutoJs6 version: 6.8.0 (5308) or later; older hosts flag the plugin as incompatible in the plugin center
 - Android version: 7.0 (API 24) or later
-- Processor architecture: any (pure bytecode APK, no native libraries)
+- Processor architecture: arm64-v8a / armeabi-v7a / x86_64 / x86 (all four built into the single APK, no per-architecture download)
 - Compose version: bundled with the plugin (BOM 2026.09.00), independent of the host's Compose runtime
 - Contract version: 1; host and plugin negotiate the contract version and refuse to load with a clear error when it does not match
 

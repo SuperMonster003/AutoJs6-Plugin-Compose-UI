@@ -1,7 +1,11 @@
 import com.android.apksig.ApkVerifier
 import org.gradle.api.provider.Property
 import java.security.MessageDigest
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.util.Properties
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 plugins {
@@ -93,6 +97,89 @@ fun lockedAars(lockFile: File, ids: List<String>, directory: String): List<File>
 val hostApiIds = listOf("common-plugin-api")
 val hostApiAars = lockedAars(rootProject.file("locks/host-api-aars.lock"), hostApiIds, "libs")
 
+// Native code inventory (roadmap D22, amended by the P0.1 evidence): the plugin has no native code of its own,
+// but Compose ui-graphics depends on androidx.graphics:graphics-path, whose libandroidx.graphics.path.so is
+// packaged for the four Android ABIs. The APK stays one universal package without ABI splits; the release gate
+// verifies that exactly these libraries are present, stored uncompressed, and 16 KB page-aligned (ELF PT_LOAD
+// and zip data offset) so that 16 KB page devices can map them straight from the APK.
+val nativeAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+val allowedNativeLibraries = listOf("libandroidx.graphics.path.so")
+val nativePageAlignment = 16384L
+
+fun elfMinimumLoadAlignment(bytes: ByteArray): Long {
+    check(bytes.size > 0x40 && bytes[0] == 0x7F.toByte() && bytes[1] == 'E'.code.toByte() && bytes[2] == 'L'.code.toByte() && bytes[3] == 'F'.code.toByte()) {
+        "Not an ELF file"
+    }
+    val buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN)
+    val is64 = bytes[4].toInt() == 2
+    val programHeaderOffset = if (is64) buffer.getLong(0x20) else (buffer.getInt(0x1C).toLong() and 0xFFFFFFFFL)
+    val entrySize = buffer.getShort(if (is64) 0x36 else 0x2A).toInt() and 0xFFFF
+    val entryCount = buffer.getShort(if (is64) 0x38 else 0x2C).toInt() and 0xFFFF
+    var minimum = Long.MAX_VALUE
+    repeat(entryCount) { index ->
+        val offset = (programHeaderOffset + index.toLong() * entrySize).toInt()
+        if (buffer.getInt(offset) == 1) { // PT_LOAD
+            val alignment = if (is64) buffer.getLong(offset + 48) else (buffer.getInt(offset + 28).toLong() and 0xFFFFFFFFL)
+            minimum = minOf(minimum, alignment)
+        }
+    }
+    check(minimum != Long.MAX_VALUE) { "No PT_LOAD segment" }
+    return minimum
+}
+
+/** Data offsets of the `lib/` entries inside [apk], read from the central directory and local headers. */
+fun nativeEntryDataOffsets(apk: File): Map<String, Long> = RandomAccessFile(apk, "r").use { file ->
+    val length = file.length()
+    val tailLength = minOf(length, 22L + 65535L).toInt()
+    val tail = ByteArray(tailLength).also { file.seek(length - tailLength); file.readFully(it) }
+    val tailBuffer = ByteBuffer.wrap(tail).order(ByteOrder.LITTLE_ENDIAN)
+    val eocd = (tail.size - 22 downTo 0).firstOrNull { tailBuffer.getInt(it) == 0x06054b50 }
+    checkNotNull(eocd) { "End of central directory not found in ${apk.name}" }
+    val entryCount = tailBuffer.getShort(eocd + 10).toInt() and 0xFFFF
+    val directorySize = tailBuffer.getInt(eocd + 12).toLong() and 0xFFFFFFFFL
+    val directoryOffset = tailBuffer.getInt(eocd + 16).toLong() and 0xFFFFFFFFL
+    val directory = ByteArray(directorySize.toInt()).also { file.seek(directoryOffset); file.readFully(it) }
+    val directoryBuffer = ByteBuffer.wrap(directory).order(ByteOrder.LITTLE_ENDIAN)
+    val offsets = LinkedHashMap<String, Long>()
+    var position = 0
+    repeat(entryCount) {
+        check(directoryBuffer.getInt(position) == 0x02014b50) { "Corrupt central directory in ${apk.name}" }
+        val nameLength = directoryBuffer.getShort(position + 28).toInt() and 0xFFFF
+        val extraLength = directoryBuffer.getShort(position + 30).toInt() and 0xFFFF
+        val commentLength = directoryBuffer.getShort(position + 32).toInt() and 0xFFFF
+        val localHeaderOffset = directoryBuffer.getInt(position + 42).toLong() and 0xFFFFFFFFL
+        val name = String(directory, position + 46, nameLength, Charsets.UTF_8)
+        if (name.startsWith("lib/")) {
+            val local = ByteArray(30).also { file.seek(localHeaderOffset); file.readFully(it) }
+            val localBuffer = ByteBuffer.wrap(local).order(ByteOrder.LITTLE_ENDIAN)
+            check(localBuffer.getInt(0) == 0x04034b50) { "Corrupt local header for $name" }
+            val localNameLength = localBuffer.getShort(26).toInt() and 0xFFFF
+            val localExtraLength = localBuffer.getShort(28).toInt() and 0xFFFF
+            offsets[name] = localHeaderOffset + 30 + localNameLength + localExtraLength
+        }
+        position += 46 + nameLength + extraLength + commentLength
+    }
+    offsets
+}
+
+fun verifyNativeLibraries(apk: File) {
+    val expected = nativeAbis.flatMap { abi -> allowedNativeLibraries.map { "lib/$abi/$it" } }.toSet()
+    ZipFile(apk).use { zip ->
+        val entries = zip.entries().asSequence().filter { it.name.startsWith("lib/") }.toList()
+        check(entries.map { it.name }.toSet() == expected) {
+            "Unexpected native library set in ${apk.name}: expected $expected, actual ${entries.map { it.name }.sorted()}"
+        }
+        entries.forEach { entry ->
+            check(entry.method == ZipEntry.STORED) { "${entry.name} must be stored uncompressed so it can be mapped from the APK" }
+            val alignment = elfMinimumLoadAlignment(zip.getInputStream(entry).use { it.readBytes() })
+            check(alignment >= nativePageAlignment) { "${entry.name} PT_LOAD alignment $alignment is below $nativePageAlignment" }
+        }
+    }
+    nativeEntryDataOffsets(apk).forEach { (name, offset) ->
+        check(offset % nativePageAlignment == 0L) { "$name data offset $offset is not $nativePageAlignment-byte aligned in the APK" }
+    }
+}
+
 android {
     // The host can select any bundled locale independently of the Android system language.
     bundle { language { enableSplit = false } }
@@ -168,9 +255,10 @@ android {
         kotlin.directories += "src/main/java"
     }
 
-    // No ABI splits on purpose (roadmap D22): the plugin is pure bytecode plus resources (Compose ships no
-    // native library), so a split would produce identical APKs. Every device installs the same single APK and
-    // getInfo() reports supportedAbis = emptyArray(); appendDigestToReleasedFiles rejects any lib/ entry.
+    // No ABI splits on purpose (roadmap D22): the only native code is the ~10 KB androidx graphics-path helper
+    // that Compose ui-graphics brings for every ABI (see nativeAbis / allowedNativeLibraries above), so splitting
+    // would save nothing measurable. Every device installs the same single APK and getInfo() reports
+    // supportedAbis = emptyArray(); appendDigestToReleasedFiles verifies the exact native library set and alignment.
     packaging {
         resources.pickFirsts.addAll(
             listOf(
@@ -249,11 +337,8 @@ tasks {
             val apk = apks.single()
             val verification = ApkVerifier.Builder(apk).build().verify()
             check(verification.isVerified) { "Invalid or unsigned release APK ${apk.name}: ${verification.errors}" }
-            ZipFile(apk).use { zip ->
-                // Roadmap D22: pure bytecode, no native library, hence no ABI split.
-                val nativeLibraries = zip.entries().asSequence().map { it.name }.filter { it.startsWith("lib/") }.toList()
-                check(nativeLibraries.isEmpty()) { "The plugin must not package native libraries, found $nativeLibraries" }
-            }
+            // Roadmap D22 (amended): no first-party native code; only the Compose graphics-path helper, 16 KB aligned.
+            verifyNativeLibraries(apk)
             val collectedName = "$prefix-${utils.digestCRC32(apk)}.$extension"
             val destination = file("$rootDir/${buildTypeRelease}s")
             check(destination.isDirectory || destination.mkdirs()) { "Cannot create $destination" }

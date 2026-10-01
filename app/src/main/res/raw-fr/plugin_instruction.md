@@ -13,7 +13,7 @@ La version actuelle est un apercu de developpement P0. Le depot contient un sque
 
 - Version d'AutoJs6 : 6.8.0 (5308) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
 - Version d'Android : 7.0 (API 24) ou ulterieure
-- Architecture du processeur : indifferente (APK en bytecode pur, sans bibliotheque native)
+- Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote
 - Version du contrat : 1 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
 
