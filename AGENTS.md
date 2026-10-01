@@ -7,7 +7,7 @@
 - `MUST`: 必须遵循. `SHOULD`: 默认遵循, 偏离时在仓库文档中说明原因. `CONDITIONAL`: 仅在对应能力落地后适用.
 - 用户在当前任务中的明确要求优先于本文件.
 - 本仓库是 **进程内渲染器插件** (路线图 D10 / D23): 宿主用 `PathClassLoader(插件 APK, parent = 宿主类加载器)` 在宿主进程内实例化渲染器工厂, 不存在 Binder 能力服务, 不存在插件自有进程中的界面. 参考规范中 Binder 服务, AIDL 冻结, 前台服务, 跨包 `queries` 的条款不适用.
-- 纯字节码单 APK (D22): 没有原生库, 没有 ABI 拆分, 没有 16 KB 页对齐校验, 没有原生库重建配方; 参考规范中这些 CONDITIONAL 条款不适用. `appendDigestToReleasedFiles` 以 "APK 内无 `lib/` 条目" 替代对齐校验.
+- 单一通用 APK (D22, 经 P0.1 证据修正): 插件自身没有原生代码, 不使用 ABI 拆分; 唯一的原生库是 Compose `ui-graphics` 传递依赖 `androidx.graphics:graphics-path` 1.0.1 自带的 `libandroidx.graphics.path.so` (四种 ABI, 各约 10 KB, 16 KB 页对齐). 不使用 `autojs6-native-alignment` 插件, 没有原生库重建配方; `appendDigestToReleasedFiles` 校验 "原生库集合恰好为这四个文件, 未压缩, ELF `PT_LOAD` 与 zip 数据偏移均 16 KB 对齐" (第 9 节).
 - 没有独立界面, 没有启动器入口 (D8): 不适用 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md`; 图标只需 `mipmap/ic_launcher.png` 与 `mipmap-night/ic_launcher.png` (插件中心与 README 使用), 不需要四个自适应 alias.
 - 没有特权进程 (Shizuku / Root), 没有隐藏 API, 不访问网络.
 
@@ -29,6 +29,7 @@
 | 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.8.3 (与兄弟仓库统一升级时再更新); 不使用 `autojs6-native-alignment` |
 | Compose 版本 | BOM `2026.09.00` (runtime / ui / foundation / animation 1.12.1, material3 1.4.0, material-icons-core 1.7.8), 由 `gradle/libs.versions.toml` 单点声明; Compose 编译器插件版本 = `System.getProperty("gradle.kotlin.version")` (D25) |
 | 发布文件名 | `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk` (1 个) |
+| 原生库 / ABI | 无插件自有原生代码; `libandroidx.graphics.path.so` (graphics-path 1.0.1, 随 Compose BOM 变动) x `arm64-v8a` / `armeabi-v7a` / `x86_64` / `x86`, 单 APK 内置; `nativeAbis` / `allowedNativeLibraries` / `nativePageAlignment` 在 `app/build.gradle.kts` 单点声明 |
 | 图标源图 | `.python/icons/compose-ui-ic-launcher-light.png` / `-dark.png` (1024 x 1024 RGBA, alpha 一致, 图案 `#272727` / `#D8D8D8`); `UI_GLYPH = 0.66`. **当前为临时占位图** (路线图 Q6), 维护者提供正式源图后替换并重新生成 |
 
 ## 3. 工作区与提交
@@ -133,7 +134,7 @@ AutoJs6-Plugin-Compose-UI/
 ### 5.3 签名与发布构建
 
 - `sign.properties` 与 `app/sm003.jks` 从宿主复制到相同相对路径, 由 `.gitignore` 忽略 (`git check-ignore` 已验证).
-- `appendDigestToReleasedFiles` 依赖 `assembleRelease`, 签名缺失时失败, 校验产物恰好为 `autojs6-plugin-compose-ui-v{VERSION_NAME}.apk` 一个, 校验签名, 断言 APK 内无 `lib/` 条目, 再追加 CRC32 复制到 `releases/`.
+- `appendDigestToReleasedFiles` 依赖 `assembleRelease`, 签名缺失时失败, 校验产物恰好为 `autojs6-plugin-compose-ui-v{VERSION_NAME}.apk` 一个, 校验签名, 校验原生库集合与 16 KB 对齐 (第 9 节), 再追加 CRC32 复制到 `releases/`.
 - 构建产物不入库 (`releases/` 被忽略).
 
 ## 6. Manifest 与激活协议
@@ -149,7 +150,7 @@ AutoJs6-Plugin-Compose-UI/
 ## 7. PluginInfo 与能力协商
 
 - `name` 来自不可翻译的 `app_name`, `description` 来自当前 locale 的 `plugin_description`, `instruction` 来自 `@raw/plugin_instruction`, `versionName` / `versionCode` 来自已安装包, `versionDate` 来自 `plugin_version_date` resValue, `id` / `engine` / `variant` / `author` 来自 `ComposeUiPlugin`.
-- `supportedAbis` 恒为空数组 (无原生代码, D22), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
+- `supportedAbis` 恒为空数组 (D22: 单 APK 内置全部四种 ABI 的 graphics-path 辅助库, 对设备没有 ABI 限制), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
 - `capabilities` 在 P0 只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`; 契约版本, 组件目录与 Compose 版本随渲染器工厂 `capabilities()` 在 P2.1 协商 (路线图附录 B), 不提前声明尚未实现的能力.
 - 新增可选能力时先协商, 不通过捕获异常猜测协议版本.
 
@@ -162,9 +163,13 @@ AutoJs6-Plugin-Compose-UI/
 - 类加载边界 (D10 / D26): 契约类与 Android / Kotlin 标准库来自宿主 (parent 加载器), Compose 来自插件 APK; 任何新增的 `compileOnly` 依赖都要在第 5.2 节与 `THIRD_PARTY_NOTICES.md` 登记并由 P0.2 的加载探针覆盖.
 - 日志不记录脚本声明的界面文本正文, 只记录会话 id, 节点数, 耗时与错误码.
 
-## 9. 原生代码与进程 (不适用)
+## 9. 原生库 (仅 Compose 传递依赖)
 
-- 本仓库不包含 C / C++ 代码, 不打包 `.so`, 不使用 `splits.abi`, 不使用 NDK; `appendDigestToReleasedFiles` 与 `ComposeUiPluginContractTest` 守卫 APK 内无 `lib/` 条目. 若未来确有原生需求, 先修订路线图 D22 并恢复参考规范第 5.4 节的全部 CONDITIONAL 条款.
+- 本仓库不包含 C / C++ 代码, 不使用 NDK, 不使用 `splits.abi`. APK 内唯一的原生库是 `androidx.graphics:graphics-path` 的 `libandroidx.graphics.path.so` (Compose `ui-graphics` 在 API 24 - 33 上用它迭代 Path; API 34+ 走平台 `PathIterator`), 四种 ABI 全部打包在同一个 APK 中, 不按 ABI 拆分 (每个约 10 KB, 拆分无收益).
+- `app/build.gradle.kts` 的 `nativeAbis` / `allowedNativeLibraries` / `nativePageAlignment` 是唯一清单; `appendDigestToReleasedFiles` 校验 release APK 的 `lib/` 条目恰好是该集合, 每个条目未压缩 (`STORED`), ELF `PT_LOAD` 对齐 >= 16384 且 zip 数据偏移为 16384 的整数倍; `ComposeUiPluginContractTest` 在设备上校验同一集合并 `System.loadLibrary("androidx.graphics.path")`.
+- 升级 Compose BOM 后若原生库集合变化 (新增 / 移除 / 更名), 同一提交内更新上述清单, androidTest 期望, `THIRD_PARTY_NOTICES.md`, README 文案与 changelog `dependency` 条目; 不得为通过校验而放宽对齐要求.
+- 宿主经 D10 的 `PathClassLoader` 装载渲染器时, 必须把插件 APK 的原生库搜索路径 (`<apk>!/lib/<abi>`) 传给加载器, 否则 API 24 - 33 上的 Path 迭代会 `UnsatisfiedLinkError`; 这是 P0.2 加载探针的验证项.
+- 若未来确有插件自有原生代码的需求, 先修订路线图 D22 并恢复参考规范第 5.4 节的全部 CONDITIONAL 条款.
 
 ## 10. 字符串资源
 
@@ -195,13 +200,13 @@ AutoJs6-Plugin-Compose-UI/
 
 ### 13.2 Android instrumentation
 
-- `ComposeUiPluginContractTest`: Wake Activity 契约与四项 application meta-data, 无启动器入口, INFO 服务 `getInfo()` 往返 (空 `supportedAbis`, capabilities 仅 `requiresHostVersion`), APK 为单文件且无 `lib/` 条目, 无导出 provider.
+- `ComposeUiPluginContractTest`: Wake Activity 契约与四项 application meta-data, 无启动器入口, INFO 服务 `getInfo()` 往返 (空 `supportedAbis`, capabilities 仅 `requiresHostVersion`), APK 为单文件且原生库恰好为四个 ABI 的 `libandroidx.graphics.path.so` 并可在当前设备加载, 无导出 provider.
 - P0.2 起: 宿主侧加载探针 (在宿主仓库); P2 起: 渲染器在宿主进程内的组合 / 事件 / 生命周期用例 (宿主 androidTest), 本仓库保留不依赖宿主的渲染器单元 instrumentation.
 - 设备池与证据等级见 `ROADMAP.md` 附录 E; 多台设备时用明确 serial; 不卸载用户的已安装应用, 不清空启动器数据, 不删除用户的 `/sdcard` 内容.
 
 ### 13.3 CI
 
-- `build.yml`: JVM 测试编译, `testDebugUnitTest`, androidTest 与 release APK, lint debug / release; API 24 x86 与 API 35 x86_64 模拟器运行契约测试.
+- `build.yml`: JVM 测试编译, `testDebugUnitTest`, androidTest 与 release APK, lint debug / release; API 24 x86 与 API 35 x86_64 模拟器运行契约测试 (含 graphics-path 原生库加载).
 - `markdown.yml`: Windows 上 `check_markdown.bat`.
 - 仓库未推送期间工作流只做本地语法与路径校验.
 

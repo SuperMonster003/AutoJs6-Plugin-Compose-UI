@@ -84,9 +84,13 @@ class ComposeUiPluginRuntimeInfoTest {
         assertTrue(build.contains("\"plugin_engine\", \"${ComposeUiPlugin.ENGINE}\""))
         assertTrue(build.contains("\"plugin_variant\", \"${ComposeUiPlugin.VARIANT}\""))
         assertTrue(build.contains("\"plugin_author\", \"${ComposeUiPlugin.AUTHOR}\""))
-        // Roadmap D22: no ABI splits and no native libraries; the release verifier rejects any lib/ entry.
+        // Roadmap D22 (amended in P0.1): no ABI splits; the only native code is the Compose graphics-path helper,
+        // and the release verifier pins the exact library set plus its 16 KB alignment.
         assertFalse("no ABI split block is declared", build.contains("splits {"))
-        assertTrue("the release verifier scans for lib/ entries", build.contains("it.startsWith(\"lib/\")"))
+        assertTrue(build.contains("val nativeAbis = listOf(\"arm64-v8a\", \"armeabi-v7a\", \"x86_64\", \"x86\")"))
+        assertTrue(build.contains("val allowedNativeLibraries = listOf(\"libandroidx.graphics.path.so\")"))
+        assertTrue(build.contains("val nativePageAlignment = 16384L"))
+        assertTrue(build.contains("verifyNativeLibraries(apk)"))
 
         val proguard = Files.readString(root.resolve("app/proguard-rules.pro"))
         assertTrue("R8 must keep the renderer factory the host instantiates by name", proguard.contains("-keep class ${ComposeUiPlugin.RENDERER_FACTORY_CLASS_NAME}"))

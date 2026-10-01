@@ -67,7 +67,7 @@ Compose UI 是 AutoJs6 的界面渲染插件. 腳本透過宿主內置的 `compo
 - 鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 作用域操作在宿主側校驗
 - 兩種承載面: `"ui";` 腳本的 Activity 內容 (`compose.mount`) 與任意腳本的懸浮窗 (`compose.floaty`)
 - 進程內渲染: 渲染器在宿主進程中運行, 沒有跨進程界面橋接, 事件與狀態更新低延遲
-- 純位元組碼 APK: 不含原生庫, 不區分 ABI, 單一安裝包適配所有裝置
+- 單一安裝包: 不區分 ABI, 不含插件自有原生代碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助庫, 四種 ABI 全部內置), 一個 APK 適配所有裝置
 
 ******
 
@@ -128,7 +128,7 @@ threads.start(() => {
 
 - AutoJs6 版本: 6.8.0 (5308) 或更高; 低於該版本的宿主會在插件中心提示不兼容
 - Android 版本: 7.0 (API 24) 或更高
-- 處理器架構: 不限 (純位元組碼 APK, 無原生庫)
+- 處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內置全部四種, 無需按架構選擇安裝包)
 - Compose 版本: 由插件自帶 (BOM 2026.09.00), 不依賴宿主的 Compose 運行時
 - 契約版本: 1; 宿主與插件透過契約版本協商, 不匹配時拒絕載入並給出明確錯誤
 

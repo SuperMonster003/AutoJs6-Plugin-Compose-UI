@@ -67,7 +67,7 @@ Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主內建�
 - 鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 範圍限定操作在宿主端驗證
 - 兩種承載面: `"ui";` 指令碼的 Activity 內容 (`compose.mount`) 與任意指令碼的懸浮視窗 (`compose.floaty`)
 - 處理程序內轉譯: 轉譯器在宿主處理程序中執行, 沒有跨處理程序介面橋接, 事件與狀態更新低延遲
-- 純位元組碼 APK: 不含原生程式庫, 不區分 ABI, 單一安裝套件適用所有裝置
+- 單一安裝套件: 不區分 ABI, 不含外掛程式自有原生程式碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助程式庫, 四種 ABI 全部內建), 一個 APK 適用所有裝置
 
 ******
 
@@ -128,7 +128,7 @@ threads.start(() => {
 
 - AutoJs6 版本: 6.8.0 (5308) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容
 - Android 版本: 7.0 (API 24) 或更新
-- 處理器架構: 不限 (純位元組碼 APK, 無原生程式庫)
+- 處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內建全部四種, 無需依架構選擇安裝套件)
 - Compose 版本: 由外掛程式自帶 (BOM 2026.09.00), 不依賴宿主的 Compose 執行階段
 - 契約版本: 1; 宿主與外掛程式透過契約版本協商, 不相符時拒絕載入並給出明確錯誤
 

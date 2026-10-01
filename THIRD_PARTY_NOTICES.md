@@ -27,6 +27,7 @@ plugin class loader). All artifacts are resolved from Google Maven through the C
 | Compose Animation | `androidx.compose.animation:animation` | 1.12.1 | Apache License 2.0 | Animated visibility and transitions |
 | Compose Material 3 | `androidx.compose.material3:material3` | 1.4.0 | Apache License 2.0 | Material 3 components and theming |
 | Compose Material Icons Core | `androidx.compose.material:material-icons-core` | 1.7.8 | Apache License 2.0 | Core Material icon set |
+| AndroidX Graphics Path | `androidx.graphics:graphics-path` | 1.0.1 | Apache License 2.0 | Native path iteration helper of Compose `ui-graphics` on API 24 to 33; the only native library in the APK (`libandroidx.graphics.path.so` for arm64-v8a / armeabi-v7a / x86_64 / x86, about 10 KB each, 16 KB page-aligned, verified by `appendDigestToReleasedFiles`) |
 | Compose UI Tooling (debug builds only) | `androidx.compose.ui:ui-tooling` | 1.12.1 | Apache License 2.0 | Layout inspector support in debug APKs; not in release |
 | Kotlin standard library | `org.jetbrains.kotlin:kotlin-stdlib` | managed by the platform versions plugin | Apache License 2.0 | Language runtime |
 

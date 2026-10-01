@@ -67,7 +67,7 @@ Capacites principales que le plugin doit livrer:
 - Modifiers chaines : `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserve l'ordre des operations, et les operations a portee limitee sont validees cote hote
 - Deux surfaces d'affichage : le contenu d'activite des scripts `"ui";` (`compose.mount`) et les fenetres flottantes de n'importe quel script (`compose.floaty`)
 - Rendu dans le processus : le moteur de rendu s'execute dans le processus de l'hote sans aucun pont d'interface inter-processus, pour des evenements et des mises a jour d'etat a faible latence
-- APK en bytecode pur : aucune bibliotheque native, aucune variante d'ABI, un seul paquet pour tous les appareils
+- Paquet unique : aucune variante d'ABI et aucun code natif propre (seulement l'assistant AndroidX graphics-path fourni avec Compose, integre pour les quatre ABI), un seul APK pour tous les appareils
 
 ******
 
@@ -128,7 +128,7 @@ Exigences d'execution et limites du plugin:
 
 - Version d'AutoJs6 : 6.8.0 (5308) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
 - Version d'Android : 7.0 (API 24) ou ulterieure
-- Architecture du processeur : indifferente (APK en bytecode pur, sans bibliotheque native)
+- Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote
 - Version du contrat : 1 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
 
