@@ -1,0 +1,7 @@
+# AutoJs6 6.8.0 host API release AAR, staged on 2026-10-02 from the host snapshot 77b5a3b0c5 (build 5307, roadmap P0.1).
+# common-plugin-api: module unchanged since host commit 9c3ba2e520 (2026-09-15); byte-identical to the artifact staged by
+#   3-Setup Installer and 3-Shell Terminal. compose-ui-api (host module plugin-api/compose-ui-api) is added by roadmap P0.2 /
+#   P1.1 together with its compileOnly declaration in app/build.gradle.kts.
+format=1
+common-plugin-api.file=common-plugin-api.aar
+common-plugin-api.sha256=ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15
