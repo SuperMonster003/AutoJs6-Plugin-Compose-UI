@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="org.autojs.permission.PLUGIN" />
+
+    <application
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+
+        <meta-data
+            android:name="org.autojs.plugin.WAKE_ACTIVITY"
+            android:value=".WakeActivity" />
+        <meta-data
+            android:name="org.autojs.plugin.info.AUTHOR"
+            android:value="@string/plugin_author" />
+        <!--
+            In-process renderer entry (roadmap D10 / D23): the host instantiates this class on a class loader
+            whose parent is the host class loader. The class lands with the roadmap P0.2 spike renderer.
+        -->
+        <meta-data
+            android:name="org.autojs.plugin.compose.RENDERER_FACTORY"
+            android:value="io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl" />
+        <!-- Provisional minimum host build (roadmap D29): back-filled in P1.3 with the first host build that ships compose-ui-api. -->
+        <meta-data
+            android:name="requiresHostVersion"
+            android:value="5308" />
+
+        <activity
+            android:name=".WakeActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnTaskLaunch="true"
+            android:permission="org.autojs.permission.PLUGIN"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="org.autojs.plugin.action.WAKE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Plugin center discovery (roadmap D23): INFO only, no Binder capability service, same shape as the ImGui plugin. -->
+        <service
+            android:name=".ComposeUiPluginInfoService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="org.autojs.permission.PLUGIN">
+            <intent-filter>
+                <action android:name="org.autojs.plugin.INFO" />
+                <category android:name="compose-ui" />
+            </intent-filter>
+        </service>
+
+    </application>
+
+</manifest>
