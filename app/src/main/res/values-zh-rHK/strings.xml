@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">以 Jetpack Compose 與 Material 3 渲染腳本聲明的界面</string>
+</resources>

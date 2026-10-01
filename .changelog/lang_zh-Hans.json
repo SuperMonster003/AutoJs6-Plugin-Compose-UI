@@ -1,0 +1,24 @@
+{
+  "changelog_label_hint": "提示",
+  "changelog_label_feature": "新增",
+  "changelog_label_fix": "修复",
+  "changelog_label_improvement": "优化",
+  "changelog_label_dependency": "依赖",
+  "$data": {
+    "v1.0.0": {
+      "released_date": "2026/10/02",
+      "hint": [
+        "P0 开发预览: 仓库骨架可构建并可被宿主识别, 渲染器与脚本 API 尚未交付",
+        "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高版本 (准确的最低版本号待宿主侧改动落地后回填)"
+      ],
+      "feature": [
+        "插件仓库骨架: 平台版本插件构建链, Jetpack Compose BOM {{ compose_bom }} 依赖, Wake Activity 激活协议与 INFO 服务 (类别 {{ plugin_info_category }})",
+        "10 种语言的 README, 插件中心说明与更新日志, 由 JSON 源文件统一生成"
+      ],
+      "dependency": [
+        "附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)",
+        "附加 Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)"
+      ]
+    }
+  }
+}

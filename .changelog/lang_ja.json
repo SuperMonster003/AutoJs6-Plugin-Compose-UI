@@ -1,0 +1,24 @@
+{
+  "changelog_label_hint": "ヒント",
+  "changelog_label_feature": "新機能",
+  "changelog_label_fix": "修正",
+  "changelog_label_improvement": "改善",
+  "changelog_label_dependency": "依存関係",
+  "$data": {
+    "v1.0.0": {
+      "released_date": "2026/10/02",
+      "hint": [
+        "P0 開発プレビュー: リポジトリの骨格はビルドでき, ホストに認識されますが, レンダラーとスクリプト API はまだ提供されていません",
+        "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 以降が必要です (正確な最小ビルド番号はホスト側の変更が取り込まれた後に補完されます)"
+      ],
+      "feature": [
+        "プラグインリポジトリの骨格: プラットフォームバージョンプラグインのビルドチェーン, Jetpack Compose BOM {{ compose_bom }} の依存関係, Wake Activity による有効化プロトコル, INFO サービス (カテゴリ {{ plugin_info_category }})",
+        "JSON ソースから生成される 10 言語の README, プラグインセンターの説明, 更新履歴"
+      ],
+      "dependency": [
+        "common-plugin-api.aar バージョン 6.8.0 (5307) を追加 (MPL 2.0, ハッシュ固定)",
+        "Jetpack Compose BOM {{ compose_bom }} を追加 (Apache 2.0)"
+      ]
+    }
+  }
+}

@@ -1,0 +1,292 @@
+<!--suppress HtmlDeprecatedAttribute, HttpUrlsUsage -->
+
+<div align="center">
+  <p>
+    <picture>
+      <source srcset="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/res/mipmap-night/ic_launcher.png?raw=true" media="(prefers-color-scheme: dark)" />
+      <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-compose-ui-ic-launcher" border="0" width="128" />
+    </picture>
+  </p>
+
+  <p>Un plugin que lleva las interfaces de Jetpack Compose y Material 3 a los scripts de AutoJs6</p>
+
+  <p>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-Compose-UI?label=Release"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-Compose-UI?color=A24232&label=Issues"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-Compose-UI?color=534BAE&label=License"/></a>
+  </p>
+</div>
+
+******
+
+### Languages / Idiomas
+
+******
+
+Este documento esta disponible en los siguientes idiomas:
+
+- [简体中文 [zh-Hans]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hans.md)
+- [繁體中文 (香港) [zh-Hant-HK]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hant-HK.md)
+- [繁體中文 (台灣) [zh-Hant-TW]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hant-TW.md)
+- [English [en]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-en.md)
+- [Français [fr]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-fr.md)
+- Español [es] # actual
+- [日本語 [ja]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ja.md)
+- [한국어 [ko]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ko.md)
+- [Русский [ru]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ru.md)
+- [العربية [ar]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ar.md)
+
+******
+
+### Introduccion
+
+******
+
+Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran su interfaz mediante el objeto global `compose` integrado en el host, y el plugin la renderiza dentro del proceso del host con Jetpack Compose y Material 3, ofreciendo una unica solucion declarativa para el contenido de las actividades en modo `"ui";` y para las ventanas flotantes.
+
+El plugin no incluye pantallas independientes ni agrega una entrada en el lanzador. El host lo descubre mediante el servicio INFO, lee su version y sus datos de compatibilidad y luego carga el renderizador dentro del proceso del host segun el contrato (`org.autojs.plugin.compose.api`). El arbol de interfaz, el estado y los eventos viven en el lado del script; el renderizador solo aplica parches a la composicion de Compose y devuelve los eventos del usuario al script.
+
+******
+
+### Estado actual
+
+******
+
+La version actual es una vista previa de desarrollo P0. El repositorio contiene un esqueleto de plugin compilable, el servicio INFO y el protocolo de activacion Wake Activity, pero el renderizador y la API de script aun no se han entregado, por lo que tras la instalacion los scripts todavia no pueden renderizar nada mediante `compose`. Consulte la hoja de ruta para conocer los proximos hitos y el progreso.
+
+******
+
+### Caracteristicas
+
+******
+
+Capacidades principales que el plugin entregara:
+
+- Interfaz declarativa: `compose.state` + `compose.mount(render)` vuelven a dibujar automaticamente ante cada cambio de estado, mientras que los manejadores de nodo de larga vida (`compose.Text({...})` y similares) permiten modificar directamente propiedades e hijos
+- Conjunto basico de componentes Material 3: diseños (Column / Row / Box / LazyColumn, etc.), texto, botones, campos de texto, interruptores, deslizadores, indicadores de progreso, tarjetas, dialogos
+- Modifiers encadenados: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserva el orden de las operaciones, y las operaciones con ambito se validan en el lado del host
+- Dos superficies de presentacion: el contenido de actividad de los scripts `"ui";` (`compose.mount`) y las ventanas flotantes de cualquier script (`compose.floaty`)
+- Renderizado dentro del proceso: el renderizador se ejecuta en el proceso del host sin ningun puente de interfaz entre procesos, con eventos y actualizaciones de estado de baja latencia
+- APK de bytecode puro: sin bibliotecas nativas ni variantes de ABI, un solo paquete para todos los dispositivos
+
+******
+
+### Uso
+
+******
+
+1. Instale AutoJs6 6.8.0 (5308) o una version posterior
+2. Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)
+3. Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado
+4. Use directamente el objeto global `compose` en los scripts (el renderizado llega con la version 1.0.0)
+
+******
+
+### Inicio rapido
+
+******
+
+Los siguientes ejemplos muestran la forma objetivo de la API (definida en el apendice A de la hoja de ruta, no ejecutable hasta que se entregue el renderizado):
+
+```js
+"ui";
+
+// Contador (capa render declarativa)
+let count = compose.state(0);
+
+compose.mount(() => compose.Column({ modifier: compose.modifier().fillMaxSize().padding(16), spacing: 12 }, [
+    compose.Text({ key: 'counter', text: `${count.value} clics`, style: 'headlineSmall' }),
+    compose.Button({ key: 'inc', onClick: () => { count.value += 1; } }, 'Sumar uno'),
+]));
+```
+
+```js
+// HUD flotante (capa de manejadores de nodo)
+let status = compose.Text({ text: 'Preparando...' });
+let win = compose.floaty(compose.Column({ padding: 12, bg: '#CC000000' }, [
+    status,
+    compose.TextButton({ onClick: () => win.close() }, 'Cerrar'),
+]), { x: 50, y: 300, raw: true });
+
+threads.start(() => {
+    for (let i = 1; i <= 100; i++) {
+        sleep(1000);
+        compose.post(() => status.set({ text: `Progreso ${i}%` }));
+    }
+});
+```
+
+La referencia completa de la API (catalogo de componentes, operaciones de Modifier, objetos de sesion, codigos de error) se encuentra en el capitulo del modulo compose de la documentacion de AutoJs6.
+
+******
+
+### Compatibilidad
+
+******
+
+Requisitos de ejecucion y limites del plugin:
+
+- Version de AutoJs6: 6.8.0 (5308) o posterior; los hosts anteriores marcan el plugin como incompatible en el centro de plugins
+- Version de Android: 7.0 (API 24) o posterior
+- Arquitectura del procesador: cualquiera (APK de bytecode puro, sin bibliotecas nativas)
+- Version de Compose: incluida en el plugin (BOM 2026.09.00), independiente del runtime de Compose del host
+- Version del contrato: 1; el host y el plugin negocian la version del contrato y rechazan la carga con un error claro cuando no coincide
+
+******
+
+### Preguntas frecuentes
+
+******
+
+- Por que no aparece el icono del plugin tras instalarlo? El plugin no tiene interfaz propia ni entrada en el lanzador; busquelo en el centro de plugins de AutoJs6
+- Por que `compose` todavia no funciona en los scripts? Esta es una vista previa de desarrollo P0; el renderizador y la API de script llegaran en hitos posteriores
+- Hay que desinstalar otros plugins de interfaz? No, Compose UI no interfiere con el modulo `ui` existente ni con otros plugins
+- Hay que modificar los scripts tras actualizar el plugin? No mientras la version del contrato se mantenga; las actualizaciones del contrato se indican explicitamente en el registro de cambios
+
+******
+
+### Permisos y seguridad
+
+******
+
+El plugin no solicita ningun permiso de tiempo de ejecucion de Android y nunca accede a la red, al almacenamiento ni a los sensores.
+
+- Proteccion de componentes: tanto la Wake Activity como el servicio INFO estan protegidos por el permiso de firma `org.autojs.permission.PLUGIN`, de modo que solo el host AutoJs6 puede acceder a ellos
+- Sin actividad en segundo plano: el plugin no tiene servicios residentes, receptores de difusion ni tareas programadas, y no consume recursos mientras el host no lo carga
+- Limite de datos: el plugin nunca lee ni escribe datos de scripts ni archivos del usuario; el estado de la interfaz solo existe en la memoria del proceso del host
+- Politica de copias de seguridad: la copia de seguridad de la aplicacion y la transferencia entre dispositivos estan deshabilitadas, y el plugin no guarda datos que migrar
+
+Al cargar el renderizador, el host conserva su propio modelo de permisos de script; el plugin no amplia las capacidades del sistema a las que pueden acceder los scripts.
+
+******
+
+### Interfaz del plugin
+
+******
+
+Identificadores expuestos al host:
+
+```text
+application id: io.github.supermonster003.autojs6.plugin.compose.ui
+plugin id: compose-ui
+engine: compose
+variant: default
+info action: org.autojs.plugin.INFO
+info category: compose-ui
+renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
+contract package: org.autojs.plugin.compose.api (version 1)
+minimum host build: 5308 (6.8.0)
+```
+
+El host descubre el plugin mediante `org.autojs.plugin.INFO` y lee datos de capacidad como `requiresHostVersion`; la clase de fabrica del renderizador se declara con el metadato `org.autojs.plugin.compose.RENDERER_FACTORY`, y el host crea un cargador de clases a partir de la ruta del APK del plugin (con el host como padre) y lo instancia dentro de su propio proceso.
+
+******
+
+### Hoja de ruta
+
+******
+
+Los hitos, las decisiones de diseño y los criterios de aceptacion se registran en una unica hoja de ruta:
+
+- [ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/ROADMAP.md)
+
+******
+
+### Historial de versiones
+
+******
+
+#### v1.0.0
+
+_2026/10/02_
+
+- `Aviso` Vista previa de desarrollo P0: el esqueleto del repositorio compila y el host lo reconoce, mientras que el renderizador y la API de script aun no se han entregado
+- `Aviso` Requiere AutoJs6 6.8.0 (5308) o posterior (el numero minimo exacto de compilacion se completara cuando se integren los cambios del lado del host)
+- `Novedad` Esqueleto del repositorio del plugin: cadena de compilacion del plugin de versiones de plataforma, dependencias de Jetpack Compose BOM 2026.09.00, protocolo de activacion Wake Activity y servicio INFO (categoria compose-ui)
+- `Novedad` README, instruccion del centro de plugins y registro de cambios en 10 idiomas, generados a partir de fuentes JSON
+- `Dependencia` Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)
+- `Dependencia` Se agrega Jetpack Compose BOM 2026.09.00 (Apache 2.0)
+
+##### Para ver mas historial de versiones, consulte
+
+* [CHANGELOG.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/assets/doc/CHANGELOG-es.md)
+
+******
+
+### Compilacion
+
+******
+
+Tras clonar el repositorio, compile directamente con el Gradle Wrapper; las versiones del plugin de Android Gradle y de Kotlin las selecciona automaticamente el plugin de versiones de plataforma segun el entorno IDE actual.
+
+Compilar el APK de depuracion:
+
+```powershell
+.\gradlew.bat :app:assembleDebug
+```
+
+Ejecutar las pruebas unitarias de JVM y empaquetar las pruebas de contrato en dispositivo:
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebugAndroidTest
+```
+
+Compilar el APK de lanzamiento (requiere `sign.properties` y la clave de firma):
+
+```powershell
+.\gradlew.bat :app:assembleRelease
+```
+
+Verificar la firma y generar el archivo de lanzamiento con sufijo de resumen:
+
+```powershell
+.\gradlew.bat :app:appendDigestToReleasedFiles
+```
+
+Verificar que los documentos localizados coinciden con sus fuentes:
+
+```powershell
+py .python\generate_markdown.py --check
+```
+
+La compilacion requiere JDK 21 o posterior. Tras editar las fuentes de `.readme` o `.changelog`, ejecute `py .python\generate_markdown.py` para regenerar todos los documentos.
+
+******
+
+### Organizacion de la documentacion
+
+******
+
+```text
+.readme/common.json
+.readme/lang_*.json
+.readme/template_readme.md
+.readme/template_plugin_instruction.md
+.changelog/lang_*.json
+.changelog/template_changelog.md
+.python/generate_markdown.py
+app/src/main/assets/doc/CHANGELOG-*.md
+app/src/main/res/raw-*/plugin_instruction.md
+```
+
+El README, la instruccion del centro de plugins y el registro de cambios se generan a partir de las fuentes JSON de `.readme` y `.changelog`; no edite directamente los archivos Markdown generados.
+
+******
+
+### Licencia
+
+******
+
+Este proyecto se publica bajo la [Mozilla Public License 2.0](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/LICENSE). La informacion de licencia de los componentes de terceros figura en [THIRD_PARTY_NOTICES.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/THIRD_PARTY_NOTICES.md).
+
+******
+
+### Enlaces
+
+******
+
+- Proyecto AutoJs6: https://github.com/SuperMonster003/AutoJs6
+- Documentacion de AutoJs6: https://docs.autojs6.com
+- Documentacion del modulo compose: https://docs.autojs6.com/#/compose
+- Jetpack Compose: https://developer.android.com/compose
+- Avisos de terceros: https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/THIRD_PARTY_NOTICES.md

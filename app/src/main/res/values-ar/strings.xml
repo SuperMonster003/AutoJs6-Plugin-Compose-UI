@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plugin_description">يعرض الواجهات التي تعلنها السكربتات باستخدام Jetpack Compose و Material 3</string>
+</resources>

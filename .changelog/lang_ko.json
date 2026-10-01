@@ -1,0 +1,24 @@
+{
+  "changelog_label_hint": "안내",
+  "changelog_label_feature": "새 기능",
+  "changelog_label_fix": "수정",
+  "changelog_label_improvement": "개선",
+  "changelog_label_dependency": "의존성",
+  "$data": {
+    "v1.0.0": {
+      "released_date": "2026/10/02",
+      "hint": [
+        "P0 개발 미리보기: 저장소 골격은 빌드되고 호스트에 인식되지만, 렌더러와 스크립트 API는 아직 제공되지 않습니다",
+        "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 이상이 필요합니다 (정확한 최소 빌드 번호는 호스트 쪽 변경이 반영된 뒤 채워집니다)"
+      ],
+      "feature": [
+        "플러그인 저장소 골격: 플랫폼 버전 플러그인 빌드 체인, Jetpack Compose BOM {{ compose_bom }} 의존성, Wake Activity 활성화 프로토콜, INFO 서비스 (카테고리 {{ plugin_info_category }})",
+        "JSON 원본에서 생성되는 10개 언어의 README, 플러그인 센터 설명, 변경 로그"
+      ],
+      "dependency": [
+        "common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)",
+        "Jetpack Compose BOM {{ compose_bom }} 추가 (Apache 2.0)"
+      ]
+    }
+  }
+}

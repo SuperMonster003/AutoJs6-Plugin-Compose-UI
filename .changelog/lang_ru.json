@@ -1,0 +1,24 @@
+{
+  "changelog_label_hint": "Подсказка",
+  "changelog_label_feature": "Новое",
+  "changelog_label_fix": "Исправление",
+  "changelog_label_improvement": "Улучшение",
+  "changelog_label_dependency": "Зависимость",
+  "$data": {
+    "v1.0.0": {
+      "released_date": "2026/10/02",
+      "hint": [
+        "Предварительная сборка этапа P0: каркас репозитория собирается и распознаётся хостом, но рендерер и скриптовый API ещё не поставлены",
+        "Требуется AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) или новее (точный минимальный номер сборки будет уточнён после внесения изменений на стороне хоста)"
+      ],
+      "feature": [
+        "Каркас репозитория плагина: сборочная цепочка плагина версий платформы, зависимости Jetpack Compose BOM {{ compose_bom }}, протокол активации Wake Activity и сервис INFO (категория {{ plugin_info_category }})",
+        "README, описание для центра плагинов и журнал изменений на 10 языках, генерируемые из JSON-исходников"
+      ],
+      "dependency": [
+        "Добавлен common-plugin-api.aar версии 6.8.0 (5307) (MPL 2.0, зафиксирован по хешу)",
+        "Добавлен Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)"
+      ]
+    }
+  }
+}

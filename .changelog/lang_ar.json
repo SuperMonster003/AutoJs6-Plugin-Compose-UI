@@ -1,0 +1,24 @@
+{
+  "changelog_label_hint": "تلميح",
+  "changelog_label_feature": "ميزة",
+  "changelog_label_fix": "إصلاح",
+  "changelog_label_improvement": "تحسين",
+  "changelog_label_dependency": "اعتمادية",
+  "$data": {
+    "v1.0.0": {
+      "released_date": "2026/10/02",
+      "hint": [
+        "معاينة تطوير في مرحلة P0: هيكل المستودع يبنى ويتعرف عليه المضيف, بينما لم يسلم المعرض وواجهة برمجة السكربتات بعد",
+        "يتطلب AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) أو أحدث (يستكمل رقم البناء الأدنى الدقيق بعد اعتماد تغييرات جانب المضيف)"
+      ],
+      "feature": [
+        "هيكل مستودع الإضافة: سلسلة بناء إضافة إصدارات المنصة, اعتماديات Jetpack Compose BOM {{ compose_bom }}, بروتوكول التفعيل Wake Activity وخدمة INFO (الفئة {{ plugin_info_category }})",
+        "README وتعليمات مركز الإضافات وسجل التغييرات بعشر لغات, مولدة من مصادر JSON"
+      ],
+      "dependency": [
+        "إرفاق common-plugin-api.aar الإصدار 6.8.0 (5307) (MPL 2.0, مثبت بالتجزئة)",
+        "إرفاق Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)"
+      ]
+    }
+  }
+}
