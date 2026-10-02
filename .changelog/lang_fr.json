@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible.",
+        "Aperçu P1: le contrat V1 entre l'hôte et le plugin est figé. Le moteur de rendu de production et l'API de script compose sont encore en développement; un hôte de test dédié peut exécuter le compteur prototype",
         "Necessite AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieur (le numero de build minimal exact sera renseigne une fois les changements cote hote integres)"
       ],
       "feature": [
@@ -19,7 +19,7 @@
       "dependency": [
         "Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)",
         "Ajout de Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "Ajout du brouillon P0 de compose-ui-api.aar (MPL 2.0, empreinte verrouillée) et alignement des dépendances partagées sur l'hôte"
+        "Ajout de compose-ui-api.aar V1 (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte"
       ]
     }
   }

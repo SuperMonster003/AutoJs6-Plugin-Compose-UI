@@ -24,7 +24,7 @@
 | 插件 ID / engine / variant | `compose-ui` / `compose` / `default` |
 | INFO 服务 | `ComposeUiPluginInfoService`, action `org.autojs.plugin.INFO`, category `compose-ui` (D23: 仅 INFO 注册, 与 ImGui 插件同形) |
 | 渲染器工厂 meta-data | application 级 `org.autojs.plugin.compose.RENDERER_FACTORY` = `io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl` (类随 P0.2 技术验证落地) |
-| 宿主契约标识 | 契约包 `org.autojs.plugin.compose.api` (宿主 `plugin-api/compose-ui-api`, 路线图 P1.1), `CONTRACT_VERSION = 1`; P0 阶段 `ComposeUiPlugin` 以字面量声明同一组值, P1.1 落地后改为引用 `ComposeUiIds` / `ComposeUiContract` |
+| 宿主契约标识 | 契约包 `org.autojs.plugin.compose.api` (宿主 `plugin-api/compose-ui-api`, 路线图 P1.1), `CONTRACT_VERSION = 1`; P1.1 已冻结 V1, `ComposeUiPlugin` 引用 `ComposeUiIds` / `ComposeUiContract` 的内联常量 |
 | 最低宿主 versionCode | `ComposeUiPlugin.REQUIRED_HOST_VERSION` = 5308 (**临时值**, D29: 仓库创建时宿主快照为 6.8.0 / 5307, 首个可携带 `compose-ui-api` 与装载器的宿主构建为 5308; P1.3 回填确认后同步 Manifest, `common.json`, changelog 与测试) |
 | 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.8.3 (与兄弟仓库统一升级时再更新); 不使用 `autojs6-native-alignment` |
 | Compose 版本 | BOM `2026.09.00` (runtime / ui / foundation / animation 1.12.1, material3 1.4.0, material-icons-core 1.7.8), 由 `gradle/libs.versions.toml` 单点声明; Compose 编译器插件版本 = `System.getProperty("gradle.kotlin.version")` (D25) |
@@ -127,8 +127,8 @@ AutoJs6-Plugin-Compose-UI/
 
 - Gradle 构建 MUST 自包含, 禁止引用兄弟仓库或宿主的路径, JAR / AAR 或 `flatDir`.
 - 宿主 AAR 只从 `libs/` 消费, 由 `locks/host-api-aars.lock` 锁定 SHA-256; `app/build.gradle.kts` 在配置期拒绝缺失文件, debug 产物, 占位哈希, 多余锁条目与摘要不符. 更新任一 AAR 时同一提交内更新锁文件, `libs/README.md` 与 `THIRD_PARTY_NOTICES.md`.
-- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. P0.2 当前只含 `org.autojs.plugin.compose.api.spike` 草案, 版本 -1, 不代表已冻结的 V1.
-- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. P0 草案与加载探针仅在宿主 instrumentation, 正式 V1 装载能力与最低宿主版本仍待 P1.
+- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. `.spike` 版本 -1 只为保留 P0 装载回归, 不属于冻结面, 随 P2.1 渲染器迁移移除.
+- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; 保留的负版本探针类型随同 AAR 供回归使用, 探针执行代码仍仅在 instrumentation. 正式装载器与最低宿主版本仍待 P1.2 / P1.3.
 - 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等本插件不需要的 View 体系库.
 
 ### 5.3 签名与发布构建
@@ -183,7 +183,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `.readme/lang_*.json` (10 语言, 键集合一致, 列表键 `features` / `usage_steps` / `compatibility_points` / `faq_items` / `security_points`) 与 `.changelog/lang_*.json` 是唯一文案源; 生成物 (`README.md`, `.readme/README-*.md`, `app/src/main/assets/doc/CHANGELOG*.md`, `app/src/main/res/raw*/plugin_instruction.md`, 共 36 个) 不手工编辑.
 - 修改 JSON 或模板后运行 `py .python/generate_markdown.py` 再 `--check`; CI `markdown.yml` 在 Windows 上执行 `.python/check_markdown.bat`.
-- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 脚本渲染能力交付前, 状态段落 MUST 如实说明 "P0 开发预览, 仅专用测试宿主可验证计数器, compose 脚本 API 尚未交付".
+- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 脚本渲染能力交付前, 状态段落 MUST 如实说明 "P1 开发预览, V1 契约已冻结, 正式渲染器与 compose 脚本 API 尚未交付".
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.
 
@@ -196,6 +196,7 @@ AutoJs6-Plugin-Compose-UI/
 ### 13.1 JVM
 
 - `ManifestContractTest` (权限, 无 queries, application meta-data 四项, Wake Activity, INFO 服务发现契约, 无 launcher / alias / receiver / provider, 导出组件集合), `ComposeUiPluginRuntimeInfoTest` (PluginInfo 纯数据映射, 空 ABI, 身份常量对齐 `common.json` / `build.gradle.kts` / `proguard-rules.pro` / `settings.gradle.kts`), `StringResourceParityTest` (键集合与排序, 描述规则, 11 份 `plugin_instruction.md`, 图标文件), `ApplicationTextPunctuationTest`, `HostApiAarLockTest` (锁与文件摘要, AAR 纯字节码, 声明文件与 `libs/README.md` 复述摘要, 构建脚本消费的 id 集合).
+- P1.1: 宿主契约模块的 `ComposeUiContractTest`, `ComponentCatalogConsistencyTest`, `ComposeUiModelTest`, `ComposeUiHostCompileGuardTest` 及设备 `ComposeUiParcelTest` 守卫冻结面与传输边界. 详细模型语义见 `docs/dev/compose-ui-plugin-protocol-v1.md`.
 - P0.2 起: 类加载边界与依赖锁的 JVM 守卫; P2 起: 组件目录 / 补丁合并 / Modifier 链 / 事件队列的纯逻辑测试.
 
 ### 13.2 Android instrumentation

@@ -25,7 +25,7 @@ val buildTypeRelease = "release"
 // Host protocol AARs are consumed only from libs/ and are pinned by locks/host-api-aars.lock.
 // The build refuses missing files, debug artifacts, placeholder hashes, extra lock entries and
 // digest mismatches. common-plugin-api is bundled for INFO; compose-ui-api is a compile-only
-// P0.2 draft. P1.1 will replace the explicit api.spike package with the frozen V1 contract.
+// V1 contract. api.spike remains only for the P0 regression fixture until the P2 renderer migration.
 // ---------------------------------------------------------------------------
 
 fun File.sha256(): String {

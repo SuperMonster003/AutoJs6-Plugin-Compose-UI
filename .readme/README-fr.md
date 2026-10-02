@@ -52,7 +52,7 @@ Le plugin n'embarque aucun ecran autonome et n'ajoute aucune entree dans le lanc
 
 ******
 
-Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible.
+Aperçu P1: le contrat V1 entre l'hôte et le plugin est figé. Le moteur de rendu de production et l'API de script compose sont encore en développement; un hôte de test dédié peut exécuter le compteur prototype.
 
 ******
 
@@ -200,14 +200,14 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 _2026/10/02_
 
-- `Indication` Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible.
+- `Indication` Aperçu P1: le contrat V1 entre l'hôte et le plugin est figé. Le moteur de rendu de production et l'API de script compose sont encore en développement; un hôte de test dédié peut exécuter le compteur prototype
 - `Indication` Necessite AutoJs6 6.8.0 (5308) ou ulterieur (le numero de build minimal exact sera renseigne une fois les changements cote hote integres)
 - `Nouveaute` Squelette du depot du plugin : chaine de compilation du plugin de versions de plateforme, dependances Jetpack Compose BOM 2026.09.00, protocole d'activation Wake Activity et service INFO (categorie compose-ui)
 - `Nouveaute` README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON
 - `Nouveaute` Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible
 - `Dependance` Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)
 - `Dependance` Ajout de Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependance` Ajout du brouillon P0 de compose-ui-api.aar (MPL 2.0, empreinte verrouillée) et alignement des dépendances partagées sur l'hôte
+- `Dependance` Ajout de compose-ui-api.aar V1 (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte
 
 ##### Pour un historique plus complet, voir
 
