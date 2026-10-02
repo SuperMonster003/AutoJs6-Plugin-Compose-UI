@@ -1,5 +1,6 @@
 import com.android.apksig.ApkVerifier
 import org.gradle.api.provider.Property
+import com.android.build.api.variant.BuildConfigField
 import java.security.MessageDigest
 import java.io.RandomAccessFile
 import java.nio.ByteBuffer
@@ -25,7 +26,7 @@ val buildTypeRelease = "release"
 // Host protocol AARs are consumed only from libs/ and are pinned by locks/host-api-aars.lock.
 // The build refuses missing files, debug artifacts, placeholder hashes, extra lock entries and
 // digest mismatches. common-plugin-api is bundled for INFO; compose-ui-api is a compile-only
-// V1 contract. api.spike remains only for the P0 regression fixture until the P2 renderer migration.
+// V1 contract. No implementation references the retained legacy api.spike types.
 // ---------------------------------------------------------------------------
 
 fun File.sha256(): String {
@@ -96,7 +97,7 @@ fun lockedAars(lockFile: File, ids: List<String>, directory: String): List<File>
 val hostApiIds = listOf("common-plugin-api", "compose-ui-api")
 val hostApiAars = lockedAars(rootProject.file("locks/host-api-aars.lock"), hostApiIds, "libs")
 
-// D26: these classes are supplied by the P0 debug host. Keep Kotlin in the APK for INFO/Wake,
+// D26: these classes are supplied by the production host. Keep Kotlin in the APK for INFO/Wake,
 // which execute outside the host, while parent-first loading shares the host's Kotlin in rendering.
 val sharedDeps = rootProject.file("locks/host-shared-deps.lock").loadUniqueLock()
     .entries.associate { it.key.toString() to it.value.toString() }
@@ -289,6 +290,11 @@ android {
 
 androidComponents {
     onVariants { variant ->
+        requireNotNull(variant.buildConfigFields).put("COMPOSE_VERSION", providers.provider {
+            val runtime = configurations.getByName("${variant.name}RuntimeClasspath").incoming.resolutionResult.allComponents
+                .mapNotNull { it.moduleVersion }.single { it.group == "androidx.compose.runtime" && it.name == "runtime-android" }
+            BuildConfigField("String", "\"${runtime.version}\"", "Resolved from the Compose BOM; not a second version pin.")
+        })
         variant.outputs.forEach { output ->
             val outputFileNameProperty = output.javaClass.methods.firstOrNull {
                 it.name == "getOutputFileName" && it.parameterTypes.isEmpty()

@@ -15,15 +15,16 @@ AutoJs6 branch `spike/compose-ui-p0` (6.8.0 / 5309, source commit `d9b090fd68`).
 It is MPL 2.0, SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`,
 consumed as `compileOnly` by the plugin and packaged by the host. It contains no Compose
 implementation dependency. The retained `api.spike` negative-version fixture is excluded from
-V1 compatibility guarantees and remains only for prototype regression until P2.1.
+V1 compatibility guarantees. P1.2 retired its implementation/test consumers; the locked AAR is
+unchanged, so these unused legacy definitions remain until the next artifact maintenance.
 
 Shared host components are pinned in `locks/host-shared-deps.lock` (Q1(b), approved for app/inrt debug/release on 2026-10-02).
 AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table
 are compile-only; Compose integration artifacts whose names end in `-compose` remain bundled.
 Kotlin standard library 2.4.0 (Apache 2.0) remains bundled for the plugin's INFO/Wake process;
 parent-first loading resolves the host's identical version when rendering. Q1(b) aligns lifecycle
-2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. V1 contract classes are supplied by the host. Loading fixtures remain in instrumentation; the
-production loader/renderer is not delivered by the contract freeze alone.
+2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. V1 contract classes are supplied by the host. P1.2 now supplies the production
+host loader/session and a limited V1 renderer preview; the complete renderer remains P2 work.
 Sources: Google Maven (AndroidX) and Maven Central (org.jetbrains.kotlin / org.jetbrains.kotlinx).
 
 ## Runtime dependencies (Gradle)

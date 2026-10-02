@@ -27,6 +27,8 @@ V1 `compose-ui-api.aar`: built with `:plugin-api:compose-ui-api:assembleRelease`
 `spike/compose-ui-p0` (6.8.0 / 5309, source commit `d9b090fd68`).
 SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`.
 The host now uses `implementation(project(":plugin-api:compose-ui-api"))` in every variant. The
-shared dependency fingerprint is unchanged. The formal loader/renderer and final minimum host
-version remain pending; the existing plugin renderer still uses the separate P0 fixture interface.
+shared dependency fingerprint and staged AAR are unchanged. P1.2 now uses the V1 loading surface
+and a three-component preview renderer. Legacy api.spike types have no remaining implementation
+references and will be removed at the next artifact maintenance. The final minimum host version
+and complete renderer remain P1.3/P2 work.
 See `docs/dev/compose-ui-plugin-protocol-v1.md` for the frozen surface and BitmapRef transport limits.

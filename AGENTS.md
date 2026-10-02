@@ -127,8 +127,8 @@ AutoJs6-Plugin-Compose-UI/
 
 - Gradle 构建 MUST 自包含, 禁止引用兄弟仓库或宿主的路径, JAR / AAR 或 `flatDir`.
 - 宿主 AAR 只从 `libs/` 消费, 由 `locks/host-api-aars.lock` 锁定 SHA-256; `app/build.gradle.kts` 在配置期拒绝缺失文件, debug 产物, 占位哈希, 多余锁条目与摘要不符. 更新任一 AAR 时同一提交内更新锁文件, `libs/README.md` 与 `THIRD_PARTY_NOTICES.md`.
-- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. `.spike` 版本 -1 只为保留 P0 装载回归, 不属于冻结面, 随 P2.1 渲染器迁移移除.
-- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; 保留的负版本探针类型随同 AAR 供回归使用, 探针执行代码仍仅在 instrumentation. 正式装载器与最低宿主版本仍待 P1.2 / P1.3.
+- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. `.spike` 版本 -1 不属于冻结面, 已无实现或测试引用, 仅保留于未改动的锁定 AAR 中, 下次维护契约制品时移除.
+- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; P1.2 的正式装载器与会话使用 V1, 负版本探针已退役. 最低正式宿主版本仍待 P1.3 回填.
 - 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等本插件不需要的 View 体系库.
 
 ### 5.3 签名与发布构建
@@ -151,7 +151,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `name` 来自不可翻译的 `app_name`, `description` 来自当前 locale 的 `plugin_description`, `instruction` 来自 `@raw/plugin_instruction`, `versionName` / `versionCode` 来自已安装包, `versionDate` 来自 `plugin_version_date` resValue, `id` / `engine` / `variant` / `author` 来自 `ComposeUiPlugin`.
 - `supportedAbis` 恒为空数组 (D22: 单 APK 内置全部四种 ABI 的 graphics-path 辅助库, 对设备没有 ABI 限制), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
-- `capabilities` 在 P0 只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`; 契约版本, 组件目录与 Compose 版本随渲染器工厂 `capabilities()` 在 P2.1 协商 (路线图附录 B), 不提前声明尚未实现的能力.
+- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P1.2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 Column / Text / Button 三个预览组件, FEATURES 为空. 尚未实现的属性 / Modifier / 命令必须明确拒绝; 完整组件语义在 P2 交付, 不提前声明能力.
 - 新增可选能力时先协商, 不通过捕获异常猜测协议版本.
 
 ## 8. 进程内渲染器与公共 API 设计 (CONDITIONAL, P0.2 起)
