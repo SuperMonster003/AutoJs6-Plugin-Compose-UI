@@ -19,7 +19,7 @@
       "dependency": [
         "附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)",
         "附加 Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "附加 compose-ui-api.aar P0 草案 (MPL 2.0, 摘要锁定), 共享依赖与开发宿主对齐"
+        "附加 compose-ui-api.aar P0 草案 (MPL 2.0, 摘要锁定), 共享依赖与宿主对齐"
       ]
     }
   }

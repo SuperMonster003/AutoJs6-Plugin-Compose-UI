@@ -207,7 +207,7 @@ _2026/10/02_
 - `Novedad` Vista previa P0: un host de pruebas dedicado puede renderizar un contador Column / Text / Button. La API de scripts compose aún no está disponible
 - `Dependencia` Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)
 - `Dependencia` Se agrega Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependencia` Añadir el borrador P0 de compose-ui-api.aar (MPL 2.0, hash fijado) y alinear las dependencias compartidas con el host de desarrollo
+- `Dependencia` Añadir el borrador P0 de compose-ui-api.aar (MPL 2.0, hash fijado) y alinear las dependencias compartidas con el host
 
 ##### Para ver mas historial de versiones, consulte
 

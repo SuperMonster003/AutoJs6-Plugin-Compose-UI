@@ -207,7 +207,7 @@ _2026/10/02_
 - `Nouveaute` Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible
 - `Dependance` Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)
 - `Dependance` Ajout de Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependance` Ajout du brouillon P0 de compose-ui-api.aar (MPL 2.0, empreinte verrouillée) et alignement des dépendances partagées sur l'hôte de développement
+- `Dependance` Ajout du brouillon P0 de compose-ui-api.aar (MPL 2.0, empreinte verrouillée) et alignement des dépendances partagées sur l'hôte
 
 ##### Pour un historique plus complet, voir
 

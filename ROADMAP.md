@@ -31,8 +31,8 @@
 | D7 | 仅本地提交 | 与 3-Shell Terminal / 3-Setup Installer 当前策略一致: 本仓库与宿主改动均仅本地 Conventional Commits, 不推送 GitHub, 不登记官方索引, 不发 Release, 直至维护者明确恢复; 宿主 `PluginInstallWizardCatalog` 条目先落地 |
 | D8 | 无独立界面 | 插件只有 Wake Activity, INFO 服务与渲染器入口, 没有启动器图标, 设置页与组件画廊 (画廊见附录 F.5); 示例脚本随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史由插件中心展示 |
 | D9 | 契约模块不依赖 Compose | 宿主新增 `plugin-api/compose-ui-api` (宿主编译并打包, 因此不得依赖任何 Compose 类): 装载面接口 (`ComposeUiRendererFactory` / `ComposeUiRenderer` / `ComposeUiHostEnvironment` / `ComposeUiEventSink`), 数据模型 (`UiNode` / `UiPatch` / `UiEvent` / `UiCommand` / `UiValue` / `ModifierOp` / `ThemeSpec`), 组件目录 (`ComponentCatalog`: 组件名, 属性类型, 插槽, 事件, 作用域限制), 常量 (`ComposeUiIds` / `ComposeUiCapabilityKeys` / `ComposeUiErrorCodes` / `ComposeUiLimits`); 插件以 `compileOnly` 消费该 AAR 的副本 (运行时类由宿主提供), 单元测试 `testImplementation` |
-| D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 验证; AndroidX 版本冲突时退路为隔离加载 + 插件自持 owner (附录 E.3, Q1) |
-| D11 | ComposeView 上下文 | 宿主提供 `ComposeHostContext : ContextWrapper`: base 为宿主 Activity 或 floaty 服务上下文 (窗口, 系统服务, 主题属性), `getResources()` / `getAssets()` 委托插件包资源 (以宿主当前 `Configuration` 经 `createConfigurationContext` 对齐密度 / 夜间 / 语言), 使 material3 内部字符串 (`LocalContext.current.resources.getString(插件 R id)`) 与无障碍文案可解析; `getClassLoader()` 返回 D10 的插件加载器. 是否还需委托 `getTheme()` 由 P0.2 决定 |
+| D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 的 debug / release 插件加载已验证; 2026-10-02 维护者选择 Q1(b), 升级宿主共享 AndroidX, 正式保持 parent-first, 不启用附录 E.3 退路. 原生搜索路径使用 `<apk>!/lib/<当前进程 ABI>`, 不能仅按设备首选 ABI 选择; P0 草案只在 instrumentation, 正式装载器在 P1.2 |
+| D11 | ComposeView 上下文 | 宿主提供 `ComposeHostContext : ContextWrapper`: base 为宿主 Activity 或 floaty 服务上下文 (窗口, 系统服务, 主题属性), `getResources()` / `getAssets()` 委托插件包资源 (以宿主当前 `Configuration` 经 `createConfigurationContext` 对齐密度 / 夜间 / 语言), 使 material3 内部字符串 (`LocalContext.current.resources.getString(插件 R id)`) 与无障碍文案可解析; `getClassLoader()` 返回 D10 的插件加载器. P0.2 最小计数器证据确认保留宿主 `getTheme()` 即可, 不把插件资源主题覆盖到 Activity 上; RawWindow 在 attach 前显式设置宿主 LifecycleOwner 与 SavedStateRegistryOwner, 关闭时推进 DESTROYED 并 dispose. 扩展组件与 IME / 夜间配色仍需 P2 / P5 回归 |
 | D12 | 线程模型 | 每个会话绑定一个 "脚本调度器": `"ui";` 模式下即 Android 主线程 (UI 模式脚本主线程就是 Android UI 线程, 见 3.1), 非 ui 脚本的 floaty 会话为脚本 looper 线程 (经 `ScriptAsyncDispatcher` 单跳回到脚本线程). render, state 变更, 事件回调, 节点属性写入都在脚本调度器执行; 补丁应用在主线程 (ui 模式同线程直接应用, 否则 `mainExecutor.execute`); 渲染器只经 `ComposeUiEventSink.enqueue` 投递事件, 不在组合 / 测量 / 布局 / 绘制期间同步执行 JS; `compose.post(fn)` 把任务投递到会话的脚本调度器, 供工作线程回写 state. 禁止主线程等待 JS 与 JS 同步等待主线程的双向等待 |
 | D13 | 节点身份与差分 | 节点句柄持有会话内单调递增的 `nodeId`; render 模式下新树按 (父节点, `key` 或 类型 + 同类索引) 与上一棵树匹配并复用 `nodeId`, 宿主 `TreeReconciler` 产出补丁 ops (`setProps` / `insert` / `remove` / `move` / `replaceSlot`), 一次 render 合并为一个 `UiPatchBatch`; 渲染器把 `nodeId` 映射为 Compose `key(nodeId)` 以保留组合状态. 1.0.0 的 render 为整树重建 + 宿主差分, 不做脚本侧细粒度依赖裁剪; 动态列表项缺 `key` 时按索引匹配并对每个会话 warn 一次 (Q3) |
 | D14 | 回调注册表 | JS 函数只留在宿主 `CallbackRegistry` (`sessionId`, `callbackId`, `generation`); 渲染节点只持 `callbackId`; 事件携带 `sessionId` / `generation` / `nodeId` / `eventType` / `callbackId` / `payload`, 会话关闭或 generation 过期的事件丢弃; 回调的增删与对应补丁同一批提交, 避免 "界面已换, 事件仍指向旧函数" |
@@ -43,11 +43,11 @@
 | D19 | 主题 | 默认 Material 3 `ColorScheme` 从宿主主题色 (`ThemeColorManager`) 与夜间模式派生, 字体随系统; `compose.theme({ seed, colors, dark, dynamicColor, typography })` 可按会话覆盖, Android 12+ `dynamicColor: true` 使用系统动态色; 主题以 `ThemeSpec` (纯数据) 跨契约传递, 由渲染器构造 `MaterialTheme` |
 | D20 | 无障碍 | 每个节点可设 `testTag` / `contentDescription`; 渲染器在根 `semantics { testTagsAsResourceId = true }`; P4.2 核实宿主 `id()` / `desc()` 选择器对 Compose 语义节点的匹配规则 (无 `pkg:id/` 前缀的原样 tag) 并写入文档, 不预设与旧 View ID 的查找逻辑自动兼容 |
 | D21 | 生命周期 | Activity 重建 (旋转 / 多窗口) 沿用 ui 模式现状: `ScriptExecuteActivity.onDestroy` 销毁引擎, 不承诺恢复; 会话在引擎退出, Activity destroy, 窗口 close 时释放 Composition (`ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool` + 显式 `dispose`), 回调注册表与补丁队列; `rememberSaveable` 不暴露给脚本 (1.0.0) |
-| D22 | 插件 APK 形态 | 纯 bytecode, 无原生库, 不启用 ABI 拆分 (拆分包内容相同, 规范 5.5 允许省略, 理由记入 `AGENTS.md`); 单个发布文件 `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk`; `getInfo()` 显式 `supportedAbis = emptyArray()`; release 开 R8 (Compose 自带 consumer 规则 + keep 渲染器工厂与契约实现), `isShrinkResources = true`. **P0.1 批注 (2026-10-02)**: "无原生库" 在事实上不成立: Compose `ui-graphics` 传递依赖 `androidx.graphics:graphics-path` 1.0.1, 其 `libandroidx.graphics.path.so` (API 24 - 33 用于 Path 迭代, 各约 10 KB) 随 Compose 打包进 arm64-v8a / armeabi-v7a / x86_64 / x86 四个 `lib/` 目录. 决策其余部分维持: 插件无自有原生代码, 不拆 ABI (单 APK 内置四种), `supportedAbis` 仍为空数组; 发布门禁 `appendDigestToReleasedFiles` 与设备契约测试改为校验 "原生库集合恰好为这四个文件 + 未压缩 + ELF `PT_LOAD` 与 zip 偏移 16 KB 对齐" (`AGENTS.md` 第 9 节). 待办: P0.2 的宿主加载器需把 `<apk>!/lib/<abi>` 作为 `PathClassLoader` 的 librarySearchPath (D10 的 `nativeLibraryDir` 参数), 否则 API 24 - 33 上 Path 迭代会 `UnsatisfiedLinkError` |
+| D22 | 插件 APK 形态 | 无插件自有原生代码, 不启用 ABI 拆分; 单个发布文件 `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk`, `getInfo()` 显式 `supportedAbis = emptyArray()`. Compose graphics-path 1.0.1 自带 `libandroidx.graphics.path.so` x arm64-v8a / armeabi-v7a / x86_64 / x86, 各约 10 KB, APK 中未压缩, 发布门禁校验 ELF 与 zip 偏移 16 KB 对齐. P0.2 已验证 D10 的 `<apk>!/lib/<进程 ABI>` 搜索路径. release 保留 R8 裁剪 / 混淆与 `isShrinkResources = true`, 保持 Kotlin ABI, 使用插件私有混淆包名, 补回 compileOnly lifecycle 的 ViewModel 构造规则; 因 R8 专用 Kotlin 方法不在宿主副本中, P0 禁用优化变换 (`-dontoptimize`), 恢复优化前必须重跑宿主内装载验证 |
 | D23 | 插件中心与宿主注册 | INFO 服务 (action `org.autojs.plugin.INFO`, category `compose-ui`, 实现 `IPluginInfoProvider`), Wake Activity, meta-data `requiresHostVersion` 与 `org.autojs.plugin.compose.RENDERER_FACTORY`; 没有 Binder 能力服务 (与 ImGui 同形), 因此不进 `SERVICE_ACTION_BY_ENGINE`, 由 INFO 通用发现列出; 默认启用遵循 `PluginDefaultEnabledPolicy` 现状 (不新增例外); 宿主向导 `entry(official("compose.ui"), "Compose UI", UI)` 与 ImGui 同组 |
 | D24 | 宿主退化 | 宿主只保留契约模块, 装载器, 会话核心与脚本 API; 插件缺失 / 禁用 / 未授权 / 不兼容时 `compose.mount` / `compose.floaty` 抛 D18 的对应错误, 宿主不内置任何 Compose 渲染实现, 也不回退到 XML 布局 |
 | D25 | Compose 依赖与编译器 | 插件 `platform("androidx.compose:compose-bom:2026.09.00")` + `runtime` / `ui` / `foundation` / `material3` / `animation` / `material-icons-core` (extended 图标集见 Q2), `debugImplementation ui-tooling`; Compose 编译器插件 `org.jetbrains.kotlin.plugin.compose` 在根 `build.gradle.kts` 以 `version System.getProperty("gradle.kotlin.version") apply false` 声明 (与平台插件选定的 Kotlin 同版本), 不硬编码; 若 AGP 9 内置 Kotlin 不接受该编译器插件, 经构建验证后在插件仓库声明 `org.jetbrains.kotlin.android` 并在 `AGENTS.md` 注明理由 (规范 5.2 的例外条款) |
-| D26 | 宿主共享依赖的版本纪律 | D10 使插件编译时的 AndroidX / coroutines 版本必须不高于宿主运行时版本: 插件 `build.gradle.kts` 把这些依赖声明为 `compileOnly` 并以 `locks/host-shared-deps.lock` 锁定 "宿主 build N 的版本表" (P0.2 从宿主 `gradle/libs.versions.toml` 与依赖报告导出); 宿主侧 `ComposeUiSharedClasspathTest` 快照同一张表, 任一方升级时两处同步并提高 `REQUIRED_HOST_VERSION` |
+| D26 | 宿主共享依赖的版本纪律 | 2026-10-02 Q1(b) 定稿: 宿主 app / inrt 的 debug / release 共用 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0, 由宿主版本目录单点声明; 插件编译依赖不能高于宿主, `locks/host-shared-deps.lock` 锁定 51 项解析版本. AndroidX / coroutines / serialization 共享项为插件 `compileOnly`, Kotlin stdlib 2.4.0 为 INFO 独立进程保留打包副本, 宿主内仍 parent-first 且 R8 必须保持 ABI. 宿主 `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath, 插件 `verifySharedClasspath` 守卫编译与排除集合; 任一版本变化时同步两仓库锁与正式最低宿主版本. 依赖解析一致不等于 minified 宿主 ABI 已通过, P1 需补正式契约 / keep 规则 / 装载器并回填最低版本 |
 | D27 | 图片与大对象 | `Image` 的 `src` 接受 `ImageWrapper` (`images.read` 等), 文件路径, 以及宿主 `R.drawable` 名称; 进程内直接传递 `Bitmap` 引用 (`UiValue.BitmapRef`), 不编码; 位图所有权归脚本 (`recycle` 由脚本决定), 渲染器只持弱引用并在节点移除时放手; URL 图片不在 1.0.0 |
 | D28 | 兼容矩阵 | API 24 AVD x86, API 28 Sony G8441 (arm64), API 31 Sony XQ-AT72, API 33 Redmi 22120RN86C, API 35 Xiaomi 23046RP50C (HyperOS), API 37 AVD (16 KB 页); 每台设备记录宿主 build 与插件 build; HyperOS 上悬浮窗只在桌面之上活动且需 `requestFocus` (既有记录), 作为 P3.4 验收的已知条件 |
 | D29 | 版本与回填 | `VERSION_NAME` 从 1.0.0 起; `ComposeUiIds.REQUIRED_HOST_VERSION_CODE` 在 P1.3 回填为首个含 `compose-ui-api` 与宿主装载器的宿主 `VERSION_BUILD`; 契约 `CONTRACT_VERSION = 1` |
@@ -247,7 +247,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 
 | 阶段 | 内容 | 目标版本 | 状态 |
 | --- | --- | --- | --- |
-| P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 进行中 (P0.1 / P0.2 完成于 2026-10-02, P0.3 待 Q1 决策) |
+| P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 未开始 |
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 未开始 |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
@@ -292,9 +292,9 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 
 ### P0.3 spike 结论回填
 
-P0.2 证据已提前落在两仓库 `docs/dev/` 中; Q1 待维护者确认, 临时入口仍严格限于宿主 debug. 下一会话先读取证据与 Q1 回复, 再决定正式共享依赖升级与临时入口转正/移除.
+维护者于 2026-10-02 明确选择 Q1(b): 升级宿主共享依赖. 本阶段把已验证版本应用于 app / inrt 的 debug / release, 并删除临时 Activity, 将 P0 草案加载器与计数器控制器迁入 instrumentation, 从宿主 APK 移除临时入口; V1 契约与正式装载器仍在 P1 实施.
 
-- [ ] (宿主 / 插件) 按 P0.2 结果定稿 D10 / D11 (或启用附录 E.3 退路并回填 Q1 拍板), 写 `docs/dev/compose-ui-spike-evidence.md` (宿主) 与本仓库 `docs/dev/p0-spike-evidence.md`; 删除宿主临时入口或转为 P1.2 的正式装载器; 更新本路线图 "固定决策" 与附录 B 草案中受影响的字段.
+- [x] (宿主 / 插件) 按 P0.2 结果定稿 D10 / D11 (或启用附录 E.3 退路并回填 Q1 拍板), 写 `docs/dev/compose-ui-spike-evidence.md` (宿主) 与本仓库 `docs/dev/p0-spike-evidence.md`; 删除宿主临时入口或转为 P1.2 的正式装载器; 更新本路线图 "固定决策" 与附录 B 草案中受影响的字段. 证据: 宿主提交 `fb784f034a`, 插件为本条所在提交 (build 8); 2026-10-02 维护者批准 Q1(b); 51 项版本用于四种宿主变体并经 JVM 快照守卫, 原临时 Activity 删除, P0 草案与探针迁至 instrumentation 并复用宿主 AboutActivity. app debug / androidTest / release 装配通过, release 原生对齐通过; 宿主 JVM 18 项, 插件 JVM 24 项, API 24 x86 AVD 与 API 33 Redmi 各 12 项设备回归通过. 详见两仓库证据文档的 P0.3 addendum. 正式 V1 契约 / 装载器仍待 P1, 不把草案计作 V1 交付.
 
 ---
 
@@ -601,6 +601,8 @@ threads.start(() => {
 
 ### B.1 装载面
 
+P0.3 定稿约束: `hostContext` 保留宿主 theme / window / system services, resources / assets 使用与宿主 Configuration 对齐的插件资源, classLoader 使用含原生路径的 parent-first 加载器. 悬浮窗 owner 由宿主提供并随窗口关闭销毁. P0 的 `api.spike` 版本 -1 仅为 instrumentation fixture, 不视为本节 V1 已冻结; `classOrigins` / `probe` / `diagnostics` 不进入正式装载面.
+
 ```kotlin
 interface ComposeUiRendererFactory {
     fun contractVersion(): Int
@@ -709,6 +711,8 @@ fun interface ComposeUiEventSink { fun enqueue(event: UiEvent) }
 ## 附录 D: 待决事项
 
 ### Q1 (P0.3 前): parent-first 加载不可行时的取舍
+
+**已拍板 (2026-10-02)**: 维护者选择 (b), 正式采用 lifecycle 2.9.4 / savedstate 1.3.2 / emoji2 1.4.0 / window 1.5.0. 维持 D10 parent-first, 不启用隔离 classloader 或进程外退路.
 
 若 P0.2 发现宿主 AndroidX 版本低于 Compose 1.12 传递依赖的下界且不可升级, 或共享 classloader 产生不可解的 `LinkageError`: (a) 启用附录 E.3 (隔离加载 + 插件自持 owner + 资源委托, 宿主内存多一份 AndroidX 副本), (b) 升级宿主 AndroidX 到满足下界的版本 (影响宿主其它模块, 需回归), (c) 改进程外 (E.2). 推荐 (b) 优先, 其次 (a).
 
@@ -827,3 +831,16 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 最终插件 build 7 的 release 在两台设备重新通过全部 5 项宿主探针. 本地签名门禁通过, 产物 `autojs6-plugin-compose-ui-v1.0.0-f7a437db.apk`; lint debug 0 问题, release 0 错误 / 3 个身份资源未使用警告. 下一会话从 P0.3 / Q1 开始. 本次只做本地提交, 不推送, 不发布.
 
 - 提交定位: 宿主 `21dff98f26` (独立分支), 插件为本条所在提交 (`VERSION_BUILD=7`). 临时测试宿主 / 插件 / 两个 instrumentation 包均已从两台测试设备移除, 原宿主保留 (Redmi 5310, AVD 5304); 本次启动的 API 37 AVD 已关闭.
+
+
+### 2026-10-02 (P0.3)
+
+- 维护者明确批准 Q1(b), 将 lifecycle 2.9.4 / savedstate 1.3.2 / emoji2 1.4.0 / window 1.5.0 从 debug 实验提升为宿主 app / inrt 的 debug / release 共享依赖. 版本目录单点声明, 两仓库共享锁值与指纹保持一致; 新增 ComposeUiSharedClasspathTest, 四种 runtime classpath 均通过.
+- 完成 D10 / D11 / D22 / D26 与附录 B 的证据回填. 临时 ComposeSpikeActivity 从宿主 APK 删除, 草案 AAR 为 androidTestImplementation, 探针为 instrumentation 中的 ComposeSpikeSession, 复用宿主 AboutActivity 与 RawWindow. P0.3 不提前实现 V1 API 或生产装载器.
+- 验证: 宿主 JVM 18 项, 插件 JVM 24 项; app debug / debug androidTest / release 装配与 release 原生对齐通过. 新建 API 24 x86 AVD 和 API 33 Redmi 使用宿主 5309 / 已签名插件 7, 各 12 项探针 / 抽屉生命周期 / 插件中心回归通过. 首轮抽屉失败经前台进程证据定位到测试包权限弹窗, 为专用测试包准备权限后原始严格断言全部通过, 未修改抽屉生产代码或保留放宽的测试.
+- 未执行: 宿主全量 JVM / 完整 lint, inrt APK 装配与设备运行, 其它设备矩阵 / TalkBack / IME / LeakCanary (后续 gate), minified 宿主 (当前宿主 release 配置关闭 minify), 远端 CI (D7). 本轮插件仅文档与锁来源变化, 设备沿用实现未变的 build 7 APK; build 8 为本次本地提交计数.
+- P0 全部完成. 下一会话从 P1.1 契约冻结开始; P1.2 完成正式装载器, P1.3 回填实际最低宿主版本. 宿主工作继续保存在独立 worktree 的 spike/compose-ui-p0 分支, 原宿主未提交内容保留, 不推送或发布.
+
+- 清理: 两台设备本次安装的 3 个临时包均已卸载, 新建 API 24 AVD 已停止. 自动审批以 `blocked by policy` 拒绝删除该 AVD 缓存, 因此保留独立宿主 `build/compose-p03/avd-api24` 与其本地注册; 构建目录被忽略, 不影响工作区提交.
+
+- 提交定位: 宿主 `fb784f034a` (独立分支), 插件为本条所在提交 (`VERSION_BUILD=8`). 插件与宿主独立 worktree 均按本次范围本地提交; 原宿主工作区未参与暂存或提交.

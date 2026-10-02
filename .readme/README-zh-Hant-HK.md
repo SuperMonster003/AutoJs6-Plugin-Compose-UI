@@ -207,7 +207,7 @@ _2026/10/02_
 - `新增` P0 開發預覽: 專用測試宿主可渲染 Column / Text / Button 計數器. compose 腳本 API 尚未交付, 安裝插件後仍不能透過腳本渲染界面
 - `依賴` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)
 - `依賴` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `依賴` 附加 compose-ui-api.aar P0 草案 (MPL 2.0, 摘要鎖定), 共用依賴與開發宿主對齊
+- `依賴` 附加 compose-ui-api.aar P0 草案 (MPL 2.0, 摘要鎖定), 共用依賴與宿主對齊
 
 ##### 更多版本歷史可參閱
 
