@@ -247,7 +247,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 
 | 阶段 | 内容 | 目标版本 | 状态 |
 | --- | --- | --- | --- |
-| P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 进行中 (P0.1 完成于 2026-10-02) |
+| P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 进行中 (P0.1 / P0.2 完成于 2026-10-02, P0.3 待 Q1 决策) |
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 未开始 |
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 未开始 |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
@@ -278,19 +278,21 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 
 ### P0.2 进程内装载 spike
 
-- [ ] (宿主, 临时) 在宿主开发者选项或临时测试 Activity 中放一个 "Compose spike" 入口 (不进 release 路径, P0.3 结束时删除或改为正式装载器): 发现插件包, 门禁检查, 按 D10 构造 `PathClassLoader(parent = 宿主 classLoader)`, 反射实例化工厂, `ComposeHostContext` 包装, 把渲染器 `view()` 作为 Activity 内容.
-- [ ] (插件, spike) 最小渲染器: `UiNode` 三种类型 (Column / Text / Button), `mutableStateOf(root)`, `Button.onClick -> eventSink.enqueue(callbackId)`; 宿主侧计数器: 点击后重建树并 `apply`, 文本更新.
-- [ ] (测试) 验证清单, 每项记录结论与证据 (设备, 日志, 堆栈):
+- [x] (宿主, 临时) 在宿主开发者选项或临时测试 Activity 中放一个 "Compose spike" 入口 (不进 release 路径, P0.3 结束时删除或改为正式装载器): 发现插件包, 门禁检查, 按 D10 构造 `PathClassLoader(parent = 宿主 classLoader)`, 反射实例化工厂, `ComposeHostContext` 包装, 把渲染器 `view()` 作为 Activity 内容. 证据: 宿主提交 `21dff98f26`, 独立 worktree 分支 `spike/compose-ui-p0`, debug-only `ComposeSpikeActivity` / `ComposeSpikeLoader` / `ComposeHostContext`, 独立包名保护既有宿主; API 33 Redmi 与 API 37 / 16 KB AVD 的 debug / release 插件加载通过 (宿主 5309, 插件 6). 详见 `docs/dev/p0-spike-evidence.md`.
+- [x] (插件, spike) 最小渲染器: `UiNode` 三种类型 (Column / Text / Button), `mutableStateOf(root)`, `Button.onClick -> eventSink.enqueue(callbackId)`; 宿主侧计数器: 点击后重建树并 `apply`, 文本更新. 证据: `renderer/SpikeRenderer.kt`, 草案 `api.spike` 版本 -1 (未冻结 V1); 实际无障碍点击后 `Count: 0 -> Count: 1`, 两台设备通过; `SpikeTreeTest` 5 项输入边界与快照测试通过.
+- [x] (测试) 验证清单, 每项记录结论与证据 (设备, 日志, 堆栈). 证据: `docs/dev/p0-spike-evidence.md`, Redmi 22120RN86C API 33 (E3) 与 AVD_API_37.1_16K API 37 (E2), 宿主 `ComposeUiSpikeDeviceTest` 各 5 项在 debug / release 插件上通过, 独立冷进程 PSS 各 1 项通过; 24 项插件 JVM 测试通过. 下列结论只覆盖该最小 spike, 不代表 P5 全矩阵完成:
   - 加载器: Compose 类来自插件 APK, `androidx.lifecycle` / `savedstate` / `core` / `activity` / `appcompat` / kotlin stdlib / coroutines 来自宿主 (对比 `Class.getClassLoader()`); 无 `NoSuchMethodError` / `LinkageError`.
   - owner: `ComposeView` 在 `ScriptExecuteActivity` 等价 Activity 内附加成功 (无 "doesn't propagate ViewTreeLifecycleOwner"); 在 `RawWindow` (非 Activity 窗口) 内附加时的 owner 来源 (预期需宿主为 floaty 窗口提供 `LifecycleOwner` + `SavedStateRegistryOwner`, 记录方案).
   - 资源: material3 组件的无障碍字符串可解析 (开启 TalkBack 或读取语义树), 密度 / 夜间 / 语言随宿主 Configuration; 是否需要委托 `getTheme()`.
-  - 版本: 导出宿主 `:app:dependencies` 中 AndroidX / coroutines 精确版本, 与 Compose BOM `2026.09.00` 的传递依赖下界比对, 形成 D26 的首版 `host-shared-deps.lock`.
-  - R8: 插件 release 构建后仍可装载 (keep 工厂与契约实现), 记录 APK 体积与 dex 方法数.
-  - 内存: 装载前后宿主 PSS 差值 (API 33 真机 + API 37 AVD).
-  - 退出: Activity destroy 后 Composition 释放, 无 `Recomposer` / `Choreographer` 回调泄漏 (LeakCanary 或 `dumpsys meminfo` 二次对比).
-- [ ] (测试) 失败路径: 插件未安装 / 未启用 / 未授权 / `requiresHostVersion` 过高 / 工厂类缺失 / 契约版本不匹配, 各自产生可区分的错误而不是崩溃.
+  - 版本: 导出宿主 `:app:dependencies` 中 AndroidX / coroutines 精确版本, 与 Compose BOM `2026.09.00` 的传递依赖下界比对, 形成 D26 的首版 `host-shared-deps.lock`. 结果: 51 项, 指纹 `f3042acc624d499feea9907a20257b62debaa6c523f40bfce19b084274334576`; debug 宿主需升级 lifecycle / savedstate / emoji2 / window, Q1 正式决策待确认. Kotlin 因 INFO 独立进程需随插件打包并保留 ABI, 渲染时仍 parent-first; SavedState 的 Compose 注解从宿主 runtime 排除.
+  - R8: 插件 release 构建后仍可装载 (keep 工厂与契约实现), 记录 APK 体积与 dex 方法数. 结果: release 1,459,210 B / 28,213 DEX 方法引用 (插件 build 6); 保留 Kotlin ABI + `-dontoptimize` + 补回 compileOnly lifecycle 的 ViewModel 构造保留规则后通过. 三次失败堆栈与原因见证据文件; 未验证 minified 宿主 (P1 / P5).
+  - 内存: 装载前后宿主 PSS 差值 (API 33 真机 + API 37 AVD). 结果: 独立进程单次观测分别 +13,102 KiB / +428 KiB, 退出读数与测量局限见证据; 尚不是性能门槛.
+  - 退出: Activity destroy 后 Composition 释放, 无 `Recomposer` / `Choreographer` 回调泄漏 (LeakCanary 或 `dumpsys meminfo` 二次对比). 结果: Composition / DisposableEffect 计数与 Recomposer ShutDown 断言通过, Debug.MemoryInfo PSS 退出对比已记录; 未做 LeakCanary 或 Choreographer 堆对象审计, 不推断一般性无泄漏.
+- [x] (测试) 失败路径: 插件未安装 / 未启用 / 未授权 / `requiresHostVersion` 过高 / 工厂类缺失 / 契约版本不匹配, 各自产生可区分的错误而不是崩溃. 证据: `loaderFailuresAreDistinguishable`, 两台设备通过; 未安装 / 系统停用 / 未授权通过门禁快照注入, 插件中心停用通过真实 store 切换并恢复, 版本与缺失工厂经真实校验 / 反射路径. 未改变用户安装包或授权记录.
 
 ### P0.3 spike 结论回填
+
+P0.2 证据已提前落在两仓库 `docs/dev/` 中; Q1 待维护者确认, 临时入口仍严格限于宿主 debug. 下一会话先读取证据与 Q1 回复, 再决定正式共享依赖升级与临时入口转正/移除.
 
 - [ ] (宿主 / 插件) 按 P0.2 结果定稿 D10 / D11 (或启用附录 E.3 退路并回填 Q1 拍板), 写 `docs/dev/compose-ui-spike-evidence.md` (宿主) 与本仓库 `docs/dev/p0-spike-evidence.md`; 删除宿主临时入口或转为 P1.2 的正式装载器; 更新本路线图 "固定决策" 与附录 B 草案中受影响的字段.
 
@@ -814,3 +816,14 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 发现并修正: Compose 传递依赖 `androidx.graphics:graphics-path` 1.0.1 带四个 ABI 的 `libandroidx.graphics.path.so`, D22 "无原生库" 改为 "无插件自有原生代码 + 单 APK 内置四种 ABI + 发布门禁校验 16 KB 对齐" (D22 批注, `AGENTS.md` 第 9 节); 需维护者确认该批注.
 - 未做 / 延后: `compose-ui-api.aar` 与 D26 共享依赖锁 (P0.2), `requiresHostVersion=5308` 回填 (P1.3), 正式图标源图 (Q6), 模拟器矩阵 (CI / P0.2), `docs/dev/` 随 P0.3 证据文件创建.
 - 下一会话从 P0.2 进程内装载 spike 开始 (宿主临时入口 + 最小渲染器 + 加载器验证清单); 加载器验证清单新增 "插件原生库搜索路径 `<apk>!/lib/<abi>`" 一项.
+
+
+### 2026-10-02 (P0.2)
+
+- P0.2 四项完成: 独立宿主 debug 入口, 三组件计数器, 共享依赖 / owner / 资源 / JNI / release R8 / PSS / 退出验证, 区分失败门禁. 原宿主存在其它会话改动, 因此所有宿主改动在独立 worktree `AutoJs6-ComposeUi-Spike` 的 `spike/compose-ui-p0` 分支, 未合入原 master.
+- 设备: Redmi 22120RN86C API 33 arm64 (E3), API 37 16 KB x86_64 AVD (E2), 宿主 build 5309 / 插件 build 6; 各 5 项宿主测试在 debug 与 release 插件上通过, 独立进程 PSS 各 1 项. 插件 JVM 24 项通过. 详细数据与复现命令见 `docs/dev/p0-spike-evidence.md`.
+- D26 发现: lifecycle / savedstate / emoji2 / window 下界超过宿主原解析版本, 只在 debug 实验中升级并建立 51 项锁. Kotlin 需供 INFO 独立进程使用, 保留打包且在 R8 中保持 ABI; R8 的 Kotlin 专用方法仍会破坏 parent-first, 因而 P0 保留裁剪和混淆但关闭优化; compileOnly lifecycle 的反射构造规则显式补齐. Q1 推荐升级宿主共享依赖, 待维护者确认后进入 P0.3.
+- 未做: 正式宿主依赖升级与 loader 转正, V1 契约冻结 (P1.1), 最低正式宿主版本回填 (P1.3), minified 宿主 / 全设备矩阵 / TalkBack 手工验收 / LeakCanary (后续 gate), 正式图标 (Q6). `compose` 脚本 API 仍未交付, 10 语言状态文案明确只有专用测试宿主可验证计数器.
+- 最终插件 build 7 的 release 在两台设备重新通过全部 5 项宿主探针. 本地签名门禁通过, 产物 `autojs6-plugin-compose-ui-v1.0.0-f7a437db.apk`; lint debug 0 问题, release 0 错误 / 3 个身份资源未使用警告. 下一会话从 P0.3 / Q1 开始. 本次只做本地提交, 不推送, 不发布.
+
+- 提交定位: 宿主 `21dff98f26` (独立分支), 插件为本条所在提交 (`VERSION_BUILD=7`). 临时测试宿主 / 插件 / 两个 instrumentation 包均已从两台测试设备移除, 原宿主保留 (Redmi 5310, AVD 5304); 本次启动的 API 37 AVD 已关闭.

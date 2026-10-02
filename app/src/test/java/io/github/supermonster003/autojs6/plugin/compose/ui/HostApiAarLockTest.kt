@@ -20,10 +20,10 @@ class HostApiAarLockTest {
     private val root: Path = findProjectRoot()
 
     @Test
-    fun `host api lock lists exactly the common plugin api and its digest matches the file`() {
+    fun `host api lock lists the INFO api and draft renderer api with matching digests`() {
         val lock = readLock(root.resolve("locks/host-api-aars.lock"))
-        // The compose-ui-api contract AAR joins the lock with roadmap P0.2 / P1.1.
-        assertEquals(setOf("common-plugin-api"), lock.keys)
+        // The P0 draft is explicitly experimental; P1.1 will freeze the production contract.
+        assertEquals(setOf("common-plugin-api", "compose-ui-api"), lock.keys)
         lock.forEach { (id, entry) ->
             val file = root.resolve("libs").resolve(entry.file)
             assertTrue("$id: missing ${entry.file}", Files.isRegularFile(file))

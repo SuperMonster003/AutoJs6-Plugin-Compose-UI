@@ -34,10 +34,12 @@ jobs:
           chmod +x gradlew
           # JVM test compilation must work before any APK exists.
           # The release APK is built explicitly: R8 missing-class failures only surface there.
-          # The plugin is pure bytecode (roadmap D22): there is no native alignment step.
-          ./gradlew :app:assembleDebugUnitTest :app:testDebugUnitTest \
-            :app:assembleDebugAndroidTest :app:assembleRelease :app:lintDebug :app:lintRelease \
+          # The only native code is Compose graphics-path; the signed local release gate checks its alignment.
+          ./gradlew :app:assembleDebugUnitTest :app:testDebugUnitTest :app:verifySharedClasspath \
+            :app:assembleDebug :app:assembleDebugAndroidTest :app:assembleRelease :app:lintDebug :app:lintRelease \
+            -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false \
             --console=plain --stacktrace
+          python3 .python/verify_apk_classpath.py app/build/outputs/apk/debug/*.apk app/build/outputs/apk/release/*.apk
 
       - name: Upload debug, release, and test APKs
         uses: actions/upload-artifact@v7

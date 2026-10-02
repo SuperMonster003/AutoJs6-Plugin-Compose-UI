@@ -52,7 +52,7 @@ The plugin ships no standalone screens and adds no launcher entry. The host disc
 
 ******
 
-The current version is a P0 development preview. The repository contains a buildable plugin skeleton, the INFO service, and the Wake Activity activation protocol, but the renderer and the script API are not delivered yet, so scripts cannot render anything through `compose` after installing it. See the roadmap for the upcoming milestones and progress.
+P0 development preview: a dedicated test host can render a Column / Text / Button counter. The compose script API is not yet available.
 
 ******
 
@@ -200,12 +200,14 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 _2026/10/02_
 
-- `Hint` P0 development preview: the repository skeleton builds and is recognized by the host, while the renderer and the script API are not delivered yet
+- `Hint` P0 development preview: a dedicated test host can render a Column / Text / Button counter. The compose script API is not yet available.
 - `Hint` Requires AutoJs6 6.8.0 (5308) or later (the exact minimum build is back-filled once the host-side changes land)
 - `Feature` Plugin repository skeleton: platform versions plugin build chain, Jetpack Compose BOM 2026.09.00 dependencies, Wake Activity activation protocol, and INFO service (category compose-ui)
 - `Feature` README, plugin center instruction, and changelog in 10 languages, generated from JSON sources
+- `Feature` P0 development preview: a dedicated test host can render a Column / Text / Button counter. The compose script API is not yet available
 - `Dependency` Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)
 - `Dependency` Attach Jetpack Compose BOM 2026.09.00 (Apache 2.0)
+- `Dependency` Attach compose-ui-api.aar P0 draft (MPL 2.0, hash-locked) and align shared dependencies with the development host
 
 ##### For more release history, see
 
