@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "P0 開発プレビュー: 専用テストホストで Column / Text / Button カウンターを描画できます. compose スクリプト API はまだ利用できません.",
+        "P1 開発プレビュー: ホストとプラグイン間の V1 契約を確定しました. 正式なレンダラーと compose スクリプト API は開発中で, 専用テストホストでは試作カウンターを実行できます",
         "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 以降が必要です (正確な最小ビルド番号はホスト側の変更が取り込まれた後に補完されます)"
       ],
       "feature": [
@@ -19,7 +19,7 @@
       "dependency": [
         "common-plugin-api.aar バージョン 6.8.0 (5307) を追加 (MPL 2.0, ハッシュ固定)",
         "Jetpack Compose BOM {{ compose_bom }} を追加 (Apache 2.0)",
-        "compose-ui-api.aar P0 草案を追加 (MPL 2.0, ハッシュ固定), 共有依存関係をホストと整合"
+        "compose-ui-api.aar V1 を追加 (MPL 2.0, ハッシュ固定), 共有依存関係をホストと整合"
       ]
     }
   }

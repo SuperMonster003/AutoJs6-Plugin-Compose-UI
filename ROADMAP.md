@@ -26,12 +26,12 @@
 | D2 | 进程内渲染 | 插件 APK 内预编译的 Kotlin Compose 渲染器装入宿主进程, `ComposeView` 直接嵌入 `ScriptExecuteActivity` 与 floaty 窗口; 协议层 (节点 / 补丁 / 事件) 与传输无关, 进程外插件 Activity 只作为退路 (附录 E.2), 不在 1.0.0 实现 |
 | D3 | API 范式: 两者都做 | 节点句柄 (`compose.Text({...})` 返回可长期持有的 `ComposeNode`, 直接改属性与增删子节点) 是底层协议对象; `compose.state` + `compose.mount(render)` 的声明式 render 层是上层糖, 两层共用同一条补丁管线, 1.0.0 同时交付 (附录 A.2 / A.3) |
 | D4 | 1.0.0 承载面 | `"ui";` 模式 Activity 内容 (`compose.mount`) 与悬浮窗 (`compose.floaty`); "与旧 ui 混合" (XML 内 `<compose>` 容器, Compose 内 `AndroidView`) 与 "独立对话框 API" (`compose.dialog`) 排 1.1 (附录 F.2 / F.3) |
-| D5 | 组件范围: 核心集 | 1.0.0 实现附录 A.5 的核心集 (约 30 个: 布局 7, 容器 3, 文本 / 图标 / 图片 3, Button 家族 5 + IconButton, 选择与输入 7, 进度 2, 对话框与提示 2); 导航 / Tabs / 底部弹层 / 菜单 / 日期时间选择 / Pager / Grid / Chips 等宽集排 1.1 (附录 F.4) |
+| D5 | 组件范围: 核心集 | 1.0.0 实现附录 A.5 的核心集 (30 项: 布局 7, 容器 / 顶栏 4, 文本 / 图标 / 图片 3, Button 家族 5 + IconButton, 选择与输入 6, 进度 2, 对话框与提示 2); 导航 / Tabs / 底部弹层 / 菜单 / 日期时间选择 / Pager / Grid / Chips 等宽集排 1.1 (附录 F.4) |
 | D6 | TSX 排 1.1 | 1.0.0 只提供函数式元素工厂; TSX 工厂 (经 TypeScript Engine 插件现有 classic TSX 契约, 输出 Compose 节点而非 XML) 为 1.1 阶段 (附录 F.1), 1.0.0 的节点协议为其预留 `compose.createElement(type, props, ...children)` 接点 |
 | D7 | 仅本地提交 | 与 3-Shell Terminal / 3-Setup Installer 当前策略一致: 本仓库与宿主改动均仅本地 Conventional Commits, 不推送 GitHub, 不登记官方索引, 不发 Release, 直至维护者明确恢复; 宿主 `PluginInstallWizardCatalog` 条目先落地 |
 | D8 | 无独立界面 | 插件只有 Wake Activity, INFO 服务与渲染器入口, 没有启动器图标, 设置页与组件画廊 (画廊见附录 F.5); 示例脚本随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史由插件中心展示 |
 | D9 | 契约模块不依赖 Compose | 宿主新增 `plugin-api/compose-ui-api` (宿主编译并打包, 因此不得依赖任何 Compose 类): 装载面接口 (`ComposeUiRendererFactory` / `ComposeUiRenderer` / `ComposeUiHostEnvironment` / `ComposeUiEventSink`), 数据模型 (`UiNode` / `UiPatch` / `UiEvent` / `UiCommand` / `UiValue` / `ModifierOp` / `ThemeSpec`), 组件目录 (`ComponentCatalog`: 组件名, 属性类型, 插槽, 事件, 作用域限制), 常量 (`ComposeUiIds` / `ComposeUiCapabilityKeys` / `ComposeUiErrorCodes` / `ComposeUiLimits`); 插件以 `compileOnly` 消费该 AAR 的副本 (运行时类由宿主提供), 单元测试 `testImplementation` |
-| D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 的 debug / release 插件加载已验证; 2026-10-02 维护者选择 Q1(b), 升级宿主共享 AndroidX, 正式保持 parent-first, 不启用附录 E.3 退路. 原生搜索路径使用 `<apk>!/lib/<当前进程 ABI>`, 不能仅按设备首选 ABI 选择; P0 草案只在 instrumentation, 正式装载器在 P1.2 |
+| D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 的 debug / release 插件加载已验证; 2026-10-02 维护者选择 Q1(b), 升级宿主共享 AndroidX, 正式保持 parent-first, 不启用附录 E.3 退路. 原生搜索路径使用 `<apk>!/lib/<当前进程 ABI>`, 不能仅按设备首选 ABI 选择; P1.1 起 V1 契约由宿主打包, 负版本 P0 类型只为兼容回归保留, 探针执行仍仅在 instrumentation; 正式装载器在 P1.2 |
 | D11 | ComposeView 上下文 | 宿主提供 `ComposeHostContext : ContextWrapper`: base 为宿主 Activity 或 floaty 服务上下文 (窗口, 系统服务, 主题属性), `getResources()` / `getAssets()` 委托插件包资源 (以宿主当前 `Configuration` 经 `createConfigurationContext` 对齐密度 / 夜间 / 语言), 使 material3 内部字符串 (`LocalContext.current.resources.getString(插件 R id)`) 与无障碍文案可解析; `getClassLoader()` 返回 D10 的插件加载器. P0.2 最小计数器证据确认保留宿主 `getTheme()` 即可, 不把插件资源主题覆盖到 Activity 上; RawWindow 在 attach 前显式设置宿主 LifecycleOwner 与 SavedStateRegistryOwner, 关闭时推进 DESTROYED 并 dispose. 扩展组件与 IME / 夜间配色仍需 P2 / P5 回归 |
 | D12 | 线程模型 | 每个会话绑定一个 "脚本调度器": `"ui";` 模式下即 Android 主线程 (UI 模式脚本主线程就是 Android UI 线程, 见 3.1), 非 ui 脚本的 floaty 会话为脚本 looper 线程 (经 `ScriptAsyncDispatcher` 单跳回到脚本线程). render, state 变更, 事件回调, 节点属性写入都在脚本调度器执行; 补丁应用在主线程 (ui 模式同线程直接应用, 否则 `mainExecutor.execute`); 渲染器只经 `ComposeUiEventSink.enqueue` 投递事件, 不在组合 / 测量 / 布局 / 绘制期间同步执行 JS; `compose.post(fn)` 把任务投递到会话的脚本调度器, 供工作线程回写 state. 禁止主线程等待 JS 与 JS 同步等待主线程的双向等待 |
 | D13 | 节点身份与差分 | 节点句柄持有会话内单调递增的 `nodeId`; render 模式下新树按 (父节点, `key` 或 类型 + 同类索引) 与上一棵树匹配并复用 `nodeId`, 宿主 `TreeReconciler` 产出补丁 ops (`setProps` / `insert` / `remove` / `move` / `replaceSlot`), 一次 render 合并为一个 `UiPatchBatch`; 渲染器把 `nodeId` 映射为 Compose `key(nodeId)` 以保留组合状态. 1.0.0 的 render 为整树重建 + 宿主差分, 不做脚本侧细粒度依赖裁剪; 动态列表项缺 `key` 时按索引匹配并对每个会话 warn 一次 (Q3) |
@@ -248,7 +248,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | 阶段 | 内容 | 目标版本 | 状态 |
 | --- | --- | --- | --- |
 | P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
-| P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 未开始 |
+| P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 进行中 (P1.1 完成, 下一步 P1.2) |
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 未开始 |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
@@ -304,12 +304,14 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 
 ### P1.1 契约模块 `plugin-api/compose-ui-api`
 
-- [ ] (宿主) `settings.gradle.kts` `pluginApi` 列表加入 `compose-ui-api`; 模块 `build.gradle.kts` 为 `com.android.library`, `api(project(":plugin-api:common-plugin-api"))`, 不依赖 Compose; `app/build.gradle.kts` `implementation(project(":plugin-api:compose-ui-api"))`.
-- [ ] (宿主) 常量: `ComposeUiIds` (PLUGIN_ID / ENGINE / VARIANT / REQUIRED_HOST_VERSION_CODE 占位), `ComposeUiContract` (CONTRACT_VERSION = 1, META_RENDERER_FACTORY, INFO_CATEGORY), `ComposeUiCapabilityKeys` (CONTRACT_VERSION / COMPONENTS / FEATURES / COMPOSE_VERSION / SHARED_DEPS_FINGERPRINT), `ComposeUiErrorCodes` (附录 B.4), `ComposeUiLimits` (附录 B.5).
-- [ ] (宿主) 装载面接口与数据模型 (附录 B.1 / B.2), Kotlin 实现, 不可变 (`List` 深拷贝), 带 `Parcelable` 实现以便将来进程外复用但 1.0.0 不经 Binder 传输.
-- [ ] (宿主) `ComponentCatalog.V1` (附录 B.3): 核心集每个组件的属性 (名称 / 类型 / 必填 / 默认 / 作用域), 插槽 (`content` / `title` / `actions` / `label` / `leadingIcon` ...), 事件 (名称 / payload 字段); `ModifierOp` 词汇与参数类型; 快捷属性映射表.
-- [ ] (测试) `ComposeUiContractTest` 快照全部字面量 (常量, 错误码, 上限, 目录条目数与名称, ModifierOp 词汇); `ComponentCatalogConsistencyTest` (属性名唯一, 作用域引用的父组件存在, 事件 payload 字段类型合法); `ComposeUiHostCompileGuardTest` (宿主与契约源码无 `androidx.compose` 引用).
-- [ ] (插件) 契约 AAR 复制到 `libs/compose-ui-api.aar`, 更新 `locks/host-api-aars.lock`, `libs/README.md`, `THIRD_PARTY_NOTICES.md`.
+- [x] (宿主) `settings.gradle.kts` `pluginApi` 列表加入 `compose-ui-api`; 模块 `build.gradle.kts` 为 `com.android.library`, `api(project(":plugin-api:common-plugin-api"))`, 不依赖 Compose; `app/build.gradle.kts` `implementation(project(":plugin-api:compose-ui-api"))`.
+- [x] (宿主) 常量: `ComposeUiIds` (PLUGIN_ID / ENGINE / VARIANT / REQUIRED_HOST_VERSION_CODE 占位), `ComposeUiContract` (CONTRACT_VERSION = 1, META_RENDERER_FACTORY, INFO_CATEGORY), `ComposeUiCapabilityKeys` (CONTRACT_VERSION / COMPONENTS / FEATURES / COMPOSE_VERSION / SHARED_DEPS_FINGERPRINT), `ComposeUiErrorCodes` (附录 B.4), `ComposeUiLimits` (附录 B.5).
+- [x] (宿主) 装载面接口与数据模型 (附录 B.1 / B.2), Kotlin 实现, 不可变 (`List` 深拷贝), 带 `Parcelable` 实现以便将来进程外复用但 1.0.0 不经 Binder 传输.
+- [x] (宿主) `ComponentCatalog.V1` (附录 B.3): 核心集每个组件的属性 (名称 / 类型 / 必填 / 默认 / 作用域), 插槽 (`content` / `title` / `actions` / `label` / `leadingIcon` ...), 事件 (名称 / payload 字段); `ModifierOp` 词汇与参数类型; 快捷属性映射表.
+- [x] (测试) `ComposeUiContractTest` 快照全部字面量 (常量, 错误码, 上限, 目录条目数与名称, ModifierOp 词汇); `ComponentCatalogConsistencyTest` (属性名唯一, 作用域引用的父组件存在, 事件 payload 字段类型合法); `ComposeUiHostCompileGuardTest` (宿主与契约源码无 `androidx.compose` 引用).
+- [x] (插件) 契约 AAR 复制到 `libs/compose-ui-api.aar`, 更新 `locks/host-api-aars.lock`, `libs/README.md`, `THIRD_PARTY_NOTICES.md`.
+
+证据: 宿主提交 `d9b090fd68`, 插件为本条所在提交 (build 9), `docs/dev/p1-contract-evidence.md` 与宿主 `docs/dev/compose-ui-contract-evidence.md`. V1 快照 747 条, 30 项目录 / 20 个 Modifier / 8 个快捷映射; API JVM 13 项, 宿主共享类路径 JVM 3 项, 插件 JVM 24 项通过; API 24 / 33 Parcel 设备测试各 6 项, API 33 release 插件宿主回归 6 项, 插件 debug 契约 5 项. AAR SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`. `api.spike` 的 -1 接口只保留给回归, 不进入 V1 冻结面, 随 P2.1 迁移删除.
 
 ### P1.2 宿主装载器与会话核心
 
@@ -559,10 +561,10 @@ compose.modifier()
 | 组 | 组件 | 关键属性 / 插槽 / 事件 |
 | --- | --- | --- |
 | 布局 (7) | Column, Row, Box, Spacer, LazyColumn, LazyRow, Scaffold | `arrangement` / `alignment` / `spacing`; Lazy: `contentPadding`, 子节点 `key`, `scrollTo`, `scroll` 事件; Scaffold: `topBar` 插槽, `snackbar` |
-| 容器 (3) | Surface, Card, HorizontalDivider | `color` / `tonalElevation` / `shape` / `elevation` / `thickness` |
+| 容器 / 顶栏 (4) | Surface, Card, HorizontalDivider, TopAppBar | `color` / `tonalElevation` / `shape` / `elevation` / `thickness` |
 | 文本与图像 (3) | Text, Icon, Image | Text: `text` / `style` (M3 排版名) / `color` / `fontSize` / `fontWeight` / `textAlign` / `maxLines` / `overflow` / `selectable`; Icon: `name` (icons-core) / `tint`; Image: `src` / `contentScale` / `contentDescription` |
 | 按钮 (6) | Button, ElevatedButton, FilledTonalButton, OutlinedButton, TextButton, IconButton | `enabled`, `onClick`, 内容插槽 (字符串简写) |
-| 选择与输入 (7) | Switch, Checkbox, RadioButton, Slider, TextField, OutlinedTextField | 受控 `checked` / `value` + `onCheckedChange` / `onValueChange` (+ `onValueChangeFinished`); TextField 见 D15 |
+| 选择与输入 (6) | Switch, Checkbox, RadioButton, Slider, TextField, OutlinedTextField | 受控 `checked` / `value` + `onCheckedChange` / `onValueChange` (+ `onValueChangeFinished`); TextField 见 D15 |
 | 进度 (2) | CircularProgressIndicator, LinearProgressIndicator | `progress` (缺省不确定) / `color` / `trackColor` |
 | 对话框与提示 (2) | AlertDialog, Snackbar (经 `session.showSnackbar`) | AlertDialog: `open` / `title` / `text` / `confirm` / `dismiss` 插槽 / `onDismissRequest`; Snackbar: `message` / `actionLabel` / `duration` / `onAction` / `onDismiss` |
 
@@ -597,11 +599,11 @@ threads.start(() => {
 
 ---
 
-## 附录 B: 契约草案 (`plugin-api/compose-ui-api`)
+## 附录 B: V1 契约 (`plugin-api/compose-ui-api`)
 
 ### B.1 装载面
 
-P0.3 定稿约束: `hostContext` 保留宿主 theme / window / system services, resources / assets 使用与宿主 Configuration 对齐的插件资源, classLoader 使用含原生路径的 parent-first 加载器. 悬浮窗 owner 由宿主提供并随窗口关闭销毁. P0 的 `api.spike` 版本 -1 仅为 instrumentation fixture, 不视为本节 V1 已冻结; `classOrigins` / `probe` / `diagnostics` 不进入正式装载面.
+P0.3 定稿约束: `hostContext` 保留宿主 theme / window / system services, resources / assets 使用与宿主 Configuration 对齐的插件资源, classLoader 使用含原生路径的 parent-first 加载器. 悬浮窗 owner 由宿主提供并随窗口关闭销毁. P1.1 冻结 `.loading` / `.model` / `.catalog` 与根命名常量, 细则见 `docs/dev/compose-ui-plugin-protocol-v1.md`. `api.spike` 版本 -1 只为既有 P0 回归保留, 不属于 V1 冻结面; `classOrigins` / `probe` / `diagnostics` 不进入正式装载面.
 
 ```kotlin
 interface ComposeUiRendererFactory {
@@ -633,19 +635,20 @@ fun interface ComposeUiEventSink { fun enqueue(event: UiEvent) }
 | 类型 | 字段 |
 | --- | --- |
 | `UiNode` | `nodeId: Int`, `type: String`, `key: String?`, `props: Map<String, UiValue>`, `modifier: List<ModifierOp>`, `children: List<Int>`, `slots: Map<String, Int>`, `callbacks: Map<String, Int>` (事件名 -> callbackId) |
-| `UiPatch` | `SetProps(nodeId, props, modifier?, callbacks?)`, `Insert(parentId, index, node: UiNode 子树)`, `Remove(parentId, nodeId)`, `Move(parentId, nodeId, toIndex)`, `ReplaceSlot(parentId, slot, node?)`, `SetRoot(node)` |
-| `UiPatchBatch` | `sessionId`, `generation`, `patches: List<UiPatch>` |
-| `UiEvent` | `sessionId`, `generation`, `nodeId`, `type`, `callbackId`, `payload: Bundle` (valueChange: `text` / `selectionStart` / `selectionEnd` / `editSeq`; checkedChange: `checked`; slider: `value`; scroll: `firstVisibleIndex` / `offset`) |
+| `UiTree` | `rootId: Int`, `nodes: List<UiNode>`, 闭合子树; 校验引用, 唯一所有权, 孤立节点, 循环, 深度与兄弟 key |
+| `UiPatch` | `SetProps(nodeId, props, modifier?, callbacks?)`, `Insert(parentId, index, subtree: UiTree)`, `Remove(parentId, nodeId)`, `Move(parentId, nodeId, toIndex)`, `ReplaceSlot(parentId, slot, subtree: UiTree?)`, `SetRoot(tree: UiTree)` |
+| `UiPatchBatch` | `sessionId: Int`, `generation: Long`, `patches: List<UiPatch>` |
+| `UiEvent` | `sessionId: Int`, `generation: Long`, `nodeId`, `type`, `callbackId`, `payload: Bundle` (valueChange: `text` / `selectionStart` / `selectionEnd` / `editSeq`; checkedChange: `checked`; slider: `value`; scroll: `firstVisibleIndex` / `offset`) |
 | `UiCommand` | `Focus(nodeId)`, `Blur(nodeId)`, `ScrollTo(nodeId, index?, offset?)`, `Edit(nodeId, text?, selection?, editSeq)`, `ShowSnackbar(message, actionLabel?, duration, callbackId?)` |
 | `UiValue` | `Str`, `Num`, `Bool`, `Color(argb)`, `Dp(v)`, `Sp(v)`, `Enum(name)`, `TextStyle(...)`, `BitmapRef(bitmap)`, `IconName(name)`, `Shape(kind, radius)`, `ListOf(values)`, `Null` |
 | `ModifierOp` | `name: String`, `args: List<UiValue>`, `scope: ScopeKind` (ANY / COLUMN_ROW / BOX) |
 | `ThemeSpec` | `seedArgb?`, `colorOverrides: Map<String, Int>`, `dark: Boolean?`, `dynamicColor: Boolean`, `fontFamily?`, `fontScale?` |
 
-全部为不可变 Kotlin 类, 实现 `Parcelable` 以便进程外退路复用; 1.0.0 不经 Binder.
+全部为不可变 Kotlin 值模型并实现 `Parcelable`; 事件 Bundle 输入与读取均复制, 仅允许标量. `BitmapRef` 借用脚本位图, 以进程 nonce + 弱句柄进行同进程 Parcel 往返, 不复制 / 回收像素; 外进程 nonce 或失效所有者被类型化拒绝, 未来进程外退路需另定图片传输. 1.0.0 不经 Binder. `SetProps.props` 完整替换, null modifier / callbacks 表示保留, 空集合表示清空; 命令与批次语义见协议文档.
 
 ### B.3 组件目录格式
 
-`ComponentCatalog.V1.components: List<ComponentSpec>`; `ComponentSpec(name, props: List<PropSpec>, slots: List<SlotSpec>, events: List<EventSpec>, childrenPolicy: NONE / SINGLE / MANY / LAZY_ITEMS, scope: ScopeKind)`; `PropSpec(name, type: UiValue 种类, required, default?, enumValues?)`; `EventSpec(name, payloadFields)`. 渲染器 capabilities 的 `COMPONENTS` 必须是目录名称子集; 宿主对不在渲染器集合内的组件抛 `UNKNOWN_COMPONENT`.
+`ComponentCatalog.V1.components: List<ComponentSpec>` (30 项, 29 个节点组件 + 仅命令的 Snackbar); `ComponentSpec(name, props: List<PropSpec>, slots: List<SlotSpec>, events: List<EventSpec>, childrenPolicy: NONE / SINGLE / MANY / LAZY_ITEMS, scope: ScopeKind)`; `PropSpec(name, type: UiValue 种类, required, default?, enumValues?)`; `EventSpec(name, payloadFields)`. 渲染器 capabilities 的 `COMPONENTS` 必须是目录名称子集; 宿主对不在渲染器集合内的组件抛 `UNKNOWN_COMPONENT`.
 
 ### B.4 错误码
 
@@ -673,8 +676,10 @@ fun interface ComposeUiEventSink { fun enqueue(event: UiEvent) }
 | `MAX_MODIFIER_OPS` | 64 |
 | `MAX_CALLBACKS_PER_SESSION` | 4096 |
 | `MAX_SESSIONS_PER_ENGINE` | 8 (ui 内容 1 + 悬浮窗 7) |
-| `MAX_BITMAP_PIXELS` | 32 M |
+| `MAX_BITMAP_PIXELS` | 32,000,000 (十进制像素数) |
 | `EVENT_QUEUE_CAPACITY` | 1024 (溢出丢弃最旧并 warn) |
+
+P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROPERTIES_PER_NODE=128`, `MAX_SLOTS_PER_NODE=32`, `MAX_EVENT_FIELDS=32`, `MAX_THEME_COLORS=64`, `MAX_PARCEL_BYTES=8 MiB` (仅序列化帧, 不限制无序列化的普通进程内调用). Lazy 子节点上限不会覆盖整个会话的 5000 节点上限.
 
 ### B.6 版本协商
 
@@ -844,3 +849,16 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 清理: 两台设备本次安装的 3 个临时包均已卸载, 新建 API 24 AVD 已停止. 自动审批以 `blocked by policy` 拒绝删除该 AVD 缓存, 因此保留独立宿主 `build/compose-p03/avd-api24` 与其本地注册; 构建目录被忽略, 不影响工作区提交.
 
 - 提交定位: 宿主 `fb784f034a` (独立分支), 插件为本条所在提交 (`VERSION_BUILD=8`). 插件与宿主独立 worktree 均按本次范围本地提交; 原宿主工作区未参与暂存或提交.
+
+
+### 2026-10-02 (P1.1)
+
+- 维护者已手动清理上次被工具策略拦截的 AVD 缓存, 本会话确认专用 AVD 注册与缓存目录均不存在, 不再作为遗留项.
+- 本会话从 P1.1 契约冻结继续, 宿主原工作区有其它会话改动, 继续在独立 worktree 的 spike/compose-ui-p0 分支实施.
+
+- P1.1 六项完成: V1 常量 / 装载接口 / 不可变 Parcelable 模型 / 30 项目录与 Modifier 词汇 / 快照与边界测试 / release AAR 同步. 宿主以 implementation 提供契约, 插件 compileOnly 消费, 身份常量改为引用契约内联值. 生产渲染器和 compose 脚本 API 尚未交付.
+- 定稿细节: UiTree 闭合子树, SetProps 完整属性替换且 null/空集合区分保留与清空; Bundle 仅标量并双向复制; BitmapRef 仅弱引用句柄同进程往返, 外进程需另定图片传输. 目录计数校正为 30 (补齐 P2.5 已列出的 TopAppBar, 选择与输入实为 6 项); 新增容器 / Parcel 边界并记录精确值.
+- 验证与产物: API JVM 13, 宿主 JVM 3, 插件 JVM 24; API 24 / 33 Parcel 测试各 6, Redmi API 33 宿主装载及独立 INFO 共 6, 插件 debug 契约 5. 本地签名产物 autojs6-plugin-compose-ui-v1.0.0-fb94ae8d.apk (build 9), 1,460,194 B; lint debug 无问题, release 0 错误 / 3 个既有身份资源警告. 完整证据见 docs/dev/p1-contract-evidence.md.
+- 下一会话从 P1.2 开始. 本次未跑宿主 release / inrt 装配与全量回归, 未实现生产渲染器 / JS 全局对象; 最低正式宿主版本仍待 P1.3. 保留已有 P0 负版本接口只为回归, 不把它当作 V1 能力. 继续仅本地提交, 不推送或发布.
+
+- 提交定位: 宿主 `d9b090fd68` (独立分支), 插件为本条所在提交 (`VERSION_BUILD=9`). 本次 6 个测试包安装已清理, 未新建或停止用户现有 AVD; 两仓库按本次范围本地提交.

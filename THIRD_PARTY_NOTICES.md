@@ -10,18 +10,20 @@ reproduced in full in the distribution of the respective project.
 | --- | --- | --- | --- | --- |
 | `common-plugin-api.aar` | AutoJs6 module `plugin-api/common-plugin-api` (https://github.com/SuperMonster003/AutoJs6): `IPluginInfoProvider` AIDL, `PluginInfo`, `PluginActions`, `PluginCapabilityKeys` | host build 6.8.0 / 5307, commit `77b5a3b0c5` (module byte-identical to the copies staged by the other official plugins) | MPL 2.0 | `ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15` |
 
-The P0 draft `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in the
-AutoJs6 `spike/compose-ui-p0` branch, source commit `21dff98f26`, based on `e86186920d` (6.8.0 / 5309). It is MPL 2.0,
-SHA-256 `c39b0cc59834d1b9e98d7b2fdde5b8184eae7ff9fe8ff2d32a843f53a44ca437`, consumed as `compileOnly`. Its experimental `api.spike` package uses
-contract version -1 and does not claim V1 compatibility; P1.1 will replace the draft.
+The frozen V1 `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in
+AutoJs6 branch `spike/compose-ui-p0` (6.8.0 / 5309, source commit `d9b090fd68`).
+It is MPL 2.0, SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`,
+consumed as `compileOnly` by the plugin and packaged by the host. It contains no Compose
+implementation dependency. The retained `api.spike` negative-version fixture is excluded from
+V1 compatibility guarantees and remains only for prototype regression until P2.1.
 
 Shared host components are pinned in `locks/host-shared-deps.lock` (Q1(b), approved for app/inrt debug/release on 2026-10-02).
 AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table
 are compile-only; Compose integration artifacts whose names end in `-compose` remain bundled.
 Kotlin standard library 2.4.0 (Apache 2.0) remains bundled for the plugin's INFO/Wake process;
 parent-first loading resolves the host's identical version when rendering. Q1(b) aligns lifecycle
-2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. The P0 draft API and
-loading fixture are instrumentation-only until P1 provides the production V1 loading contract.
+2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. V1 contract classes are supplied by the host. Loading fixtures remain in instrumentation; the
+production loader/renderer is not delivered by the contract freeze alone.
 Sources: Google Maven (AndroidX) and Maven Central (org.jetbrains.kotlin / org.jetbrains.kotlinx).
 
 ## Runtime dependencies (Gradle)

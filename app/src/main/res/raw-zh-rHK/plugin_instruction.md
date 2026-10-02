@@ -1,6 +1,6 @@
 Compose UI 是 AutoJs6 的界面渲染插件. 腳本透過宿主內置的 `compose` 全域物件宣告界面, 插件在宿主進程內以 Jetpack Compose 與 Material 3 完成渲染, 為 `"ui";` 模式 Activity 內容與懸浮窗提供統一的宣告式界面方案.
 
-P0 開發預覽: 專用測試宿主可渲染 Column / Text / Button 計數器. compose 腳本 API 尚未交付, 安裝插件後仍不能透過腳本渲染界面.
+P1 開發預覽: 宿主與插件的 V1 契約已凍結. 正式渲染器與 compose 腳本 API 仍在開發中, 專用測試宿主可執行原型計數器.
 
 ### 使用方式
 

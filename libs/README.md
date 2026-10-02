@@ -9,9 +9,10 @@ Stage the audited **release** artifacts named exactly:
 
 - `common-plugin-api.aar` (host module `plugin-api/common-plugin-api`: `PluginInfo`, `IPluginInfoProvider`, `PluginActions`,
   `PluginCapabilityKeys`), consumed with `implementation`.
-- `compose-ui-api.aar` (host module `plugin-api/compose-ui-api`, roadmap D9): the Compose UI contract (loading interfaces,
-  data model, component catalog, constants). P0.2 stages an explicitly experimental `api.spike` draft (version -1), P1.1 will replace it with V1. It is
-  consumed with `compileOnly` because the host provides the classes at run time (roadmap D10); `testImplementation` for JVM tests.
+- `compose-ui-api.aar` (host module `plugin-api/compose-ui-api`): frozen V1 loading interfaces,
+  immutable Parcelable models, the 30-entry catalog and centralized vocabulary. Consumed with
+  `compileOnly`, and `testImplementation` / `androidTestImplementation` for tests. The host supplies
+  the classes. The negative-version `api.spike` regression fixture is outside the frozen V1 surface.
 
 Current provenance: `common-plugin-api.aar` is the release AAR of the AutoJs6 6.8.0 snapshot `77b5a3b0c5` (build 5307,
 2026-10-02); the module is unchanged since host commit `9c3ba2e520` (2026-09-15), so the file is byte-identical to the
@@ -22,8 +23,10 @@ mismatches during configuration. Do not commit locally assembled debug AARs or r
 policy. Record the lowercase SHA-256 of every staged artifact in the lock file; licenses are listed in
 `../THIRD_PARTY_NOTICES.md`.
 
-Draft `compose-ui-api.aar`: host branch `spike/compose-ui-p0`, source commit `21dff98f26`, based on `e86186920d` (6.8.0 / 5309),
-release task `:plugin-api:compose-ui-api:assembleRelease`, SHA-256 `c39b0cc59834d1b9e98d7b2fdde5b8184eae7ff9fe8ff2d32a843f53a44ca437`.
-This AAR contains no Compose dependency. Q1(b) applies the matching dependency snapshot
-`locks/host-shared-deps.lock` to every host variant; the draft API itself is now instrumentation-only
-on the host side. It is not a released V1 compatibility guarantee.
+V1 `compose-ui-api.aar`: built with `:plugin-api:compose-ui-api:assembleRelease` on host branch
+`spike/compose-ui-p0` (6.8.0 / 5309, source commit `d9b090fd68`).
+SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`.
+The host now uses `implementation(project(":plugin-api:compose-ui-api"))` in every variant. The
+shared dependency fingerprint is unchanged. The formal loader/renderer and final minimum host
+version remain pending; the existing plugin renderer still uses the separate P0 fixture interface.
+See `docs/dev/compose-ui-plugin-protocol-v1.md` for the frozen surface and BitmapRef transport limits.

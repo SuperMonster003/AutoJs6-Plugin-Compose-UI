@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "P0 development preview: a dedicated test host can render a Column / Text / Button counter. The compose script API is not yet available.",
+        "P1 development preview: the V1 host/plugin contract is frozen. The production renderer and compose script API are still under development; a dedicated test host can run the prototype counter",
         "Requires AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) or later (the exact minimum build is back-filled once the host-side changes land)"
       ],
       "feature": [
@@ -19,7 +19,7 @@
       "dependency": [
         "Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)",
         "Attach Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "Attach compose-ui-api.aar P0 draft (MPL 2.0, hash-locked) and align shared dependencies with the host"
+        "Attach compose-ui-api.aar V1 (MPL 2.0, hash-locked), with shared dependencies aligned to the host"
       ]
     }
   }

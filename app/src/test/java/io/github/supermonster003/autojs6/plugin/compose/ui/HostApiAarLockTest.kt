@@ -20,9 +20,9 @@ class HostApiAarLockTest {
     private val root: Path = findProjectRoot()
 
     @Test
-    fun `host api lock lists the INFO api and draft renderer api with matching digests`() {
+    fun `host api lock lists the INFO api and frozen renderer api with matching digests`() {
         val lock = readLock(root.resolve("locks/host-api-aars.lock"))
-        // The P0 draft is explicitly experimental; P1.1 will freeze the production contract.
+        // V1 is frozen; the separate negative-version P0 fixture remains outside its public contract.
         assertEquals(setOf("common-plugin-api", "compose-ui-api"), lock.keys)
         lock.forEach { (id, entry) ->
             val file = root.resolve("libs").resolve(entry.file)

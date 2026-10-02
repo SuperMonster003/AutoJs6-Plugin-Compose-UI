@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI est un plugin de rendu d'interface pour AutoJs6. Les scripts declarent leur interface via l'objet global `compose` integre a l'hote, et le plugin la rend dans le processus de l'hote avec Jetpack Compose et Material 3, offrant une solution declarative unique au contenu des activites en mode `\"ui\";` et aux fenetres flottantes.",
   "p_introduction_how": "Le plugin n'embarque aucun ecran autonome et n'ajoute aucune entree dans le lanceur. L'hote le decouvre via le service INFO, lit sa version et ses informations de compatibilite, puis charge le moteur de rendu dans son propre processus selon le contrat (`org.autojs.plugin.compose.api`). L'arbre d'interface, l'etat et les evenements vivent cote script ; le moteur de rendu se contente d'appliquer les correctifs a la composition Compose et de renvoyer les evenements utilisateur au script.",
   "h3_status": "Etat actuel",
-  "p_status": "Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible.",
+  "p_status": "Aperçu P1: le contrat V1 entre l'hôte et le plugin est figé. Le moteur de rendu de production et l'API de script compose sont encore en développement; un hôte de test dédié peut exécuter le compteur prototype.",
   "h3_features": "Fonctionnalites",
   "p_features_intro": "Capacites principales que le plugin doit livrer",
   "features": [
