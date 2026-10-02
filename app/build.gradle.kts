@@ -24,9 +24,8 @@ val buildTypeRelease = "release"
 // ---------------------------------------------------------------------------
 // Host protocol AARs are consumed only from libs/ and are pinned by locks/host-api-aars.lock.
 // The build refuses missing files, debug artifacts, placeholder hashes, extra lock entries and
-// digest mismatches. Roadmap P0.1 stages common-plugin-api only; the Compose UI contract
-// (compose-ui-api, host module plugin-api/compose-ui-api) joins this list as compileOnly once the
-// P0.2 spike draft, then the frozen V1 of P1.1, exists (roadmap D9).
+// digest mismatches. common-plugin-api is bundled for INFO; compose-ui-api is a compile-only
+// P0.2 draft. P1.1 will replace the explicit api.spike package with the frozen V1 contract.
 // ---------------------------------------------------------------------------
 
 fun File.sha256(): String {
@@ -94,8 +93,22 @@ fun lockedAars(lockFile: File, ids: List<String>, directory: String): List<File>
 }
 
 // Host contract AARs: common-plugin-api from the host 6.8.0 snapshot 77b5a3b0c5 (build 5307), see libs/README.md.
-val hostApiIds = listOf("common-plugin-api")
+val hostApiIds = listOf("common-plugin-api", "compose-ui-api")
 val hostApiAars = lockedAars(rootProject.file("locks/host-api-aars.lock"), hostApiIds, "libs")
+
+// D26: these classes are supplied by the P0 debug host. Keep Kotlin in the APK for INFO/Wake,
+// which execute outside the host, while parent-first loading shares the host's Kotlin in rendering.
+val sharedDeps = rootProject.file("locks/host-shared-deps.lock").loadUniqueLock()
+    .entries.associate { it.key.toString() to it.value.toString() }
+require(sharedDeps.isNotEmpty() && sharedDeps.keys.none { it.startsWith("androidx.compose:") || it.startsWith("androidx.compose.") })
+val sharedFingerprint = MessageDigest.getInstance("SHA-256")
+    .digest(sharedDeps.toSortedMap().entries.joinToString("") { "${it.key}=${it.value}\n" }.toByteArray(Charsets.UTF_8))
+    .joinToString("") { "%02x".format(it) }
+configurations.matching { it.name in setOf("debugRuntimeClasspath", "releaseRuntimeClasspath") }.configureEach {
+    sharedDeps.keys.filterNot { it.startsWith("org.jetbrains.kotlin:") }.forEach { coordinate ->
+        exclude(group = coordinate.substringBefore(':'), module = coordinate.substringAfter(':'))
+    }
+}
 
 // Native code inventory (roadmap D22, amended by the P0.1 evidence): the plugin has no native code of its own,
 // but Compose ui-graphics depends on androidx.graphics:graphics-path, whose libandroidx.graphics.path.so is
@@ -195,6 +208,7 @@ android {
         versionCode = versions.appVersionCode
         versionName = versions.appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "SHARED_DEPS_FINGERPRINT", "\"$sharedFingerprint\"")
 
         resValue("string", "plugin_author", "SuperMonster003")
         resValue("string", "plugin_engine", "compose")
@@ -293,11 +307,22 @@ androidComponents {
 
 dependencies {
     // PluginInfo, IPluginInfoProvider and the shared plugin constants (host module plugin-api/common-plugin-api).
-    implementation(files(hostApiAars))
+    implementation(files(hostApiAars[0]))
+    compileOnly(files(hostApiAars[1]))
+    testImplementation(files(hostApiAars[1]))
+    androidTestImplementation(files(hostApiAars[1]))
+    sharedDeps.forEach { (coordinate, version) ->
+        if (coordinate.startsWith("org.jetbrains.kotlin:")) {
+            implementation("$coordinate:$version")
+        } else {
+            compileOnly("$coordinate:$version")
+            androidTestImplementation("$coordinate:$version")
+        }
+    }
 
     // Jetpack Compose (roadmap D25): the renderer classes live only in this APK; the host loads them through a
     // PathClassLoader whose parent is the host class loader (roadmap D10). AndroidX core / activity / lifecycle /
-    // savedstate arrive transitively here and are shared with the host at run time; roadmap P0.2 / D26 pins them.
+    // savedstate are compile-only through the host shared lock above (roadmap P0.2 / D26).
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.runtime)
     implementation(libs.compose.ui)
@@ -315,6 +340,22 @@ dependencies {
 }
 
 tasks {
+    register("verifySharedClasspath") {
+        group = "verification"
+        doLast {
+            listOf("debug", "release").forEach { variant ->
+                val compile = configurations.getByName("${variant}CompileClasspath").incoming.resolutionResult.allComponents
+                    .mapNotNull { it.moduleVersion }.associate { "${it.group}:${it.name}" to it.version }
+                val runtime = configurations.getByName("${variant}RuntimeClasspath").incoming.resolutionResult.allComponents
+                    .mapNotNull { it.moduleVersion }.associate { "${it.group}:${it.name}" to it.version }
+                sharedDeps.forEach { (id, version) ->
+                    check(compile[id] == version) { "$variant $id compiled against ${compile[id]}, expected host $version" }
+                    if (!id.startsWith("org.jetbrains.kotlin:")) check(id !in runtime) { "$variant bundles host component $id" }
+                }
+            }
+            println("Shared classpath verified: ${sharedDeps.size} components, SHA-256 $sharedFingerprint")
+        }
+    }
     withType(JavaCompile::class.java) {
         options.encoding = "UTF-8"
     }

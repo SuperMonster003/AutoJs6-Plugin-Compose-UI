@@ -10,9 +10,18 @@ reproduced in full in the distribution of the respective project.
 | --- | --- | --- | --- | --- |
 | `common-plugin-api.aar` | AutoJs6 module `plugin-api/common-plugin-api` (https://github.com/SuperMonster003/AutoJs6): `IPluginInfoProvider` AIDL, `PluginInfo`, `PluginActions`, `PluginCapabilityKeys` | host build 6.8.0 / 5307, commit `77b5a3b0c5` (module byte-identical to the copies staged by the other official plugins) | MPL 2.0 | `ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15` |
 
-The renderer contract `compose-ui-api.aar` (`org.autojs.plugin.compose.api`, roadmap P0.2 / P1.1) joins this table
-and the lock file once the host module exists; it is consumed as `compileOnly` because the host provides the
-classes at run time (roadmap D26).
+The P0 draft `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in the
+AutoJs6 `spike/compose-ui-p0` branch, source commit `21dff98f26`, based on `e86186920d` (6.8.0 / 5309). It is MPL 2.0,
+SHA-256 `c39b0cc59834d1b9e98d7b2fdde5b8184eae7ff9fe8ff2d32a843f53a44ca437`, consumed as `compileOnly`. Its experimental `api.spike` package uses
+contract version -1 and does not claim V1 compatibility; P1.1 will replace the draft.
+
+Shared host components are pinned in `locks/host-shared-deps.lock` (debug spike snapshot only).
+AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table
+are compile-only; Compose integration artifacts whose names end in `-compose` remain bundled.
+Kotlin standard library 2.4.0 (Apache 2.0) remains bundled for the plugin's INFO/Wake process;
+parent-first loading resolves the host's identical version when rendering. The host experiment
+aligns lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 only in debug builds.
+Sources: Google Maven (AndroidX) and Maven Central (org.jetbrains.kotlin / org.jetbrains.kotlinx).
 
 ## Runtime dependencies (Gradle)
 
@@ -29,7 +38,7 @@ plugin class loader). All artifacts are resolved from Google Maven through the C
 | Compose Material Icons Core | `androidx.compose.material:material-icons-core` | 1.7.8 | Apache License 2.0 | Core Material icon set |
 | AndroidX Graphics Path | `androidx.graphics:graphics-path` | 1.0.1 | Apache License 2.0 | Native path iteration helper of Compose `ui-graphics` on API 24 to 33; the only native library in the APK (`libandroidx.graphics.path.so` for arm64-v8a / armeabi-v7a / x86_64 / x86, about 10 KB each, 16 KB page-aligned, verified by `appendDigestToReleasedFiles`) |
 | Compose UI Tooling (debug builds only) | `androidx.compose.ui:ui-tooling` | 1.12.1 | Apache License 2.0 | Layout inspector support in debug APKs; not in release |
-| Kotlin standard library | `org.jetbrains.kotlin:kotlin-stdlib` | managed by the platform versions plugin | Apache License 2.0 | Language runtime |
+| Kotlin standard library | `org.jetbrains.kotlin:kotlin-stdlib` | 2.4.0 (host shared lock) | Apache License 2.0 | INFO process runtime; parent-first in the host |
 
 Transitive AndroidX libraries pulled in by Compose (`activity`, `core`, `lifecycle`, `annotation`, `collection`,
 `savedstate`, `profileinstaller`, `startup` and others) are Apache License 2.0 as well.

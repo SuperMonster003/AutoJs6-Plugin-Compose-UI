@@ -8,16 +8,18 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "Apercu de developpement P0 : le squelette du depot se compile et est reconnu par l'hote, tandis que le moteur de rendu et l'API de script ne sont pas encore livres",
+        "Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible.",
         "Necessite AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieur (le numero de build minimal exact sera renseigne une fois les changements cote hote integres)"
       ],
       "feature": [
         "Squelette du depot du plugin : chaine de compilation du plugin de versions de plateforme, dependances Jetpack Compose BOM {{ compose_bom }}, protocole d'activation Wake Activity et service INFO (categorie {{ plugin_info_category }})",
-        "README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON"
+        "README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON",
+        "Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible"
       ],
       "dependency": [
         "Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)",
-        "Ajout de Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)"
+        "Ajout de Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
+        "Ajout du brouillon P0 de compose-ui-api.aar (MPL 2.0, empreinte verrouillée) et alignement des dépendances partagées sur l'hôte de développement"
       ]
     }
   }

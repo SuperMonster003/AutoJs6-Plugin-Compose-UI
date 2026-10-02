@@ -1,6 +1,6 @@
 Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主內建的 `compose` 全域物件宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯, 為 `"ui";` 模式 Activity 內容與懸浮視窗提供統一的宣告式介面方案.
 
-目前版本為 P0 開發預覽. 存放庫已包含可建置的外掛程式骨架, INFO 服務與 Wake Activity 啟用協定, 但轉譯器與指令碼 API 尚未交付, 安裝後指令碼暫時不能透過 `compose` 轉譯任何介面. 後續里程碑與進度見藍圖.
+P0 開發預覽: 專用測試宿主可轉譯 Column / Text / Button 計數器. compose 指令碼 API 尚未交付, 安裝外掛後仍不能透過指令碼轉譯介面.
 
 ### 使用方式
 

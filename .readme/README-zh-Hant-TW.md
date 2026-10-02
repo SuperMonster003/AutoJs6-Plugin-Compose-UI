@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主內建�
 
 ******
 
-目前版本為 P0 開發預覽. 存放庫已包含可建置的外掛程式骨架, INFO 服務與 Wake Activity 啟用協定, 但轉譯器與指令碼 API 尚未交付, 安裝後指令碼暫時不能透過 `compose` 轉譯任何介面. 後續里程碑與進度見藍圖.
+P0 開發預覽: 專用測試宿主可轉譯 Column / Text / Button 計數器. compose 指令碼 API 尚未交付, 安裝外掛後仍不能透過指令碼轉譯介面.
 
 ******
 
@@ -200,12 +200,14 @@ minimum host build: 5308 (6.8.0)
 
 _2026/10/02_
 
-- `提示` P0 開發預覽: 存放庫骨架可建置並可被宿主識別, 轉譯器與指令碼 API 尚未交付
+- `提示` P0 開發預覽: 專用測試宿主可轉譯 Column / Text / Button 計數器. compose 指令碼 API 尚未交付, 安裝外掛後仍不能透過指令碼轉譯介面.
 - `提示` 需要 AutoJs6 6.8.0 (5308) 或更新版本 (準確的最低版本號待宿主端變更落地後回填)
 - `新增` 外掛程式存放庫骨架: 平台版本外掛程式建置鏈, Jetpack Compose BOM 2026.09.00 相依, Wake Activity 啟用協定與 INFO 服務 (類別 compose-ui)
 - `新增` 10 種語言的 README, 外掛程式中心說明與更新日誌, 由 JSON 來源檔案統一產生
+- `新增` P0 開發預覽: 專用測試宿主可轉譯 Column / Text / Button 計數器. compose 指令碼 API 尚未交付, 安裝外掛後仍不能透過指令碼轉譯介面
 - `相依` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)
 - `相依` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
+- `相依` 附加 compose-ui-api.aar P0 草案 (MPL 2.0, 雜湊鎖定), 共用相依性與開發宿主對齊
 
 ##### 更多版本歷史可參閱
 

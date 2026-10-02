@@ -127,8 +127,8 @@ AutoJs6-Plugin-Compose-UI/
 
 - Gradle 构建 MUST 自包含, 禁止引用兄弟仓库或宿主的路径, JAR / AAR 或 `flatDir`.
 - 宿主 AAR 只从 `libs/` 消费, 由 `locks/host-api-aars.lock` 锁定 SHA-256; `app/build.gradle.kts` 在配置期拒绝缺失文件, debug 产物, 占位哈希, 多余锁条目与摘要不符. 更新任一 AAR 时同一提交内更新锁文件, `libs/README.md` 与 `THIRD_PARTY_NOTICES.md`.
-- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); 未来的 `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26).
-- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的 "共享依赖锁" (D26) 落地后, 与宿主重叠且必须由宿主提供的构件改为 `compileOnly` 并在此处登记.
+- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. P0.2 当前只含 `org.autojs.plugin.compose.api.spike` 草案, 版本 -1, 不代表已冻结的 V1.
+- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定独立宿主 debug 验证构建的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. 此表尚不是正式宿主的兼容性承诺, 正式升级需 P0.3 / Q1 决策.
 - 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等本插件不需要的 View 体系库.
 
 ### 5.3 签名与发布构建
@@ -145,7 +145,7 @@ AutoJs6-Plugin-Compose-UI/
 - `ComposeUiPluginInfoService`: exported, enabled, PLUGIN 权限, intent-filter `org.autojs.plugin.INFO` + category `compose-ui`, 无 meta-data, 默认进程.
 - 不存在 launcher intent-filter, activity-alias, receiver, provider; 导出组件只有上述两个且都受 PLUGIN 权限保护 (`ManifestContractTest` 守卫).
 - `allowBackup=false`, `fullBackupContent=false`, `dataExtractionRules` 排除全部域; 不设 application `theme` 与 `name` (渲染器需要 `Application` 子类时再加并说明).
-- 渲染器工厂类由宿主在宿主进程内按 meta-data 类名反射创建; 它不是 Android 组件, 不在 Manifest 中注册, 但 R8 规则 MUST 保留其类名与无参构造 (`proguard-rules.pro`).
+- 渲染器工厂类由宿主在宿主进程内按 meta-data 类名反射创建; 它不是 Android 组件, 不在 Manifest 中注册, 但 R8 规则 MUST 保留其类名与无参构造 (`proguard-rules.pro`). P0.2 额外要求保持 `kotlin.**` ABI, 关闭 R8 优化变换 (仍裁剪 / 混淆 / 缩减资源), 以插件私有包承载混淆类名, 并补回 compileOnly lifecycle 的 ViewModel 无参构造规则; 原因与失败栈见 `docs/dev/p0-spike-evidence.md`.
 
 ## 7. PluginInfo 与能力协商
 
@@ -160,7 +160,7 @@ AutoJs6-Plugin-Compose-UI/
 - 渲染器只依赖契约接口与 Android / Compose 公共 API, 不反射宿主内部类; 需要宿主能力 (主题快照, 资源, 调度器) 时经契约接口由宿主注入.
 - 线程模型按 D12: 渲染器只经 `ComposeUiEventSink.enqueue` 投递事件, 不在组合 / 测量 / 布局 / 绘制期间同步执行 JS; 补丁应用在主线程; 禁止双向等待.
 - 全部输入按契约上限校验, 超限返回类型化错误, 不崩溃; 渲染器内部异常不得传播到宿主主线程, 统一转为契约错误回传脚本.
-- 类加载边界 (D10 / D26): 契约类与 Android / Kotlin 标准库来自宿主 (parent 加载器), Compose 来自插件 APK; 任何新增的 `compileOnly` 依赖都要在第 5.2 节与 `THIRD_PARTY_NOTICES.md` 登记并由 P0.2 的加载探针覆盖.
+- 类加载边界 (D10 / D26): 契约类与 Android / Kotlin 标准库来自宿主 (parent 加载器), Compose 来自插件 APK (Kotlin 为 INFO 独立进程保留 APK 副本); 任何新增的 `compileOnly` 依赖都要在第 5.2 节与 `THIRD_PARTY_NOTICES.md` 登记并由 P0.2 的加载探针覆盖.
 - 日志不记录脚本声明的界面文本正文, 只记录会话 id, 节点数, 耗时与错误码.
 
 ## 9. 原生库 (仅 Compose 传递依赖)
@@ -183,7 +183,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `.readme/lang_*.json` (10 语言, 键集合一致, 列表键 `features` / `usage_steps` / `compatibility_points` / `faq_items` / `security_points`) 与 `.changelog/lang_*.json` 是唯一文案源; 生成物 (`README.md`, `.readme/README-*.md`, `app/src/main/assets/doc/CHANGELOG*.md`, `app/src/main/res/raw*/plugin_instruction.md`, 共 36 个) 不手工编辑.
 - 修改 JSON 或模板后运行 `py .python/generate_markdown.py` 再 `--check`; CI `markdown.yml` 在 Windows 上执行 `.python/check_markdown.bat`.
-- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 渲染能力交付前, 状态段落 MUST 如实说明 "P0 开发预览, 尚不能渲染".
+- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 脚本渲染能力交付前, 状态段落 MUST 如实说明 "P0 开发预览, 仅专用测试宿主可验证计数器, compose 脚本 API 尚未交付".
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.
 
