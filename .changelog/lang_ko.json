@@ -19,7 +19,7 @@
       "dependency": [
         "common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)",
         "Jetpack Compose BOM {{ compose_bom }} 추가 (Apache 2.0)",
-        "compose-ui-api.aar P0 초안 추가 (MPL 2.0, 해시 고정), 공유 의존성을 개발 호스트와 일치시킴"
+        "compose-ui-api.aar P0 초안 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴"
       ]
     }
   }

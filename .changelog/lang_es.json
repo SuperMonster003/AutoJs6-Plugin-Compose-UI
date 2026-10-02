@@ -19,7 +19,7 @@
       "dependency": [
         "Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)",
         "Se agrega Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "Añadir el borrador P0 de compose-ui-api.aar (MPL 2.0, hash fijado) y alinear las dependencias compartidas con el host de desarrollo"
+        "Añadir el borrador P0 de compose-ui-api.aar (MPL 2.0, hash fijado) y alinear las dependencias compartidas con el host"
       ]
     }
   }

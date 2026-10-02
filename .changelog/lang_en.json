@@ -19,7 +19,7 @@
       "dependency": [
         "Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)",
         "Attach Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "Attach compose-ui-api.aar P0 draft (MPL 2.0, hash-locked) and align shared dependencies with the development host"
+        "Attach compose-ui-api.aar P0 draft (MPL 2.0, hash-locked) and align shared dependencies with the host"
       ]
     }
   }

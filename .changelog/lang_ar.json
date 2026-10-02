@@ -19,7 +19,7 @@
       "dependency": [
         "إرفاق common-plugin-api.aar الإصدار 6.8.0 (5307) (MPL 2.0, مثبت بالتجزئة)",
         "إرفاق Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "إضافة مسودة P0 من compose-ui-api.aar (MPL 2.0, بصمة مقفلة) ومواءمة الاعتماديات المشتركة مع مضيف التطوير"
+        "إضافة مسودة P0 من compose-ui-api.aar (MPL 2.0, بصمة مقفلة) ومواءمة الاعتماديات المشتركة مع المضيف"
       ]
     }
   }

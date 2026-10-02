@@ -24,5 +24,6 @@ policy. Record the lowercase SHA-256 of every staged artifact in the lock file; 
 
 Draft `compose-ui-api.aar`: host branch `spike/compose-ui-p0`, source commit `21dff98f26`, based on `e86186920d` (6.8.0 / 5309),
 release task `:plugin-api:compose-ui-api:assembleRelease`, SHA-256 `c39b0cc59834d1b9e98d7b2fdde5b8184eae7ff9fe8ff2d32a843f53a44ca437`.
-This AAR contains no Compose dependency. The matching debug host dependency snapshot is
-`locks/host-shared-deps.lock`; it is not a released host compatibility guarantee.
+This AAR contains no Compose dependency. Q1(b) applies the matching dependency snapshot
+`locks/host-shared-deps.lock` to every host variant; the draft API itself is now instrumentation-only
+on the host side. It is not a released V1 compatibility guarantee.

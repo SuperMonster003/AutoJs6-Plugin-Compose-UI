@@ -207,7 +207,7 @@ _2026/10/02_
 - `새 기능` P0 개발 미리 보기: 전용 테스트 호스트에서 Column / Text / Button 카운터를 렌더링할 수 있습니다. compose 스크립트 API 는 아직 제공되지 않습니다
 - `의존성` common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)
 - `의존성` Jetpack Compose BOM 2026.09.00 추가 (Apache 2.0)
-- `의존성` compose-ui-api.aar P0 초안 추가 (MPL 2.0, 해시 고정), 공유 의존성을 개발 호스트와 일치시킴
+- `의존성` compose-ui-api.aar P0 초안 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴
 
 ##### 더 많은 릴리스 기록은 다음을 참고하세요
 

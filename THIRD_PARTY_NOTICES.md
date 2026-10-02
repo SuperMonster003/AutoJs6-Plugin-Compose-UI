@@ -15,12 +15,13 @@ AutoJs6 `spike/compose-ui-p0` branch, source commit `21dff98f26`, based on `e861
 SHA-256 `c39b0cc59834d1b9e98d7b2fdde5b8184eae7ff9fe8ff2d32a843f53a44ca437`, consumed as `compileOnly`. Its experimental `api.spike` package uses
 contract version -1 and does not claim V1 compatibility; P1.1 will replace the draft.
 
-Shared host components are pinned in `locks/host-shared-deps.lock` (debug spike snapshot only).
+Shared host components are pinned in `locks/host-shared-deps.lock` (Q1(b), approved for app/inrt debug/release on 2026-10-02).
 AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table
 are compile-only; Compose integration artifacts whose names end in `-compose` remain bundled.
 Kotlin standard library 2.4.0 (Apache 2.0) remains bundled for the plugin's INFO/Wake process;
-parent-first loading resolves the host's identical version when rendering. The host experiment
-aligns lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 only in debug builds.
+parent-first loading resolves the host's identical version when rendering. Q1(b) aligns lifecycle
+2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. The P0 draft API and
+loading fixture are instrumentation-only until P1 provides the production V1 loading contract.
 Sources: Google Maven (AndroidX) and Maven Central (org.jetbrains.kotlin / org.jetbrains.kotlinx).
 
 ## Runtime dependencies (Gradle)

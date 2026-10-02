@@ -15,4 +15,4 @@
 * `Feature` P0 development preview: a dedicated test host can render a Column / Text / Button counter. The compose script API is not yet available
 * `Dependency` Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)
 * `Dependency` Attach Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-* `Dependency` Attach compose-ui-api.aar P0 draft (MPL 2.0, hash-locked) and align shared dependencies with the development host
+* `Dependency` Attach compose-ui-api.aar P0 draft (MPL 2.0, hash-locked) and align shared dependencies with the host

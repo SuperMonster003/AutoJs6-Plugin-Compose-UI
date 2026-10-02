@@ -15,4 +15,4 @@
 * `新增` P0 開發預覽: 專用測試宿主可轉譯 Column / Text / Button 計數器. compose 指令碼 API 尚未交付, 安裝外掛後仍不能透過指令碼轉譯介面
 * `相依` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)
 * `相依` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-* `相依` 附加 compose-ui-api.aar P0 草案 (MPL 2.0, 雜湊鎖定), 共用相依性與開發宿主對齊
+* `相依` 附加 compose-ui-api.aar P0 草案 (MPL 2.0, 雜湊鎖定), 共用相依性與宿主對齊
