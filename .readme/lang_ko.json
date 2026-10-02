@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI는 AutoJs6의 UI 렌더링 플러그인입니다. 스크립트는 호스트에 내장된 `compose` 전역 객체로 UI를 선언하고, 플러그인은 호스트 프로세스 안에서 Jetpack Compose와 Material 3로 이를 렌더링하여 `\"ui\";` 모드 Activity 콘텐츠와 플로팅 창에 하나의 선언형 UI 방식을 제공합니다.",
   "p_introduction_how": "플러그인은 독립적인 화면이 없으며 런처에도 표시되지 않습니다. 호스트는 INFO 서비스로 플러그인을 발견하고 버전과 호환성 정보를 읽은 뒤, 계약 (`org.autojs.plugin.compose.api`)에 따라 호스트 프로세스 안에 렌더러를 로드합니다. UI 트리, 상태, 이벤트는 스크립트 쪽에서 기술되며, 렌더러는 Compose 컴포지션에 패치를 적용하고 사용자 이벤트를 스크립트로 되돌려 보내는 역할만 합니다.",
   "h3_status": "현재 상태",
-  "p_status": "P1 개발 미리 보기: 호스트와 플러그인 간 V1 계약을 확정했습니다. 정식 렌더러와 compose 스크립트 API 는 개발 중이며, 전용 테스트 호스트에서 프로토타입 카운터를 실행할 수 있습니다.",
+  "p_status": "P1 개발 미리보기: V1 호스트 로더와 세션으로 전용 테스트 호스트에서 Column / Text / Button 카운터를 실행할 수 있습니다. 전체 렌더러와 compose 스크립트 API는 개발 중입니다.",
   "h3_features": "기능",
   "p_features_intro": "플러그인이 제공할 핵심 기능",
   "features": [

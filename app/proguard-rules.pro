@@ -32,5 +32,3 @@
 # contract types are provided by the host at run time and must keep their names on the plugin side as well.
 -keep class org.autojs.plugin.common.api.** { *; }
 -keep class org.autojs.plugin.compose.api.** { *; }
--keep class * implements org.autojs.plugin.compose.api.spike.ComposeUiRendererFactory { *; }
--keep class * implements org.autojs.plugin.compose.api.spike.ComposeUiRenderer { *; }

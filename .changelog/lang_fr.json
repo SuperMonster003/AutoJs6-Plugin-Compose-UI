@@ -8,13 +8,13 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "Aperçu P1: le contrat V1 entre l'hôte et le plugin est figé. Le moteur de rendu de production et l'API de script compose sont encore en développement; un hôte de test dédié peut exécuter le compteur prototype",
+        "Aperçu de développement P1: le chargeur hôte V1 et les sessions exécutent un compteur Column / Text / Button dans un hôte de test dédié. Le moteur de rendu complet et l'API de script compose restent en développement",
         "Necessite AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieur (le numero de build minimal exact sera renseigne une fois les changements cote hote integres)"
       ],
       "feature": [
         "Squelette du depot du plugin : chaine de compilation du plugin de versions de plateforme, dependances Jetpack Compose BOM {{ compose_bom }}, protocole d'activation Wake Activity et service INFO (categorie {{ plugin_info_category }})",
         "README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON",
-        "Aperçu P0: un hôte de test dédié peut afficher un compteur Column / Text / Button. L'API de script compose est encore indisponible"
+        "Le compteur de prévisualisation prend en charge les mises à jour incrémentales et libère les callbacks à la fermeture; une mise à jour rejetée conserve la dernière interface valide"
       ],
       "dependency": [
         "Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)",

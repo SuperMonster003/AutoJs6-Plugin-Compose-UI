@@ -8,13 +8,13 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "P1 開発プレビュー: ホストとプラグイン間の V1 契約を確定しました. 正式なレンダラーと compose スクリプト API は開発中で, 専用テストホストでは試作カウンターを実行できます",
+        "P1 開発プレビュー: V1 ホストローダーとセッションは専用テストホストで Column / Text / Button カウンターを実行できます. 完全なレンダラーと compose スクリプト API は開発中です",
         "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 以降が必要です (正確な最小ビルド番号はホスト側の変更が取り込まれた後に補完されます)"
       ],
       "feature": [
         "プラグインリポジトリの骨格: プラットフォームバージョンプラグインのビルドチェーン, Jetpack Compose BOM {{ compose_bom }} の依存関係, Wake Activity による有効化プロトコル, INFO サービス (カテゴリ {{ plugin_info_category }})",
         "JSON ソースから生成される 10 言語の README, プラグインセンターの説明, 更新履歴",
-        "P0 開発プレビュー: 専用テストホストで Column / Text / Button カウンターを描画できます. compose スクリプト API はまだ利用できません"
+        "プレビューカウンターは差分更新と終了時のコールバック解放に対応. 更新が拒否された場合は直前の有効な画面を保持"
       ],
       "dependency": [
         "common-plugin-api.aar バージョン 6.8.0 (5307) を追加 (MPL 2.0, ハッシュ固定)",

@@ -8,13 +8,13 @@
     "v1.0.0": {
       "released_date": "2026/10/02",
       "hint": [
-        "P1 開發預覽: 宿主與插件的 V1 契約已凍結. 正式渲染器與 compose 腳本 API 仍在開發中, 專用測試宿主可執行原型計數器",
+        "P1 開發預覽: V1 宿主載入器與會話已可在專用測試宿主中運行 Column / Text / Button 計數器. 完整渲染器與 compose 腳本 API 仍在開發中",
         "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高版本 (準確的最低版本號待宿主側改動落地後回填)"
       ],
       "feature": [
         "插件倉庫骨架: 平台版本插件構建鏈, Jetpack Compose BOM {{ compose_bom }} 依賴, Wake Activity 激活協議與 INFO 服務 (類別 {{ plugin_info_category }})",
         "10 種語言的 README, 插件中心說明與更新日誌, 由 JSON 源檔案統一生成",
-        "P0 開發預覽: 專用測試宿主可渲染 Column / Text / Button 計數器. compose 腳本 API 尚未交付, 安裝插件後仍不能透過腳本渲染界面"
+        "預覽計數器支援增量更新與關閉後的回調清理, 更新被拒絕時保留上一次有效界面"
       ],
       "dependency": [
         "附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)",

@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主内置的 `compose` 全局对象声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染, 为 `\"ui\";` 模式 Activity 内容与悬浮窗提供统一的声明式界面方案.",
   "p_introduction_how": "插件不包含任何独立界面, 也不在启动器中显示入口. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在宿主进程内加载渲染器. 界面树, 状态与事件在脚本侧描述, 渲染器只负责把补丁应用到 Compose 组合并把用户事件回传给脚本.",
   "h3_status": "当前状态",
-  "p_status": "P1 开发预览: 宿主与插件的 V1 契约已冻结. 正式渲染器与 compose 脚本 API 仍在开发中, 专用测试宿主可运行原型计数器.",
+  "p_status": "P1 开发预览: V1 宿主装载器与会话已可在专用测试宿主中运行 Column / Text / Button 计数器. 完整渲染器与 compose 脚本 API 仍在开发中.",
   "h3_features": "功能特性",
   "p_features_intro": "插件计划交付的核心能力",
   "features": [
