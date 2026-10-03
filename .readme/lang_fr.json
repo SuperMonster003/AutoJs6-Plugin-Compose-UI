@@ -8,17 +8,17 @@
   "p_introduction_what": "Compose UI est un plugin de rendu d'interface pour AutoJs6. Les scripts déclarent les interfaces via `compose` / `$compose` de l'hôte, puis le plugin les rend dans son processus avec Jetpack Compose et Material 3. L'aperçu prend en charge les activités `\"ui\";` et les fenêtres flottantes des scripts non UI.",
   "p_introduction_how": "Le plugin n'embarque aucun ecran autonome et n'ajoute aucune entree dans le lanceur. L'hote le decouvre via le service INFO, lit sa version et ses informations de compatibilite, puis charge le moteur de rendu dans son propre processus selon le contrat (`org.autojs.plugin.compose.api`). L'arbre d'interface, l'etat et les evenements vivent cote script ; le moteur de rendu se contente d'appliquer les correctifs a la composition Compose et de renvoyer les evenements utilisateur au script.",
   "h3_status": "Etat actuel",
-  "p_status": "Aperçu de développement P5: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Cinq exemples de compteur, formulaire, liste de 1000 éléments, HUD flottant et thèmes sont inclus et synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant. Les vérifications de robustesse, la matrice de compatibilité sur six appareils/émulateurs et la validation des applications empaquetées sont terminées; les références de performances sont consignées. La documentation API complète et les déclarations de types restent prévues pour P6. Cet aperçu local n'a pas de publication officielle.",
+  "p_status": "Aperçu de développement local 1.0.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur.",
   "h3_features": "Fonctionnalites",
   "p_features_intro": "Fonctions de l'aperçu de développement actuel",
   "features": [
     "Interface declarative : `compose.state` + `compose.mount(render)` redessinent automatiquement a chaque changement d'etat, tandis que des poignees de noeud durables (`compose.Text({...})` et consorts) permettent de modifier directement proprietes et enfants",
-    "Ensemble de composants Material 3 : dispositions (Column / Row / Box / LazyColumn, etc.), texte, boutons, champs de saisie, interrupteurs, curseurs, indicateurs de progression, cartes, boites de dialogue",
+    "Noyau Material 3: 29 fabriques de noeuds pour les dispositions, textes, icônes, images, boutons, saisies, sélections, listes paresseuses, dialogues et indicateurs; Snackbar est une commande de session, pas une fabrique compose.Snackbar",
     "Modifiers chaines : `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserve l'ordre des operations, et les operations a portee limitee sont validees cote hote",
     "Deux modes d'affichage: `compose.mount` ou `compose` / `$compose` appelables pour le contenu des activités `\"ui\";`, et `compose.floaty` pour des fenêtres raw ou redimensionnables, y compris dans les scripts non UI",
-    "Rendu dans le processus : le moteur de rendu s'execute dans le processus de l'hote sans aucun pont d'interface inter-processus, pour des evenements et des mises a jour d'etat a faible latence",
-    "Paquet unique : aucune variante d'ABI et aucun code natif propre (seulement l'assistant AndroidX graphics-path fourni avec Compose, integre pour les quatre ABI), un seul APK pour tous les appareils",
-    "API de script: `compose` / `$compose`, 29 fabriques de noeuds et handles persistants, ainsi que `compose.ref`, `compose.batch`, `compose.post` et `compose.theme`",
+    "Rendu dans le processus hôte: les mises à jour UI sont appliquées dans l'hôte et les événements sont mis en file vers le thread propriétaire du script; les workers utilisent compose.post",
+    "Un APK contient arm64-v8a / armeabi-v7a / x86_64 / x86, sans code natif propre au plugin; la bibliothèque auxiliaire AndroidX graphics-path est incluse et les conditions de compatibilité Android/hôte/plugin restent applicables",
+    "La saisie native préserve la sélection et la composition IME, permet le focus et les modifications explicites, et rejette les modifications tardives qui écraseraient une saisie plus récente; les interrupteurs et curseurs restent contrôlés par le script",
     "Protections d'intégration: les vérifications indiquent indisponible si le plugin manque ou est incompatible, les erreurs utilisent `ComposeError`, et fermer la session ou arrêter le script libère ses fenêtres et rappels",
     "Cinq exemples exécutables de compteur, validation de formulaire, liste à clés stables de 1000 éléments, HUD flottant hors mode UI et thèmes, avec prérequis et index, synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant"
   ],
@@ -38,7 +38,7 @@
   "example_hud_preparing": "Preparation...",
   "example_hud_close": "Fermer",
   "example_hud_progress": "Progression ${i}%",
-  "p_quick_start_details": "Cinq exemples exécutables sont inclus dans `assets/examples/` et répertoriés dans `index.json`; l'hôte correspondant propose les mêmes scripts dans sa catégorie d'exemples Compose UI (`sample/Compose UI/`). Chaque en-tête précise le mode d'exécution et les autorisations nécessaires. La référence API complète et les déclarations TypeScript restent à livrer; l'annexe A de la feuille de route définit la forme actuelle de l'API.",
+  "p_quick_start_details": "Les cinq scripts exécutables sont répertoriés dans assets/examples/index.json et synchronisés dans la catégorie Compose UI de l'hôte correspondant. Chaque en-tête précise le mode et les autorisations. Consultez la référence API locale et les déclarations TypeScript/éditeur associées pour les noeuds, modificateurs, thèmes, sessions et fenêtres; le site en ligne peut ne pas encore refléter ces changements locaux.",
   "h3_compatibility": "Compatibilite",
   "p_compatibility_intro": "Exigences d'execution et limites du plugin",
   "compatibility_points": [
@@ -46,15 +46,19 @@
     "Version d'Android : {{ min_android_version }} (API {{ android_min_sdk }}) ou ulterieure",
     "Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)",
     "Version de Compose : embarquee dans le plugin (BOM {{ compose_bom }}), independante du runtime Compose de l'hote",
-    "Version du contrat : {{ plugin_contract_version }} ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord"
+    "Version du contrat : {{ plugin_contract_version }} ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord",
+    "Les applications empaquetées nécessitent aussi l'installation séparée d'un plugin Compose UI compatible, avec activation/autorisation propres à cette application; la compatibilité porte sur le runtime AutoJs6 intégré, pas sur le versionCode de l'application"
   ],
   "h3_faq": "FAQ",
   "faq_items": [
     "Pourquoi aucune icone de plugin n'apparait apres l'installation ? Le plugin n'a ni interface autonome ni entree dans le lanceur ; consultez le centre de plugins d'AutoJs6",
     "Pourquoi `compose` est-il absent? L'objet global est fourni par la compilation locale compatible de l'hôte; installer uniquement l'APK du plugin ne l'ajoute pas",
     "Faut-il desinstaller d'autres plugins d'interface ? Non, Compose UI n'interfere ni avec le module `ui` existant ni avec les autres plugins",
-    "Faut-il modifier les scripts apres une mise a jour du plugin ? Non tant que la version du contrat reste la meme ; les montees de version du contrat sont indiquees explicitement dans le journal des modifications",
-    "Que faut-il pour les fenêtres flottantes? Accordez la permission de superposition à l'hôte et appelez `window.requestFocus()` avant la saisie. Si HyperOS ne montre pas la fenêtre, revenez au bureau. Une permission manquante renvoie PERMISSION_REQUIRED sans ouvrir automatiquement de demande d'autorisation"
+    "Que se passe-t-il si le plugin change? Sa mise à jour, désinstallation ou désactivation ferme les sessions actives et signale l'erreur correspondante; un plugin compatible et activé permet un nouveau montage",
+    "Que faut-il pour les fenêtres flottantes? Accordez la permission de superposition à l'hôte et appelez `window.requestFocus()` avant la saisie. Si HyperOS ne montre pas la fenêtre, revenez au bureau. Une permission manquante renvoie PERMISSION_REQUIRED sans ouvrir automatiquement de demande d'autorisation",
+    "Peut-on appeler des fonctions Compose arbitraires ou utiliser JSX/TSX? Non. Utilisez les fabriques et commandes documentées; le plugin ne compile pas Kotlin et n'expose pas de fonctions Composable arbitraires",
+    "La rotation perd-elle l'état? L'hôte actuel gère les changements ordinaires d'orientation sans remplacer le moteur de script. Une véritable recréation ou destruction de l'Activity ferme le moteur et ses sessions; l'état métier n'est pas restauré automatiquement",
+    "Comment rechercher les composants? testTag est exposé comme ID brut sans préfixe de paquet. id/testTag et desc/contentDescription sont distincts; le texte d'un Button peut être un enfant, auquel cas suivez parent() vers un ancêtre cliquable"
   ],
   "h3_security": "Permissions et securite",
   "p_security_intro": "Le plugin ne demande aucune permission d'execution Android et n'accede jamais au reseau, au stockage ni aux capteurs.",

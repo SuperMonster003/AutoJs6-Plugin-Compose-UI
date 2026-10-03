@@ -85,16 +85,20 @@ compose.mount(() => compose.Column({ modifier: compose.modifier().fillMaxSize().
 
 ```js
 // {{ example_hud }}
-let status = compose.Text({ text: '{{ example_hud_preparing }}' });
+let worker = null;
+let status = compose.Text({ text: '{{ example_hud_preparing }}', color: '#FFFFFF' });
 let win = compose.floaty(compose.Column({ padding: 12, bg: '#CC000000' }, [
     status,
-    compose.TextButton({ onClick: () => win.close() }, '{{ example_hud_close }}'),
+    compose.TextButton({ contentColor: '#FFFFFF', onClick: () => win.close() }, '{{ example_hud_close }}'),
 ]), { x: 50, y: 300, raw: true });
+win.on('close', () => { if (worker) worker.interrupt(); });
 
-threads.start(() => {
+worker = threads.start(() => {
     for (let i = 1; i <= 100; i++) {
         sleep(1000);
-        compose.post(() => status.set({ text: `{{ example_hud_progress }}` }));
+        compose.post(() => {
+            if (!win.isClosed()) status.text = `{{ example_hud_progress }}`;
+        });
     }
 });
 ```

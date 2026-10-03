@@ -1,6 +1,6 @@
 Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports both `"ui";` activity content and floating windows from non-UI scripts.
 
-P5 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Robustness checks, the compatibility matrix across six devices/emulators, and packaged-app verification are complete, with performance baselines recorded. Complete API documentation and type declarations remain for P6. This is a local preview without an official release.
+1.0.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images.
 
 ### Usage
 
@@ -16,14 +16,18 @@ P5 development preview: the callable compose / $compose entry, 29 node factories
 - Processor architecture: arm64-v8a / armeabi-v7a / x86_64 / x86 (all four built into the single APK, no per-architecture download)
 - Compose version: bundled with the plugin (BOM 2026.09.00), independent of the host's Compose runtime
 - Contract version: 1; host and plugin negotiate the contract version and refuse to load with a clear error when it does not match
+- Packaged apps also require a separately installed compatible Compose UI plugin, with enablement/authorization belonging to that app; compatibility checks the embedded AutoJs6 runtime, not the packaged app's own versionCode
 
 ### FAQ
 
 - Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
-- Do scripts need changes after a plugin update? Not while the contract version stays the same; contract upgrades are called out explicitly in the changelog
+- What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
 - What do floating windows require? Grant overlay permission to the host. Call `window.requestFocus()` before text input; if a HyperOS window is not visible, return to the desktop. Missing permission reports PERMISSION_REQUIRED without opening a permission prompt automatically
+- Can scripts call arbitrary Compose functions or use JSX/TSX? No. Use the documented node factories and commands; the plugin does not compile Kotlin or expose arbitrary Composable functions
+- Does rotation lose state? The current host handles ordinary orientation changes without replacing the script engine. Actual Activity recreation or destruction closes that engine and its sessions; business state is not automatically restored
+- How do selectors find components? testTag is exposed as the raw ID without a package prefix. id/testTag and desc/contentDescription are distinct; Button text may be a child node, so follow parent() to a clickable ancestor when needed
 
 ### Permissions and Security
 

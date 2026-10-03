@@ -52,7 +52,7 @@ Le plugin n'embarque aucun ecran autonome et n'ajoute aucune entree dans le lanc
 
 ******
 
-Aperçu de développement P5: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Cinq exemples de compteur, formulaire, liste de 1000 éléments, HUD flottant et thèmes sont inclus et synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant. Les vérifications de robustesse, la matrice de compatibilité sur six appareils/émulateurs et la validation des applications empaquetées sont terminées; les références de performances sont consignées. La documentation API complète et les déclarations de types restent prévues pour P6. Cet aperçu local n'a pas de publication officielle.
+Aperçu de développement local 1.0.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur.
 
 ******
 
@@ -63,12 +63,12 @@ Aperçu de développement P5: compose / $compose appelables, 29 fabriques de noe
 Fonctions de l'aperçu de développement actuel:
 
 - Interface declarative : `compose.state` + `compose.mount(render)` redessinent automatiquement a chaque changement d'etat, tandis que des poignees de noeud durables (`compose.Text({...})` et consorts) permettent de modifier directement proprietes et enfants
-- Ensemble de composants Material 3 : dispositions (Column / Row / Box / LazyColumn, etc.), texte, boutons, champs de saisie, interrupteurs, curseurs, indicateurs de progression, cartes, boites de dialogue
+- Noyau Material 3: 29 fabriques de noeuds pour les dispositions, textes, icônes, images, boutons, saisies, sélections, listes paresseuses, dialogues et indicateurs; Snackbar est une commande de session, pas une fabrique compose.Snackbar
 - Modifiers chaines : `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserve l'ordre des operations, et les operations a portee limitee sont validees cote hote
 - Deux modes d'affichage: `compose.mount` ou `compose` / `$compose` appelables pour le contenu des activités `"ui";`, et `compose.floaty` pour des fenêtres raw ou redimensionnables, y compris dans les scripts non UI
-- Rendu dans le processus : le moteur de rendu s'execute dans le processus de l'hote sans aucun pont d'interface inter-processus, pour des evenements et des mises a jour d'etat a faible latence
-- Paquet unique : aucune variante d'ABI et aucun code natif propre (seulement l'assistant AndroidX graphics-path fourni avec Compose, integre pour les quatre ABI), un seul APK pour tous les appareils
-- API de script: `compose` / `$compose`, 29 fabriques de noeuds et handles persistants, ainsi que `compose.ref`, `compose.batch`, `compose.post` et `compose.theme`
+- Rendu dans le processus hôte: les mises à jour UI sont appliquées dans l'hôte et les événements sont mis en file vers le thread propriétaire du script; les workers utilisent compose.post
+- Un APK contient arm64-v8a / armeabi-v7a / x86_64 / x86, sans code natif propre au plugin; la bibliothèque auxiliaire AndroidX graphics-path est incluse et les conditions de compatibilité Android/hôte/plugin restent applicables
+- La saisie native préserve la sélection et la composition IME, permet le focus et les modifications explicites, et rejette les modifications tardives qui écraseraient une saisie plus récente; les interrupteurs et curseurs restent contrôlés par le script
 - Protections d'intégration: les vérifications indiquent indisponible si le plugin manque ou est incompatible, les erreurs utilisent `ComposeError`, et fermer la session ou arrêter le script libère ses fenêtres et rappels
 - Cinq exemples exécutables de compteur, validation de formulaire, liste à clés stables de 1000 éléments, HUD flottant hors mode UI et thèmes, avec prérequis et index, synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant
 
@@ -105,21 +105,25 @@ compose.mount(() => compose.Column({ modifier: compose.modifier().fillMaxSize().
 
 ```js
 // HUD flottant (couche des poignees de noeud)
-let status = compose.Text({ text: 'Preparation...' });
+let worker = null;
+let status = compose.Text({ text: 'Preparation...', color: '#FFFFFF' });
 let win = compose.floaty(compose.Column({ padding: 12, bg: '#CC000000' }, [
     status,
-    compose.TextButton({ onClick: () => win.close() }, 'Fermer'),
+    compose.TextButton({ contentColor: '#FFFFFF', onClick: () => win.close() }, 'Fermer'),
 ]), { x: 50, y: 300, raw: true });
+win.on('close', () => { if (worker) worker.interrupt(); });
 
-threads.start(() => {
+worker = threads.start(() => {
     for (let i = 1; i <= 100; i++) {
         sleep(1000);
-        compose.post(() => status.set({ text: `Progression ${i}%` }));
+        compose.post(() => {
+            if (!win.isClosed()) status.text = `Progression ${i}%`;
+        });
     }
 });
 ```
 
-Cinq exemples exécutables sont inclus dans `assets/examples/` et répertoriés dans `index.json`; l'hôte correspondant propose les mêmes scripts dans sa catégorie d'exemples Compose UI (`sample/Compose UI/`). Chaque en-tête précise le mode d'exécution et les autorisations nécessaires. La référence API complète et les déclarations TypeScript restent à livrer; l'annexe A de la feuille de route définit la forme actuelle de l'API.
+Les cinq scripts exécutables sont répertoriés dans assets/examples/index.json et synchronisés dans la catégorie Compose UI de l'hôte correspondant. Chaque en-tête précise le mode et les autorisations. Consultez la référence API locale et les déclarations TypeScript/éditeur associées pour les noeuds, modificateurs, thèmes, sessions et fenêtres; le site en ligne peut ne pas encore refléter ces changements locaux.
 
 ******
 
@@ -134,6 +138,7 @@ Exigences d'execution et limites du plugin:
 - Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote
 - Version du contrat : 1 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
+- Les applications empaquetées nécessitent aussi l'installation séparée d'un plugin Compose UI compatible, avec activation/autorisation propres à cette application; la compatibilité porte sur le runtime AutoJs6 intégré, pas sur le versionCode de l'application
 
 ******
 
@@ -144,8 +149,11 @@ Exigences d'execution et limites du plugin:
 - Pourquoi aucune icone de plugin n'apparait apres l'installation ? Le plugin n'a ni interface autonome ni entree dans le lanceur ; consultez le centre de plugins d'AutoJs6
 - Pourquoi `compose` est-il absent? L'objet global est fourni par la compilation locale compatible de l'hôte; installer uniquement l'APK du plugin ne l'ajoute pas
 - Faut-il desinstaller d'autres plugins d'interface ? Non, Compose UI n'interfere ni avec le module `ui` existant ni avec les autres plugins
-- Faut-il modifier les scripts apres une mise a jour du plugin ? Non tant que la version du contrat reste la meme ; les montees de version du contrat sont indiquees explicitement dans le journal des modifications
+- Que se passe-t-il si le plugin change? Sa mise à jour, désinstallation ou désactivation ferme les sessions actives et signale l'erreur correspondante; un plugin compatible et activé permet un nouveau montage
 - Que faut-il pour les fenêtres flottantes? Accordez la permission de superposition à l'hôte et appelez `window.requestFocus()` avant la saisie. Si HyperOS ne montre pas la fenêtre, revenez au bureau. Une permission manquante renvoie PERMISSION_REQUIRED sans ouvrir automatiquement de demande d'autorisation
+- Peut-on appeler des fonctions Compose arbitraires ou utiliser JSX/TSX? Non. Utilisez les fabriques et commandes documentées; le plugin ne compile pas Kotlin et n'expose pas de fonctions Composable arbitraires
+- La rotation perd-elle l'état? L'hôte actuel gère les changements ordinaires d'orientation sans remplacer le moteur de script. Une véritable recréation ou destruction de l'Activity ferme le moteur et ses sessions; l'état métier n'est pas restauré automatiquement
+- Comment rechercher les composants? testTag est exposé comme ID brut sans préfixe de paquet. id/testTag et desc/contentDescription sont distincts; le texte d'un Button peut être un enfant, auquel cas suivez parent() vers un ancêtre cliquable
 
 ******
 
@@ -204,20 +212,20 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 _2026/10/03_
 
-- `Indication` Aperçu de développement P5: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Cinq exemples de compteur, formulaire, liste de 1000 éléments, HUD flottant et thèmes sont inclus et synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant. Les vérifications de robustesse, la matrice de compatibilité sur six appareils/émulateurs et la validation des applications empaquetées sont terminées; les références de performances sont consignées. La documentation API complète et les déclarations de types restent prévues pour P6. Cet aperçu local n'a pas de publication officielle
+- `Indication` Aperçu de développement local 1.0.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur
 - `Indication` Necessite AutoJs6 6.8.0 (5316) ou ulterieur
-- `Nouveaute` Squelette du depot du plugin : chaine de compilation du plugin de versions de plateforme, dependances Jetpack Compose BOM 2026.09.00, protocole d'activation Wake Activity et service INFO (categorie compose-ui)
-- `Nouveaute` README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON
-- `Nouveaute` L'aperçu prend en charge les mises en page, textes, icônes, images, boutons, contrôles de sélection et curseurs; les bitmaps fournis restent la propriété de l'appelant, qui gère leur libération
+- `Indication` Les applications empaquetées nécessitent aussi l'installation séparée d'un plugin Compose UI compatible, avec activation/autorisation propres à cette application; la compatibilité porte sur le runtime AutoJs6 intégré, pas sur le versionCode de l'application
+- `Indication` Les deux mipmap clair/sombre sont conservés; le dessin actuel est provisoire et sera remplacé par les images noir et blanc définitives du mainteneur
+- `Nouveaute` compose / $compose appelables, handles de noeuds persistants, state/render/ref réactifs, modifications groupées, publications en file et contrôle du thème
+- `Nouveaute` Noyau Material 3: 29 fabriques de noeuds pour les dispositions, textes, icônes, images, boutons, saisies, sélections, listes paresseuses, dialogues et indicateurs; Snackbar est une commande de session, pas une fabrique compose.Snackbar
+- `Nouveaute` Les scripts UI montent le contenu Activity; compose.floaty propose aussi aux scripts hors UI des fenêtres raw ou redimensionnables, une géométrie en pixels, le contrôle du toucher/focus et la libération de leurs ressources
 - `Nouveaute` Les 20 opérations Modifier conservent l'ordre déclaré et prennent en charge la validation du contexte de mise en page, le défilement et les libellés d'accessibilité
 - `Nouveaute` Les thèmes Material 3 prennent en charge les couleurs sources, les modes clair et sombre, les couleurs dynamiques du système sur Android 12+, les familles de polices et la taille du texte
-- `Nouveaute` Les mises à jour de l'interface sont atomiques et conservent la dernière vue valide en cas de rejet; les entrées contrôlées signalent les changements par des callbacks en file, libérés à la fermeture
-- `Nouveaute` Les champs de texte de l'aperçu conservent la sélection et la composition IME, prennent en charge le focus et les modifications explicites, et refusent les modifications retardées qui écraseraient une saisie plus récente
-- `Nouveaute` L'aperçu ajoute des listes à chargement différé avec clés stables et défilement par indice, les emplacements de Scaffold et de la barre supérieure, des dialogues contrôlés, des indicateurs de progression et des rappels en file pour les actions ou fermetures de Snackbar
-- `Nouveaute` L'aperçu de script fournit compose / $compose appelables, 29 fabriques de noeuds, des handles persistants, state/render/ref réactifs, le regroupement, la planification et le contrôle du thème
-- `Nouveaute` Les scripts UI peuvent monter du contenu Compose; remplacer le montage ou arrêter le script libère l'ancienne session et ses rappels
-- `Nouveaute` Les scripts non UI peuvent créer des fenêtres Compose raw ou redimensionnables, modifier position et taille en pixels, toucher et focus, puis les fermer via leurs commandes, floaty.closeAll ou l'arrêt du script
+- `Nouveaute` La saisie native préserve la sélection et la composition IME, permet le focus et les modifications explicites, et rejette les modifications tardives qui écraseraient une saisie plus récente; les interrupteurs et curseurs restent contrôlés par le script
+- `Nouveaute` Icônes core et images ImageWrapper/Bitmap, fichiers locaux et drawable de l'hôte; le moteur de rendu ne recycle pas automatiquement les images appartenant à l'appelant
 - `Nouveaute` Cinq exemples exécutables de compteur, validation de formulaire, liste à clés stables de 1000 éléments, HUD flottant hors mode UI et thèmes, avec prérequis et index, synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant
+- `Nouveaute` Référence API et déclarations TypeScript associées, ainsi que README, instructions du centre des plugins et historique en 10 langues
+- `Nouveaute` Détection dans le centre des plugins avec vérifications de version hôte, de contrat et d'autorisation, sans écran autonome ni entrée de lanceur
 - `Correction` Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin
 - `Amelioration` Les vérifications et ComposeError signalent uniformément les plugins absents, désactivés, non autorisés ou incompatibles, les permissions manquantes et les sessions fermées; la libération couvre aussi les fenêtres annulées avant leur attachement natif; La mise à jour, la désinstallation ou la désactivation du plugin ferme ses sessions actives et signale l'erreur correspondante
 - `Dependance` Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)

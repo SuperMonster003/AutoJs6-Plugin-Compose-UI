@@ -52,7 +52,7 @@ The plugin ships no standalone screens and adds no launcher entry. The host disc
 
 ******
 
-P5 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Robustness checks, the compatibility matrix across six devices/emulators, and packaged-app verification are complete, with performance baselines recorded. Complete API documentation and type declarations remain for P6. This is a local preview without an official release.
+1.0.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images.
 
 ******
 
@@ -63,12 +63,12 @@ P5 development preview: the callable compose / $compose entry, 29 node factories
 Capabilities of the current development preview:
 
 - Declarative UI: `compose.state` + `compose.mount(render)` re-render on state changes, while long-lived node handles (`compose.Text({...})` and friends) allow direct property and child updates
-- Material 3 component core set: layouts (Column / Row / Box / LazyColumn and more), text, buttons, text fields, switches, sliders, progress indicators, cards, dialogs
+- Material 3 core: 29 node factories for layouts, text, icons, images, buttons, inputs, selection controls, lazy lists, dialogs and progress; Snackbar is a session command, not a compose.Snackbar factory
 - Chained modifiers: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` keeps operation order, and scoped operations are validated on the host side
 - Two hosting surfaces: `compose.mount` or callable `compose` / `$compose` for `"ui";` activity content, and `compose.floaty` for raw or resizable floating windows, including non-UI scripts
-- In-process rendering: the renderer runs inside the host process without any cross-process UI bridge, so events and state updates stay low-latency
-- Single package: no ABI variants and no first-party native code (only the AndroidX graphics-path helper bundled with Compose, built in for all four ABIs), one APK fits every device
-- Script entry: `compose` / `$compose`, 29 node factories and retained handles, plus `compose.ref`, `compose.batch`, `compose.post`, and `compose.theme`
+- In-process rendering: the plugin applies UI updates in the host process and queues events to the owning script thread; workers use compose.post to request updates
+- One APK includes arm64-v8a / armeabi-v7a / x86_64 / x86, with no first-party native code; the bundled AndroidX graphics-path helper remains subject to Android, host and plugin compatibility requirements
+- Native text editing preserves selection and IME composition, supports focus and explicit edits, and rejects delayed edits that would overwrite newer input; switches and sliders remain script-controlled
 - Integration guards: availability probes return unavailable for missing or incompatible plugins, errors use `ComposeError`, and closing a session or stopping its script releases owned windows and callbacks
 - Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category
 
@@ -105,21 +105,25 @@ compose.mount(() => compose.Column({ modifier: compose.modifier().fillMaxSize().
 
 ```js
 // Floating HUD (node handle layer)
-let status = compose.Text({ text: 'Preparing...' });
+let worker = null;
+let status = compose.Text({ text: 'Preparing...', color: '#FFFFFF' });
 let win = compose.floaty(compose.Column({ padding: 12, bg: '#CC000000' }, [
     status,
-    compose.TextButton({ onClick: () => win.close() }, 'Close'),
+    compose.TextButton({ contentColor: '#FFFFFF', onClick: () => win.close() }, 'Close'),
 ]), { x: 50, y: 300, raw: true });
+win.on('close', () => { if (worker) worker.interrupt(); });
 
-threads.start(() => {
+worker = threads.start(() => {
     for (let i = 1; i <= 100; i++) {
         sleep(1000);
-        compose.post(() => status.set({ text: `Progress ${i}%` }));
+        compose.post(() => {
+            if (!win.isClosed()) status.text = `Progress ${i}%`;
+        });
     }
 });
 ```
 
-Five runnable examples are bundled under `assets/examples/` and listed in `index.json`; the matching host provides the same scripts in its Compose UI sample category (`sample/Compose UI/`). Each header explains execution mode and permission prerequisites. The complete API reference and TypeScript declarations remain pending; roadmap appendix A defines the current API shape.
+Five runnable scripts are bundled in assets/examples/index.json and the matching host's Compose UI sample category. Each header states its mode and permissions. Use the companion local API reference and TypeScript/editor declarations for node, modifier, theme, session and floating-window details; the online site may not yet contain these local changes.
 
 ******
 
@@ -134,6 +138,7 @@ Runtime requirements and limits of the plugin:
 - Processor architecture: arm64-v8a / armeabi-v7a / x86_64 / x86 (all four built into the single APK, no per-architecture download)
 - Compose version: bundled with the plugin (BOM 2026.09.00), independent of the host's Compose runtime
 - Contract version: 1; host and plugin negotiate the contract version and refuse to load with a clear error when it does not match
+- Packaged apps also require a separately installed compatible Compose UI plugin, with enablement/authorization belonging to that app; compatibility checks the embedded AutoJs6 runtime, not the packaged app's own versionCode
 
 ******
 
@@ -144,8 +149,11 @@ Runtime requirements and limits of the plugin:
 - Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
-- Do scripts need changes after a plugin update? Not while the contract version stays the same; contract upgrades are called out explicitly in the changelog
+- What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
 - What do floating windows require? Grant overlay permission to the host. Call `window.requestFocus()` before text input; if a HyperOS window is not visible, return to the desktop. Missing permission reports PERMISSION_REQUIRED without opening a permission prompt automatically
+- Can scripts call arbitrary Compose functions or use JSX/TSX? No. Use the documented node factories and commands; the plugin does not compile Kotlin or expose arbitrary Composable functions
+- Does rotation lose state? The current host handles ordinary orientation changes without replacing the script engine. Actual Activity recreation or destruction closes that engine and its sessions; business state is not automatically restored
+- How do selectors find components? testTag is exposed as the raw ID without a package prefix. id/testTag and desc/contentDescription are distinct; Button text may be a child node, so follow parent() to a clickable ancestor when needed
 
 ******
 
@@ -204,20 +212,20 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 _2026/10/03_
 
-- `Hint` P5 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Robustness checks, the compatibility matrix across six devices/emulators, and packaged-app verification are complete, with performance baselines recorded. Complete API documentation and type declarations remain for P6. This is a local preview without an official release
+- `Hint` 1.0.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images
 - `Hint` Requires AutoJs6 6.8.0 (5316) or later
-- `Feature` Plugin repository skeleton: platform versions plugin build chain, Jetpack Compose BOM 2026.09.00 dependencies, Wake Activity activation protocol, and INFO service (category compose-ui)
-- `Feature` README, plugin center instruction, and changelog in 10 languages, generated from JSON sources
-- `Feature` Preview rendering supports layouts, text, icons, images, buttons, selection controls, and sliders; supplied bitmaps remain owned and recycled by the caller
+- `Hint` Packaged apps also require a separately installed compatible Compose UI plugin, with enablement/authorization belonging to that app; compatibility checks the embedded AutoJs6 runtime, not the packaged app's own versionCode
+- `Hint` The light/dark mipmap entries are retained; current artwork is a placeholder until the maintainer supplies the final black-and-white images
+- `Feature` Callable compose / $compose with retained node handles, reactive state/render/ref, batched changes, queued posts and theme control
+- `Feature` Material 3 core: 29 node factories for layouts, text, icons, images, buttons, inputs, selection controls, lazy lists, dialogs and progress; Snackbar is a session command, not a compose.Snackbar factory
+- `Feature` UI scripts mount Activity content; compose.floaty also supports non-UI scripts with raw or resizable windows, pixel geometry, touch/focus controls and owned cleanup
 - `Feature` All 20 modifier operations preserve declaration order, with layout scope checks, scrolling, and accessibility labels
 - `Feature` Material 3 themes support seed colors, light and dark modes, Android 12+ system dynamic colors, font families, and text scaling
-- `Feature` Interface updates apply atomically and rejected updates keep the last valid view; controlled inputs report changes through queued callbacks, and closing releases callbacks
-- `Feature` Preview text fields preserve selection and IME composition, support focus and explicit edits, and reject delayed edits that would overwrite newer input
-- `Feature` Preview adds lazy lists with stable item keys and indexed scrolling, Scaffold and top app bar slots, controlled dialogs, progress indicators, and queued Snackbar action or dismissal callbacks
-- `Feature` The script preview exposes callable compose / $compose, 29 node factories, retained handles, reactive state/render/ref, batching, posting, and theme control
-- `Feature` UI scripts can mount Compose content; replacing the mount or stopping the script releases the old session and callbacks
-- `Feature` Non-UI scripts can create raw or resizable Compose floating windows, change pixel geometry, touch and focus settings, and close them through their controls, floaty.closeAll, or script termination
+- `Feature` Native text editing preserves selection and IME composition, supports focus and explicit edits, and rejects delayed edits that would overwrite newer input; switches and sliders remain script-controlled
+- `Feature` Core icons and ImageWrapper/Bitmap, local file and host drawable images; caller-owned image resources are not automatically recycled by the renderer
 - `Feature` Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category
+- `Feature` Companion API reference and TypeScript declarations, plus README, plugin-center instructions and changelog in 10 languages
+- `Feature` Plugin-center discovery with host-version, contract and authorization checks, without a standalone screen or launcher entry
 - `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
 - `Improvement` Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment; Updating, uninstalling or disabling the plugin closes its active sessions and reports the corresponding error
 - `Dependency` Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)

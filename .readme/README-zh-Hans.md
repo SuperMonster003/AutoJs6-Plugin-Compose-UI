@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compo
 
 ******
 
-P5 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 已完成健壮性检查, 六台设备/模拟器兼容矩阵与打包应用验证, 并记录性能基线. 完整 API 文档与类型声明将在 P6 交付. 当前仅为本地预览, 尚无官方发行版.
+1.0.0 本地开发预览: 需要匹配的 AutoJs6 宿主构建, 并安装和启用本插件. 本地配套提供 UI 页面, 悬浮窗, 五个示例, API 参考与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标图案仍为临时占位, 等待维护者提供正式源图.
 
 ******
 
@@ -63,12 +63,12 @@ P5 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长
 当前开发预览的核心能力:
 
 - 声明式界面: `compose.state` + `compose.mount(render)` 按状态变化自动重绘, 同时提供可长期持有的节点句柄 (`compose.Text({...})` 等) 直接修改属性与子节点
-- Material 3 组件核心集: 布局 (Column / Row / Box / LazyColumn 等), 文本, 按钮, 输入框, 开关, 滑块, 进度条, 卡片, 对话框等
+- Material 3 核心集: 29 个节点工厂覆盖布局, 文本, 图标, 图片, 按钮, 输入, 选择控件, 惰性列表, 对话框与进度; Snackbar 是会话命令, 不是 compose.Snackbar 工厂
 - 链式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作顺序, 作用域操作在宿主侧校验
 - 两种承载方式: `"ui";` 脚本通过 `compose.mount` 或可调用的 `compose` / `$compose` 挂载 Activity 内容; `compose.floaty` 创建 raw 或可调整悬浮窗, 同样支持非 ui 脚本
-- 进程内渲染: 渲染器在宿主进程中运行, 没有跨进程界面桥接, 事件与状态更新低延迟
-- 单一安装包: 不区分 ABI, 不含插件自有原生代码 (仅随 Compose 附带的 AndroidX graphics-path 辅助库, 四种 ABI 全部内置), 一个 APK 适配所有设备
-- 脚本入口: `compose` / `$compose`, 29 个节点工厂与长期持有的句柄, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`
+- 进程内渲染: 插件在宿主进程应用界面更新, 事件排队回到所属脚本线程; 工作线程通过 compose.post 请求更新
+- 一个 APK 包含 arm64-v8a / armeabi-v7a / x86_64 / x86, 无插件自有原生代码; 随包的 AndroidX graphics-path 辅助库仍需满足 Android, 宿主与插件兼容条件
+- 原生文本编辑保留选区与输入法组合状态, 支持焦点和显式编辑, 拒绝覆盖较新输入的延迟编辑; 开关与滑块仍由脚本控制状态
 - 集成守卫: 插件缺失或不兼容时可用性探测返回不可用, 错误使用 `ComposeError`, 关闭会话或停止脚本会释放所属窗口与回调
 - 计数器, 表单校验, 1000 项键控列表, 非 ui 悬浮 HUD 与主题五个可运行示例, 包含前置条件与索引, 同步至匹配宿主的 Compose UI 示例分类
 
@@ -105,21 +105,25 @@ compose.mount(() => compose.Column({ modifier: compose.modifier().fillMaxSize().
 
 ```js
 // 悬浮窗 HUD (节点句柄层)
-let status = compose.Text({ text: '准备中...' });
+let worker = null;
+let status = compose.Text({ text: '准备中...', color: '#FFFFFF' });
 let win = compose.floaty(compose.Column({ padding: 12, bg: '#CC000000' }, [
     status,
-    compose.TextButton({ onClick: () => win.close() }, '关闭'),
+    compose.TextButton({ contentColor: '#FFFFFF', onClick: () => win.close() }, '关闭'),
 ]), { x: 50, y: 300, raw: true });
+win.on('close', () => { if (worker) worker.interrupt(); });
 
-threads.start(() => {
+worker = threads.start(() => {
     for (let i = 1; i <= 100; i++) {
         sleep(1000);
-        compose.post(() => status.set({ text: `进度 ${i}%` }));
+        compose.post(() => {
+            if (!win.isClosed()) status.text = `进度 ${i}%`;
+        });
     }
 });
 ```
 
-五个可运行示例随包放在 `assets/examples/`, 由 `index.json` 列出; 匹配宿主的 "示例代码 > Compose UI" 提供相同脚本 (`sample/Compose UI/`). 每例头部说明运行模式与权限前提. 完整 API 说明与 TypeScript 类型声明仍待交付, 当前 API 形态以路线图附录 A 为准.
+五个可运行脚本由 assets/examples/index.json 列出, 同步至匹配宿主的 Compose UI 示例分类. 每例头部说明模式与权限. 节点, 修饰链, 主题, 会话与悬浮窗详情请使用同批本地 API 文档及 TypeScript/编辑器声明; 在线站点不一定已包含这些本地变更.
 
 ******
 
@@ -134,6 +138,7 @@ threads.start(() => {
 - 处理器架构: arm64-v8a / armeabi-v7a / x86_64 / x86 (单一 APK 内置全部四种, 无需按架构选择安装包)
 - Compose 版本: 由插件自带 (BOM 2026.09.00), 不依赖宿主的 Compose 运行时
 - 契约版本: 1; 宿主与插件通过契约版本协商, 不匹配时拒绝加载并给出明确错误
+- 打包应用仍需另外安装兼容的 Compose UI 插件, 启用/授权记录属于该应用; 兼容性检查依据内置 AutoJs6 运行时, 不是打包应用自身的 versionCode
 
 ******
 
@@ -144,8 +149,11 @@ threads.start(() => {
 - 为什么安装后找不到插件图标? 插件没有独立界面, 也不会在启动器显示, 请在 AutoJs6 的插件中心查看
 - 为什么找不到 `compose`? 全局对象由匹配的本地宿主构建提供, 单独安装插件 APK 不会添加该入口
 - 是否需要卸载其它界面插件? 不需要, Compose UI 与现有 `ui` 模块及其它插件互不影响
-- 插件更新后脚本需要修改吗? 契约版本不变时无需修改; 契约升级会在更新日志中明确标注
+- 插件变化时会怎样? 更新, 卸载或停用插件会关闭活动会话并报告对应错误; 兼容且启用的插件允许重新挂载
 - 悬浮窗需要什么条件? 先授予宿主悬浮窗权限, 输入文字前调用 `window.requestFocus()`. 若 HyperOS 未显示窗口, 请先回到桌面. 缺少权限会返回 PERMISSION_REQUIRED, 不会自动弹出授权界面
+- 能否直接调用任意 Compose 函数或使用 JSX/TSX? 不能. 请使用文档中的节点工厂和命令; 插件不编译 Kotlin, 也不暴露任意 Composable 函数
+- 旋转是否丢失状态? 当前宿主自行处理普通方向变化, 保留脚本引擎. 真实的 Activity 重建或销毁会关闭该引擎及所属会话, 不自动恢复业务状态
+- 选择器如何查找组件? testTag 按原样暴露为 ID, 不添加包名前缀. id/testTag 与 desc/contentDescription 是不同信息; Button 的文字可能是子节点, 必要时沿 parent() 查找可点击祖先
 
 ******
 
@@ -204,20 +212,20 @@ minimum host build: 5316 (6.8.0)
 
 _2026/10/03_
 
-- `提示` P5 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 已完成健壮性检查, 六台设备/模拟器兼容矩阵与打包应用验证, 并记录性能基线. 完整 API 文档与类型声明将在 P6 交付. 当前仅为本地预览, 尚无官方发行版
+- `提示` 1.0.0 本地开发预览: 需要匹配的 AutoJs6 宿主构建, 并安装和启用本插件. 本地配套提供 UI 页面, 悬浮窗, 五个示例, API 参考与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标图案仍为临时占位, 等待维护者提供正式源图
 - `提示` 需要 AutoJs6 6.8.0 (5316) 或更高版本
-- `新增` 插件仓库骨架: 平台版本插件构建链, Jetpack Compose BOM 2026.09.00 依赖, Wake Activity 激活协议与 INFO 服务 (类别 compose-ui)
-- `新增` 10 种语言的 README, 插件中心说明与更新日志, 由 JSON 源文件统一生成
-- `新增` 预览渲染支持布局, 文本, 图标, 图片, 按钮, 选择控件与滑块; 传入位图仍由调用方持有并负责回收
+- `提示` 打包应用仍需另外安装兼容的 Compose UI 插件, 启用/授权记录属于该应用; 兼容性检查依据内置 AutoJs6 运行时, 不是打包应用自身的 versionCode
+- `提示` 保留亮色/深色两类 mipmap 入口; 当前图案为占位, 待维护者提供正式黑白源图后替换
+- `新增` 可调用的 compose / $compose, 长期节点句柄, 响应式 state/render/ref, 批量变更, 排队调度与主题控制
+- `新增` Material 3 核心集: 29 个节点工厂覆盖布局, 文本, 图标, 图片, 按钮, 输入, 选择控件, 惰性列表, 对话框与进度; Snackbar 是会话命令, 不是 compose.Snackbar 工厂
+- `新增` UI 脚本可挂载 Activity 内容; compose.floaty 同时支持非 UI 脚本的 raw / 可调整窗口, 像素位置与尺寸, 触摸/焦点控制及所属资源清理
 - `新增` 全部 20 种 Modifier 操作保留声明顺序, 支持布局作用域校验, 滚动与无障碍标签
 - `新增` Material 3 主题支持种子色, 明暗模式, Android 12+ 系统动态色, 字体与字号缩放
-- `新增` 界面更新以完整事务应用, 拒绝更新时保留上一次有效界面; 受控输入通过队列回调报告变化, 关闭后释放回调
-- `新增` 预览输入框保留选区与输入法组合文本, 支持焦点和显式编辑, 拒绝覆盖较新输入的延迟编辑
-- `新增` 预览新增支持稳定条目 key 与索引滚动的懒加载列表, Scaffold 与顶部应用栏插槽, 受控对话框, 进度指示器, 以及按队列返回操作或关闭结果的 Snackbar
-- `新增` 脚本预览提供可调用的 compose / $compose, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, 批处理, 调度与主题控制
-- `新增` ui 脚本可挂载 Compose 内容; 替换挂载或停止脚本时释放旧会话及回调
-- `新增` 非 ui 脚本可创建 raw 或可调整 Compose 悬浮窗, 修改像素位置和尺寸, 触摸及焦点设置, 并通过窗口控件, floaty.closeAll 或脚本退出关闭
+- `新增` 原生文本编辑保留选区与输入法组合状态, 支持焦点和显式编辑, 拒绝覆盖较新输入的延迟编辑; 开关与滑块仍由脚本控制状态
+- `新增` 核心图标与 ImageWrapper/Bitmap, 本地文件和宿主 drawable 图片; 渲染器不自动回收调用方持有的图片资源
 - `新增` 计数器, 表单校验, 1000 项键控列表, 非 ui 悬浮 HUD 与主题五个可运行示例, 包含前置条件与索引, 同步至匹配宿主的 Compose UI 示例分类
+- `新增` 配套 API 参考与 TypeScript 声明, 以及 10 语言 README, 插件中心说明和更新日志
+- `新增` 插件中心发现与宿主版本, 契约, 授权检查, 无独立界面和启动器入口
 - `修复` Compose UI 在渲染回调中拒绝再次挂载页面或悬浮窗并保留当前页面, 支持插件更新后重新挂载页面
 - `优化` 可用性探测与 ComposeError 统一报告插件缺失, 禁用, 未授权, 不兼容, 权限不足及会话关闭; 生命周期清理覆盖原生窗口附加前即被取消的情况; 插件更新, 卸载或停用时关闭活动会话并报告对应错误
 - `依赖` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)
