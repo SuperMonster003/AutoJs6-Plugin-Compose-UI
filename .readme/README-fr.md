@@ -75,7 +75,7 @@ Capacites principales que le plugin doit livrer:
 
 ******
 
-1. Installez AutoJs6 6.8.0 (5308) ou une version ulterieure
+1. Installez AutoJs6 6.8.0 (5316) ou une version ulterieure
 2. Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)
 3. Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active
 4. Utilisez directement l'objet global `compose` dans vos scripts (le rendu arrive avec la version 1.0.0)
@@ -126,7 +126,7 @@ La reference complete de l'API (catalogue de composants, operations de Modifier,
 
 Exigences d'execution et limites du plugin:
 
-- Version d'AutoJs6 : 6.8.0 (5308) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
+- Version minimale d'AutoJs6 : 6.8.0 (5316) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
 - Version d'Android : 7.0 (API 24) ou ulterieure
 - Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote
@@ -175,7 +175,7 @@ info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5308 (6.8.0)
+minimum host build: 5316 (6.8.0)
 ```
 
 L'hote decouvre le plugin via `org.autojs.plugin.INFO` et lit des informations de capacite telles que `requiresHostVersion` ; la classe de fabrique du moteur de rendu est declaree par la meta-donnee `org.autojs.plugin.compose.RENDERER_FACTORY`, et l'hote cree un chargeur de classes a partir du chemin de l'APK du plugin (avec l'hote comme parent) puis l'instancie dans son propre processus.
@@ -198,16 +198,16 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 #### v1.0.0
 
-_2026/10/02_
+_2026/10/03_
 
 - `Indication` Aperçu de développement P1: le chargeur hôte V1 et les sessions exécutent un compteur Column / Text / Button dans un hôte de test dédié. Le moteur de rendu complet et l'API de script compose restent en développement
-- `Indication` Necessite AutoJs6 6.8.0 (5308) ou ulterieur (le numero de build minimal exact sera renseigne une fois les changements cote hote integres)
+- `Indication` Necessite AutoJs6 6.8.0 (5316) ou ulterieur
 - `Nouveaute` Squelette du depot du plugin : chaine de compilation du plugin de versions de plateforme, dependances Jetpack Compose BOM 2026.09.00, protocole d'activation Wake Activity et service INFO (categorie compose-ui)
 - `Nouveaute` README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON
 - `Nouveaute` Le compteur de prévisualisation prend en charge les mises à jour incrémentales et libère les callbacks à la fermeture; une mise à jour rejetée conserve la dernière interface valide
 - `Dependance` Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)
 - `Dependance` Ajout de Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependance` Ajout de compose-ui-api.aar V1 (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte
+- `Dependance` Ajout de compose-ui-api.aar V1 aligné sur AutoJs6 6.8.0 (5316) (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte
 
 ##### Pour un historique plus complet, voir
 

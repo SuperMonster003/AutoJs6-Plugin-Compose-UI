@@ -4,14 +4,14 @@ Aperçu de développement P1: le chargeur hôte V1 et les sessions exécutent un
 
 ### Utilisation
 
-1. Installez AutoJs6 6.8.0 (5308) ou une version ulterieure
+1. Installez AutoJs6 6.8.0 (5316) ou une version ulterieure
 2. Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)
 3. Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active
 4. Utilisez directement l'objet global `compose` dans vos scripts (le rendu arrive avec la version 1.0.0)
 
 ### Compatibilite
 
-- Version d'AutoJs6 : 6.8.0 (5308) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
+- Version minimale d'AutoJs6 : 6.8.0 (5316) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
 - Version d'Android : 7.0 (API 24) ou ulterieure
 - Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote

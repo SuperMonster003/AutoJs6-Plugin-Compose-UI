@@ -6,10 +6,10 @@
   "changelog_label_dependency": "Зависимость",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/10/02",
+      "released_date": "2026/10/03",
       "hint": [
         "Предварительная версия P1: загрузчик V1 и сеансы запускают счетчик Column / Text / Button в отдельном тестовом хосте. Полный рендерер и API сценариев compose еще разрабатываются",
-        "Требуется AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) или новее (точный минимальный номер сборки будет уточнён после внесения изменений на стороне хоста)"
+        "Требуется AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) или новее"
       ],
       "feature": [
         "Каркас репозитория плагина: сборочная цепочка плагина версий платформы, зависимости Jetpack Compose BOM {{ compose_bom }}, протокол активации Wake Activity и сервис INFO (категория {{ plugin_info_category }})",
@@ -19,7 +19,7 @@
       "dependency": [
         "Добавлен common-plugin-api.aar версии 6.8.0 (5307) (MPL 2.0, зафиксирован по хешу)",
         "Добавлен Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "Добавлен compose-ui-api.aar V1 (MPL 2.0, фиксированная хеш-сумма), общие зависимости согласованы с хостом"
+        "Добавлен compose-ui-api.aar V1 для AutoJs6 6.8.0 (5316) (MPL 2.0, фиксированная хеш-сумма), общие зависимости согласованы с хостом"
       ]
     }
   }

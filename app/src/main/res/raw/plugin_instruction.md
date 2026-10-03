@@ -4,14 +4,14 @@ P1 development preview: the V1 host loader and sessions can run a Column / Text 
 
 ### Usage
 
-1. Install AutoJs6 6.8.0 (5308) or later
+1. Install AutoJs6 6.8.0 (5316) or later
 2. Install this plugin APK (there is nothing to open, the plugin has no launcher entry)
 3. Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled
 4. Use the `compose` global object directly in scripts (rendering arrives with version 1.0.0)
 
 ### Compatibility
 
-- AutoJs6 version: 6.8.0 (5308) or later; older hosts flag the plugin as incompatible in the plugin center
+- Minimum AutoJs6 version: 6.8.0 (5316) or later; older hosts flag the plugin as incompatible in the plugin center
 - Android version: 7.0 (API 24) or later
 - Processor architecture: arm64-v8a / armeabi-v7a / x86_64 / x86 (all four built into the single APK, no per-architecture download)
 - Compose version: bundled with the plugin (BOM 2026.09.00), independent of the host's Compose runtime

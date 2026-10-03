@@ -39,7 +39,7 @@
   "h3_compatibility": "التوافق",
   "p_compatibility_intro": "متطلبات التشغيل وحدود الإضافة",
   "compatibility_points": [
-    "إصدار AutoJs6: {{ required_host_version_name }} ({{ required_host_version_code }}) أو أحدث; تعرض المضيفات الأقدم الإضافة على أنها غير متوافقة في مركز الإضافات",
+    "الحد الأدنى لإصدار AutoJs6: {{ required_host_version_name }} ({{ required_host_version_code }}) أو أحدث; تعرض المضيفات الأقدم الإضافة على أنها غير متوافقة في مركز الإضافات",
     "إصدار Android: {{ min_android_version }} (API {{ android_min_sdk }}) أو أحدث",
     "معمارية المعالج: arm64-v8a / armeabi-v7a / x86_64 / x86 (الأربع جميعها مدمجة في حزمة APK الواحدة, دون اختيار حسب المعمارية)",
     "إصدار Compose: مضمن مع الإضافة (BOM {{ compose_bom }}), مستقل عن بيئة Compose في المضيف",

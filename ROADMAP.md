@@ -50,7 +50,7 @@
 | D26 | 宿主共享依赖的版本纪律 | 2026-10-02 Q1(b) 定稿: 宿主 app / inrt 的 debug / release 共用 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0, 由宿主版本目录单点声明; 插件编译依赖不能高于宿主, `locks/host-shared-deps.lock` 锁定 51 项解析版本. AndroidX / coroutines / serialization 共享项为插件 `compileOnly`, Kotlin stdlib 2.4.0 为 INFO 独立进程保留打包副本, 宿主内仍 parent-first 且 R8 必须保持 ABI. 宿主 `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath, 插件 `verifySharedClasspath` 守卫编译与排除集合; 任一版本变化时同步两仓库锁与正式最低宿主版本. 依赖解析一致不等于 minified 宿主 ABI 已通过, P1 需补正式契约 / keep 规则 / 装载器并回填最低版本 |
 | D27 | 图片与大对象 | `Image` 的 `src` 接受 `ImageWrapper` (`images.read` 等), 文件路径, 以及宿主 `R.drawable` 名称; 进程内直接传递 `Bitmap` 引用 (`UiValue.BitmapRef`), 不编码; 位图所有权归脚本 (`recycle` 由脚本决定), 渲染器只持弱引用并在节点移除时放手; URL 图片不在 1.0.0 |
 | D28 | 兼容矩阵 | API 24 AVD x86, API 28 Sony G8441 (arm64), API 31 Sony XQ-AT72, API 33 Redmi 22120RN86C, API 35 Xiaomi 23046RP50C (HyperOS), API 37 AVD (16 KB 页); 每台设备记录宿主 build 与插件 build; HyperOS 上悬浮窗只在桌面之上活动且需 `requestFocus` (既有记录), 作为 P3.4 验收的已知条件 |
-| D29 | 版本与回填 | `VERSION_NAME` 从 1.0.0 起; `ComposeUiIds.REQUIRED_HOST_VERSION_CODE` 在 P1.3 回填为首个含 `compose-ui-api` 与宿主装载器的宿主 `VERSION_BUILD`; 契约 `CONTRACT_VERSION = 1` |
+| D29 | 契约与最低宿主版本 | V1 `CONTRACT_VERSION = 1`, `MIN_SUPPORTED = 1`; P1.3 将 `REQUIRED_HOST_VERSION_CODE` 确认为 5316 (AutoJs6 6.8.0), 对应集成装载器 / 会话核心 / 插件中心注册的构建. 同步 Manifest, 公共文案, JVM / 设备断言与锁定 AAR, 只更新部署元数据, 不变更 V1 wire 语义. 原 5308 为建仓占位值, 保留于历史证据中 |
 | D30 | 打包应用 (inrt) | 打包的脚本应用使用 `compose` 时需目标设备已安装并启用本插件 (与 epub / mail 等插件模块一致); P5.2 验证 inrt 构建中的装载路径与错误提示, 文档写明 |
 | D31 | 示例与守卫 | 插件 `assets/examples/*.js` (计数器, 表单, 列表, 悬浮 HUD, 主题) 由 `assets/examples/index.json` 列出, P4.1 同步到宿主 `app/src/main/assets-app/sample/` 的对应分类; 示例必须能在兼容矩阵上运行, 作为 P5 回归用例 |
 
@@ -248,7 +248,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | 阶段 | 内容 | 目标版本 | 状态 |
 | --- | --- | --- | --- |
 | P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
-| P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 进行中 (P1.2 完成, 下一步 P1.3) |
+| P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 已完成 (2026-10-03, P1.1 - P1.3) |
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 未开始 |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
@@ -327,12 +327,14 @@ P1.2 证据 (2026-10-02): `docs/dev/p1-session-evidence.md`; 宿主提交 `adf66
 
 ### P1.3 注册, 协议文档, changelog 与版本回填
 
-- [ ] (宿主) `PluginInstallWizardCatalog` 增加 `entry(official("compose.ui"), "Compose UI", UI)`; 确认插件中心对本包的 INFO 发现, 启用 / 禁用 / 授权与 `requiresHostVersion` 展示正确 (`PluginCenterComposeUiRegistrationTest`); 如 INFO 发现需要包名 `<queries>` 则补充.
-- [ ] (宿主) `docs/dev/compose-ui-plugin-protocol-v1.md`: 状态, 决策, 装载面, 数据模型, 组件目录, 事件, 命令, 错误, 上限, 版本协商, 线程与所有权, 与 ImGui 注册表路线的差异.
-- [ ] (宿主) 回填 `ComposeUiIds.REQUIRED_HOST_VERSION_CODE` 为本阶段提交后的 `VERSION_BUILD`; 插件 `requiresHostVersion` 与 `README` / 测试同步.
-- [ ] (宿主) `.changelog` 10 语言: feature "集成 Compose UI 插件, 提供脚本模块 compose 以 Jetpack Compose 与 Material 3 渲染声明式界面 (需安装 Compose UI 插件)" 与 hint (6.8.0 既有 "部分内置功能改由独立插件提供" 条目下补充); 生成器 `--check`.
+- [x] (宿主) `PluginInstallWizardCatalog` 增加 `entry(official("compose.ui"), "Compose UI", UI)`; 确认插件中心对本包的 INFO 发现, 启用 / 禁用 / 授权与 `requiresHostVersion` 展示正确 (`PluginCenterComposeUiRegistrationTest`); 如 INFO 发现需要包名 `<queries>` 则补充.
+- [x] (宿主) `docs/dev/compose-ui-plugin-protocol-v1.md`: 状态, 决策, 装载面, 数据模型, 组件目录, 事件, 命令, 错误, 上限, 版本协商, 线程与所有权, 与 ImGui 注册表路线的差异.
+- [x] (宿主) 回填 `ComposeUiIds.REQUIRED_HOST_VERSION_CODE` 为本阶段提交后的 `VERSION_BUILD`; 插件 `requiresHostVersion` 与 `README` / 测试同步.
+- [x] (宿主) `.changelog` 10 语言: feature 说明 Compose UI 开发预览已纳入插件中心, 可管理已安装插件的启用 / 授权 / 兼容性; compose 脚本 API 随 P3 实际交付后再公告, 与 hint (6.8.0 既有 "部分内置功能改由独立插件提供" 条目下补充); 生成器 `--check`.
 
 ---
+
+P1.3 证据 (2026-10-03): `docs/dev/p13-p2-evidence.md`. 宿主基于当前 master 同步后为 6.8.0 / 5316; 25 项宿主 JVM + 13 项 API JVM, debug / release 装配与原生对齐通过; API 24 x86 与 API 35 arm64 各 9 项 V1 装载 / 受控事件测试通过. 最低版本回填为 5316, 新 AAR 仅变更部署门槛. 公告按实际交付写为开发预览, 避免在 P3 前宣称存在 compose 脚本入口; 安装向导仍需远端索引实际存在该包才展示下载项.
 
 ## P2: 插件渲染器核心
 

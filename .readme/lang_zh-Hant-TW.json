@@ -39,7 +39,7 @@
   "h3_compatibility": "相容性",
   "p_compatibility_intro": "外掛程式的執行需求與限制",
   "compatibility_points": [
-    "AutoJs6 版本: {{ required_host_version_name }} ({{ required_host_version_code }}) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容",
+    "最低 AutoJs6 版本: {{ required_host_version_name }} ({{ required_host_version_code }}) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容",
     "Android 版本: {{ min_android_version }} (API {{ android_min_sdk }}) 或更新",
     "處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內建全部四種, 無需依架構選擇安裝套件)",
     "Compose 版本: 由外掛程式自帶 (BOM {{ compose_bom }}), 不依賴宿主的 Compose 執行階段",

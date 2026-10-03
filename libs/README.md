@@ -24,11 +24,11 @@ policy. Record the lowercase SHA-256 of every staged artifact in the lock file; 
 `../THIRD_PARTY_NOTICES.md`.
 
 V1 `compose-ui-api.aar`: built with `:plugin-api:compose-ui-api:assembleRelease` on host branch
-`spike/compose-ui-p0` (6.8.0 / 5309, source commit `d9b090fd68`).
-SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`.
+`spike/compose-ui-p0` (6.8.0 / 5316, P1.3 integration commit recorded in `docs/dev/p13-p2-evidence.md`).
+SHA-256 `3ba7c215262e889034eef61e6ba0d5414839712a03284e3d009a96696cce5266`.
 The host now uses `implementation(project(":plugin-api:compose-ui-api"))` in every variant. The
-shared dependency fingerprint and staged AAR are unchanged. P1.2 now uses the V1 loading surface
+shared dependency fingerprint is unchanged. P1.3 changes only the API deployment-floor metadata,
+with the new staged artifact digest recorded above. P1.2 now uses the V1 loading surface
 and a three-component preview renderer. Legacy api.spike types have no remaining implementation
-references and will be removed at the next artifact maintenance. The final minimum host version
-and complete renderer remain P1.3/P2 work.
+references and will be removed at the next artifact maintenance. The final minimum host version is 5316; the complete renderer remains P2 work.
 See `docs/dev/compose-ui-plugin-protocol-v1.md` for the frozen surface and BitmapRef transport limits.

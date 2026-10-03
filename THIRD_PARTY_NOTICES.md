@@ -11,8 +11,8 @@ reproduced in full in the distribution of the respective project.
 | `common-plugin-api.aar` | AutoJs6 module `plugin-api/common-plugin-api` (https://github.com/SuperMonster003/AutoJs6): `IPluginInfoProvider` AIDL, `PluginInfo`, `PluginActions`, `PluginCapabilityKeys` | host build 6.8.0 / 5307, commit `77b5a3b0c5` (module byte-identical to the copies staged by the other official plugins) | MPL 2.0 | `ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15` |
 
 The frozen V1 `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in
-AutoJs6 branch `spike/compose-ui-p0` (6.8.0 / 5309, source commit `d9b090fd68`).
-It is MPL 2.0, SHA-256 `e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21`,
+AutoJs6 branch `spike/compose-ui-p0` (6.8.0 / 5316, P1.3 integration commit recorded in `docs/dev/p13-p2-evidence.md`).
+It is MPL 2.0, SHA-256 `3ba7c215262e889034eef61e6ba0d5414839712a03284e3d009a96696cce5266`,
 consumed as `compileOnly` by the plugin and packaged by the host. It contains no Compose
 implementation dependency. The retained `api.spike` negative-version fixture is excluded from
 V1 compatibility guarantees. P1.2 retired its implementation/test consumers; the locked AAR is

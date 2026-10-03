@@ -18,7 +18,7 @@
   "plugin_renderer_factory_meta": "org.autojs.plugin.compose.RENDERER_FACTORY",
   "plugin_contract_package": "org.autojs.plugin.compose.api",
   "plugin_contract_version": "1",
-  "required_host_version_code": "5308",
+  "required_host_version_code": "5316",
   "required_host_version_name": "6.8.0",
   "android_min_sdk": "24",
   "min_android_version": "7.0",

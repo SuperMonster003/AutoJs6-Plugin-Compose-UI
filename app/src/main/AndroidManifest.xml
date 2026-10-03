@@ -24,10 +24,10 @@
         <meta-data
             android:name="org.autojs.plugin.compose.RENDERER_FACTORY"
             android:value="io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl" />
-        <!-- Provisional minimum host build (roadmap D29): back-filled in P1.3 with the first host build that ships compose-ui-api. -->
+        <!-- P1.3: first integrated host build containing the V1 loader, sessions and Plugin Center registration. -->
         <meta-data
             android:name="requiresHostVersion"
-            android:value="5308" />
+            android:value="5316" />
 
         <activity
             android:name=".WakeActivity"
