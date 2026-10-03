@@ -42,7 +42,7 @@
 
 ******
 
-Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览支持 `"ui";` 模式的 Activity 内容, 悬浮窗计划在 P3.4 交付.
+Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `"ui";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.
 
 插件不包含任何独立界面, 也不在启动器中显示入口. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在宿主进程内加载渲染器. 界面树, 状态与事件在脚本侧描述, 渲染器只负责把补丁应用到 Compose 组合并把用户事件回传给脚本.
 
@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compo
 
 ******
 
-P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme 与 ui 脚本挂载已可在匹配的本地 AutoJs6 宿主构建中使用. 悬浮窗仍计划在 P3.4 交付. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
+P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
 
 ******
 
@@ -60,15 +60,16 @@ P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长
 
 ******
 
-当前开发预览的能力与后续承载支持:
+当前开发预览的核心能力:
 
 - 声明式界面: `compose.state` + `compose.mount(render)` 按状态变化自动重绘, 同时提供可长期持有的节点句柄 (`compose.Text({...})` 等) 直接修改属性与子节点
 - Material 3 组件核心集: 布局 (Column / Row / Box / LazyColumn 等), 文本, 按钮, 输入框, 开关, 滑块, 进度条, 卡片, 对话框等
 - 链式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作顺序, 作用域操作在宿主侧校验
-- 承载方式: `"ui";` 脚本的 Activity 内容可通过 `compose.mount` 或可调用的 `compose` / `$compose` 挂载; 悬浮窗 (`compose.floaty`) 计划在 P3.4 交付
+- 两种承载方式: `"ui";` 脚本通过 `compose.mount` 或可调用的 `compose` / `$compose` 挂载 Activity 内容; `compose.floaty` 创建 raw 或可调整悬浮窗, 同样支持非 ui 脚本
 - 进程内渲染: 渲染器在宿主进程中运行, 没有跨进程界面桥接, 事件与状态更新低延迟
 - 单一安装包: 不区分 ABI, 不含插件自有原生代码 (仅随 Compose 附带的 AndroidX graphics-path 辅助库, 四种 ABI 全部内置), 一个 APK 适配所有设备
 - 脚本入口: `compose` / `$compose`, 29 个节点工厂与长期持有的句柄, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`
+- 集成守卫: 插件缺失或不兼容时可用性探测返回不可用, 错误使用 `ComposeError`, 关闭会话或停止脚本会释放所属窗口与回调
 
 ******
 
@@ -79,7 +80,7 @@ P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长
 1. 安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 6.8.0 / 5316)
 2. 安装本插件 APK (无需打开, 插件没有启动器入口)
 3. 在 AutoJs6 的插件中心确认 Compose UI 已被识别并处于启用状态
-4. 在脚本中使用 `compose` 或 `$compose`; 通过 `"ui";` 脚本挂载 Activity 内容
+4. 在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`
 
 ******
 
@@ -87,7 +88,7 @@ P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长
 
 ******
 
-以下计数器可在匹配的本地预览宿主中运行. 悬浮窗 HUD 展示 P3.4 的目标 API, 当前尚不能运行:
+以下计数器与悬浮窗 HUD 均可在匹配的本地预览宿主中运行. 运行 HUD 前需授予宿主显示在其他应用上层的权限:
 
 ```js
 "ui";
@@ -143,6 +144,7 @@ threads.start(() => {
 - 为什么找不到 `compose`? 全局对象由匹配的本地宿主构建提供, 单独安装插件 APK 不会添加该入口
 - 是否需要卸载其它界面插件? 不需要, Compose UI 与现有 `ui` 模块及其它插件互不影响
 - 插件更新后脚本需要修改吗? 契约版本不变时无需修改; 契约升级会在更新日志中明确标注
+- 悬浮窗需要什么条件? 先授予宿主悬浮窗权限, 输入文字前调用 `window.requestFocus()`. 若 HyperOS 未显示窗口, 请先回到桌面. 缺少权限会返回 PERMISSION_REQUIRED, 不会自动弹出授权界面
 
 ******
 
@@ -201,7 +203,7 @@ minimum host build: 5316 (6.8.0)
 
 _2026/10/03_
 
-- `提示` P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme 与 ui 脚本挂载已可在匹配的本地 AutoJs6 宿主构建中使用. 悬浮窗仍计划在 P3.4 交付. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版
+- `提示` P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版
 - `提示` 需要 AutoJs6 6.8.0 (5316) 或更高版本
 - `新增` 插件仓库骨架: 平台版本插件构建链, Jetpack Compose BOM 2026.09.00 依赖, Wake Activity 激活协议与 INFO 服务 (类别 compose-ui)
 - `新增` 10 种语言的 README, 插件中心说明与更新日志, 由 JSON 源文件统一生成
@@ -212,7 +214,9 @@ _2026/10/03_
 - `新增` 预览输入框保留选区与输入法组合文本, 支持焦点和显式编辑, 拒绝覆盖较新输入的延迟编辑
 - `新增` 预览新增支持稳定条目 key 与索引滚动的懒加载列表, Scaffold 与顶部应用栏插槽, 受控对话框, 进度指示器, 以及按队列返回操作或关闭结果的 Snackbar
 - `新增` 脚本预览提供可调用的 compose / $compose, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, 批处理, 调度与主题控制
-- `新增` ui 脚本可挂载 Compose 内容; 替换挂载或停止脚本时释放旧会话及回调, 悬浮窗承载仍计划在 P3.4 交付
+- `新增` ui 脚本可挂载 Compose 内容; 替换挂载或停止脚本时释放旧会话及回调
+- `新增` 非 ui 脚本可创建 raw 或可调整 Compose 悬浮窗, 修改像素位置和尺寸, 触摸及焦点设置, 并通过窗口控件, floaty.closeAll 或脚本退出关闭
+- `优化` 可用性探测与 ComposeError 统一报告插件缺失, 禁用, 未授权, 不兼容, 权限不足及会话关闭; 生命周期清理覆盖原生窗口附加前即被取消的情况
 - `依赖` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)
 - `依赖` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `依赖` 附加与 AutoJs6 6.8.0 (5316) 对齐的 compose-ui-api.aar V1 (MPL 2.0, 摘要锁定), 共用依赖与宿主对齐

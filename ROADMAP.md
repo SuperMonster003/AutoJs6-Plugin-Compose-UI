@@ -250,7 +250,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 已完成 (2026-10-03, P1.1 - P1.3) |
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6) |
-| P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 进行中 (P3.1 - P3.3 完成, 下一步 P3.4) |
+| P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 已完成 (2026-10-03, P3.1 - P3.5) |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 未开始 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 未开始 |
@@ -411,14 +411,16 @@ P3.1 - P3.3 证据 (2026-10-03): `docs/dev/p31-p33-evidence.md`. 宿主已提供
 
 ### P3.4 悬浮窗承载
 
-- [ ] (宿主) `compose.floaty(nodeOrRender, options)`: `options.raw` 选择 `rawWindow` / 可调整窗口, 其它选项 (位置, 尺寸, 可触摸, 焦点) 透传; 权限检查复用 `floaty.ensurePermission` 语义 (`PERMISSION_REQUIRED`); 窗口 View 为渲染器 `view()`, owner 由 P1.2 的 `ComposeFloatyOwners` 提供; 返回 `ComposeFloatyWindow` (继承 `JsRawWindow` / `JsResizableWindow` 的 `setPosition / setSize / close / requestFocus / disableFocus / setTouchable` + `session`); 非 ui 脚本的调度器为脚本 looper, 脚本退出时 `floaty.closeAll` 既有路径关闭窗口与会话.
-- [ ] (测试) 真机 (HyperOS, Sony API 31) + AVD: 非 ui 脚本创建 HUD 窗口, 工作线程经 `compose.post` 每秒更新文本, 点击按钮关闭; TextField 在悬浮窗内获得焦点并输入 (需 `requestFocus`); 脚本退出窗口消失.
+- [x] (宿主) `compose.floaty(nodeOrRender, options)`: `options.raw` 选择 `rawWindow` / 可调整窗口, 其它选项 (位置, 尺寸, 可触摸, 焦点) 透传; 权限检查复用 `floaty.ensurePermission` 语义 (`PERMISSION_REQUIRED`); 窗口 View 为渲染器 `view()`, owner 由 P1.2 的 `ComposeFloatyOwners` 提供; 返回 `ComposeFloatyWindow` (继承 `JsRawWindow` / `JsResizableWindow` 的 `setPosition / setSize / close / requestFocus / disableFocus / setTouchable` + `session`); 非 ui 脚本的调度器为脚本 looper, 脚本退出时 `floaty.closeAll` 既有路径关闭窗口与会话.
+- [x] (测试) 真机 (HyperOS, Sony API 31) + AVD: 非 ui 脚本创建 HUD 窗口, 工作线程经 `compose.post` 每秒更新文本, 点击按钮关闭; TextField 在悬浮窗内获得焦点并输入 (需 `requestFocus`); 脚本退出窗口消失.
 
 ### P3.5 错误, 探测与守卫
 
-- [ ] (宿主) `ComposeError` (`code` / `message` / `nodeId` / `prop` / `cause`), 装载失败消息复用插件中心本地化字符串; 新增字符串 (`error_compose_ui_mode_required`, `error_compose_unknown_component` 等) 10 语言, 按 name 排序.
-- [ ] (宿主) 守卫: 单引擎并发会话上限 (附录 B.5), 会话关闭后对句柄的操作 -> `SESSION_CLOSED`; 引擎退出时的全部清理有单元测试.
-- [ ] (测试) JVM `ComposeJsErrorsTest` (code 映射, instanceof, 消息前缀); `ComposeSessionLifecycleTest`.
+- [x] (宿主) `ComposeError` (`code` / `message` / `nodeId` / `prop` / `cause`), 装载失败消息复用插件中心本地化字符串; 新增字符串 (`error_compose_ui_mode_required`, `error_compose_unknown_component` 等) 10 语言, 按 name 排序.
+- [x] (宿主) 守卫: 单引擎并发会话上限 (附录 B.5), 会话关闭后对句柄的操作 -> `SESSION_CLOSED`; 引擎退出时的全部清理有单元测试.
+- [x] (测试) JVM `ComposeJsErrorsTest` (code 映射, instanceof, 消息前缀); `ComposeSessionLifecycleTest`.
+
+P3.4 - P3.5 证据 (2026-10-03): `docs/dev/p34-p35-evidence.md`. 宿主相关 JVM 154 项 (生命周期 19, 错误 12, 控制投递与回执 17 等) 与冻结契约 13 项通过. API 24 x86 AVD / Sony API 31 / HyperOS API 35 各 8 项真实非 ui 悬浮脚本通过, 含每秒工作线程更新, raw / 可调整窗口, 真实 IME, 立即 closeAll, 普通队列饱和时原生事件 / 关闭, 控制名额耗尽后的临时窗口清理; 两端额外各 7 项页面回归, Sony 额外 1 项既有窗口 owner 回归, 合计 39 项. 修复脚本 looper 退出后的迟到投递, 丢弃清理队列后的 owner 重试, 初始化失败和名额拒绝的资源释放. 原生控制与普通 post 队列均有界且分离. 宿主 app debug / androidTest / release, 插件 JVM 63 项, 51 项共享依赖及签名 / 对齐 / DEX 门禁通过. P3 全部完成, 下一起点为 P4.1; HyperOS 仍按桌面与 requestFocus 条件验收, 完整矩阵与长期内存测量留在原 P5.
 
 ---
 
@@ -747,6 +749,8 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 
 `compose.floaty(...)` (推荐, 与 `compose.mount` 对称, 文档集中) 还是 `floaty.compose(...)` (与 `floaty.window` / `rawWindow` 并列). 两者只能选一, 不做别名.
 
+2026-10-03 P3.4 按正文既定入口实现 `compose.floaty(...)`, 不增加 `floaty.compose` 别名.
+
 ### Q5 (P5.3 后): 性能回归阈值
 
 由 P5.3 实测数据提出 (首帧, 单次更新, 列表滚动, PSS, APK 体积), 维护者确认后写入插件 `AGENTS.md`.
@@ -898,3 +902,13 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 下一起点为 P2.4 输入框, 然后 P2.5 列表 / 脚手架 / 提示; P3 脚本入口, IME, TalkBack, inrt 执行, 全矩阵和性能 / 长期内存门禁未在本轮交付. 图标 Q6 仍为占位源图. 继续只做本地提交, 不推送 / 发 Release / 登记远端索引.
 - 本轮最终插件签名产物: autojs6-plugin-compose-ui-v1.0.0-6b41b408.apk (build 12, 1958242 B). 测试安装全部清理, 自建 compose_ui_p2_api24 AVD 的注册与数据目录已验证删除.
 - 提交定位: 宿主主线同步 8372f53eee, P1.3 注册 0ee2953425, P2 事件 / 验证 6812bdbd9f; 插件最低版本接入 4b89901, P2 渲染器为本条所在提交 (build 12).
+
+### 2026-10-03: P3.4 悬浮窗与 P3.5 生命周期守卫
+
+- 从插件 eec4889 (build 15) 与宿主独立分支 6fba451cae 继续, 先同步已提交主线 2fd0809e57 为 8edfb7ac84. 宿主原工作区中其它会话的代码生成 / 图标等改动未参与本任务暂存与提交.
+- 完成原 P3.4 / P3.5, P3 全部勾选. `compose.floaty` 支持 ui / 非 ui, raw / 可调整窗口, 位置 / 尺寸 / 焦点 / 可触摸控制与 session; 每个悬浮会话拥有独立保活令牌, 与 UI 共享 8 会话上限. 18 个错误码与 10 语言资源, 关闭后句柄守卫和退出清理均有证据. 未增加, 分拆或丢弃路线图小节.
+- 边界修复: 立即 closeAll 防止异步重现窗口; 原生登记集合移除锁反转并保留并发新增项; 退出 looper 的迟到投递按取消处理; owner 线程补做被丢弃的清理; 原生控制与普通 post 队列隔离且有界; 初始化失败和控制名额拒绝都释放临时窗口与保活令牌. 完整经过与限制见 `docs/dev/p34-p35-evidence.md`.
+- 验证: 宿主相关 JVM 154, 冻结 API JVM 13, 插件 JVM 63; API 24 AVD / Sony API 31 / HyperOS API 35 各 8 项悬浮脚本, 连同页面 / 既有窗口回归合计 39 项通过. 宿主 app debug / androidTest / release, 共享依赖守卫, 插件签名 / 原生对齐 / DEX 归属及 36 个文档产物检查通过.
+- 提交定位: 宿主 f7fcac31af (本地化错误), 065c8148e8 (原生控制 / 退出清理), 4d649bca96 (悬浮 API / 集成守卫 / 多语言历史), 证据另行提交. 插件本条所在提交为 build 16, 签名产物 autojs6-plugin-compose-ui-v1.0.0-f82f337c.apk, 2365090 B; 渲染器代码, 冻结 AAR, 51 项共享依赖与最低宿主 5316 保持不变, 脚本 API 需匹配当前本地宿主构建.
+- 清理: 三台设备本次安装的 3 个包均已卸载并确认不存在; 自建 compose_p34_api24 AVD 已停止, SDK 按名称删除后确认数据与注册均不存在. 用户应用, 文件和其它 AVD 未处理. 继续只做本地提交, 不推送 / 登记索引 / 发 Release.
+- 下一会话从 P4.1 示例脚本开始. 完整兼容 / inrt / 性能 / 长期内存验证继续按 P5, 用户文档与声明按 P6; Q6 正式图标仍待源图. 本轮没有执行宿主全量 JVM / lint, inrt 装配与远端 CI, 不把所选回归外推为这些门禁已通过.

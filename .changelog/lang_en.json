@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, and UI script mounting work with a matching local AutoJs6 host build. Floating windows remain planned for P3.4. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release",
+        "P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release",
         "Requires AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) or later"
       ],
       "feature": [
@@ -21,13 +21,17 @@
         "Preview text fields preserve selection and IME composition, support focus and explicit edits, and reject delayed edits that would overwrite newer input",
         "Preview adds lazy lists with stable item keys and indexed scrolling, Scaffold and top app bar slots, controlled dialogs, progress indicators, and queued Snackbar action or dismissal callbacks",
         "The script preview exposes callable compose / $compose, 29 node factories, retained handles, reactive state/render/ref, batching, posting, and theme control",
-        "UI scripts can mount Compose content; replacing the mount or stopping the script releases the old session and callbacks, while floating hosting remains planned for P3.4"
+        "UI scripts can mount Compose content; replacing the mount or stopping the script releases the old session and callbacks",
+        "Non-UI scripts can create raw or resizable Compose floating windows, change pixel geometry, touch and focus settings, and close them through their controls, floaty.closeAll, or script termination"
       ],
       "dependency": [
         "Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)",
         "Attach Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
         "Attach compose-ui-api.aar V1 aligned to AutoJs6 6.8.0 (5316) (MPL 2.0, hash-locked), with shared dependencies aligned to the host",
         "Attach Compose UI Test managed by BOM {{ compose_bom }} (Apache 2.0, tests only)"
+      ],
+      "improvement": [
+        "Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment"
       ]
     }
   }

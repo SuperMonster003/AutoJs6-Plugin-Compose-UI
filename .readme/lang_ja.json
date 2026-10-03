@@ -5,30 +5,31 @@
   "h3_languages_with_ascii": "Languages / 言語",
   "p_languages_all_supported_for_readme": "このドキュメントは以下の言語で提供されています",
   "h3_introduction": "はじめに",
-  "p_introduction_what": "Compose UI は AutoJs6 の UI 描画プラグインです. スクリプトはホストが提供する `compose` / `$compose` API で UI を宣言し, プラグインがホストプロセス内で Jetpack Compose と Material 3 により描画します. 現在のプレビューは `\"ui\";` モードの Activity 内容に対応し, フローティングウィンドウは P3.4 で提供予定です.",
+  "p_introduction_what": "Compose UI は AutoJs6 の UI 描画プラグインです. スクリプトはホストが提供する `compose` / `$compose` API で UI を宣言し, プラグインがホストプロセス内で Jetpack Compose と Material 3 により描画します. 現在のプレビューは `\"ui\";` モードの Activity 内容と非 UI スクリプトのフローティングウィンドウの両方に対応します.",
   "p_introduction_how": "プラグインは独立した画面を持たず, ランチャーにも表示されません. ホストは INFO サービスでプラグインを検出し, バージョンと互換性情報を読み取った上で, 契約 (`org.autojs.plugin.compose.api`) に従ってホストプロセス内にレンダラーを読み込みます. UI ツリー, 状態, イベントはスクリプト側で記述され, レンダラーは Compose のコンポジションにパッチを適用し, ユーザーイベントをスクリプトへ返すだけです.",
   "h3_status": "現在の状態",
-  "p_status": "P3 開発プレビュー: 呼び出し可能な compose / $compose, 29 個のノードファクトリー, 保持可能なハンドル, リアクティブな state/render/ref, batch/post/theme, UI スクリプトのマウントを対応するローカル AutoJs6 ホストビルドで利用できます. フローティングウィンドウは P3.4 で提供予定です. サンプル集, 完全な API 文書, 型宣言, より広い検証マトリクスは未提供です. 現在はローカルプレビューであり, 公式リリースではありません.",
+  "p_status": "P3 開発プレビュー: 呼び出し可能な compose / $compose, 29 個のノードファクトリー, 保持可能なハンドル, リアクティブな state/render/ref, batch/post/theme, UI スクリプトのマウント, raw またはサイズ変更可能なフローティングウィンドウを対応ローカル AutoJs6 ホストビルドで利用できます. 可用性確認, 型付きエラー, セッションの解放も含まれます. サンプル集, 完全な API 文書, 型宣言, より広い検証マトリクスは未提供です. 現在はローカルプレビューであり, 公式リリースではありません.",
   "h3_features": "機能",
-  "p_features_intro": "現在のプレビュー機能と今後のホスティング対応",
+  "p_features_intro": "現在の開発プレビューの主な機能",
   "features": [
     "宣言的 UI: `compose.state` + `compose.mount(render)` が状態変化に応じて自動で再描画し, 長期保持できるノードハンドル (`compose.Text({...})` など) でプロパティや子ノードを直接変更できます",
     "Material 3 コンポーネントのコアセット: レイアウト (Column / Row / Box / LazyColumn など), テキスト, ボタン, テキストフィールド, スイッチ, スライダー, プログレスインジケーター, カード, ダイアログ",
     "チェーン式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` は操作順序を保持し, スコープ限定の操作はホスト側で検証されます",
-    "表示先: `\"ui\";` スクリプトの Activity 内容は `compose.mount` または呼び出し可能な `compose` / `$compose` でマウントできます; フローティングウィンドウ (`compose.floaty`) は P3.4 で提供予定です",
+    "2 種類の表示先: `\"ui\";` スクリプトの Activity 内容は `compose.mount` または呼び出し可能な `compose` / `$compose`, 非 UI スクリプトを含むフローティング表示は `compose.floaty` の raw またはサイズ変更可能なウィンドウを使用",
     "プロセス内描画: レンダラーはホストプロセス内で動作し, プロセス間の UI ブリッジがないためイベントと状態更新の遅延が小さい",
     "単一パッケージ: ABI の区分なし, プラグイン独自のネイティブコードなし (Compose に同梱される AndroidX graphics-path ヘルパーのみ, 4 つの ABI すべてを内蔵), 1 つの APK で全デバイスに対応",
-    "スクリプト API: `compose` / `$compose`, 29 個のノードファクトリーと保持可能なハンドル, `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`"
+    "スクリプト API: `compose` / `$compose`, 29 個のノードファクトリーと保持可能なハンドル, `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`",
+    "統合時の保護: プラグインが未導入または非互換なら可用性確認は利用不可を返し, エラーは `ComposeError` で報告. セッション終了やスクリプト停止で所有ウィンドウとコールバックを解放"
   ],
   "h3_usage": "使い方",
   "usage_steps": [
     "compose スクリプト API を含む対応ローカル AutoJs6 ビルドをインストールします (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
     "このプラグインの APK をインストールします (開く必要はありません. プラグインにはランチャーエントリがありません)",
     "AutoJs6 のプラグインセンターで Compose UI が認識され, 有効になっていることを確認します",
-    "スクリプトで `compose` または `$compose` を使用し, `\"ui\";` スクリプトから Activity 内容をマウントします"
+    "スクリプトで `compose` または `$compose` を使用します. Activity 内容は `compose.mount`, フローティング表示はホストに重ね合わせ表示権限を付与してから `compose.floaty` を使用します"
   ],
   "h3_quick_start": "クイックスタート",
-  "p_quick_start_intro": "以下のカウンターは対応するローカルプレビューホストで実行できます. フローティング HUD は P3.4 の目標 API を示しており, まだ実行できません:",
+  "p_quick_start_intro": "以下のカウンターとフローティング HUD は対応するローカルプレビューホストで実行できます. HUD の実行前にホストへ他のアプリの上に表示する権限を付与してください:",
   "example_counter": "カウンター (宣言的 render 層)",
   "example_counter_text": "${count.value} 回クリックしました",
   "example_counter_button": "1 を加える",
@@ -51,7 +52,8 @@
     "インストール後にプラグインのアイコンが見つからないのはなぜですか? プラグインには独立した UI もランチャーエントリもありません. AutoJs6 のプラグインセンターで確認してください",
     "`compose` が見つからないのはなぜですか? グローバルオブジェクトは対応するローカルホストビルドが提供します. プラグイン APK のインストールだけでは追加されません",
     "他の UI プラグインをアンインストールする必要はありますか? ありません. Compose UI は既存の `ui` モジュールや他のプラグインに影響しません",
-    "プラグインの更新後にスクリプトの修正は必要ですか? 契約バージョンが変わらない限り不要です. 契約の更新は更新履歴に明記されます"
+    "プラグインの更新後にスクリプトの修正は必要ですか? 契約バージョンが変わらない限り不要です. 契約の更新は更新履歴に明記されます",
+    "フローティング表示に必要な条件は? ホストに重ね合わせ表示権限を付与し, 文字入力前に `window.requestFocus()` を呼び出します. HyperOS でウィンドウが見えない場合はデスクトップに戻ってください. 権限不足は PERMISSION_REQUIRED を返し, 許可画面を自動表示しません"
   ],
   "h3_security": "権限とセキュリティ",
   "p_security_intro": "プラグインは Android の実行時権限を一切要求せず, ネットワーク, ストレージ, センサーにもアクセスしません.",

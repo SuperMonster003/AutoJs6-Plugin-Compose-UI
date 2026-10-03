@@ -5,30 +5,31 @@
   "h3_languages_with_ascii": "Languages / Langues",
   "p_languages_all_supported_for_readme": "Ce document est disponible dans les langues suivantes",
   "h3_introduction": "Introduction",
-  "p_introduction_what": "Compose UI est un plugin de rendu d'interface pour AutoJs6. Les scripts déclarent les interfaces via l'entrée `compose` / `$compose` de l'hôte, et le plugin les rend dans le processus de l'hôte avec Jetpack Compose et Material 3. L'aperçu actuel prend en charge le contenu des activités `\"ui\";`; les fenêtres flottantes sont prévues pour P3.4.",
+  "p_introduction_what": "Compose UI est un plugin de rendu d'interface pour AutoJs6. Les scripts déclarent les interfaces via `compose` / `$compose` de l'hôte, puis le plugin les rend dans son processus avec Jetpack Compose et Material 3. L'aperçu prend en charge les activités `\"ui\";` et les fenêtres flottantes des scripts non UI.",
   "p_introduction_how": "Le plugin n'embarque aucun ecran autonome et n'ajoute aucune entree dans le lanceur. L'hote le decouvre via le service INFO, lit sa version et ses informations de compatibilite, puis charge le moteur de rendu dans son propre processus selon le contrat (`org.autojs.plugin.compose.api`). L'arbre d'interface, l'etat et les evenements vivent cote script ; le moteur de rendu se contente d'appliquer les correctifs a la composition Compose et de renvoyer les evenements utilisateur au script.",
   "h3_status": "Etat actuel",
-  "p_status": "Aperçu de développement P3: compose / $compose appelables, 29 fabriques de noeuds, des handles persistants, state/render/ref réactifs, batch/post/theme et le montage dans les scripts UI fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les fenêtres flottantes restent prévues pour P3.4. Les exemples inclus, la documentation complète de l'API, les déclarations de types et la matrice de vérification élargie restent à livrer. Il s'agit d'un aperçu local sans publication officielle.",
+  "p_status": "Aperçu de développement P3: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Les exemples inclus, la documentation complète, les déclarations de types et la matrice de vérification élargie restent à livrer. Cet aperçu local n'a pas de publication officielle.",
   "h3_features": "Fonctionnalites",
-  "p_features_intro": "Fonctions de l'aperçu actuel et prise en charge des affichages prévue",
+  "p_features_intro": "Fonctions de l'aperçu de développement actuel",
   "features": [
     "Interface declarative : `compose.state` + `compose.mount(render)` redessinent automatiquement a chaque changement d'etat, tandis que des poignees de noeud durables (`compose.Text({...})` et consorts) permettent de modifier directement proprietes et enfants",
     "Ensemble de composants Material 3 : dispositions (Column / Row / Box / LazyColumn, etc.), texte, boutons, champs de saisie, interrupteurs, curseurs, indicateurs de progression, cartes, boites de dialogue",
     "Modifiers chaines : `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserve l'ordre des operations, et les operations a portee limitee sont validees cote hote",
-    "Affichage: le contenu des activités des scripts `\"ui\";` se monte via `compose.mount` ou les entrées appelables `compose` / `$compose`; les fenêtres flottantes (`compose.floaty`) sont prévues pour P3.4",
+    "Deux modes d'affichage: `compose.mount` ou `compose` / `$compose` appelables pour le contenu des activités `\"ui\";`, et `compose.floaty` pour des fenêtres raw ou redimensionnables, y compris dans les scripts non UI",
     "Rendu dans le processus : le moteur de rendu s'execute dans le processus de l'hote sans aucun pont d'interface inter-processus, pour des evenements et des mises a jour d'etat a faible latence",
     "Paquet unique : aucune variante d'ABI et aucun code natif propre (seulement l'assistant AndroidX graphics-path fourni avec Compose, integre pour les quatre ABI), un seul APK pour tous les appareils",
-    "API de script: `compose` / `$compose`, 29 fabriques de noeuds et handles persistants, ainsi que `compose.ref`, `compose.batch`, `compose.post` et `compose.theme`"
+    "API de script: `compose` / `$compose`, 29 fabriques de noeuds et handles persistants, ainsi que `compose.ref`, `compose.batch`, `compose.post` et `compose.theme`",
+    "Protections d'intégration: les vérifications indiquent indisponible si le plugin manque ou est incompatible, les erreurs utilisent `ComposeError`, et fermer la session ou arrêter le script libère ses fenêtres et rappels"
   ],
   "h3_usage": "Utilisation",
   "usage_steps": [
     "Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum {{ required_host_version_name }} / {{ required_host_version_code }})",
     "Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)",
     "Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active",
-    "Utilisez `compose` ou `$compose` dans les scripts; montez le contenu d'activité depuis un script `\"ui\";`"
+    "Utilisez `compose` ou `$compose` dans les scripts; montez les activités avec `compose.mount`, ou accordez la permission de superposition à l'hôte et utilisez `compose.floaty`"
   ],
   "h3_quick_start": "Demarrage rapide",
-  "p_quick_start_intro": "Le compteur ci-dessous peut s'exécuter avec l'hôte local compatible de l'aperçu. Le HUD flottant illustre l'API cible de P3.4 et ne peut pas encore s'exécuter:",
+  "p_quick_start_intro": "Le compteur et le HUD flottant ci-dessous peuvent s'exécuter avec l'hôte local compatible de l'aperçu. Autorisez l'hôte à s'afficher au-dessus des autres applications avant d'exécuter le HUD:",
   "example_counter": "Compteur (couche render declarative)",
   "example_counter_text": "${count.value} clics",
   "example_counter_button": "Ajouter un",
@@ -51,7 +52,8 @@
     "Pourquoi aucune icone de plugin n'apparait apres l'installation ? Le plugin n'a ni interface autonome ni entree dans le lanceur ; consultez le centre de plugins d'AutoJs6",
     "Pourquoi `compose` est-il absent? L'objet global est fourni par la compilation locale compatible de l'hôte; installer uniquement l'APK du plugin ne l'ajoute pas",
     "Faut-il desinstaller d'autres plugins d'interface ? Non, Compose UI n'interfere ni avec le module `ui` existant ni avec les autres plugins",
-    "Faut-il modifier les scripts apres une mise a jour du plugin ? Non tant que la version du contrat reste la meme ; les montees de version du contrat sont indiquees explicitement dans le journal des modifications"
+    "Faut-il modifier les scripts apres une mise a jour du plugin ? Non tant que la version du contrat reste la meme ; les montees de version du contrat sont indiquees explicitement dans le journal des modifications",
+    "Que faut-il pour les fenêtres flottantes? Accordez la permission de superposition à l'hôte et appelez `window.requestFocus()` avant la saisie. Si HyperOS ne montre pas la fenêtre, revenez au bureau. Une permission manquante renvoie PERMISSION_REQUIRED sans ouvrir automatiquement de demande d'autorisation"
   ],
   "h3_security": "Permissions et securite",
   "p_security_intro": "Le plugin ne demande aucune permission d'execution Android et n'accede jamais au reseau, au stockage ni aux capteurs.",
