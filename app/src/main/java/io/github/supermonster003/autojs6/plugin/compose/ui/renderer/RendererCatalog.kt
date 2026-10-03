@@ -15,11 +15,14 @@ internal enum class RenderKind(val component: String) {
     ELEVATED_BUTTON(C.ELEVATED_BUTTON), TONAL_BUTTON(C.FILLED_TONAL_BUTTON), OUTLINED_BUTTON(C.OUTLINED_BUTTON),
     TEXT_BUTTON(C.TEXT_BUTTON), ICON_BUTTON(C.ICON_BUTTON), SWITCH(C.SWITCH), CHECKBOX(C.CHECKBOX),
     RADIO_BUTTON(C.RADIO_BUTTON), SLIDER(C.SLIDER),
+    TEXT_FIELD(C.TEXT_FIELD), OUTLINED_TEXT_FIELD(C.OUTLINED_TEXT_FIELD),
+    LAZY_COLUMN(C.LAZY_COLUMN), LAZY_ROW(C.LAZY_ROW), SCAFFOLD(C.SCAFFOLD), TOP_APP_BAR(C.TOP_APP_BAR),
+    ALERT_DIALOG(C.ALERT_DIALOG), CIRCULAR_PROGRESS(C.CIRCULAR_PROGRESS_INDICATOR), LINEAR_PROGRESS(C.LINEAR_PROGRESS_INDICATOR),
 }
 
 internal object RendererCatalog {
     val dispatch = RenderKind.entries.associateBy { it.component }
-    val components: Set<String> = java.util.Collections.unmodifiableSet(dispatch.keys)
+    val components: Set<String> = java.util.Collections.unmodifiableSet(dispatch.keys + C.SNACKBAR)
 
     fun validate(node: UiNode) {
         if (node.type !in dispatch) throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_COMPONENT, nodeId = node.nodeId)
