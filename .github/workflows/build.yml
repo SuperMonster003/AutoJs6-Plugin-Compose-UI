@@ -106,8 +106,8 @@ jobs:
           avd-name: Compose_UI_Conformance_CI_${{ matrix.api-level }}
           script: |
             chmod +x gradlew
-            # Rendering is exercised inside the AutoJs6 host on the device matrix of ROADMAP.md, not on the
-            # disposable CI emulator; the contract suite covers activation, discovery and packaging.
+            # Run activation/discovery plus renderer-local semantics and pixel tests. Cross-APK loading
+            # and script-dispatch tests remain in the AutoJs6 host device matrix.
             ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
 
       - name: Upload instrumentation reports after failure

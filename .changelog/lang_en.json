@@ -8,18 +8,22 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P1 development preview: the V1 host loader and sessions can run a Column / Text / Button counter in a dedicated test host. The complete renderer and compose script API are still under development",
+        "P2 development preview: 20 layout, display, and interactive components, ordered modifiers, and Material 3 themes run in a dedicated test host. Text fields, lazy lists, Scaffold, dialogs, other remaining components, and the compose script API are still under development",
         "Requires AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) or later"
       ],
       "feature": [
         "Plugin repository skeleton: platform versions plugin build chain, Jetpack Compose BOM {{ compose_bom }} dependencies, Wake Activity activation protocol, and INFO service (category {{ plugin_info_category }})",
         "README, plugin center instruction, and changelog in 10 languages, generated from JSON sources",
-        "Preview counter supports incremental updates and callback cleanup on close; rejected updates preserve the last valid interface"
+        "Preview rendering supports layouts, text, icons, images, buttons, selection controls, and sliders; supplied bitmaps remain owned and recycled by the caller",
+        "All 20 modifier operations preserve declaration order, with layout scope checks, scrolling, and accessibility labels",
+        "Material 3 themes support seed colors, light and dark modes, Android 12+ system dynamic colors, font families, and text scaling",
+        "Interface updates apply atomically and rejected updates keep the last valid view; controlled inputs report changes through queued callbacks, and closing releases callbacks"
       ],
       "dependency": [
         "Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)",
         "Attach Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "Attach compose-ui-api.aar V1 aligned to AutoJs6 6.8.0 (5316) (MPL 2.0, hash-locked), with shared dependencies aligned to the host"
+        "Attach compose-ui-api.aar V1 aligned to AutoJs6 6.8.0 (5316) (MPL 2.0, hash-locked), with shared dependencies aligned to the host",
+        "Attach Compose UI Test managed by BOM {{ compose_bom }} (Apache 2.0, tests only)"
       ]
     }
   }

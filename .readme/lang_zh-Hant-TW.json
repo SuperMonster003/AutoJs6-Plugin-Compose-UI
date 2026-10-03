@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主內建的 `compose` 全域物件宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯, 為 `\"ui\";` 模式 Activity 內容與懸浮視窗提供統一的宣告式介面方案.",
   "p_introduction_how": "外掛程式不包含任何獨立介面, 也不在啟動器中顯示進入點. 宿主透過 INFO 服務探索外掛程式並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在宿主處理程序內載入轉譯器. 介面樹, 狀態與事件在指令碼端描述, 轉譯器只負責把修補套用到 Compose 組合並把使用者事件回傳給指令碼.",
   "h3_status": "目前狀態",
-  "p_status": "P1 開發預覽: V1 宿主載入器與工作階段已可在專用測試宿主中執行 Column / Text / Button 計數器. 完整轉譯器與 compose 指令碼 API 仍在開發中.",
+  "p_status": "P2 開發預覽: 20 種版面配置, 顯示與互動元件, 有序 Modifier 鏈及 Material 3 主題已可在專用測試宿主中執行. 輸入框, 延遲載入清單, Scaffold, 對話方塊等其餘元件與 compose 指令碼 API 仍在開發中.",
   "h3_features": "功能特性",
   "p_features_intro": "外掛程式計劃交付的核心能力",
   "features": [
@@ -48,7 +48,7 @@
   "h3_faq": "常見問題",
   "faq_items": [
     "為什麼安裝後找不到外掛程式圖示? 外掛程式沒有獨立介面, 也不會在啟動器顯示, 請在 AutoJs6 的外掛程式中心查看",
-    "為什麼指令碼裡的 `compose` 還不能用? 目前為 P0 開發預覽, 轉譯器與指令碼 API 將在後續里程碑交付",
+    "為什麼指令碼裡的 `compose` 還不能用? 目前 P2 開發預覽透過專用測試宿主執行, compose 指令碼入口預計於 P3 提供",
     "是否需要解除安裝其它介面外掛程式? 不需要, Compose UI 與現有 `ui` 模組及其它外掛程式互不影響",
     "外掛程式更新後指令碼需要修改嗎? 契約版本不變時無需修改; 契約升級會在更新日誌中明確標註"
   ],

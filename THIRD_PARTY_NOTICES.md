@@ -56,3 +56,12 @@ Gradle, the Android Gradle Plugin (with its built-in Kotlin support), the Compos
 (`org.jetbrains.kotlin.plugin.compose`) and `io.github.supermonster003.autojs6-platform-versions` are used by
 `build-logic/` and the Gradle build only. Python 3 with Pillow generates the launcher icons and the localized
 documentation (`.python/`).
+
+## Renderer test dependency
+
+The instrumentation APK uses `androidx.compose.ui:ui-test-junit4` (Android variant
+`ui-test-junit4-android`, 1.12.1 from BOM 2026.09.00), from Google Maven under Apache 2.0.
+It is test-only and is not packaged in the plugin APK. JVM tests provide the same locked shared
+AndroidX/coroutine dependencies as the host so pure value/theme tests can run without a host APK.
+No new runtime dependency or native library was added for P2. Theme seed colors use an independent
+CIELAB/LCh tonal construction with gamut reduction; this is not an implementation of Google's HCT.

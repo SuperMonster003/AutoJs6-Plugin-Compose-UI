@@ -5,14 +5,15 @@ import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.model.*
 
 /** Private transaction workspace; visible state changes only after full validation. */
-internal class NodeStore(private val sessionId: Int, private val validateRendererNode: (UiNode) -> Unit = {}) {
+internal class NodeStore(private val sessionId: Int, private val validateRendererNode: (UiNode) -> Unit = {}, private val allowUnknownDebug: Boolean = false) {
     var tree: UiTree? = null
         private set
     var generation = 0L
         private set
+    private var acceptedBatch = false
 
-    fun apply(batch: UiPatchBatch): UiTree {
-        if (batch.sessionId != sessionId || batch.generation <= generation) invalid()
+    fun apply(batch: UiPatchBatch): UiTree? {
+        if (batch.sessionId != sessionId || acceptedBatch && batch.generation <= generation) invalid()
         var root = tree?.rootId
         val nodes = tree?.nodes?.associateBy { it.nodeId }?.toMutableMap() ?: linkedMapOf()
         fun node(id: Int) = nodes[id] ?: throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED, nodeId = id)
@@ -77,12 +78,17 @@ internal class NodeStore(private val sessionId: Int, private val validateRendere
                 put(parent.with(slots = slots))
             }
         }
-        val candidate = UiTree(root ?: invalid(), nodes.values.toList())
+        val candidate = root?.let { UiTree(it, nodes.values.toList()) }
         val parents = HashMap<Int, String>()
-        candidate.nodes.forEach { parent -> (parent.children + parent.slots.values).forEach { parents[it] = parent.type } }
-        candidate.nodes.forEach { ComponentCatalog.V1.validateNode(it, parents[it.nodeId]); validateRendererNode(it) }
+        candidate?.nodes?.forEach { parent -> (parent.children + parent.slots.values).forEach { parents[it] = parent.type } }
+        candidate?.nodes?.forEach {
+            if (!allowUnknownDebug || ComponentCatalog.V1.component(it.type) != null) {
+                ComponentCatalog.V1.validateNode(it, parents[it.nodeId]); validateRendererNode(it)
+            }
+        }
         tree = candidate
         generation = batch.generation
+        acceptedBatch = true
         return candidate
     }
 

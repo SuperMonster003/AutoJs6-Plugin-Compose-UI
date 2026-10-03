@@ -322,6 +322,7 @@ dependencies {
             implementation("$coordinate:$version")
         } else {
             compileOnly("$coordinate:$version")
+            testImplementation("$coordinate:$version")
             androidTestImplementation("$coordinate:$version")
         }
     }
@@ -343,6 +344,8 @@ dependencies {
     androidTestImplementation(libs.test.runner)
     androidTestImplementation(libs.test.rules)
     androidTestImplementation(libs.test.ext.junit)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
 }
 
 tasks {

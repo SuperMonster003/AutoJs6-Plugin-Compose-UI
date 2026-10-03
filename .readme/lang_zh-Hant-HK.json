@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 腳本透過宿主內置的 `compose` 全域物件宣告界面, 插件在宿主進程內以 Jetpack Compose 與 Material 3 完成渲染, 為 `\"ui\";` 模式 Activity 內容與懸浮窗提供統一的宣告式界面方案.",
   "p_introduction_how": "插件不包含任何獨立界面, 也不在啟動器中顯示入口. 宿主透過 INFO 服務發現插件並讀取版本與兼容資訊, 再按契約 (`org.autojs.plugin.compose.api`) 在宿主進程內載入渲染器. 界面樹, 狀態與事件在腳本側描述, 渲染器只負責把補丁套用到 Compose 組合並把用戶事件回傳給腳本.",
   "h3_status": "當前狀態",
-  "p_status": "P1 開發預覽: V1 宿主載入器與會話已可在專用測試宿主中運行 Column / Text / Button 計數器. 完整渲染器與 compose 腳本 API 仍在開發中.",
+  "p_status": "P2 開發預覽: 20 種佈局, 展示與互動組件, 有序 Modifier 鏈及 Material 3 主題已可在專用測試宿主中運行. 輸入框, 懶加載列表, Scaffold, 對話框等其餘組件與 compose 腳本 API 仍在開發中.",
   "h3_features": "功能特性",
   "p_features_intro": "插件計劃交付的核心能力",
   "features": [
@@ -48,7 +48,7 @@
   "h3_faq": "常見問題",
   "faq_items": [
     "為什麼安裝後找不到插件圖示? 插件沒有獨立界面, 也不會在啟動器顯示, 請在 AutoJs6 的插件中心查看",
-    "為什麼腳本裏的 `compose` 還不能用? 當前為 P0 開發預覽, 渲染器與腳本 API 將在後續里程碑交付",
+    "為什麼腳本裏的 `compose` 還不能用? 當前 P2 開發預覽透過專用測試宿主運行, compose 腳本入口計劃在 P3 交付",
     "是否需要卸載其它界面插件? 不需要, Compose UI 與現有 `ui` 模組及其它插件互不影響",
     "插件更新後腳本需要修改嗎? 契約版本不變時無需修改; 契約升級會在更新日誌中明確標註"
   ],

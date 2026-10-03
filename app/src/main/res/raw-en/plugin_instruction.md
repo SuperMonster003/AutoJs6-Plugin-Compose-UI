@@ -1,6 +1,6 @@
 Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare their interface through the host's built-in `compose` global object, and the plugin renders it inside the host process with Jetpack Compose and Material 3, giving `"ui";` mode activities and floating windows one declarative UI solution.
 
-P1 development preview: the V1 host loader and sessions can run a Column / Text / Button counter in a dedicated test host. The complete renderer and compose script API are still under development.
+P2 development preview: 20 layout, display, and interactive components, ordered modifiers, and Material 3 themes run in a dedicated test host. Text fields, lazy lists, Scaffold, dialogs, other remaining components, and the compose script API are still under development.
 
 ### Usage
 
@@ -20,7 +20,7 @@ P1 development preview: the V1 host loader and sessions can run a Column / Text 
 ### FAQ
 
 - Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
-- Why does `compose` not work in scripts yet? This is a P0 development preview; the renderer and the script API arrive in later milestones
+- Why does `compose` not work in scripts yet? This P2 development preview runs through a dedicated test host; the compose script entry is planned for P3
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
 - Do scripts need changes after a plugin update? Not while the contract version stays the same; contract upgrades are called out explicitly in the changelog
 
