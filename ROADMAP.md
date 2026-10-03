@@ -484,7 +484,9 @@ P6.1 证据 (2026-10-03): 文档 `2832a4d` (完整8页及导航), `2de38ab` (同
 
 ### P6.2 声明
 
-- [ ] (文档) `AutoJs6-TypeScript-Declarations/declarations/autojs6/aj6-int-compose.d.ts` (`Internal.Compose`, 元素工厂重载按目录生成, `ComposeNode` / `ComposeState<T>` / `ComposeModifier` / `ComposeSession` / `ComposeFloatyWindow` / `ComposeError`, 事件 payload 类型), `index.d.ts` 引用; `aj6dts.bat -Publish` 后同步两个仓库的 `aj6-int-compose.d.ts`, Ace 仓库执行 `:app:generateAutoJs6LspDeclarations`, 版本号与版本名按 AGENTS 规则加一并提交.
+- [x] (文档) `AutoJs6-TypeScript-Declarations/declarations/autojs6/aj6-int-compose.d.ts` (`Internal.Compose`, 元素工厂重载按目录生成, `ComposeNode` / `ComposeState<T>` / `ComposeModifier` / `ComposeSession` / `ComposeFloatyWindow` / `ComposeError`, 事件 payload 类型), `index.d.ts` 引用; `aj6dts.bat -Publish` 后同步两个仓库的 `aj6-int-compose.d.ts`, Ace 仓库执行 `:app:generateAutoJs6LspDeclarations`, 版本号与版本名按 AGENTS 规则加一并提交.
+
+P6.2 证据 (2026-10-03): 声明4.30.0 / `43b29d7`, Ace1.22.0 / build124; 实际Publish生成并同步配套宿主Java/资源/库, 手写声明镜像与30/114目录通过. TypeScript5.1.3正例及39负例+2项exact-nullish用例通过, 新声明本体不跳过检查也无诊断. 实际TS6.0.3语言服务默认/全部声明组均验证29工厂、签名与错误输入诊断, 新回归接入原verifier; Ace JVM171与debug/原生对齐通过. 未开启额外默认声明组或改变运行时API, 未触碰Ace预存未跟踪releases目录. 详见 `docs/dev/p6-release-gate.md`.
 
 ### P6.3 README 与 changelog
 
