@@ -5,12 +5,15 @@ import android.graphics.Canvas
 import android.os.Looper
 import android.os.Build
 import android.view.View
+import android.view.ViewGroup
 import android.view.KeyEvent
 import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.findViewTreeComposeViewContext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.*
@@ -30,6 +33,9 @@ import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeViewModelStoreOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
 import androidx.test.platform.app.InstrumentationRegistry
@@ -96,6 +102,54 @@ class ComposeRendererTest {
         rule.runOnIdle {
             renderer!!.dispose(); renderer!!.dispose()
             try { renderer!!.view(); fail() } catch (e: ComposeUiContractException) { assertEquals(ComposeUiErrorCodes.SESSION_CLOSED, e.code) }
+        }
+    }
+
+    @Test fun replacingARendererKeepsItsComposeContextOutOfTheSharedActivityAncestors() {
+        var ancestorContext: Any? = null
+        rule.runOnUiThread {
+            // Model a previously installed plugin that left a Compose context on the host's
+            // reusable ancestor. Keep the context reachable across disposal, as another loader can.
+            val predecessor = ComposeView(rule.activity).apply { setContent {} }
+            rule.activity.setContentView(predecessor)
+            val parent = predecessor.parent as ViewGroup
+            ancestorContext = requireNotNull(parent.findViewTreeComposeViewContext())
+            predecessor.disposeComposition()
+            parent.removeView(predecessor)
+        }
+        create()
+        apply(UiTree(1, listOf(text(1, "before"))))
+        var previousContext: Any? = null
+        var previousOwner: Any? = null
+        rule.runOnIdle {
+            val root = renderer!!.view() as ViewGroup
+            val child = root.getChildAt(0)
+            val owner = requireNotNull(child.findViewTreeLifecycleOwner())
+            val savedStateOwner = requireNotNull(child.findViewTreeSavedStateRegistryOwner())
+            assertNotSame(rule.activity, owner)
+            assertSame(owner, savedStateOwner)
+            assertSame(rule.activity.lifecycle, owner.lifecycle)
+            assertSame(rule.activity.savedStateRegistry, savedStateOwner.savedStateRegistry)
+            assertSame(rule.activity, child.findViewTreeViewModelStoreOwner())
+            previousOwner = owner
+            previousContext = requireNotNull(child.findViewTreeComposeViewContext())
+            val sharedParent = root.parent as ViewGroup
+            assertNotSame(ancestorContext, previousContext)
+            assertSame("Renderer caches must not replace the host ancestor's existing context", ancestorContext, sharedParent.findViewTreeComposeViewContext())
+            renderer!!.dispose()
+            sharedParent.removeView(root)
+            renderer = null
+        }
+        create()
+        apply(UiTree(1, listOf(text(1, "after"))))
+        rule.onNodeWithTag("text").assertTextEquals("after")
+        rule.runOnIdle {
+            val root = renderer!!.view() as ViewGroup
+            val child = root.getChildAt(0)
+            assertNotSame(previousOwner, child.findViewTreeLifecycleOwner())
+            assertNotSame(previousContext, child.findViewTreeComposeViewContext())
+            assertSame(ancestorContext, (root.parent as View).findViewTreeComposeViewContext())
+            assertTrue(events.none { it.type == E.ERROR })
         }
     }
 

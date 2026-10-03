@@ -218,7 +218,8 @@ _2026/10/03_
 - `Feature` UI scripts can mount Compose content; replacing the mount or stopping the script releases the old session and callbacks
 - `Feature` Non-UI scripts can create raw or resizable Compose floating windows, change pixel geometry, touch and focus settings, and close them through their controls, floaty.closeAll, or script termination
 - `Feature` Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category
-- `Improvement` Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment
+- `Fix` Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates
+- `Improvement` Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment; Updating, uninstalling or disabling the plugin closes its active sessions and reports the corresponding error
 - `Dependency` Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)
 - `Dependency` Attach Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `Dependency` Attach compose-ui-api.aar V1 aligned to AutoJs6 6.8.0 (5316) (MPL 2.0, hash-locked), with shared dependencies aligned to the host

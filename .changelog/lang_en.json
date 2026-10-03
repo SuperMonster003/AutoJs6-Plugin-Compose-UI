@@ -33,7 +33,10 @@
         "Attach JaCoCo version 0.8.14 (optional test coverage only, excluded from release packages)"
       ],
       "improvement": [
-        "Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment"
+        "Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment; Updating, uninstalling or disabling the plugin closes its active sessions and reports the corresponding error"
+      ],
+      "fix": [
+        "Compose UI rejects mounting another page or floating window inside a render callback and keeps the current page; pages can be mounted again after plugin updates"
       ]
     }
   }
