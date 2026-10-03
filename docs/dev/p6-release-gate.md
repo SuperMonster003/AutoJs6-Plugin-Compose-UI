@@ -1,6 +1,6 @@
 # P6 documentation, declarations and local release gate
 
-Date: 2026-10-03. Starting plugin commit dbf2c26 (build21), host implementation
+Dates: 2026-10-03 to 2026-10-04. Starting plugin commit dbf2c26 (build21), host implementation
 ef707fd667 (6.8.0 / 5317). Maintainer decisions Q2-Q7 are recorded in plugin
 27be441 (build22) and the approved performance evidence in host d29eb47782.
 The production renderer and frozen V1 AAR/shared dependency locks remain unchanged.
@@ -95,8 +95,69 @@ native libraries, component catalog and renderer production code do not change.
 Local-preview/official-release distinctions and the placeholder artwork status are
 retained; no claim of remote deployment is added.
 
-## Remaining local gate recording
+## P6.4 completed local gate, 2026-10-04
 
-P6.4 final APK/device results
-are added here when their corresponding local checks and commits are complete.
-This interim document does not claim those gates have already passed.
+The final plugin is1.0.0/build26. It was built with Gradle9.5.0, AGP9.3.2,
+Kotlin2.4.0 and the existing Compose BOM2026.09.00. The dedicated host remains
+6.8.0/build5317. Local build-number/time auto-increment was disabled.
+
+| Check | Result |
+| --- | --- |
+| Plugin Markdown/icons/examples | 36 generated documents and two icons match; five scripts/manifest match the host |
+| Plugin JVM | 63/63, zero failure/error/skip |
+| Plugin assembly/lint | Debug + androidTest + release; debug lint has no issues |
+| connectedDebugAndroidTest | 32/32 on the owned API35 x86_64 AVD, zero failure/error/skip |
+| Signed release collection | One Compose release; signature, CRC32, DEX ownership and four native helper alignments pass |
+| Host selected JVM / frozen API | 200/200 and16/16, zero failure/error/skip |
+| Host assembly | App debug + androidTest; native alignment passes |
+| Final release through real host | Five actual examples + resource/JNI + standalone INFO:7/7 in18.673 s |
+| Documentation / Offline Docs | 152 modules fresh;208 matching assets with documented LF normalization; JVM2/Python4; debug/release payloads and signed release collection pass |
+| Declarations / Ace | Catalog30/114; TS39+2 cases; actual default/full-group language-service regression; JVM171 and debug/alignment pass |
+
+The device task used ANDROID_SERIAL=emulator-5584 with --no-daemon. The actual AGP
+ConnectedDeviceProvider implementation was inspected to confirm serial filtering;
+its result XML names only compose_p6_api35 and32 tests. Other connected devices
+were not used. The first JVM gate caught two non-ASCII punctuation characters in
+roadmap evidence; they were corrected before the complete gate passed. No assertion
+was weakened or failed test omitted.
+
+Final artifact:
+
+- releases/autojs6-plugin-compose-ui-v1.0.0-d9cdec3c.apk
+- 2378609 bytes; CRC32 d9cdec3c.
+- SHA-256 c2d7ddae7d8311b4b82c991b7fe6f1c92547b4b1df7dfd018f1f43b0be7be8cc.
+- One DEX,7143 class definitions and44721 method references.
+- Approved review budgets2612576 bytes /49194 references are not exceeded. Size
+  increases3540 bytes (about0.15%) from the measured P5 artifact; references are
+  unchanged. No new timing/PSS observations are claimed for this artifact.
+
+The Offline Docs signed companion is
+autojs6-plugin-offline-docs-v6.8.6-universal-5923dfdb.apk (4003313 bytes). Its208
+content files total12399989 bytes, canonical content digest
+8d1e785c3ddf186118ccd5de252b1b7140e2f6962be8ed17ea6ed19d058b7bfd.
+Older Offline Docs releases were retained. Ace's pre-existing untracked releases
+directory was not changed; only its debug output was built.
+
+## Commits, cleanup and limits
+
+Plugin decisions/P6.1/P6.2/P6.3:27be441,27a397a,63b22f0,5cb77ef. The build26 closing
+commit contains this final gate record. Host decisions/history:d29eb47782 and
+417f469975; the host gate copy is committed separately. Documentation:2832a4d
+(complete source/site),2de38ab (counter90). Offline Docs:396f191/build71.
+Declarations:43b29d7/version4.30.0. Ace:07a4831/version1.22.0/build124.
+
+The test task cleaned its own plugin instrumentation installation. Subsequent
+owned host/test/release-plugin packages were uninstalled and absence checked.
+The AVD name, serial and resolved data path were verified before SDK deletion;
+compose_p6_api35's data and registration are absent. Physical devices, other AVDs,
+shared SDK images and the original host worktree were not changed by this task.
+
+Not performed: full host JVM/lint, another full P5 six-device matrix, release-host
+performance, new cold/PSS/scroll stability measurements, long-running heap/leak
+certification, remote CI or public publication. Formal artwork remains pending;
+the two required PNG variants pass resource checks with the retained placeholder
+source. These limits are not converted into passing results.
+
+P0-P6's specified local implementation and gate are complete. P7 is the approved
+next sequence beginning with F.1 TSX. D7 still requires an explicit maintainer
+change before Git pushes, official-index registration or public releases.
