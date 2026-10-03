@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P4 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 完整 API 文件, 型別宣告與 P5 完整驗證矩陣仍待後續交付. 目前僅為本機預覽, 尚無官方發行版",
+        "P5 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 已完成穩健性檢查, 六台裝置/模擬器相容性矩陣與封裝應用程式驗證, 並記錄效能基準. 完整 API 文件與型別宣告將於 P6 交付. 目前僅為本機預覽, 尚無官方發行版",
         "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更新版本"
       ],
       "feature": [
