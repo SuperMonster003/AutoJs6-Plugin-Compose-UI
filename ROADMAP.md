@@ -249,7 +249,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | --- | --- | --- | --- |
 | P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 已完成 (2026-10-03, P1.1 - P1.3) |
-| P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 未开始 |
+| P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 进行中 (P2.1 - P2.3, P2.6 完成, 下一步 P2.4) |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 未开始 |
@@ -342,20 +342,22 @@ P1.3 证据 (2026-10-03): `docs/dev/p13-p2-evidence.md`. 宿主基于当前 mast
 
 ### P2.1 渲染器骨架
 
-- [ ] (插件) `ComposeUiRendererFactoryImpl` (契约版本, capabilities: COMPONENTS 列表, FEATURES, COMPOSE_VERSION, SHARED_DEPS_FINGERPRINT), `ComposeUiRendererImpl` (`ComposeView(ComposeHostContext)`, `setViewCompositionStrategy`, `setContent { MaterialTheme(ThemeMapper(theme)) { RenderNode(rootState.value) } }`, `apply(batch)` 在主线程更新不可变树, `execute(command)`, `setTheme`, `dispose`).
+- [x] (插件) `ComposeUiRendererFactoryImpl` (契约版本, capabilities: COMPONENTS 列表, FEATURES, COMPOSE_VERSION, SHARED_DEPS_FINGERPRINT), `ComposeUiRendererImpl` (`ComposeView(ComposeHostContext)`, `setViewCompositionStrategy`, `setContent { MaterialTheme(ThemeMapper(theme)) { RenderNode(rootState.value) } }`, `apply(batch)` 在主线程更新不可变树, `execute(command)`, `setTheme`, `dispose`).
 - [x] (插件) `NodeStore` 不可变树与补丁应用 (setProps / insert / remove / move / replaceSlot), 全部校验失败整批拒绝并抛契约异常 (宿主转为 `ComposeError`), 不留下半应用状态. P1.2 为正式宿主往返提前落地, 6 项 JVM 测试覆盖增删 / 跨父移动 / 插槽 / 晚失败回滚 / 环与作用域拒绝, 详见 `docs/dev/p1-session-evidence.md`.
-- [ ] (插件) `RenderNode` 分派, `key(nodeId)`, 未知类型 -> 占位 `Text("<unknown: type>")` 仅 debug 构建, release 由宿主提前拒绝.
-- [ ] (测试) JVM: `NodeStoreTest` (补丁应用与拒绝), `ThemeMapperTest` / `ValueMapperTest` (颜色解析 `#RRGGBB` / `#AARRGGBB` / 命名色, 尺寸 dp / sp, 文本样式); instrumentation: 空树 / 单节点树装配.
+- [x] (插件) `RenderNode` 分派, `key(nodeId)`, 未知类型 -> 占位 `Text("<unknown: type>")` 仅 debug 构建, release 由宿主提前拒绝.
+- [x] (测试) JVM: `NodeStoreTest` (补丁应用与拒绝), `ThemeMapperTest` / `ValueMapperTest` (颜色解析 `#RRGGBB` / `#AARRGGBB` / 命名色, 尺寸 dp / sp, 文本样式); instrumentation: 空树 / 单节点树装配.
 
 ### P2.2 布局与基础组件
 
-- [ ] (插件) Column / Row / Box / Spacer (含 `verticalArrangement` / `horizontalAlignment` / `spacing` 等), Surface / Card / HorizontalDivider, Text (样式, 对齐, 省略, 最大行数, 可选择), Icon (material-icons-core 名称表 + `ImageVector` 映射), Image (BitmapRef / contentScale / contentDescription).
-- [ ] (测试) instrumentation 用 `onNodeWithTag` 断言布局与属性; 目录属性与实现逐项对照 (`CatalogCoverageTest`: 渲染器声明的 COMPONENTS 与实现的 `when` 分支一致).
+- [x] (插件) Column / Row / Box / Spacer (含 `verticalArrangement` / `horizontalAlignment` / `spacing` 等), Surface / Card / HorizontalDivider, Text (样式, 对齐, 省略, 最大行数, 可选择), Icon (material-icons-core 名称表 + `ImageVector` 映射), Image (BitmapRef / contentScale / contentDescription).
+- [x] (测试) instrumentation 用 `onNodeWithTag` 断言布局与属性; 目录属性与实现逐项对照 (`CatalogCoverageTest`: 渲染器声明的 COMPONENTS 与实现的 `when` 分支一致).
 
 ### P2.3 交互组件
 
-- [ ] (插件) Button / ElevatedButton / FilledTonalButton / OutlinedButton / TextButton / IconButton (`onClick`, `enabled`, 内容插槽), Switch / Checkbox / RadioButton (`checked` 受控 + `onCheckedChange`), Slider (`value` / `range` / `steps` / `onValueChange` / `onValueChangeFinished`).
-- [ ] (测试) 事件 payload 与 generation 经宿主 `ComposeSession` 回到调度器; 受控组件在脚本未回写时保持旧值 (受控语义), 文档注明.
+- [x] (插件) Button / ElevatedButton / FilledTonalButton / OutlinedButton / TextButton / IconButton (`onClick`, `enabled`, 内容插槽), Switch / Checkbox / RadioButton (`checked` 受控 + `onCheckedChange`), Slider (`value` / `range` / `steps` / `onValueChange` / `onValueChangeFinished`).
+- [x] (测试) 事件 payload 与 generation 经宿主 `ComposeSession` 回到调度器; 受控组件在脚本未回写时保持旧值 (受控语义), 文档注明.
+
+P2.1 - P2.3 证据 (2026-10-03): `docs/dev/p13-p2-evidence.md`. 能力表与分派同源, 实现 20 种组件及其目录属性 / 插槽; 图标为 core 的 280 个显式样式名称. 插件 JVM 45 项, API 24 x86 / API 35 arm64 各 17 项插件测试 (含 12 项渲染 / 像素 / 生命周期) 与 9 项宿主集成测试通过; minified release 插件各 4 项计数器 / INFO / 受控组件往返通过. 主题覆盖 48 个颜色角色及动态色 / 字体, seed 色板使用 CIELAB/LCh, 未宣称 Google HCT. 空批次与首批 generation 0, Slider 派生刻度上限和失效节点命令均有边界守卫.
 
 ### P2.4 输入框
 
@@ -369,10 +371,12 @@ P1.3 证据 (2026-10-03): `docs/dev/p13-p2-evidence.md`. 宿主基于当前 mast
 
 ### P2.6 Modifier 链与快捷属性
 
-- [ ] (插件) `ModifierMapper`: padding / size / width / height / fillMaxWidth / fillMaxHeight / fillMaxSize / weight (RowScope / ColumnScope) / align (BoxScope) / background (色 + 形状) / border / clip (RoundedCorner / Circle) / alpha / clickable / verticalScroll / horizontalScroll / offset / aspectRatio / testTag / semantics(contentDescription); 顺序严格按 ops 序列组合; 作用域操作出现在错误父节点时宿主已拒绝, 渲染器再次防御.
-- [ ] (测试) JVM `ModifierMapperTest` 对每个 op 的参数解析; instrumentation 对 `padding -> background` 与 `background -> padding` 的像素 / 语义差异断言.
+- [x] (插件) `ModifierMapper`: padding / size / width / height / fillMaxWidth / fillMaxHeight / fillMaxSize / weight (RowScope / ColumnScope) / align (BoxScope) / background (色 + 形状) / border / clip (RoundedCorner / Circle) / alpha / clickable / verticalScroll / horizontalScroll / offset / aspectRatio / testTag / semantics(contentDescription); 顺序严格按 ops 序列组合; 作用域操作出现在错误父节点时宿主已拒绝, 渲染器再次防御.
+- [x] (测试) JVM `ModifierMapperTest` 对每个 op 的参数解析; instrumentation 对 `padding -> background` 与 `background -> padding` 的像素 / 语义差异断言.
 
 ---
+
+P2.6 证据 (2026-10-03): 完整 Modifier 链为本轮基础 / 交互组件提供能力, 因依赖关系一并交付, 路线图小节保持不变. 5 项 JVM 用例覆盖 20 个 op 与命令注册生命周期; 设备像素用例验证 padding/background 顺序, 触摸用例验证外层 clickable 不被内层禁用及长按不触发普通点击, 样式更新保持滚动位置. API 24 通过实际 View 树软件位图读回像素, API 26+ 使用 PixelCopy.
 
 ## P3: 脚本 API `compose`
 
@@ -877,3 +881,14 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 初期可访问性测试受到已有检查窗口和旧节点缓存影响; 测试限定本包窗口并刷新节点, 使用独立 API 24 AVD 完成最终验收. 未关闭用户检查窗口, 未操作 /sdcard 内容. 详见证据文档中的运行记录与边界.
 - 下一会话从 P1.3 注册与最低宿主版本回填开始. 完整渲染器, JS 全局对象与引擎退出接线仍待后续阶段; 宿主 release/inrt 装配, 全量回归, 热更新中的活动会话和 P6 泄漏/性能验收未在本次宣称通过. 继续仅本地提交, 不推送或发布.
 - 清理完成: 重用设备上的 10 个本次安装包均已卸载; 自建 compose_ui_p1_api24 AVD 已停机并经 avdmanager 删除, 注册与数据路径均不存在; 原有 AVD 仍保留.
+
+### 2026-10-03: P1.3 与 P2 基础渲染交付
+
+- 从插件 d383be0 (build 10) 与宿主独立分支 9c139db474 继续. 宿主主线 2082edef14 无冲突同步为 8372f53eee; P1.3 提交 0ee2953425, 插件集成提交 4b89901 (build 11), 最低宿主确认 6.8.0 / 5316. 原宿主目录的其他未提交改动保持不动.
+- 完成原路线图 P1.3, P2.1, P2.2, P2.3 与 P2.6. 公告如实说明开发预览, 不在 P3 前宣称 compose 脚本 API 已交付. 未增加, 分拆或丢弃阶段; Modifier 作为基础组件依赖在本轮一并完成.
+- 20 个组件, 20 个 Modifier, core 图标显式名称映射, 完整 V1 主题字段, 原子补丁与受控事件均通过本地验证. 宿主 / 插件保持同一 51 项共享指纹, AAR 只调整最低宿主部署元数据, V1 wire 不变.
+- 补强边界: 接受首批 generation 0 与空场景批次; 嵌套 clickable 独立启用; 隐式点击焦点事件; 样式插入保持 scroll state; 卸载前已移除节点的命令拒绝; 错误 nodeId/prop 回到脚本调度器. 绘制 / 测量异常通过容器隔离, 借用位图每次绘制重新取引用.
+- 验收详见 `docs/dev/p13-p2-evidence.md`: 插件 JVM 45, 宿主相关 JVM 25 + API JVM 13; 两台设备各 17 项插件 / 9 项 debug 宿主 / 4 项 release 往返. 宿主 app debug/release 和插件全部装配通过, lint debug 清洁, release 仅 3 个既有资源警告.
+- 下一起点为 P2.4 输入框, 然后 P2.5 列表 / 脚手架 / 提示; P3 脚本入口, IME, TalkBack, inrt 执行, 全矩阵和性能 / 长期内存门禁未在本轮交付. 图标 Q6 仍为占位源图. 继续只做本地提交, 不推送 / 发 Release / 登记远端索引.
+- 本轮最终插件签名产物: autojs6-plugin-compose-ui-v1.0.0-6b41b408.apk (build 12, 1958242 B). 测试安装全部清理, 自建 compose_ui_p2_api24 AVD 的注册与数据目录已验证删除.
+- 提交定位: 宿主主线同步 8372f53eee, P1.3 注册 0ee2953425, P2 事件 / 验证 6812bdbd9f; 插件最低版本接入 4b89901, P2 渲染器为本条所在提交 (build 12).

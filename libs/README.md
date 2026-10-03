@@ -29,6 +29,6 @@ SHA-256 `3ba7c215262e889034eef61e6ba0d5414839712a03284e3d009a96696cce5266`.
 The host now uses `implementation(project(":plugin-api:compose-ui-api"))` in every variant. The
 shared dependency fingerprint is unchanged. P1.3 changes only the API deployment-floor metadata,
 with the new staged artifact digest recorded above. P1.2 now uses the V1 loading surface
-and a three-component preview renderer. Legacy api.spike types have no remaining implementation
+and the implemented P2 basic/interactive renderer. Legacy api.spike types have no remaining implementation
 references and will be removed at the next artifact maintenance. The final minimum host version is 5316; the complete renderer remains P2 work.
 See `docs/dev/compose-ui-plugin-protocol-v1.md` for the frozen surface and BitmapRef transport limits.

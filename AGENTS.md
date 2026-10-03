@@ -127,7 +127,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - Gradle 构建 MUST 自包含, 禁止引用兄弟仓库或宿主的路径, JAR / AAR 或 `flatDir`.
 - 宿主 AAR 只从 `libs/` 消费, 由 `locks/host-api-aars.lock` 锁定 SHA-256; `app/build.gradle.kts` 在配置期拒绝缺失文件, debug 产物, 占位哈希, 多余锁条目与摘要不符. 更新任一 AAR 时同一提交内更新锁文件, `libs/README.md` 与 `THIRD_PARTY_NOTICES.md`.
-- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. `.spike` 版本 -1 不属于冻结面, 已无实现或测试引用, 仅保留于未改动的锁定 AAR 中, 下次维护契约制品时移除.
+- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. JVM 与设备测试提供同一份共享依赖锁的运行时副本, 正式插件仍以 compileOnly 消费共享库. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. `.spike` 版本 -1 不属于冻结面, 已无实现或测试引用, 仅保留于未改动的锁定 AAR 中, 下次维护契约制品时移除.
 - Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; P1.2 的正式装载器与会话使用 V1, 负版本探针已退役. 最低正式宿主版本已于 P1.3 确认为 5316.
 - 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等本插件不需要的 View 体系库.
 
@@ -151,7 +151,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `name` 来自不可翻译的 `app_name`, `description` 来自当前 locale 的 `plugin_description`, `instruction` 来自 `@raw/plugin_instruction`, `versionName` / `versionCode` 来自已安装包, `versionDate` 来自 `plugin_version_date` resValue, `id` / `engine` / `variant` / `author` 来自 `ComposeUiPlugin`.
 - `supportedAbis` 恒为空数组 (D22: 单 APK 内置全部四种 ABI 的 graphics-path 辅助库, 对设备没有 ABI 限制), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
-- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P1.2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 Column / Text / Button 三个预览组件, FEATURES 为空. 尚未实现的属性 / Modifier / 命令必须明确拒绝; 完整组件语义在 P2 交付, 不提前声明能力.
+- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 `RendererCatalog` 声明的 20 个已实现基础 / 交互组件, FEATURES 为空. 尚未实现的组件 / 命令必须明确拒绝; P2.4 / P2.5 组件仍待交付, 不提前声明能力.
 - 新增可选能力时先协商, 不通过捕获异常猜测协议版本.
 
 ## 8. 进程内渲染器与公共 API 设计 (CONDITIONAL, P0.2 起)
@@ -183,7 +183,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `.readme/lang_*.json` (10 语言, 键集合一致, 列表键 `features` / `usage_steps` / `compatibility_points` / `faq_items` / `security_points`) 与 `.changelog/lang_*.json` 是唯一文案源; 生成物 (`README.md`, `.readme/README-*.md`, `app/src/main/assets/doc/CHANGELOG*.md`, `app/src/main/res/raw*/plugin_instruction.md`, 共 36 个) 不手工编辑.
 - 修改 JSON 或模板后运行 `py .python/generate_markdown.py` 再 `--check`; CI `markdown.yml` 在 Windows 上执行 `.python/check_markdown.bat`.
-- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 脚本渲染能力交付前, 状态段落 MUST 如实说明 "P1 开发预览, V1 契约已冻结, 正式渲染器与 compose 脚本 API 尚未交付".
+- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 脚本渲染能力交付前, 状态段落 MUST 如实说明 "P2 开发预览, 基础 / 交互组件已实现, 其余组件与 compose 脚本 API 仍在开发中".
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.
 

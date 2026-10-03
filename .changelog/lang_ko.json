@@ -8,18 +8,22 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P1 개발 미리보기: V1 호스트 로더와 세션으로 전용 테스트 호스트에서 Column / Text / Button 카운터를 실행할 수 있습니다. 전체 렌더러와 compose 스크립트 API는 개발 중입니다",
+        "P2 개발 미리보기: 20가지 레이아웃, 표시 및 상호작용 컴포넌트, 순서가 유지되는 Modifier, Material 3 테마를 전용 테스트 호스트에서 실행할 수 있습니다. 입력란, 지연 로딩 목록, Scaffold, 대화상자 등 나머지 컴포넌트와 compose 스크립트 API는 개발 중입니다",
         "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 이상이 필요합니다"
       ],
       "feature": [
         "플러그인 저장소 골격: 플랫폼 버전 플러그인 빌드 체인, Jetpack Compose BOM {{ compose_bom }} 의존성, Wake Activity 활성화 프로토콜, INFO 서비스 (카테고리 {{ plugin_info_category }})",
         "JSON 원본에서 생성되는 10개 언어의 README, 플러그인 센터 설명, 변경 로그",
-        "미리보기 카운터는 증분 업데이트와 종료 후 콜백 정리를 지원하며, 업데이트가 거부되면 마지막으로 유효한 화면을 유지"
+        "미리보기 렌더링은 레이아웃, 텍스트, 아이콘, 이미지, 버튼, 선택 컨트롤 및 슬라이더를 지원하며, 전달한 비트맵의 소유권과 해제 책임은 호출자에게 유지",
+        "20가지 Modifier 작업 모두 선언 순서를 유지하며 레이아웃 범위 검사, 스크롤 및 접근성 레이블을 지원",
+        "Material 3 테마는 시드 색상, 밝은 모드와 어두운 모드, Android 12+ 시스템 동적 색상, 글꼴 및 글자 크기 배율을 지원",
+        "화면 업데이트를 원자적으로 적용하고 거부 시 마지막으로 유효한 화면을 유지. 제어 입력은 큐에 넣은 콜백으로 변경을 알리며 종료 시 콜백을 해제"
       ],
       "dependency": [
         "common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)",
         "Jetpack Compose BOM {{ compose_bom }} 추가 (Apache 2.0)",
-        "AutoJs6 6.8.0 (5316)에 맞춘 compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴"
+        "AutoJs6 6.8.0 (5316)에 맞춘 compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴",
+        "BOM {{ compose_bom }}에서 관리하는 Compose UI Test 추가 (Apache 2.0, 테스트 전용)"
       ]
     }
   }
