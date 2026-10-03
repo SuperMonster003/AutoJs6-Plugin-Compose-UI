@@ -478,7 +478,9 @@ P5.3 实测证据 (2026-10-03): `docs/dev/p5-performance-evidence.md` 与紧凑J
 
 ### P6.1 文档
 
-- [ ] (文档) `AutoJs6-Documentation/api/compose.md` (模块总览, 两层范式, 线程, 承载面, 主题, 无障碍, 打包应用, 错误) 与类型页 `composeNodeType.md`, `composeStateType.md`, `composeModifierType.md`, `composeSessionType.md`, `composeFloatyWindowType.md`, `composeThemeType.md`, `composeComponents.md` (核心集逐组件属性 / 插槽 / 事件表, 由 P4.3 脚本生成初稿); `sidebar.md` / `toc.md` / `dataTypes.md` / `progress.md` 更新; 运行 `generator/auto-generate-for-autojs6.bat`, 同步 `AutoJs6-Plugin-Offline-Docs`, 按各仓库 AGENTS 提交.
+- [x] (文档) `AutoJs6-Documentation/api/compose.md` (模块总览, 两层范式, 线程, 承载面, 主题, 无障碍, 打包应用, 错误) 与类型页 `composeNodeType.md`, `composeStateType.md`, `composeModifierType.md`, `composeSessionType.md`, `composeFloatyWindowType.md`, `composeThemeType.md`, `composeComponents.md` (核心集逐组件属性 / 插槽 / 事件表, 由 P4.3 脚本生成初稿); `sidebar.md` / `toc.md` / `dataTypes.md` / `progress.md` 更新; 运行 `generator/auto-generate-for-autojs6.bat`, 同步 `AutoJs6-Plugin-Offline-Docs`, 按各仓库 AGENTS 提交.
+
+P6.1 证据 (2026-10-03): 文档 `2832a4d` (完整8页及导航), `2de38ab` (同步计数90); 冻结目录30项/114属性与两份真实声明比对通过, 152模块全量生成及freshness通过, 搜索6543条. BAT先dry-run再verify-offline, Offline Docs6.8.6/build71同步208资产, 除5个已有文本文件的规范LF转换外与来源完全一致, JVM2/Python4与debug/release APK内容门禁通过. 完整经过见 `docs/dev/p6-release-gate.md`.
 
 ### P6.2 声明
 
