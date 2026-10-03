@@ -49,8 +49,38 @@ debug/release APK-content verification passes, and all208 site assets match afte
 the five existing text files' documented LF normalization. Provenance pins the
 clean source commit2832a4d, not an unrelated host commit or a dirty working tree.
 
+## P6.2 declarations and actual editor diagnostics
+
+Declarations4.30.0 (commit43b29d7) adds Internal.Compose, the callable globals and
+ComposeError, 29 factories and typed Node/State/Ref/Modifier/Theme/Session/Floaty
+interfaces. The generated30/114 region is used in the actual factory signatures.
+Normalized read types differ from accepted write types where required. The local
+aj6dts -Publish flow used the explicit task-host root/appDebug, generated real
+Java/resource/library declarations and mirrored them to Ace. The host/generator
+input commits are d29eb47782 / 525bebdaa1. No npm or remote Git action occurred.
+
+Both hand-maintained copies and their catalog regions match. Compose declaration
+SHA-256: b71832f8b4a62a386934555c2aa3f8dadc118b36bad50b7553b804ed98ac5d6a.
+TypeScript5.1.3 strict/exactOptionalPropertyTypes passes39 negative and full API
+positive examples, plus2 separate exact-nullish cases. The new declaration itself
+has zero semantic diagnostics without skipping its checking in the real graph.
+
+Actual Ace TypeScript6.0.3 and the real generated core/browser language service
+pass default and fully enabled group checks. A direct reference to an unloaded
+native type originally degraded to error-any and admitted primitive image/color
+inputs. The final boxed public-member mapping keeps these branches object-shaped,
+rejects that misuse and preserves full Bitmap/ImageWrapper/ThemeColor assignability
+when native groups are enabled. The existing default group policy is unchanged.
+Complete native members still require optional groups; distinguishing explicit
+duration:undefined statically requires exactOptionalPropertyTypes.
+
+Ace1.22.0/build124 incorporates this into its regular verify-runtime.mjs alongside
+18 existing verification groups. The generated-core task, actual language-service
+regression, JVM171/32 classes, debug APK and native16 KB alignment all pass.
+The pre-existing untracked releases directory is not modified or committed.
+
 ## Remaining local gate recording
 
-P6.2 declaration/LSP checks, P6.3 finalized copy and P6.4 final APK/device results
+P6.3 finalized copy and P6.4 final APK/device results
 are added here when their corresponding local checks and commits are complete.
 This interim document does not claim those gates have already passed.
