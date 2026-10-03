@@ -252,7 +252,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6) |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 已完成 (2026-10-03, P3.1 - P3.5) |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
-| P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | P5.1 / P5.2 完成; P5.3 已测基线, Q5 回归线待确认 |
+| P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 未开始 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | 未开始 |
 
@@ -467,10 +467,10 @@ P5.2 证据 (2026-10-03): `docs/dev/p5-compatibility-evidence.md`, 宿主5317 / 
 
 ### P5.3 性能与体积
 
-- [ ] (测试) 度量并记录 (不预先承诺): 装载首帧 (冷 / 热), 单次 state 更新到界面可见 (ui 模式与 floaty), 100 次连续更新合并后的 render 次数与耗时, 1000 项 LazyColumn 首帧与滚动掉帧, 宿主 PSS 增量, 插件 APK 体积与 dex 方法数; 以此定 1.0.0 的回归阈值写入插件 `AGENTS.md` 第 14 节.
+- [x] (测试) 度量并记录 (不预先承诺): 装载首帧 (冷 / 热), 单次 state 更新到界面可见 (ui 模式与 floaty), 100 次连续更新合并后的 render 次数与耗时, 1000 项 LazyColumn 首帧与滚动掉帧, 宿主 PSS 增量, 插件 APK 体积与 dex 方法数; 以此定 1.0.0 的回归阈值写入插件 `AGENTS.md` 第 14 节.
 - [x] (宿主 / 插件) 若 render 整树重建成为瓶颈, 先做宿主侧节点属性快照比较 (跳过无变化子树的 ops), 不改脚本 API; 记录是否需要 F.6 的细粒度更新.
 
-P5.3 实测证据 (2026-10-03): `docs/dev/p5-performance-evidence.md` 与紧凑JSON, 宿主测量实现 `472f52e39b` / 插件19. API24 AVD与API35 Pad各118条, 共236条完整记录; 分析工具16项自测通过. 已覆盖冷/暖首帧, UI/floaty更新, 同回调100赋值(所有样本均1次render), 1000项列表首帧/真实滚动帧, 配对PSS与APK/DEX. APK2375069B, 7143类/44721方法引用. 1000节点初始构建成本明显; 既有TreeReconciler已比较属性/Modifier/回调快照并跳过空补丁, 滚动没有重跑JS render, 本轮不据此增加F.6或预先优化. 第一项的测量已完成, 但其回归阈值须按Q5经维护者确认, 因此仍保留未勾选, 未增加或分拆条目. 冷启动3样本/PSS单进程序列/AVD帧波动不冒充稳定门禁.
+P5.3 实测证据 (2026-10-03): `docs/dev/p5-performance-evidence.md` 与紧凑JSON, 宿主测量实现 `472f52e39b` / 插件19. API24 AVD与API35 Pad各118条, 共236条完整记录; 分析工具16项自测通过. 已覆盖冷/暖首帧, UI/floaty更新, 同回调100赋值(所有样本均1次render), 1000项列表首帧/真实滚动帧, 配对PSS与APK/DEX. APK2375069B, 7143类/44721方法引用. 1000节点初始构建成本明显; 既有TreeReconciler已比较属性/Modifier/回调快照并跳过空补丁, 滚动没有重跑JS render, 本轮不据此增加F.6或预先优化. 维护者同日确认Q5, 具体首版复核线及超线复测/说明和维护者确认规则已写入AGENTS第14节, 本项完成. 冷启动/PSS/全部滚动指标继续观察, 待补稳定性证据再定线.
 
 ---
 
@@ -498,7 +498,7 @@ P5.3 实测证据 (2026-10-03): `docs/dev/p5-performance-evidence.md` 与紧凑J
 
 ## P7: 1.1.0 候选
 
-以下条目在 1.0.0 gate 后由维护者排序 (Q7), 详细说明见附录 F.
+以下条目在 1.0.0 gate 后按维护者已确认的 Q7 顺序推进, 详细说明见附录 F.
 
 - [ ] (宿主 / 文档) F.1 TSX 工厂: `__autojs6Tsx` 按 `type` 路由到 `compose.createElement`, `aj6-jsx-element-extension.d.ts` 增补 Compose 元素类型, TypeScript Engine 插件配合.
 - [ ] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
@@ -748,13 +748,19 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 
 ### Q2 (P2.2 前): 图标集范围
 
+**已拍板 (2026-10-03)**: 采用推荐的 core 图标集, 自带图标通过 `Image` / `ImageWrapper` 使用; extended 留在 F.4 评估. 与已实现范围一致.
+
 `material-icons-core` (约 50 个常用图标, 体积小) 还是 `material-icons-extended` (约 2000 个, APK 增加数 MB, R8 可裁剪未引用项但名称表驱动的动态查找会阻止裁剪). 推荐 core + 允许 `Image` 以 `ImageWrapper` 自带图标; extended 列入 F.4 评估.
 
 ### Q3 (P3.2 前): 缺 key 的动态列表项
 
+**已拍板 (2026-10-03)**: 按索引匹配, 每会话 warn 一次; 与现有实现一致.
+
 按索引匹配并每会话 warn 一次 (推荐), 还是直接 `INVALID_ARGUMENT`. 影响 render 层的容错与文档措辞.
 
 ### Q4 (P3.4 前): 悬浮窗 API 归属
+
+**已拍板 (2026-10-03)**: 只提供 `compose.floaty(...)`, 不增加 `floaty.compose(...)` 别名; 与 P3.4 实现一致.
 
 `compose.floaty(...)` (推荐, 与 `compose.mount` 对称, 文档集中) 还是 `floaty.compose(...)` (与 `floaty.window` / `rawWindow` 并列). 两者只能选一, 不做别名.
 
@@ -764,13 +770,17 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 
 由 P5.3 实测数据提出 (首帧, 单次更新, 列表滚动, PSS, APK 体积), 维护者确认后写入插件 `AGENTS.md`.
 
-2026-10-03 已提出同设备同方法的暖首帧 / 更新 / 列表 p90 约加50%复核线, APK与DEX方法引用加10%预算, 详见 `docs/dev/p5-performance-evidence.md`. 冷启动, PSS与AVD帧波动保持观察. 已向维护者询问, 当前尚未收到确认, 未将候选值设为门禁.
+**已拍板 (2026-10-03)**: 接受 P5.3 现有数值作为第一版复核规则, 同设备同方法的暖首帧 / 更新 / 列表首帧耗时采用约 +50%, APK 和 DEX 方法引用数采用 +10%. 超线必须复测或说明原因, 并由维护者确认是否接受; 不静默放宽或自动接受合理增长. 冷启动/PSS 和全部滚动指标继续记录, 后续补充稳定性证据再定线. 具体数值见 `AGENTS.md` 第 14 节与 `docs/dev/p5-performance-evidence.md`.
 
 ### Q6 (P6.4 前): 启动器图标源图
+
+**资源形式已确认 (2026-10-03)**: 仅需暗色和亮色两类 `mipmap*/ic_launcher.png`, 用于插件中心, 应用内图标与 README banner; 不需要 launcher alias 或额外自适应图标. 当前源图仍为 P0.1 占位素材, 正式图案源图待补.
 
 维护者提供两张黑白透明 PNG (亮色模式用深色图案, 暗色模式用浅色图案) 以替换 P0.1 的临时图标; 无 launcher 入口, 只需基础 `mipmap*/ic_launcher.png` 系列.
 
 ### Q7 (P7 前): 1.1.0 顺序
+
+**已拍板 (2026-10-03)**: 按既定建议顺序 F.1 TSX -> F.2 与旧 ui 混合 -> F.3 `compose.dialog` -> F.4 宽集 -> F.5 画廊 -> F.6 细粒度更新推进; 1.0.0 gate 在先, F.6 是否需要仍以性能证据为依据.
 
 F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6 细粒度更新的先后.
 
