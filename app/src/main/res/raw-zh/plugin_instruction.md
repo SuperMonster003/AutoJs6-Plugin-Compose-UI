@@ -1,13 +1,13 @@
-Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览支持 `"ui";` 模式的 Activity 内容, 悬浮窗计划在 P3.4 交付.
+Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `"ui";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.
 
-P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme 与 ui 脚本挂载已可在匹配的本地 AutoJs6 宿主构建中使用. 悬浮窗仍计划在 P3.4 交付. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
+P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
 
 ### 使用方式
 
 1. 安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 6.8.0 / 5316)
 2. 安装本插件 APK (无需打开, 插件没有启动器入口)
 3. 在 AutoJs6 的插件中心确认 Compose UI 已被识别并处于启用状态
-4. 在脚本中使用 `compose` 或 `$compose`; 通过 `"ui";` 脚本挂载 Activity 内容
+4. 在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`
 
 ### 兼容性
 
@@ -23,6 +23,7 @@ P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长
 - 为什么找不到 `compose`? 全局对象由匹配的本地宿主构建提供, 单独安装插件 APK 不会添加该入口
 - 是否需要卸载其它界面插件? 不需要, Compose UI 与现有 `ui` 模块及其它插件互不影响
 - 插件更新后脚本需要修改吗? 契约版本不变时无需修改; 契约升级会在更新日志中明确标注
+- 悬浮窗需要什么条件? 先授予宿主悬浮窗权限, 输入文字前调用 `window.requestFocus()`. 若 HyperOS 未显示窗口, 请先回到桌面. 缺少权限会返回 PERMISSION_REQUIRED, 不会自动弹出授权界面
 
 ### 权限与安全
 

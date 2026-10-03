@@ -42,7 +42,7 @@ Este documento esta disponible en los siguientes idiomas:
 
 ******
 
-Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante la entrada `compose` / `$compose` del host, y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa actual admite contenido de actividades `"ui";`; las ventanas flotantes están previstas para P3.4.
+Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `"ui";` y ventanas flotantes desde scripts no UI.
 
 El plugin no incluye pantallas independientes ni agrega una entrada en el lanzador. El host lo descubre mediante el servicio INFO, lee su version y sus datos de compatibilidad y luego carga el renderizador dentro del proceso del host segun el contrato (`org.autojs.plugin.compose.api`). El arbol de interfaz, el estado y los eventos viven en el lado del script; el renderizador solo aplica parches a la composicion de Compose y devuelve los eventos del usuario al script.
 
@@ -52,7 +52,7 @@ El plugin no incluye pantallas independientes ni agrega una entrada en el lanzad
 
 ******
 
-Vista previa de desarrollo P3: la entrada invocable compose / $compose, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme y el montaje en scripts UI funcionan con una compilación local compatible del host AutoJs6. Las ventanas flotantes siguen previstas para P3.4. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial.
+Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial.
 
 ******
 
@@ -60,15 +60,16 @@ Vista previa de desarrollo P3: la entrada invocable compose / $compose, 29 fábr
 
 ******
 
-Funciones de la vista previa actual y soporte de alojamiento previsto:
+Funciones de la vista previa de desarrollo actual:
 
 - Interfaz declarativa: `compose.state` + `compose.mount(render)` vuelven a dibujar automaticamente ante cada cambio de estado, mientras que los manejadores de nodo de larga vida (`compose.Text({...})` y similares) permiten modificar directamente propiedades e hijos
 - Conjunto basico de componentes Material 3: diseños (Column / Row / Box / LazyColumn, etc.), texto, botones, campos de texto, interruptores, deslizadores, indicadores de progreso, tarjetas, dialogos
 - Modifiers encadenados: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserva el orden de las operaciones, y las operaciones con ambito se validan en el lado del host
-- Alojamiento: el contenido de actividades de scripts `"ui";` se monta con `compose.mount` o con `compose` / `$compose` invocables; las ventanas flotantes (`compose.floaty`) están previstas para P3.4
+- Dos superficies: `compose.mount` o `compose` / `$compose` invocables para contenido de actividades `"ui";`, y `compose.floaty` para ventanas flotantes raw o redimensionables, también desde scripts no UI
 - Renderizado dentro del proceso: el renderizador se ejecuta en el proceso del host sin ningun puente de interfaz entre procesos, con eventos y actualizaciones de estado de baja latencia
 - Paquete unico: sin variantes de ABI ni codigo nativo propio (solo el auxiliar AndroidX graphics-path incluido con Compose, integrado para las cuatro ABI), un solo APK para todos los dispositivos
 - API de scripts: `compose` / `$compose`, 29 fábricas de nodos y manejadores persistentes, además de `compose.ref`, `compose.batch`, `compose.post` y `compose.theme`
+- Protecciones de integración: las comprobaciones indican no disponible si falta el plugin o es incompatible, los errores usan `ComposeError`, y cerrar la sesión o detener el script libera sus ventanas y callbacks
 
 ******
 
@@ -79,7 +80,7 @@ Funciones de la vista previa actual y soporte de alojamiento previsto:
 1. Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo 6.8.0 / 5316)
 2. Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)
 3. Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado
-4. Use `compose` o `$compose` en los scripts; monte el contenido de la actividad desde un script `"ui";`
+4. Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`
 
 ******
 
@@ -87,7 +88,7 @@ Funciones de la vista previa actual y soporte de alojamiento previsto:
 
 ******
 
-El contador siguiente puede ejecutarse con el host local de vista previa compatible. El HUD flotante muestra la API objetivo de P3.4 y todavía no se puede ejecutar:
+El contador y el HUD flotante siguientes pueden ejecutarse con el host local compatible de la vista previa. Antes de ejecutar el HUD, permita al host mostrarse sobre otras aplicaciones:
 
 ```js
 "ui";
@@ -143,6 +144,7 @@ Requisitos de ejecucion y limites del plugin:
 - Por qué falta `compose`? El objeto global lo proporciona la compilación local compatible del host; instalar solo el APK del plugin no lo añade
 - Hay que desinstalar otros plugins de interfaz? No, Compose UI no interfiere con el modulo `ui` existente ni con otros plugins
 - Hay que modificar los scripts tras actualizar el plugin? No mientras la version del contrato se mantenga; las actualizaciones del contrato se indican explicitamente en el registro de cambios
+- Qué requieren las ventanas flotantes? Conceda permiso de superposición al host y llame a `window.requestFocus()` antes de escribir. Si HyperOS no muestra la ventana, vuelva al escritorio. La falta de permiso devuelve PERMISSION_REQUIRED sin abrir automáticamente una solicitud de autorización
 
 ******
 
@@ -201,7 +203,7 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 _2026/10/03_
 
-- `Aviso` Vista previa de desarrollo P3: la entrada invocable compose / $compose, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme y el montaje en scripts UI funcionan con una compilación local compatible del host AutoJs6. Las ventanas flotantes siguen previstas para P3.4. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial
+- `Aviso` Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial
 - `Aviso` Requiere AutoJs6 6.8.0 (5316) o posterior
 - `Novedad` Esqueleto del repositorio del plugin: cadena de compilacion del plugin de versiones de plataforma, dependencias de Jetpack Compose BOM 2026.09.00, protocolo de activacion Wake Activity y servicio INFO (categoria compose-ui)
 - `Novedad` README, instruccion del centro de plugins y registro de cambios en 10 idiomas, generados a partir de fuentes JSON
@@ -212,7 +214,9 @@ _2026/10/03_
 - `Novedad` Los campos de texto de la vista previa conservan la selección y la composición del IME, admiten el foco y la edición explícita, y rechazan ediciones retrasadas que sobrescribirían entradas más recientes
 - `Novedad` La vista previa incorpora listas de carga diferida con claves de elemento estables y desplazamiento por índice, ranuras de Scaffold y barra superior, diálogos controlados, indicadores de progreso y callbacks en cola de acción o cierre de Snackbar
 - `Novedad` La vista previa de scripts ofrece compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, lotes, programación y control de temas
-- `Novedad` Los scripts UI pueden montar contenido Compose; sustituir el montaje o detener el script libera la sesión anterior y sus callbacks. El alojamiento flotante sigue previsto para P3.4
+- `Novedad` Los scripts UI pueden montar contenido Compose; sustituir el montaje o detener el script libera la sesión anterior y sus callbacks
+- `Novedad` Los scripts no UI pueden crear ventanas Compose raw o redimensionables, cambiar posición y tamaño en píxeles, tactilidad y foco, y cerrarlas con sus controles, floaty.closeAll o al terminar el script
+- `Mejora` Las comprobaciones y ComposeError informan de plugins ausentes, desactivados, no autorizados o incompatibles, permisos insuficientes y sesiones cerradas; la limpieza también cubre ventanas canceladas antes de su conexión nativa
 - `Dependencia` Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)
 - `Dependencia` Se agrega Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `Dependencia` Añadir compose-ui-api.aar V1 alineado con AutoJs6 6.8.0 (5316) (MPL 2.0, hash fijado), con las dependencias compartidas alineadas con el host

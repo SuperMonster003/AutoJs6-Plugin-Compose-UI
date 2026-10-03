@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的句柄, 響應式 state/render/ref, batch/post/theme 與 ui 腳本掛載已可在匹配的本地 AutoJs6 宿主構建中使用. 懸浮窗仍計劃在 P3.4 交付. 示例包, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本地預覽, 尚無官方發行版",
+        "P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的句柄, 響應式 state/render/ref, batch/post/theme, ui 腳本掛載及 raw / 可調整懸浮窗已可在匹配的本地 AutoJs6 宿主構建中使用. 已包含可用性探測, 型別化錯誤與會話清理. 示例包, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本地預覽, 尚無官方發行版",
         "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高版本"
       ],
       "feature": [
@@ -21,13 +21,17 @@
         "預覽輸入框保留選區與輸入法組合文字, 支援焦點和明確編輯, 拒絕覆蓋較新輸入的延遲編輯",
         "預覽新增支援穩定項目 key 與索引捲動的懶加載列表, Scaffold 與頂部應用程式列插槽, 受控對話框, 進度指示器, 以及按佇列回傳操作或關閉結果的 Snackbar",
         "腳本預覽提供可呼叫的 compose / $compose, 29 個節點工廠, 長期持有的句柄, 響應式 state/render/ref, 批次處理, 排程與主題控制",
-        "ui 腳本可掛載 Compose 內容; 替換掛載或停止腳本時釋放舊會話及回呼, 懸浮窗承載仍計劃在 P3.4 交付"
+        "ui 腳本可掛載 Compose 內容; 替換掛載或停止腳本時釋放舊會話及回呼",
+        "非 ui 腳本可建立 raw 或可調整 Compose 懸浮窗, 修改像素位置和尺寸, 觸摸及焦點設定, 並透過窗口控制項, floaty.closeAll 或腳本退出關閉"
       ],
       "dependency": [
         "附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)",
         "附加 Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
         "附加與 AutoJs6 6.8.0 (5316) 對齊的 compose-ui-api.aar V1 (MPL 2.0, 摘要鎖定), 共用依賴與宿主對齊",
         "附加由 BOM {{ compose_bom }} 管理的 Compose UI Test (Apache 2.0, 僅用於測試)"
+      ],
+      "improvement": [
+        "可用性探測與 ComposeError 統一報告插件缺失, 停用, 未授權, 不相容, 權限不足及會話關閉; 生命週期清理涵蓋原生窗口附加前即被取消的情況"
       ]
     }
   }

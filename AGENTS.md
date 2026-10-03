@@ -151,7 +151,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `name` 来自不可翻译的 `app_name`, `description` 来自当前 locale 的 `plugin_description`, `instruction` 来自 `@raw/plugin_instruction`, `versionName` / `versionCode` 来自已安装包, `versionDate` 来自 `plugin_version_date` resValue, `id` / `engine` / `variant` / `author` 来自 `ComposeUiPlugin`.
 - `supportedAbis` 恒为空数组 (D22: 单 APK 内置全部四种 ABI 的 graphics-path 辅助库, 对设备没有 ABI 限制), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
-- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 `RendererCatalog` 声明的完整 30 项 V1 目录 (29 个节点组件与仅命令的 Snackbar), FEATURES 为空. P2.4 / P2.5 已补齐原生输入框, 列表, Scaffold, 顶部应用栏, 对话框与进度指示器. P3.1 / P3.2 / P3.3 已在匹配的本地宿主交付可调用的 `compose` / `$compose`, 29 个节点工厂, 句柄, 响应式 state/render/ref, batch/post/theme 与 ui 模式挂载; 悬浮窗仍待 P3.4, 不提前声明未实现的承载能力.
+- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 `RendererCatalog` 声明的完整 30 项 V1 目录 (29 个节点组件与仅命令的 Snackbar), FEATURES 为空. P2.4 / P2.5 已补齐原生输入框, 列表, Scaffold, 顶部应用栏, 对话框与进度指示器. P3.1 - P3.5 已在匹配的本地宿主交付可调用的 `compose` / `$compose`, 29 个节点工厂, 句柄, 响应式 state/render/ref, batch/post/theme, ui 模式挂载与非 ui 脚本的 raw / 可调整悬浮窗, 以及错误 / 探测 / 生命周期守卫. 悬浮窗复用宿主授权, 缺失权限返回 `PERMISSION_REQUIRED`, 不自动弹出授权界面; 文档与完整验证矩阵仍由后续阶段交付.
 - 新增可选能力时先协商, 不通过捕获异常猜测协议版本.
 
 ## 8. 进程内渲染器与公共 API 设计 (CONDITIONAL, P0.2 起)
@@ -183,7 +183,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `.readme/lang_*.json` (10 语言, 键集合一致, 列表键 `features` / `usage_steps` / `compatibility_points` / `faq_items` / `security_points`) 与 `.changelog/lang_*.json` 是唯一文案源; 生成物 (`README.md`, `.readme/README-*.md`, `app/src/main/assets/doc/CHANGELOG*.md`, `app/src/main/res/raw*/plugin_instruction.md`, 共 36 个) 不手工编辑.
 - 修改 JSON 或模板后运行 `py .python/generate_markdown.py` 再 `--check`; CI `markdown.yml` 在 Windows 上执行 `.python/check_markdown.bat`.
-- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 当前状态段落 MUST 如实说明 "P3 本地开发预览, 脚本入口与 ui 模式挂载已实现, 需要匹配的本地宿主构建, 悬浮窗及后续配套尚待交付, 尚无官方发行版". 计数器为可运行的本地预览示例, 悬浮窗 HUD 标明为 P3.4 目标 API; 示例包, 完整 API 文档, 类型声明与完整验证矩阵仍待后续阶段.
+- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 当前状态段落 MUST 如实说明 "P3 本地开发预览, 脚本入口, ui 模式与悬浮窗承载及错误 / 生命周期守卫已实现, 需要匹配的本地宿主构建, 尚无官方发行版". 计数器与悬浮窗 HUD 均为可运行的本地预览示例, HUD 说明宿主悬浮窗授权前提; 示例包, 完整 API 文档, 类型声明与完整验证矩阵仍待后续阶段.
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.
 

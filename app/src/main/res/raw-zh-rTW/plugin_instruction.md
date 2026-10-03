@@ -1,13 +1,13 @@
-Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽支援 `"ui";` 模式的 Activity 內容, 懸浮視窗計劃在 P3.4 交付.
+Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `"ui";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.
 
-P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme 與 ui 指令碼掛載已可在相符的本機 AutoJs6 宿主建置中使用. 懸浮視窗仍計劃在 P3.4 交付. 範例套件, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本機預覽, 尚無官方發行版.
+P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 範例套件, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本機預覽, 尚無官方發行版.
 
 ### 使用方式
 
 1. 安裝包含 compose 指令碼入口的相符本機 AutoJs6 建置 (最低 6.8.0 / 5316)
 2. 安裝本外掛程式 APK (無需開啟, 外掛程式沒有啟動器進入點)
 3. 在 AutoJs6 的外掛程式中心確認 Compose UI 已被識別並處於啟用狀態
-4. 在指令碼中使用 `compose` 或 `$compose`; 透過 `"ui";` 指令碼掛載 Activity 內容
+4. 在指令碼中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮視窗權限再使用 `compose.floaty`
 
 ### 相容性
 
@@ -23,6 +23,7 @@ P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長
 - 為什麼找不到 `compose`? 全域物件由相符的本機宿主建置提供, 單獨安裝外掛程式 APK 不會加入該入口
 - 是否需要解除安裝其它介面外掛程式? 不需要, Compose UI 與現有 `ui` 模組及其它外掛程式互不影響
 - 外掛程式更新後指令碼需要修改嗎? 契約版本不變時無需修改; 契約升級會在更新日誌中明確標註
+- 懸浮視窗需要什麼條件? 先授予宿主懸浮視窗權限, 輸入文字前呼叫 `window.requestFocus()`. 若 HyperOS 未顯示視窗, 請先返回桌面. 缺少權限會傳回 PERMISSION_REQUIRED, 不會自動彈出授權介面
 
 ### 權限與安全
 

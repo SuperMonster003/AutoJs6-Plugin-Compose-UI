@@ -1,13 +1,13 @@
-Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante la entrada `compose` / `$compose` del host, y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa actual admite contenido de actividades `"ui";`; las ventanas flotantes están previstas para P3.4.
+Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `"ui";` y ventanas flotantes desde scripts no UI.
 
-Vista previa de desarrollo P3: la entrada invocable compose / $compose, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme y el montaje en scripts UI funcionan con una compilación local compatible del host AutoJs6. Las ventanas flotantes siguen previstas para P3.4. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial.
+Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial.
 
 ### Uso
 
 1. Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo 6.8.0 / 5316)
 2. Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)
 3. Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado
-4. Use `compose` o `$compose` en los scripts; monte el contenido de la actividad desde un script `"ui";`
+4. Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`
 
 ### Compatibilidad
 
@@ -23,6 +23,7 @@ Vista previa de desarrollo P3: la entrada invocable compose / $compose, 29 fábr
 - Por qué falta `compose`? El objeto global lo proporciona la compilación local compatible del host; instalar solo el APK del plugin no lo añade
 - Hay que desinstalar otros plugins de interfaz? No, Compose UI no interfiere con el modulo `ui` existente ni con otros plugins
 - Hay que modificar los scripts tras actualizar el plugin? No mientras la version del contrato se mantenga; las actualizaciones del contrato se indican explicitamente en el registro de cambios
+- Qué requieren las ventanas flotantes? Conceda permiso de superposición al host y llame a `window.requestFocus()` antes de escribir. Si HyperOS no muestra la ventana, vuelva al escritorio. La falta de permiso devuelve PERMISSION_REQUIRED sin abrir automáticamente una solicitud de autorización
 
 ### Permisos y seguridad
 
