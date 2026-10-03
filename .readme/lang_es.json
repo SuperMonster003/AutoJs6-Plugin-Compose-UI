@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `\"ui\";` y ventanas flotantes desde scripts no UI.",
   "p_introduction_how": "El plugin no incluye pantallas independientes ni agrega una entrada en el lanzador. El host lo descubre mediante el servicio INFO, lee su version y sus datos de compatibilidad y luego carga el renderizador dentro del proceso del host segun el contrato (`org.autojs.plugin.compose.api`). El arbol de interfaz, el estado y los eventos viven en el lado del script; el renderizador solo aplica parches a la composicion de Compose y devuelve los eventos del usuario al script.",
   "h3_status": "Estado actual",
-  "p_status": "Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial.",
+  "p_status": "Vista previa de desarrollo P4: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Se incluyen cinco ejemplos de contador, formulario, lista de 1000 elementos, HUD flotante y temas, sincronizados con la categoría Compose UI del host correspondiente. La documentación completa de la API, las declaraciones de tipos y la matriz completa de verificación P5 siguen pendientes. Es una vista previa local sin publicación oficial.",
   "h3_features": "Caracteristicas",
   "p_features_intro": "Funciones de la vista previa de desarrollo actual",
   "features": [
@@ -19,7 +19,8 @@
     "Renderizado dentro del proceso: el renderizador se ejecuta en el proceso del host sin ningun puente de interfaz entre procesos, con eventos y actualizaciones de estado de baja latencia",
     "Paquete unico: sin variantes de ABI ni codigo nativo propio (solo el auxiliar AndroidX graphics-path incluido con Compose, integrado para las cuatro ABI), un solo APK para todos los dispositivos",
     "API de scripts: `compose` / `$compose`, 29 fábricas de nodos y manejadores persistentes, además de `compose.ref`, `compose.batch`, `compose.post` y `compose.theme`",
-    "Protecciones de integración: las comprobaciones indican no disponible si falta el plugin o es incompatible, los errores usan `ComposeError`, y cerrar la sesión o detener el script libera sus ventanas y callbacks"
+    "Protecciones de integración: las comprobaciones indican no disponible si falta el plugin o es incompatible, los errores usan `ComposeError`, y cerrar la sesión o detener el script libera sus ventanas y callbacks",
+    "Cinco ejemplos ejecutables de contador, validación de formularios, lista de 1000 elementos con claves estables, HUD flotante sin modo UI y temas, con requisitos e índice, sincronizados con la categoría Compose UI del host correspondiente"
   ],
   "h3_usage": "Uso",
   "usage_steps": [
@@ -37,7 +38,7 @@
   "example_hud_preparing": "Preparando...",
   "example_hud_close": "Cerrar",
   "example_hud_progress": "Progreso ${i}%",
-  "p_quick_start_details": "Los ejemplos incluidos, la referencia completa de la API y las declaraciones TypeScript siguen pendientes. El apéndice A de la hoja de ruta define la forma actual de la API.",
+  "p_quick_start_details": "Los cinco ejemplos ejecutables se incluyen en `assets/examples/` y se enumeran en `index.json`; el host correspondiente ofrece los mismos scripts en su categoría de ejemplos Compose UI (`sample/Compose UI/`). Cada cabecera explica el modo de ejecución y los permisos necesarios. La referencia completa de la API y las declaraciones TypeScript siguen pendientes; el apéndice A de la hoja de ruta define la forma actual de la API.",
   "h3_compatibility": "Compatibilidad",
   "p_compatibility_intro": "Requisitos de ejecucion y limites del plugin",
   "compatibility_points": [

@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供�
 
 ******
 
-P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 範例套件, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本機預覽, 尚無官方發行版.
+P4 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 完整 API 文件, 型別宣告與 P5 完整驗證矩陣仍待後續交付. 目前僅為本機預覽, 尚無官方發行版.
 
 ******
 
@@ -70,6 +70,7 @@ P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長
 - 單一安裝套件: 不區分 ABI, 不含外掛程式自有原生程式碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助程式庫, 四種 ABI 全部內建), 一個 APK 適用所有裝置
 - 指令碼入口: `compose` / `$compose`, 29 個節點工廠與長期持有的控制代碼, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`
 - 整合防護: 外掛程式缺少或不相容時可用性探測傳回不可用, 錯誤使用 `ComposeError`, 關閉工作階段或停止指令碼會釋放所屬視窗與回呼
+- 計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類
 
 ******
 
@@ -118,7 +119,7 @@ threads.start(() => {
 });
 ```
 
-範例套件, 完整 API 說明與 TypeScript 型別宣告尚待交付. 目前 API 形態以藍圖附錄 A 為準.
+五個可執行範例隨套件放在 `assets/examples/`, 由 `index.json` 列出; 相符宿主的 "範例程式碼 > Compose UI" 提供相同指令碼 (`sample/Compose UI/`). 每例開頭說明執行模式與權限前提. 完整 API 說明與 TypeScript 型別宣告仍待交付, 目前 API 形態以藍圖附錄 A 為準.
 
 ******
 
@@ -203,7 +204,7 @@ minimum host build: 5316 (6.8.0)
 
 _2026/10/03_
 
-- `提示` P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 範例套件, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本機預覽, 尚無官方發行版
+- `提示` P4 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 完整 API 文件, 型別宣告與 P5 完整驗證矩陣仍待後續交付. 目前僅為本機預覽, 尚無官方發行版
 - `提示` 需要 AutoJs6 6.8.0 (5316) 或更新版本
 - `新增` 外掛程式存放庫骨架: 平台版本外掛程式建置鏈, Jetpack Compose BOM 2026.09.00 相依, Wake Activity 啟用協定與 INFO 服務 (類別 compose-ui)
 - `新增` 10 種語言的 README, 外掛程式中心說明與更新日誌, 由 JSON 來源檔案統一產生
@@ -216,11 +217,13 @@ _2026/10/03_
 - `新增` 指令碼預覽提供可呼叫的 compose / $compose, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, 批次處理, 排程與主題控制
 - `新增` ui 指令碼可掛載 Compose 內容; 取代掛載或停止指令碼時釋放舊工作階段及回呼
 - `新增` 非 ui 指令碼可建立 raw 或可調整 Compose 懸浮視窗, 修改像素位置和尺寸, 觸控及焦點設定, 並透過視窗控制項, floaty.closeAll 或指令碼結束關閉
+- `新增` 計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類
 - `最佳化` 可用性探測與 ComposeError 統一報告外掛程式缺少, 停用, 未授權, 不相容, 權限不足及工作階段關閉; 生命週期清理涵蓋原生視窗附加前即被取消的情況
 - `相依` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)
 - `相依` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `相依` 附加與 AutoJs6 6.8.0 (5316) 對齊的 compose-ui-api.aar V1 (MPL 2.0, 雜湊鎖定), 共用相依性與宿主對齊
 - `相依` 附加由 BOM 2026.09.00 管理的 Compose UI Test (Apache 2.0, 僅用於測試)
+- `相依` 附加 JaCoCo 版本 0.8.14 (僅用於選用測試涵蓋率, 不隨發行套件打包)
 
 ##### 更多版本歷史可參閱
 

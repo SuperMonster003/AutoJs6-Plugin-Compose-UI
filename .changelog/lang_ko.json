@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P3 개발 미리보기: 호출 가능한 compose / $compose, 노드 팩터리 29개, 유지 가능한 핸들, 반응형 state/render/ref, batch/post/theme, UI 스크립트 마운트와 raw 또는 크기 조절 가능한 플로팅 창을 호환 로컬 AutoJs6 호스트 빌드에서 사용할 수 있습니다. 가용성 확인, 형식화된 오류 및 세션 정리도 포함됩니다. 예제 모음, 전체 API 문서, 타입 선언 및 더 넓은 검증 매트릭스는 아직 제공되지 않습니다. 현재는 공식 릴리스가 아닌 로컬 미리보기입니다",
+        "P4 개발 미리보기: 호출 가능한 compose / $compose, 노드 팩터리 29개, 유지 가능한 핸들, 반응형 state/render/ref, batch/post/theme, UI 스크립트 마운트와 raw 또는 크기 조절 가능한 플로팅 창을 호환 로컬 AutoJs6 호스트 빌드에서 사용할 수 있습니다. 가용성 확인, 형식화된 오류 및 세션 정리도 포함됩니다. 카운터, 폼, 1000개 항목 목록, 플로팅 HUD, 테마 예제 5개가 포함되며 호환 호스트의 Compose UI 예제 분류에도 동기화됩니다. 전체 API 문서, 타입 선언 및 P5 전체 검증 매트릭스는 추후 제공됩니다. 현재는 공식 릴리스가 아닌 로컬 미리보기입니다",
         "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 이상이 필요합니다"
       ],
       "feature": [
@@ -22,13 +22,15 @@
         "안정적인 항목 key 및 인덱스 스크롤을 지원하는 지연 로딩 목록, Scaffold와 상단 앱 바 슬롯, 제어형 대화상자, 진행 표시기, 작업 또는 닫기 결과를 대기열 순서로 반환하는 Snackbar를 미리보기에 추가",
         "스크립트 미리보기에 호출 가능한 compose / $compose, 노드 팩터리 29개, 유지 가능한 핸들, 반응형 state/render/ref, 일괄 처리, 예약 실행 및 테마 제어 제공",
         "UI 스크립트에서 Compose 콘텐츠를 마운트할 수 있으며 재마운트나 스크립트 중지 시 이전 세션과 콜백 해제",
-        "비 UI 스크립트에서 raw 또는 크기 조절 가능한 Compose 플로팅 창을 만들고 픽셀 위치와 크기, 터치 및 포커스를 변경 가능. 창 제어, floaty.closeAll 또는 스크립트 종료를 통한 닫기 지원"
+        "비 UI 스크립트에서 raw 또는 크기 조절 가능한 Compose 플로팅 창을 만들고 픽셀 위치와 크기, 터치 및 포커스를 변경 가능. 창 제어, floaty.closeAll 또는 스크립트 종료를 통한 닫기 지원",
+        "카운터, 폼 검증, 안정적인 키를 사용하는 1000개 항목 목록, 비 UI 플로팅 HUD, 테마 예제 5개를 요구 사항과 목록과 함께 제공하며 호환 호스트의 Compose UI 예제 분류에도 동기화"
       ],
       "dependency": [
         "common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)",
         "Jetpack Compose BOM {{ compose_bom }} 추가 (Apache 2.0)",
         "AutoJs6 6.8.0 (5316)에 맞춘 compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴",
-        "BOM {{ compose_bom }}에서 관리하는 Compose UI Test 추가 (Apache 2.0, 테스트 전용)"
+        "BOM {{ compose_bom }}에서 관리하는 Compose UI Test 추가 (Apache 2.0, 테스트 전용)",
+        "JaCoCo 버전 0.8.14 추가 (선택적 테스트 커버리지 전용, 릴리스 패키지에는 포함되지 않음)"
       ],
       "improvement": [
         "가용성 확인과 ComposeError가 플러그인 누락, 비활성화, 미승인, 비호환, 권한 부족 및 닫힌 세션을 일관되게 보고. 네이티브 창 연결 전 취소도 수명 주기 정리에서 처리"

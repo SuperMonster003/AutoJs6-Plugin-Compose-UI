@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `\"ui\";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.",
   "p_introduction_how": "插件不包含任何独立界面, 也不在启动器中显示入口. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在宿主进程内加载渲染器. 界面树, 状态与事件在脚本侧描述, 渲染器只负责把补丁应用到 Compose 组合并把用户事件回传给脚本.",
   "h3_status": "当前状态",
-  "p_status": "P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.",
+  "p_status": "P4 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 完整 API 文档, 类型声明与 P5 完整验证矩阵仍待后续交付. 当前仅为本地预览, 尚无官方发行版.",
   "h3_features": "功能特性",
   "p_features_intro": "当前开发预览的核心能力",
   "features": [
@@ -19,7 +19,8 @@
     "进程内渲染: 渲染器在宿主进程中运行, 没有跨进程界面桥接, 事件与状态更新低延迟",
     "单一安装包: 不区分 ABI, 不含插件自有原生代码 (仅随 Compose 附带的 AndroidX graphics-path 辅助库, 四种 ABI 全部内置), 一个 APK 适配所有设备",
     "脚本入口: `compose` / `$compose`, 29 个节点工厂与长期持有的句柄, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`",
-    "集成守卫: 插件缺失或不兼容时可用性探测返回不可用, 错误使用 `ComposeError`, 关闭会话或停止脚本会释放所属窗口与回调"
+    "集成守卫: 插件缺失或不兼容时可用性探测返回不可用, 错误使用 `ComposeError`, 关闭会话或停止脚本会释放所属窗口与回调",
+    "计数器, 表单校验, 1000 项键控列表, 非 ui 悬浮 HUD 与主题五个可运行示例, 包含前置条件与索引, 同步至匹配宿主的 Compose UI 示例分类"
   ],
   "h3_usage": "使用方式",
   "usage_steps": [
@@ -37,7 +38,7 @@
   "example_hud_preparing": "准备中...",
   "example_hud_close": "关闭",
   "example_hud_progress": "进度 ${i}%",
-  "p_quick_start_details": "示例包, 完整 API 说明与 TypeScript 类型声明尚待交付. 当前 API 形态以路线图附录 A 为准.",
+  "p_quick_start_details": "五个可运行示例随包放在 `assets/examples/`, 由 `index.json` 列出; 匹配宿主的 \"示例代码 > Compose UI\" 提供相同脚本 (`sample/Compose UI/`). 每例头部说明运行模式与权限前提. 完整 API 说明与 TypeScript 类型声明仍待交付, 当前 API 形态以路线图附录 A 为准.",
   "h3_compatibility": "兼容性",
   "p_compatibility_intro": "插件的运行要求与限制",
   "compatibility_points": [

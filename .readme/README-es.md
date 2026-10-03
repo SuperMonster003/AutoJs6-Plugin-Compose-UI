@@ -52,7 +52,7 @@ El plugin no incluye pantallas independientes ni agrega una entrada en el lanzad
 
 ******
 
-Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial.
+Vista previa de desarrollo P4: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Se incluyen cinco ejemplos de contador, formulario, lista de 1000 elementos, HUD flotante y temas, sincronizados con la categoría Compose UI del host correspondiente. La documentación completa de la API, las declaraciones de tipos y la matriz completa de verificación P5 siguen pendientes. Es una vista previa local sin publicación oficial.
 
 ******
 
@@ -70,6 +70,7 @@ Funciones de la vista previa de desarrollo actual:
 - Paquete unico: sin variantes de ABI ni codigo nativo propio (solo el auxiliar AndroidX graphics-path incluido con Compose, integrado para las cuatro ABI), un solo APK para todos los dispositivos
 - API de scripts: `compose` / `$compose`, 29 fábricas de nodos y manejadores persistentes, además de `compose.ref`, `compose.batch`, `compose.post` y `compose.theme`
 - Protecciones de integración: las comprobaciones indican no disponible si falta el plugin o es incompatible, los errores usan `ComposeError`, y cerrar la sesión o detener el script libera sus ventanas y callbacks
+- Cinco ejemplos ejecutables de contador, validación de formularios, lista de 1000 elementos con claves estables, HUD flotante sin modo UI y temas, con requisitos e índice, sincronizados con la categoría Compose UI del host correspondiente
 
 ******
 
@@ -118,7 +119,7 @@ threads.start(() => {
 });
 ```
 
-Los ejemplos incluidos, la referencia completa de la API y las declaraciones TypeScript siguen pendientes. El apéndice A de la hoja de ruta define la forma actual de la API.
+Los cinco ejemplos ejecutables se incluyen en `assets/examples/` y se enumeran en `index.json`; el host correspondiente ofrece los mismos scripts en su categoría de ejemplos Compose UI (`sample/Compose UI/`). Cada cabecera explica el modo de ejecución y los permisos necesarios. La referencia completa de la API y las declaraciones TypeScript siguen pendientes; el apéndice A de la hoja de ruta define la forma actual de la API.
 
 ******
 
@@ -203,7 +204,7 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 _2026/10/03_
 
-- `Aviso` Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial
+- `Aviso` Vista previa de desarrollo P4: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Se incluyen cinco ejemplos de contador, formulario, lista de 1000 elementos, HUD flotante y temas, sincronizados con la categoría Compose UI del host correspondiente. La documentación completa de la API, las declaraciones de tipos y la matriz completa de verificación P5 siguen pendientes. Es una vista previa local sin publicación oficial
 - `Aviso` Requiere AutoJs6 6.8.0 (5316) o posterior
 - `Novedad` Esqueleto del repositorio del plugin: cadena de compilacion del plugin de versiones de plataforma, dependencias de Jetpack Compose BOM 2026.09.00, protocolo de activacion Wake Activity y servicio INFO (categoria compose-ui)
 - `Novedad` README, instruccion del centro de plugins y registro de cambios en 10 idiomas, generados a partir de fuentes JSON
@@ -216,11 +217,13 @@ _2026/10/03_
 - `Novedad` La vista previa de scripts ofrece compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, lotes, programación y control de temas
 - `Novedad` Los scripts UI pueden montar contenido Compose; sustituir el montaje o detener el script libera la sesión anterior y sus callbacks
 - `Novedad` Los scripts no UI pueden crear ventanas Compose raw o redimensionables, cambiar posición y tamaño en píxeles, tactilidad y foco, y cerrarlas con sus controles, floaty.closeAll o al terminar el script
+- `Novedad` Cinco ejemplos ejecutables de contador, validación de formularios, lista de 1000 elementos con claves estables, HUD flotante sin modo UI y temas, con requisitos e índice, sincronizados con la categoría Compose UI del host correspondiente
 - `Mejora` Las comprobaciones y ComposeError informan de plugins ausentes, desactivados, no autorizados o incompatibles, permisos insuficientes y sesiones cerradas; la limpieza también cubre ventanas canceladas antes de su conexión nativa
 - `Dependencia` Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)
 - `Dependencia` Se agrega Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `Dependencia` Añadir compose-ui-api.aar V1 alineado con AutoJs6 6.8.0 (5316) (MPL 2.0, hash fijado), con las dependencias compartidas alineadas con el host
 - `Dependencia` Añadir Compose UI Test gestionado por BOM 2026.09.00 (Apache 2.0, solo para pruebas)
+- `Dependencia` Añadir JaCoCo versión 0.8.14 (solo cobertura opcional de pruebas, excluido de los paquetes de publicación)
 
 ##### Para ver mas historial de versiones, consulte
 

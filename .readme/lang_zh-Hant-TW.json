@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `\"ui\";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.",
   "p_introduction_how": "外掛程式不包含任何獨立介面, 也不在啟動器中顯示進入點. 宿主透過 INFO 服務探索外掛程式並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在宿主處理程序內載入轉譯器. 介面樹, 狀態與事件在指令碼端描述, 轉譯器只負責把修補套用到 Compose 組合並把使用者事件回傳給指令碼.",
   "h3_status": "目前狀態",
-  "p_status": "P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 範例套件, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本機預覽, 尚無官方發行版.",
+  "p_status": "P4 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 完整 API 文件, 型別宣告與 P5 完整驗證矩陣仍待後續交付. 目前僅為本機預覽, 尚無官方發行版.",
   "h3_features": "功能特性",
   "p_features_intro": "目前開發預覽的核心能力",
   "features": [
@@ -19,7 +19,8 @@
     "處理程序內轉譯: 轉譯器在宿主處理程序中執行, 沒有跨處理程序介面橋接, 事件與狀態更新低延遲",
     "單一安裝套件: 不區分 ABI, 不含外掛程式自有原生程式碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助程式庫, 四種 ABI 全部內建), 一個 APK 適用所有裝置",
     "指令碼入口: `compose` / `$compose`, 29 個節點工廠與長期持有的控制代碼, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`",
-    "整合防護: 外掛程式缺少或不相容時可用性探測傳回不可用, 錯誤使用 `ComposeError`, 關閉工作階段或停止指令碼會釋放所屬視窗與回呼"
+    "整合防護: 外掛程式缺少或不相容時可用性探測傳回不可用, 錯誤使用 `ComposeError`, 關閉工作階段或停止指令碼會釋放所屬視窗與回呼",
+    "計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類"
   ],
   "h3_usage": "使用方式",
   "usage_steps": [
@@ -37,7 +38,7 @@
   "example_hud_preparing": "準備中...",
   "example_hud_close": "關閉",
   "example_hud_progress": "進度 ${i}%",
-  "p_quick_start_details": "範例套件, 完整 API 說明與 TypeScript 型別宣告尚待交付. 目前 API 形態以藍圖附錄 A 為準.",
+  "p_quick_start_details": "五個可執行範例隨套件放在 `assets/examples/`, 由 `index.json` 列出; 相符宿主的 \"範例程式碼 > Compose UI\" 提供相同指令碼 (`sample/Compose UI/`). 每例開頭說明執行模式與權限前提. 完整 API 說明與 TypeScript 型別宣告仍待交付, 目前 API 形態以藍圖附錄 A 為準.",
   "h3_compatibility": "相容性",
   "p_compatibility_intro": "外掛程式的執行需求與限制",
   "compatibility_points": [

@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports both `\"ui\";` activity content and floating windows from non-UI scripts.",
   "p_introduction_how": "The plugin ships no standalone screens and adds no launcher entry. The host discovers it through the INFO service, reads its version and compatibility data, then loads the renderer inside the host process according to the contract (`org.autojs.plugin.compose.api`). The UI tree, state, and events live on the script side; the renderer only applies patches to the Compose composition and forwards user events back to the script.",
   "h3_status": "Status",
-  "p_status": "P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release.",
+  "p_status": "P4 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Complete API documentation, type declarations, and the full P5 verification matrix remain pending. This is a local preview without an official release.",
   "h3_features": "Features",
   "p_features_intro": "Capabilities of the current development preview",
   "features": [
@@ -19,7 +19,8 @@
     "In-process rendering: the renderer runs inside the host process without any cross-process UI bridge, so events and state updates stay low-latency",
     "Single package: no ABI variants and no first-party native code (only the AndroidX graphics-path helper bundled with Compose, built in for all four ABIs), one APK fits every device",
     "Script entry: `compose` / `$compose`, 29 node factories and retained handles, plus `compose.ref`, `compose.batch`, `compose.post`, and `compose.theme`",
-    "Integration guards: availability probes return unavailable for missing or incompatible plugins, errors use `ComposeError`, and closing a session or stopping its script releases owned windows and callbacks"
+    "Integration guards: availability probes return unavailable for missing or incompatible plugins, errors use `ComposeError`, and closing a session or stopping its script releases owned windows and callbacks",
+    "Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category"
   ],
   "h3_usage": "Usage",
   "usage_steps": [
@@ -37,7 +38,7 @@
   "example_hud_preparing": "Preparing...",
   "example_hud_close": "Close",
   "example_hud_progress": "Progress ${i}%",
-  "p_quick_start_details": "Bundled examples, the complete API reference, and TypeScript declarations are still pending. Roadmap appendix A defines the current API shape.",
+  "p_quick_start_details": "Five runnable examples are bundled under `assets/examples/` and listed in `index.json`; the matching host provides the same scripts in its Compose UI sample category (`sample/Compose UI/`). Each header explains execution mode and permission prerequisites. The complete API reference and TypeScript declarations remain pending; roadmap appendix A defines the current API shape.",
   "h3_compatibility": "Compatibility",
   "p_compatibility_intro": "Runtime requirements and limits of the plugin",
   "compatibility_points": [

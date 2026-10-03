@@ -52,7 +52,7 @@ The plugin ships no standalone screens and adds no launcher entry. The host disc
 
 ******
 
-P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release.
+P4 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Complete API documentation, type declarations, and the full P5 verification matrix remain pending. This is a local preview without an official release.
 
 ******
 
@@ -70,6 +70,7 @@ Capabilities of the current development preview:
 - Single package: no ABI variants and no first-party native code (only the AndroidX graphics-path helper bundled with Compose, built in for all four ABIs), one APK fits every device
 - Script entry: `compose` / `$compose`, 29 node factories and retained handles, plus `compose.ref`, `compose.batch`, `compose.post`, and `compose.theme`
 - Integration guards: availability probes return unavailable for missing or incompatible plugins, errors use `ComposeError`, and closing a session or stopping its script releases owned windows and callbacks
+- Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category
 
 ******
 
@@ -118,7 +119,7 @@ threads.start(() => {
 });
 ```
 
-Bundled examples, the complete API reference, and TypeScript declarations are still pending. Roadmap appendix A defines the current API shape.
+Five runnable examples are bundled under `assets/examples/` and listed in `index.json`; the matching host provides the same scripts in its Compose UI sample category (`sample/Compose UI/`). Each header explains execution mode and permission prerequisites. The complete API reference and TypeScript declarations remain pending; roadmap appendix A defines the current API shape.
 
 ******
 
@@ -203,7 +204,7 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 _2026/10/03_
 
-- `Hint` P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release
+- `Hint` P4 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Complete API documentation, type declarations, and the full P5 verification matrix remain pending. This is a local preview without an official release
 - `Hint` Requires AutoJs6 6.8.0 (5316) or later
 - `Feature` Plugin repository skeleton: platform versions plugin build chain, Jetpack Compose BOM 2026.09.00 dependencies, Wake Activity activation protocol, and INFO service (category compose-ui)
 - `Feature` README, plugin center instruction, and changelog in 10 languages, generated from JSON sources
@@ -216,11 +217,13 @@ _2026/10/03_
 - `Feature` The script preview exposes callable compose / $compose, 29 node factories, retained handles, reactive state/render/ref, batching, posting, and theme control
 - `Feature` UI scripts can mount Compose content; replacing the mount or stopping the script releases the old session and callbacks
 - `Feature` Non-UI scripts can create raw or resizable Compose floating windows, change pixel geometry, touch and focus settings, and close them through their controls, floaty.closeAll, or script termination
+- `Feature` Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category
 - `Improvement` Availability probes and ComposeError consistently report missing, disabled, unauthorized or incompatible plugins, permission failures and closed sessions; lifecycle cleanup also covers windows canceled before native attachment
 - `Dependency` Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)
 - `Dependency` Attach Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `Dependency` Attach compose-ui-api.aar V1 aligned to AutoJs6 6.8.0 (5316) (MPL 2.0, hash-locked), with shared dependencies aligned to the host
 - `Dependency` Attach Compose UI Test managed by BOM 2026.09.00 (Apache 2.0, tests only)
+- `Dependency` Attach JaCoCo version 0.8.14 (optional test coverage only, excluded from release packages)
 
 ##### For more release history, see
 

@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compo
 
 ******
 
-P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
+P4 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 完整 API 文档, 类型声明与 P5 完整验证矩阵仍待后续交付. 当前仅为本地预览, 尚无官方发行版.
 
 ******
 
@@ -70,6 +70,7 @@ P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长
 - 单一安装包: 不区分 ABI, 不含插件自有原生代码 (仅随 Compose 附带的 AndroidX graphics-path 辅助库, 四种 ABI 全部内置), 一个 APK 适配所有设备
 - 脚本入口: `compose` / `$compose`, 29 个节点工厂与长期持有的句柄, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`
 - 集成守卫: 插件缺失或不兼容时可用性探测返回不可用, 错误使用 `ComposeError`, 关闭会话或停止脚本会释放所属窗口与回调
+- 计数器, 表单校验, 1000 项键控列表, 非 ui 悬浮 HUD 与主题五个可运行示例, 包含前置条件与索引, 同步至匹配宿主的 Compose UI 示例分类
 
 ******
 
@@ -118,7 +119,7 @@ threads.start(() => {
 });
 ```
 
-示例包, 完整 API 说明与 TypeScript 类型声明尚待交付. 当前 API 形态以路线图附录 A 为准.
+五个可运行示例随包放在 `assets/examples/`, 由 `index.json` 列出; 匹配宿主的 "示例代码 > Compose UI" 提供相同脚本 (`sample/Compose UI/`). 每例头部说明运行模式与权限前提. 完整 API 说明与 TypeScript 类型声明仍待交付, 当前 API 形态以路线图附录 A 为准.
 
 ******
 
@@ -203,7 +204,7 @@ minimum host build: 5316 (6.8.0)
 
 _2026/10/03_
 
-- `提示` P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版
+- `提示` P4 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 完整 API 文档, 类型声明与 P5 完整验证矩阵仍待后续交付. 当前仅为本地预览, 尚无官方发行版
 - `提示` 需要 AutoJs6 6.8.0 (5316) 或更高版本
 - `新增` 插件仓库骨架: 平台版本插件构建链, Jetpack Compose BOM 2026.09.00 依赖, Wake Activity 激活协议与 INFO 服务 (类别 compose-ui)
 - `新增` 10 种语言的 README, 插件中心说明与更新日志, 由 JSON 源文件统一生成
@@ -216,11 +217,13 @@ _2026/10/03_
 - `新增` 脚本预览提供可调用的 compose / $compose, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, 批处理, 调度与主题控制
 - `新增` ui 脚本可挂载 Compose 内容; 替换挂载或停止脚本时释放旧会话及回调
 - `新增` 非 ui 脚本可创建 raw 或可调整 Compose 悬浮窗, 修改像素位置和尺寸, 触摸及焦点设置, 并通过窗口控件, floaty.closeAll 或脚本退出关闭
+- `新增` 计数器, 表单校验, 1000 项键控列表, 非 ui 悬浮 HUD 与主题五个可运行示例, 包含前置条件与索引, 同步至匹配宿主的 Compose UI 示例分类
 - `优化` 可用性探测与 ComposeError 统一报告插件缺失, 禁用, 未授权, 不兼容, 权限不足及会话关闭; 生命周期清理覆盖原生窗口附加前即被取消的情况
 - `依赖` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)
 - `依赖` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `依赖` 附加与 AutoJs6 6.8.0 (5316) 对齐的 compose-ui-api.aar V1 (MPL 2.0, 摘要锁定), 共用依赖与宿主对齐
 - `依赖` 附加由 BOM 2026.09.00 管理的 Compose UI Test (Apache 2.0, 仅用于测试)
+- `依赖` 附加 JaCoCo 版本 0.8.14 (仅用于可选测试覆盖率, 不随发布包打包)
 
 ##### 更多版本历史可参阅
 

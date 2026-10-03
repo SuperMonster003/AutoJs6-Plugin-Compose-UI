@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版",
+        "P4 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 完整 API 文档, 类型声明与 P5 完整验证矩阵仍待后续交付. 当前仅为本地预览, 尚无官方发行版",
         "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高版本"
       ],
       "feature": [
@@ -22,13 +22,15 @@
         "预览新增支持稳定条目 key 与索引滚动的懒加载列表, Scaffold 与顶部应用栏插槽, 受控对话框, 进度指示器, 以及按队列返回操作或关闭结果的 Snackbar",
         "脚本预览提供可调用的 compose / $compose, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, 批处理, 调度与主题控制",
         "ui 脚本可挂载 Compose 内容; 替换挂载或停止脚本时释放旧会话及回调",
-        "非 ui 脚本可创建 raw 或可调整 Compose 悬浮窗, 修改像素位置和尺寸, 触摸及焦点设置, 并通过窗口控件, floaty.closeAll 或脚本退出关闭"
+        "非 ui 脚本可创建 raw 或可调整 Compose 悬浮窗, 修改像素位置和尺寸, 触摸及焦点设置, 并通过窗口控件, floaty.closeAll 或脚本退出关闭",
+        "计数器, 表单校验, 1000 项键控列表, 非 ui 悬浮 HUD 与主题五个可运行示例, 包含前置条件与索引, 同步至匹配宿主的 Compose UI 示例分类"
       ],
       "dependency": [
         "附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)",
         "附加 Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
         "附加与 AutoJs6 6.8.0 (5316) 对齐的 compose-ui-api.aar V1 (MPL 2.0, 摘要锁定), 共用依赖与宿主对齐",
-        "附加由 BOM {{ compose_bom }} 管理的 Compose UI Test (Apache 2.0, 仅用于测试)"
+        "附加由 BOM {{ compose_bom }} 管理的 Compose UI Test (Apache 2.0, 仅用于测试)",
+        "附加 JaCoCo 版本 0.8.14 (仅用于可选测试覆盖率, 不随发布包打包)"
       ],
       "improvement": [
         "可用性探测与 ComposeError 统一报告插件缺失, 禁用, 未授权, 不兼容, 权限不足及会话关闭; 生命周期清理覆盖原生窗口附加前即被取消的情况"
