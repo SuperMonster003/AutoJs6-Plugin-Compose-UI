@@ -468,7 +468,9 @@ P5.2 证据 (2026-10-03): `docs/dev/p5-compatibility-evidence.md`, 宿主5317 / 
 ### P5.3 性能与体积
 
 - [ ] (测试) 度量并记录 (不预先承诺): 装载首帧 (冷 / 热), 单次 state 更新到界面可见 (ui 模式与 floaty), 100 次连续更新合并后的 render 次数与耗时, 1000 项 LazyColumn 首帧与滚动掉帧, 宿主 PSS 增量, 插件 APK 体积与 dex 方法数; 以此定 1.0.0 的回归阈值写入插件 `AGENTS.md` 第 14 节.
-- [ ] (宿主 / 插件) 若 render 整树重建成为瓶颈, 先做宿主侧节点属性快照比较 (跳过无变化子树的 ops), 不改脚本 API; 记录是否需要 F.6 的细粒度更新.
+- [x] (宿主 / 插件) 若 render 整树重建成为瓶颈, 先做宿主侧节点属性快照比较 (跳过无变化子树的 ops), 不改脚本 API; 记录是否需要 F.6 的细粒度更新.
+
+P5.3 实测证据 (2026-10-03): `docs/dev/p5-performance-evidence.md` 与紧凑JSON, 宿主测量实现 `472f52e39b` / 插件19. API24 AVD与API35 Pad各118条, 共236条完整记录; 分析工具16项自测通过. 已覆盖冷/暖首帧, UI/floaty更新, 同回调100赋值(所有样本均1次render), 1000项列表首帧/真实滚动帧, 配对PSS与APK/DEX. APK2375069B, 7143类/44721方法引用. 1000节点初始构建成本明显; 既有TreeReconciler已比较属性/Modifier/回调快照并跳过空补丁, 滚动没有重跑JS render, 本轮不据此增加F.6或预先优化. 第一项的测量已完成, 但其回归阈值须按Q5经维护者确认, 因此仍保留未勾选, 未增加或分拆条目. 冷启动3样本/PSS单进程序列/AVD帧波动不冒充稳定门禁.
 
 ---
 
@@ -762,6 +764,8 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 
 由 P5.3 实测数据提出 (首帧, 单次更新, 列表滚动, PSS, APK 体积), 维护者确认后写入插件 `AGENTS.md`.
 
+2026-10-03 已提出同设备同方法的暖首帧 / 更新 / 列表 p90 约加50%复核线, APK与DEX方法引用加10%预算, 详见 `docs/dev/p5-performance-evidence.md`. 冷启动, PSS与AVD帧波动保持观察. 已向维护者询问, 当前尚未收到确认, 未将候选值设为门禁.
+
 ### Q6 (P6.4 前): 启动器图标源图
 
 维护者提供两张黑白透明 PNG (亮色模式用深色图案, 暗色模式用浅色图案) 以替换 P0.1 的临时图标; 无 launcher 入口, 只需基础 `mipmap*/ic_launcher.png` 系列.
@@ -932,3 +936,15 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 提交定位: 插件 168268f (示例, build 17), 本条所在提交为 P4 收尾 (build 18); 宿主 d86d7a28a4 (目录工具), 24eb7ca2dc (示例), 214f8eedae (无障碍), 文档与证据另行提交. 外部文档 ac56189. 最终签名 APK autojs6-plugin-compose-ui-v1.0.0-3fc65a76.apk, 2373541 B, 7142 classes / 44715 method refs.
 - 清理: 两台专用 AVD 上 4 个自有测试包全部移除并确认不存在; compose_p4_api24 / compose_p4_api35 的数据与注册均已核对后由 SDK 删除. 其它 AVD, 实体设备和原宿主其它工作保留. 本轮仍仅本地提交, 不推送 / 登记索引 / 发 Release.
 - 下一会话从 P5.1 健壮性继续, 然后 P5.2 完整矩阵 / inrt 与 P5.3 性能体积. 本轮未执行宿主全量 JVM / lint, inrt 装配或远端 CI; 完整 API / 类型声明 / 离线插件同步留在 P6, 不提前勾选. Q6 正式图标仍待源图.
+
+### 2026-10-03: P5 健壮性, 六设备 / inrt 与性能基线
+
+- 从插件 `99c4d1d` (build18) 与宿主独立分支 `9332c85d43` 继续, 已提交主线 `166910c968` 同步为 `cadb1ddac6`. 原宿主其它会话的未提交工作未修改或暂存. 原路线图 P5.1 / P5.2 完成, P5.3 测量与优化判断完成, 回归线按 Q5 保留待确认; 未新增, 分拆或丢弃小节.
+- P5.1: 敌意输入与事务回滚, 100次mount/close, 回调关闭, 工作线程post, 渲染中停止, 真实旋转 / Activity重建, 真实系统trim-memory, 活动会话包更新 / 卸载 / 禁用均有证据. 修复包身份订阅, 迟到请求缓存驱逐, render内递归挂载, attach异常结束整个引擎, Compose1.12祖先context跨loader污染. 公共owner包装仍委托宿主原Lifecycle和SavedStateRegistry, 无私有反射或AAR变更.
+- P5.2: API24 x86 / Sony28 / Sony31 / Redmi33 / HyperOS35 / API37 16KB 六设备最终110项通过. 真正生成并安装应用版本1 / runtime5317的默认签名inrt APK, 插件存在和真实卸载后各连续5轮通过; 额外修复执行记录晚于Activity启动的登记竞态, 新增5项确定性测试. 外部文档7个文件更新, 145模块生成与freshness通过, Offline Docs保持P6范围.
+- P5.3: API24与API35各118条, 共236条完整记录, 分析工具16项自测通过. 所有100赋值样本均1次render; 暖首帧p90约499/287ms, UI更新约86/124ms, floaty约83/137ms, 1000项列表首帧约1392/937ms. 这些是含查询/截图开销的可见性确认上界. 已有快照比较与空补丁跳过, 本轮不改API或加入推测性优化; 冷3样本/PSS单进程/AVD帧波动如实作为观察项. Q5已提出同环境p90约加50%及APK/DEX加10%复核预算, 尚未收到维护者确认, 不作为门禁, 首个复合条目仍未勾选.
+- 验证: 宿主选定JVM200, API16, 插件JVM63, APK Builder38, Python16; 插件API24/35各32项通过. API37额外插件ComposeTestRule尝试中5契约项通过, 27项受Espresso已移除InputManager反射入口阻断, 不计入通过; 该设备真实宿主16项和inrt通过. 宿主debug / androidTest / inrt RuntimeKit, 插件debug / androidTest / release与debug lint通过; 完整宿主JVM / lint, 长期堆泄漏测试, release宿主性能基线及远端CI未执行.
+- 提交定位: 插件 `004f9fd` (P5.1, build19), `5013b57` (P5.2, build20), 本条所在提交 (P5.3基线, build21); 宿主 `472f52e39b` (健壮性), `ec34abc00f` (启动登记与inrt), `ef707fd667` (性能工具与基线); APK Builder `4884075` (两构建别名与计数50对齐); 外部文档 `7dc1add`. 宿主仍在独立 `spike/compose-ui-p0` 分支.
+- 最终插件签名产物 `autojs6-plugin-compose-ui-v1.0.0-5c0881dc.apk`, build21, 2376581B, SHA-256 `0978455b1bc5c04415fc4b6860be49dfd749deb9472b1392be67525aa0578640`, 7143类 / 44721方法引用. 与实测release19相比仅版本/预览说明改变, renderer源码不变; 最终APK在API24的JNI/计数器/停止清理3项及API37真实inrt1项均通过. 性能基线继续绑定原实测19, 未把新APK冒称重测.
+- 清理: 六设备本次安装的23个自有包全部卸载并确认不存在. 两台专用AVD `compose_p5_api24` / `compose_p5_api37_16k` 经名称、已解析数据路径与注册核对后停机并由SDK删除, 注册和数据均不存在. 四台真机原宿主版本与既有APK Builder保留, 其它设备/AVD与共享SDK未处理. 四个本次修改仓库均按逻辑本地提交; 无推送, 官方索引登记或公开Release.
+- 下一起点为Q5回归线确认与P6.1完整API文档, 随后按P6继续声明/Ace与Offline Docs同步. Q6正式图标仍待维护者源图. 完整证据见 `docs/dev/p5-robustness-evidence.md`, `docs/dev/p5-compatibility-evidence.md`, `docs/dev/p5-performance-evidence.md`.
