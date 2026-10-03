@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P4 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Complete API documentation, type declarations, and the full P5 verification matrix remain pending. This is a local preview without an official release",
+        "P5 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Robustness checks, the compatibility matrix across six devices/emulators, and packaged-app verification are complete, with performance baselines recorded. Complete API documentation and type declarations remain for P6. This is a local preview without an official release",
         "Requires AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) or later"
       ],
       "feature": [

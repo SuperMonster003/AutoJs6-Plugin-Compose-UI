@@ -8,7 +8,7 @@
 
 ###### 2026/10/03
 
-* `Hint` P4 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Complete API documentation, type declarations, and the full P5 verification matrix remain pending. This is a local preview without an official release
+* `Hint` P5 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, UI script mounting, and raw or resizable floating windows work with a matching local AutoJs6 host build. Availability probes, typed errors, and session cleanup are included. Five examples for a counter, form, 1000-item list, floating HUD, and themes are bundled and synchronized to the matching host's Compose UI sample category. Robustness checks, the compatibility matrix across six devices/emulators, and packaged-app verification are complete, with performance baselines recorded. Complete API documentation and type declarations remain for P6. This is a local preview without an official release
 * `Hint` Requires AutoJs6 6.8.0 (5316) or later
 * `Feature` Plugin repository skeleton: platform versions plugin build chain, Jetpack Compose BOM 2026.09.00 dependencies, Wake Activity activation protocol, and INFO service (category compose-ui)
 * `Feature` README, plugin center instruction, and changelog in 10 languages, generated from JSON sources

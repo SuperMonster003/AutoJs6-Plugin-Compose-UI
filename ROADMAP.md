@@ -252,7 +252,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6) |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 已完成 (2026-10-03, P3.1 - P3.5) |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
-| P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 未开始 |
+| P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | P5.1 / P5.2 完成; P5.3 已测基线, Q5 回归线待确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 未开始 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | 未开始 |
 
@@ -460,8 +460,10 @@ P5.1 证据 (2026-10-03): `docs/dev/p5-robustness-evidence.md`, 插件 build19 /
 
 ### P5.2 兼容矩阵
 
-- [ ] (测试) D28 六台设备 / 模拟器: 装载, 计数器, 表单 (含 IME), 列表, 悬浮窗, 停止清理; API 24 的 Compose 1.12 行为 (本项目 minSdk 24) 与 API 37 (16 KB 页, 按 D22 校验 graphics-path 原生辅助库) 记录; HyperOS 悬浮窗焦点条件记录.
-- [ ] (测试) inrt 打包 (D30): 打包一个使用 `compose` 的脚本应用, 在已安装 / 未安装插件的设备上运行, 错误提示可理解; 结果写入文档 "打包应用" 节.
+- [x] (测试) D28 六台设备 / 模拟器: 装载, 计数器, 表单 (含 IME), 列表, 悬浮窗, 停止清理; API 24 的 Compose 1.12 行为 (本项目 minSdk 24) 与 API 37 (16 KB 页, 按 D22 校验 graphics-path 原生辅助库) 记录; HyperOS 悬浮窗焦点条件记录.
+- [x] (测试) inrt 打包 (D30): 打包一个使用 `compose` 的脚本应用, 在已安装 / 未安装插件的设备上运行, 错误提示可理解; 结果写入文档 "打包应用" 节.
+
+P5.2 证据 (2026-10-03): `docs/dev/p5-compatibility-evidence.md`, 宿主5317 / release插件19. 六设备最终110项全部通过, HyperOS显式申请窗口焦点, API37实测16KB页. 真实RuntimeKit经独立APK Builder生成应用版本1 / 内嵌运行时5317的x86_64 APK, 默认应用签名, 不请求插件签名权限; 已安装 / 实际卸载插件两种条件各连续5次通过. 修复由inrt暴露的先启动Activity后登记execution竞态, 登记表并发与快速结束有5项确定性回归, 宿主相关JVM合计200项. APK Builder提交 `4884075` 校正构建别名, JVM38项通过; 外部文档 `7dc1add`, 145模块本地生成与freshness通过. 完整API / 声明 / Offline Docs仍按P6, 无推送或公开发布.
 
 ### P5.3 性能与体积
 
