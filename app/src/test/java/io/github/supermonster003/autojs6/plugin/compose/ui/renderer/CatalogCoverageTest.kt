@@ -12,14 +12,18 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class CatalogCoverageTest {
-    @Test fun implementedComponentsAreExactlyTheBasicAndInteractiveRoadmapSets() {
+    @Test fun implementedComponentsAreExactlyTheV1RoadmapSet() {
         val expected = setOf(C.COLUMN, C.ROW, C.BOX, C.SPACER, C.SURFACE, C.CARD, C.HORIZONTAL_DIVIDER,
             C.TEXT, C.ICON, C.IMAGE, C.BUTTON, C.ELEVATED_BUTTON, C.FILLED_TONAL_BUTTON, C.OUTLINED_BUTTON,
-            C.TEXT_BUTTON, C.ICON_BUTTON, C.SWITCH, C.CHECKBOX, C.RADIO_BUTTON, C.SLIDER)
+            C.TEXT_BUTTON, C.ICON_BUTTON, C.SWITCH, C.CHECKBOX, C.RADIO_BUTTON, C.SLIDER,
+            C.TEXT_FIELD, C.OUTLINED_TEXT_FIELD, C.LAZY_COLUMN, C.LAZY_ROW, C.SCAFFOLD, C.TOP_APP_BAR,
+            C.ALERT_DIALOG, C.CIRCULAR_PROGRESS_INDICATOR, C.LINEAR_PROGRESS_INDICATOR, C.SNACKBAR)
         assertEquals(expected, RendererCatalog.components)
         assertEquals(RenderKind.entries.size, RendererCatalog.dispatch.size)
         RendererCatalog.components.forEach { assertNotNull(ComponentCatalog.V1.component(it)) }
-        try { RendererCatalog.validate(UiNode(1, C.TEXT_FIELD)); fail() }
+        assertEquals(30, RendererCatalog.components.size)
+        assertEquals(29, RendererCatalog.dispatch.size)
+        try { RendererCatalog.validate(UiNode(1, C.SNACKBAR)); fail() }
         catch (e: ComposeUiContractException) { assertEquals(ComposeUiErrorCodes.UNKNOWN_COMPONENT, e.code) }
     }
 

@@ -59,13 +59,20 @@ internal class NodeCommandRegistry {
     )
 
     private val handles = HashMap<Int, Handle>()
+    private val componentHandles = HashMap<Int, Handle>()
 
     fun register(nodeId: Int, handle: Handle): () -> Unit {
         handles[nodeId] = handle
         return { if (handles[nodeId] === handle) handles.remove(nodeId) }
     }
 
-    fun clear() = handles.clear()
+    /** Component-owned commands augment modifier commands; e.g. lazy scrolling keeps modifier focus. */
+    fun registerComponent(nodeId: Int, handle: Handle): () -> Unit {
+        componentHandles[nodeId] = handle
+        return { if (componentHandles[nodeId] === handle) componentHandles.remove(nodeId) }
+    }
+
+    fun clear() { handles.clear(); componentHandles.clear() }
 
     fun validate(command: UiCommand) { resolve(command) }
 
@@ -77,7 +84,15 @@ internal class NodeCommandRegistry {
             is UiCommand.ScrollTo -> command.nodeId
             else -> throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)
         }
-        val handle = handles[id] ?: detached(id)
+        val specific = componentHandles[id]
+        val useSpecific = specific != null && when (command) {
+            is UiCommand.Focus -> specific.focus != null
+            is UiCommand.Blur -> specific.blur != null
+            is UiCommand.ScrollTo -> specific.scroll != null
+            else -> false
+        }
+        val owner = if (useSpecific) componentHandles else handles
+        val handle = owner[id] ?: if (specific == null) detached(id) else unsupported(id)
         val action: suspend () -> Unit = when (command) {
             is UiCommand.Focus -> handle.focus?.let { action -> suspend { action() } } ?: unsupported(id)
             is UiCommand.Blur -> handle.blur?.let { action -> suspend { action() } } ?: unsupported(id)
@@ -89,7 +104,7 @@ internal class NodeCommandRegistry {
             else -> unsupported(id)
         }
         return {
-            if (handles[id] !== handle) detached(id)
+            if (owner[id] !== handle) detached(id)
             action()
         }
     }
@@ -222,7 +237,34 @@ internal object ModifierMapper {
 
         val enabled = interactionEnabled(node)
         val longClick = node.callbacks[ComposeUiEvents.LONG_CLICK]
-        if (node.type == ComposeUiComponents.SLIDER && enabled && (node.callbacks[ComposeUiEvents.CLICK] != null || longClick != null)) {
+        if (TextFieldController.isTextField(node)) {
+            // Text editors own selection, caret placement, IME activation and the native toolbar.
+            // Observe their gestures without competing for consumed events or swallowing release.
+            // Explicit clickable modifier operations above retain their declared chain semantics.
+            if (enabled && (node.callbacks[ComposeUiEvents.CLICK] != null || longClick != null)) {
+                modifier = modifier.pointerInput(node.nodeId) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                        val tapped = withTimeoutOrNull(viewConfiguration.longPressTimeoutMillis) {
+                            var released = false
+                            var canceled = false
+                            while (!released && !canceled) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                val pointer = event.changes.firstOrNull { it.id == down.id }
+                                canceled = pointer == null || (pointer.position - down.position).getDistance() > viewConfiguration.touchSlop ||
+                                    event.changes.any { it.id != down.id && it.pressed }
+                                released = pointer?.pressed == false
+                            }
+                            released && !canceled
+                        }
+                        if (interactionEnabled(currentNode)) {
+                            val type = when (tapped) { true -> ComposeUiEvents.CLICK; null -> ComposeUiEvents.LONG_CLICK; false -> null }
+                            type?.let { event -> currentNode.callbacks[event]?.let { currentEmit(event, it, Bundle()) } }
+                        }
+                    }
+                }
+            }
+        } else if (node.type == ComposeUiComponents.SLIDER && enabled && (node.callbacks[ComposeUiEvents.CLICK] != null || longClick != null)) {
             // Slider owns its down/drag stream. Observe a stationary release without consuming it,
             // so adding common callbacks cannot disable value changes or drag completion.
             modifier = modifier.pointerInput(node.nodeId, longClick != null) {

@@ -41,31 +41,33 @@ internal fun RenderNode(
     frame: RenderFrame,
     id: Int,
     commands: NodeCommandRegistry,
+    fields: TextFieldController,
+    snackbar: SnackbarController,
     emit: (generation: Long, nodeId: Int, type: String, callbackId: Int, payload: Bundle) -> Unit,
     rowScope: RowScope? = null,
     columnScope: ColumnScope? = null,
     boxScope: BoxScope? = null,
 ) {
     val node = frame.nodes.getValue(id)
-    key(id) {
+    key(id, node.type) {
         if (RendererCatalog.dispatch[node.type] == null) {
             if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>")
         } else {
             val publish: (String, Int, Bundle) -> Unit = { type, callback, payload -> emit(frame.generation, id, type, callback, payload) }
             val modifier = with(ModifierMapper) { Modifier.map(node, commands, rowScope, columnScope, boxScope, publish) }
             val children = node.slots[S.CONTENT]?.let(::listOf) ?: node.children
-            val content: @Composable () -> Unit = { children.forEach { RenderNode(frame, it, commands, emit) } }
+            val content: @Composable () -> Unit = { children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit) } }
             val onClick = { ModifierMapper.clickCallback(node)?.let { publish(E.CLICK, it, Bundle()) }; Unit }
             val enabled = ModifierMapper.interactionEnabled(node)
             when (RendererCatalog.dispatch[node.type]) {
                 RenderKind.COLUMN -> Column(modifier, verticalArrangement = verticalArrangement(node), horizontalAlignment = horizontalAlignment(node.enum(P.ALIGNMENT, "start"))) {
-                    children.forEach { RenderNode(frame, it, commands, emit, columnScope = this) }
+                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, columnScope = this) }
                 }
                 RenderKind.ROW -> Row(modifier, horizontalArrangement = horizontalArrangement(node), verticalAlignment = verticalAlignment(node.enum(P.ALIGNMENT, "top"))) {
-                    children.forEach { RenderNode(frame, it, commands, emit, rowScope = this) }
+                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, rowScope = this) }
                 }
                 RenderKind.BOX -> Box(modifier, contentAlignment = boxAlignment(node.enum(P.ALIGNMENT, "topStart"))) {
-                    children.forEach { RenderNode(frame, it, commands, emit, boxScope = this) }
+                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, boxScope = this) }
                 }
                 RenderKind.SPACER -> Spacer(modifier)
                 RenderKind.SURFACE -> {
@@ -130,6 +132,17 @@ internal fun RenderNode(
                         steps = (node.props[P.STEPS] as? UiValue.Num)?.value?.toInt() ?: 0,
                         onValueChangeFinished = { node.callbacks[E.VALUE_CHANGE_FINISHED]?.let { publish(E.VALUE_CHANGE_FINISHED, it, Bundle()) } })
                 }
+                RenderKind.TEXT_FIELD, RenderKind.OUTLINED_TEXT_FIELD -> RenderTextField(
+                    node, fields.editor(id), fields.inputTransformation(id), modifier,
+                ) { name -> node.slots[name]?.let { RenderNode(frame, it, commands, fields, snackbar, emit) } }
+                RenderKind.LAZY_COLUMN, RenderKind.LAZY_ROW, RenderKind.SCAFFOLD, RenderKind.TOP_APP_BAR,
+                RenderKind.ALERT_DIALOG, RenderKind.CIRCULAR_PROGRESS, RenderKind.LINEAR_PROGRESS -> AdvancedComponents(
+                    node, modifier, commands, snackbar,
+                    childKey = { child -> frame.nodes.getValue(child).key ?: child },
+                    childType = { child -> frame.nodes.getValue(child).type },
+                    renderChild = { child -> RenderNode(frame, child, commands, fields, snackbar, emit) },
+                    emit = publish,
+                )
                 null -> if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>", modifier)
             }
         }
@@ -143,9 +156,9 @@ private fun UiNode.bool(name: String) = (props[name] as? UiValue.Bool)?.value ?:
 private fun UiNode.enum(name: String, fallback: String) = (props[name] as? UiValue.Enum)?.value ?: fallback
 private fun UiNode.dp(name: String, fallback: Dp = 0.dp) = (props[name] as? UiValue.Dp)?.value?.toFloat()?.dp ?: fallback
 private fun UiNode.shape() = (props[P.SHAPE] as? UiValue.Shape)?.let(ValueMapper::shape)
-private fun horizontalAlignment(name: String) = when (name) { "center" -> Alignment.CenterHorizontally; "end" -> Alignment.End; else -> Alignment.Start }
-private fun verticalAlignment(name: String) = when (name) { "center" -> Alignment.CenterVertically; "bottom" -> Alignment.Bottom; else -> Alignment.Top }
-private fun verticalArrangement(node: UiNode): Arrangement.Vertical {
+internal fun horizontalAlignment(name: String) = when (name) { "center" -> Alignment.CenterHorizontally; "end" -> Alignment.End; else -> Alignment.Start }
+internal fun verticalAlignment(name: String) = when (name) { "center" -> Alignment.CenterVertically; "bottom" -> Alignment.Bottom; else -> Alignment.Top }
+internal fun verticalArrangement(node: UiNode): Arrangement.Vertical {
     val name = node.enum(P.ARRANGEMENT, "top")
     val base = when (name) { "center" -> Arrangement.Center; "bottom" -> Arrangement.Bottom; "spaceBetween" -> Arrangement.SpaceBetween; "spaceAround" -> Arrangement.SpaceAround; "spaceEvenly" -> Arrangement.SpaceEvenly; else -> Arrangement.Top }
     val gap = node.dp(P.SPACING)
@@ -160,7 +173,7 @@ private fun verticalArrangement(node: UiNode): Arrangement.Vertical {
         }
     }
 }
-private fun horizontalArrangement(node: UiNode): Arrangement.Horizontal {
+internal fun horizontalArrangement(node: UiNode): Arrangement.Horizontal {
     val name = node.enum(P.ARRANGEMENT, "start")
     val base = when (name) { "center" -> Arrangement.Center; "end" -> Arrangement.End; "spaceBetween" -> Arrangement.SpaceBetween; "spaceAround" -> Arrangement.SpaceAround; "spaceEvenly" -> Arrangement.SpaceEvenly; else -> Arrangement.Start }
     val gap = node.dp(P.SPACING)

@@ -17,11 +17,17 @@ import io.github.supermonster003.autojs6.plugin.compose.ui.BuildConfig
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.loading.ComposeUiHostEnvironment
 import org.autojs.plugin.compose.api.loading.ComposeUiRenderer
+import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.model.*
 
 /** V1 renderer: publish immutable validated frames and queue every event through the host sink. */
 class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) : ComposeUiRenderer {
-    private val store = NodeStore(environment.sessionId, RendererCatalog::validate, allowUnknownDebug = BuildConfig.DEBUG)
+    private val fields = TextFieldController(::emit, ::error, ::ensureScope)
+    private val snackbar = SnackbarController(::ensureScope, ::emit)
+    private val store = NodeStore(environment.sessionId, { node ->
+        RendererCatalog.validate(node)
+        fields.validateNode(node)
+    }, allowUnknownDebug = BuildConfig.DEBUG)
     private val frame = mutableStateOf<RenderFrame?>(null)
     private val theme = mutableStateOf(environment.initialTheme)
     private val commands = NodeCommandRegistry()
@@ -36,8 +42,7 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
         usable()
         return container ?: GuardedComposeContainer(environment.hostContext, ::error).also { root ->
             val output = ComposeView(environment.hostContext)
-            val handler = CoroutineExceptionHandler { _, failure -> error(failure) }
-            val owner = CoroutineScope(AndroidUiDispatcher.Main + SupervisorJob() + handler).also { scope = it }
+            val owner = ensureScope()
             val composer = Recomposer(owner.coroutineContext).also { recomposer = it }
             owner.launch { composer.runRecomposeAndApplyChanges() }
             output.setParentCompositionContext(composer)
@@ -45,7 +50,7 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
             output.setContent {
                 ThemeMapper.Content(theme.value) {
                     Box(Modifier.semantics { testTagsAsResourceId = true }) {
-                        frame.value?.let { RenderNode(it, it.rootId, commands, ::emit) }
+                        frame.value?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit) }
                     }
                 }
             }
@@ -57,12 +62,14 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
     override fun apply(batch: UiPatchBatch) {
         usable()
         val tree = store.apply(batch)
+        fields.acceptFrame(tree, store.generation)
+        snackbar.acceptFrame(tree, store.generation)
         frame.value = tree?.let { RenderFrame(it.rootId, it.nodes.associateBy { node -> node.nodeId }, store.generation) }
         container?.recover()
     }
     override fun execute(command: UiCommand) {
         usable()
-        fun validateLiveNode() {
+        fun validateLiveNode(): UiNode? {
             val id = when (command) {
                 is UiCommand.Focus -> command.nodeId
                 is UiCommand.Blur -> command.nodeId
@@ -70,12 +77,45 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
                 is UiCommand.Edit -> command.nodeId
                 is UiCommand.ShowSnackbar -> null
             }
-            if (id != null && store.tree?.nodes?.any { it.nodeId == id } != true) throw ComposeUiContractException(
-                ComposeUiErrorCodes.NODE_DETACHED, nodeId = id)
+            val node = id?.let { target -> store.tree?.nodes?.firstOrNull { it.nodeId == target } }
+            if (id != null && node == null) throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED, nodeId = id)
+            val name = when (command) {
+                is UiCommand.Focus -> ComposeUiCommands.FOCUS
+                is UiCommand.Blur -> ComposeUiCommands.BLUR
+                is UiCommand.ScrollTo -> ComposeUiCommands.SCROLL_TO
+                is UiCommand.Edit -> ComposeUiCommands.EDIT
+                is UiCommand.ShowSnackbar -> null
+            }
+            if (node != null && name != null) {
+                val catalog = ComponentCatalog.V1
+                if (name !in catalog.requireComponent(node.type).commands && node.modifier.none {
+                    name in catalog.modifier(it.name)!!.commands
+                }) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
+            }
+            if (command is UiCommand.Edit && !TextFieldController.isTextField(node!!)) {
+                throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
+            }
+            if (command is UiCommand.ScrollTo && node?.type in setOf(ComposeUiComponents.LAZY_COLUMN, ComposeUiComponents.LAZY_ROW)) {
+                val index = command.index
+                if (index != null && index >= node!!.children.size) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
+            }
+            if (command is UiCommand.ScrollTo && command.index != null && node?.type !in setOf(ComposeUiComponents.LAZY_COLUMN, ComposeUiComponents.LAZY_ROW)) {
+                throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
+            }
+            return node
         }
-        validateLiveNode()
+        val acceptedType = validateLiveNode()?.type
+        when (command) {
+            is UiCommand.Edit -> { fields.execute(command); return }
+            is UiCommand.ShowSnackbar -> { snackbar.execute(command); return }
+            else -> Unit
+        }
         val action = commands.resolve(command)
-        requireNotNull(scope).launch { try { validateLiveNode(); action() } catch (cancelled: CancellationException) { throw cancelled }
+        ensureScope().launch { try {
+            val current = validateLiveNode()
+            if (current?.type != acceptedType) throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED, nodeId = current?.nodeId)
+            action()
+        } catch (cancelled: CancellationException) { throw cancelled }
             catch (failure: Exception) { error(failure) } catch (failure: LinkageError) { error(failure) } }
     }
     override fun setTheme(theme: ThemeSpec) {
@@ -89,11 +129,14 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
         if (closed) return
         closed = true
         try { view?.disposeComposition() } finally {
-            commands.clear(); recomposer?.cancel(); scope?.cancel()
+            fields.dispose(); snackbar.close(); commands.clear(); recomposer?.cancel(); scope?.cancel()
             container?.removeAllViews(); container = null
             view = null; recomposer = null; scope = null; frame.value = null; store.clear()
         }
     }
+    private fun ensureScope(): CoroutineScope = scope ?: CoroutineScope(
+        AndroidUiDispatcher.Main + SupervisorJob() + CoroutineExceptionHandler { _, failure -> error(failure) }
+    ).also { scope = it }
     private fun main() { check(Looper.myLooper() == Looper.getMainLooper()) { "Renderer methods require the main thread" } }
     private fun usable() { main(); if (closed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED) }
     private fun emit(generation: Long, nodeId: Int, type: String, callbackId: Int, payload: Bundle) {

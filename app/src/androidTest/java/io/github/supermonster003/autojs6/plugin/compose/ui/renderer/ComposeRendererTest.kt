@@ -99,11 +99,14 @@ class ComposeRendererTest {
         }
     }
 
-    @Test fun everyAdvertisedComponentHasAComposingHandler() {
+    @Test fun basicAndInteractiveComponentsHaveComposingHandlers() {
         create()
         val bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888)
         try {
-            val children = RendererCatalog.components.mapIndexed { index, name ->
+            // Stateful fields, lazy layouts, modal windows and commands have separate fixtures.
+            val basic = RendererCatalog.components - setOf(C.TEXT_FIELD, C.OUTLINED_TEXT_FIELD, C.LAZY_COLUMN, C.LAZY_ROW,
+                C.SCAFFOLD, C.TOP_APP_BAR, C.ALERT_DIALOG, C.CIRCULAR_PROGRESS_INDICATOR, C.LINEAR_PROGRESS_INDICATOR, C.SNACKBAR)
+            val children = basic.mapIndexed { index, name ->
                 val props = when (name) {
                     C.TEXT -> mapOf(P.TEXT to UiValue.Str("text"))
                     C.ICON -> mapOf(P.NAME to UiValue.IconName("Home"))
@@ -113,7 +116,7 @@ class ComposeRendererTest {
                 UiNode(index + 2, name, props = props, modifier = listOf(tag(name), size(36.0)))
             }
             apply(UiTree(1, listOf(UiNode(1, C.COLUMN, children = children.map { it.nodeId })) + children))
-            RendererCatalog.components.forEach { rule.onNodeWithTag(it, useUnmergedTree = true).assertExists() }
+            basic.forEach { rule.onNodeWithTag(it, useUnmergedTree = true).assertExists() }
             assertTrue(events.none { it.type == E.ERROR })
         } finally { rule.runOnIdle { renderer!!.dispose(); bitmap.recycle() } }
     }
