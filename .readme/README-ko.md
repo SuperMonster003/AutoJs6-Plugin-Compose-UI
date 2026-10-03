@@ -75,7 +75,7 @@ P1 개발 미리보기: V1 호스트 로더와 세션으로 전용 테스트 호
 
 ******
 
-1. AutoJs6 6.8.0 (5308) 이상을 설치합니다
+1. AutoJs6 6.8.0 (5316) 이상을 설치합니다
 2. 이 플러그인 APK를 설치합니다 (열 필요가 없으며, 플러그인에는 런처 항목이 없습니다)
 3. AutoJs6 플러그인 센터에서 Compose UI가 인식되고 활성화되었는지 확인합니다
 4. 스크립트에서 `compose` 전역 객체를 바로 사용합니다 (렌더링 기능은 1.0.0 버전과 함께 제공됩니다)
@@ -126,7 +126,7 @@ threads.start(() => {
 
 플러그인의 실행 요구 사항과 제한:
 
-- AutoJs6 버전: 6.8.0 (5308) 이상. 더 낮은 버전의 호스트는 플러그인 센터에서 비호환으로 표시합니다
+- 최소 AutoJs6 버전: 6.8.0 (5316) 이상. 더 낮은 버전의 호스트는 플러그인 센터에서 비호환으로 표시합니다
 - Android 버전: 7.0 (API 24) 이상
 - 프로세서 아키텍처: arm64-v8a / armeabi-v7a / x86_64 / x86 (네 가지 모두 단일 APK에 내장, 아키텍처별 선택 불필요)
 - Compose 버전: 플러그인에 포함 (BOM 2026.09.00), 호스트의 Compose 런타임에 의존하지 않습니다
@@ -175,7 +175,7 @@ info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5308 (6.8.0)
+minimum host build: 5316 (6.8.0)
 ```
 
 호스트는 `org.autojs.plugin.INFO`으로 플러그인을 발견하고 `requiresHostVersion` 등의 기능 정보를 읽습니다. 렌더러 팩토리 클래스 이름은 `org.autojs.plugin.compose.RENDERER_FACTORY` 메타데이터로 선언되며, 호스트는 플러그인 APK 경로로 클래스 로더 (부모는 호스트)를 만들어 호스트 프로세스 안에서 인스턴스화합니다.
@@ -198,16 +198,16 @@ minimum host build: 5308 (6.8.0)
 
 #### v1.0.0
 
-_2026/10/02_
+_2026/10/03_
 
 - `안내` P1 개발 미리보기: V1 호스트 로더와 세션으로 전용 테스트 호스트에서 Column / Text / Button 카운터를 실행할 수 있습니다. 전체 렌더러와 compose 스크립트 API는 개발 중입니다
-- `안내` AutoJs6 6.8.0 (5308) 이상이 필요합니다 (정확한 최소 빌드 번호는 호스트 쪽 변경이 반영된 뒤 채워집니다)
+- `안내` AutoJs6 6.8.0 (5316) 이상이 필요합니다
 - `새 기능` 플러그인 저장소 골격: 플랫폼 버전 플러그인 빌드 체인, Jetpack Compose BOM 2026.09.00 의존성, Wake Activity 활성화 프로토콜, INFO 서비스 (카테고리 compose-ui)
 - `새 기능` JSON 원본에서 생성되는 10개 언어의 README, 플러그인 센터 설명, 변경 로그
 - `새 기능` 미리보기 카운터는 증분 업데이트와 종료 후 콜백 정리를 지원하며, 업데이트가 거부되면 마지막으로 유효한 화면을 유지
 - `의존성` common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)
 - `의존성` Jetpack Compose BOM 2026.09.00 추가 (Apache 2.0)
-- `의존성` compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴
+- `의존성` AutoJs6 6.8.0 (5316)에 맞춘 compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴
 
 ##### 더 많은 릴리스 기록은 다음을 참고하세요
 

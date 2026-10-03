@@ -38,10 +38,6 @@ object ComposeUiPlugin {
     /** Contract version this plugin targets (roadmap D29 / appendix B.6). */
     const val CONTRACT_VERSION = ComposeUiContract.CONTRACT_VERSION
 
-    /**
-     * Minimum AutoJs6 `versionCode`. Provisional (roadmap D29): the host snapshot this repository was
-     * created against is 6.8.0 / 5307, so the first host build that can ship `compose-ui-api` and the
-     * loader is 5308; roadmap P1.3 back-fills the confirmed value.
-     */
+    /** Minimum AutoJs6 build containing the V1 loader, session core and Plugin Center registration (P1.3). */
     const val REQUIRED_HOST_VERSION = ComposeUiIds.REQUIRED_HOST_VERSION_CODE
 }

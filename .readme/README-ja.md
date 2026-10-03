@@ -75,7 +75,7 @@ P1 開発プレビュー: V1 ホストローダーとセッションは専用テ
 
 ******
 
-1. AutoJs6 6.8.0 (5308) 以降をインストールします
+1. AutoJs6 6.8.0 (5316) 以降をインストールします
 2. このプラグインの APK をインストールします (開く必要はありません. プラグインにはランチャーエントリがありません)
 3. AutoJs6 のプラグインセンターで Compose UI が認識され, 有効になっていることを確認します
 4. スクリプトで `compose` グローバルオブジェクトをそのまま使用します (描画機能はバージョン 1.0.0 で提供されます)
@@ -126,7 +126,7 @@ threads.start(() => {
 
 プラグインの動作要件と制限:
 
-- AutoJs6 のバージョン: 6.8.0 (5308) 以降. それより古いホストではプラグインセンターに非互換と表示されます
+- AutoJs6 の対応最小バージョン: 6.8.0 (5316) 以降. それより古いホストではプラグインセンターに非互換と表示されます
 - Android のバージョン: 7.0 (API 24) 以降
 - プロセッサアーキテクチャ: arm64-v8a / armeabi-v7a / x86_64 / x86 (単一の APK に 4 つすべてを内蔵, アーキテクチャ別の選択は不要)
 - Compose のバージョン: プラグインに同梱 (BOM 2026.09.00). ホストの Compose ランタイムには依存しません
@@ -175,7 +175,7 @@ info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5308 (6.8.0)
+minimum host build: 5316 (6.8.0)
 ```
 
 ホストは `org.autojs.plugin.INFO` でプラグインを検出し, `requiresHostVersion` などの機能情報を読み取ります. レンダラーファクトリーのクラス名は `org.autojs.plugin.compose.RENDERER_FACTORY` メタデータで宣言され, ホストはプラグイン APK のパスからクラスローダー (親はホスト) を作成し, ホストプロセス内でインスタンス化します.
@@ -198,16 +198,16 @@ minimum host build: 5308 (6.8.0)
 
 #### v1.0.0
 
-_2026/10/02_
+_2026/10/03_
 
 - `ヒント` P1 開発プレビュー: V1 ホストローダーとセッションは専用テストホストで Column / Text / Button カウンターを実行できます. 完全なレンダラーと compose スクリプト API は開発中です
-- `ヒント` AutoJs6 6.8.0 (5308) 以降が必要です (正確な最小ビルド番号はホスト側の変更が取り込まれた後に補完されます)
+- `ヒント` AutoJs6 6.8.0 (5316) 以降が必要です
 - `新機能` プラグインリポジトリの骨格: プラットフォームバージョンプラグインのビルドチェーン, Jetpack Compose BOM 2026.09.00 の依存関係, Wake Activity による有効化プロトコル, INFO サービス (カテゴリ compose-ui)
 - `新機能` JSON ソースから生成される 10 言語の README, プラグインセンターの説明, 更新履歴
 - `新機能` プレビューカウンターは差分更新と終了時のコールバック解放に対応. 更新が拒否された場合は直前の有効な画面を保持
 - `依存関係` common-plugin-api.aar バージョン 6.8.0 (5307) を追加 (MPL 2.0, ハッシュ固定)
 - `依存関係` Jetpack Compose BOM 2026.09.00 を追加 (Apache 2.0)
-- `依存関係` compose-ui-api.aar V1 を追加 (MPL 2.0, ハッシュ固定), 共有依存関係をホストと整合
+- `依存関係` AutoJs6 6.8.0 (5316) に対応する compose-ui-api.aar V1 を追加 (MPL 2.0, ハッシュ固定), 共有依存関係をホストと整合
 
 ##### さらに詳しいリリース履歴は次を参照してください
 

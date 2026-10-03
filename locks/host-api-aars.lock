@@ -6,4 +6,4 @@ format=1
 common-plugin-api.file=common-plugin-api.aar
 common-plugin-api.sha256=ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15
 compose-ui-api.file=compose-ui-api.aar
-compose-ui-api.sha256=e6024147dd45776e1f0bc178da66a1a337e9d084cbe3dbcf244291e20857ba21
+compose-ui-api.sha256=3ba7c215262e889034eef61e6ba0d5414839712a03284e3d009a96696cce5266

@@ -75,7 +75,7 @@ P1 開發預覽: V1 宿主載入器與工作階段已可在專用測試宿主中
 
 ******
 
-1. 安裝 AutoJs6 6.8.0 (5308) 或更新版本
+1. 安裝 AutoJs6 6.8.0 (5316) 或更新版本
 2. 安裝本外掛程式 APK (無需開啟, 外掛程式沒有啟動器進入點)
 3. 在 AutoJs6 的外掛程式中心確認 Compose UI 已被識別並處於啟用狀態
 4. 在指令碼中直接使用 `compose` 全域物件 (轉譯能力將隨 1.0.0 版本交付)
@@ -126,7 +126,7 @@ threads.start(() => {
 
 外掛程式的執行需求與限制:
 
-- AutoJs6 版本: 6.8.0 (5308) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容
+- 最低 AutoJs6 版本: 6.8.0 (5316) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容
 - Android 版本: 7.0 (API 24) 或更新
 - 處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內建全部四種, 無需依架構選擇安裝套件)
 - Compose 版本: 由外掛程式自帶 (BOM 2026.09.00), 不依賴宿主的 Compose 執行階段
@@ -175,7 +175,7 @@ info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5308 (6.8.0)
+minimum host build: 5316 (6.8.0)
 ```
 
 宿主透過 `org.autojs.plugin.INFO` 探索外掛程式並讀取 `requiresHostVersion` 等能力資訊; 轉譯器工廠類別名稱由 `org.autojs.plugin.compose.RENDERER_FACTORY` 中繼資料宣告, 宿主以外掛程式 APK 路徑建立類別載入器 (父載入器為宿主) 並在宿主處理程序內實例化.
@@ -198,16 +198,16 @@ minimum host build: 5308 (6.8.0)
 
 #### v1.0.0
 
-_2026/10/02_
+_2026/10/03_
 
 - `提示` P1 開發預覽: V1 宿主載入器與工作階段已可在專用測試宿主中執行 Column / Text / Button 計數器. 完整轉譯器與 compose 指令碼 API 仍在開發中
-- `提示` 需要 AutoJs6 6.8.0 (5308) 或更新版本 (準確的最低版本號待宿主端變更落地後回填)
+- `提示` 需要 AutoJs6 6.8.0 (5316) 或更新版本
 - `新增` 外掛程式存放庫骨架: 平台版本外掛程式建置鏈, Jetpack Compose BOM 2026.09.00 相依, Wake Activity 啟用協定與 INFO 服務 (類別 compose-ui)
 - `新增` 10 種語言的 README, 外掛程式中心說明與更新日誌, 由 JSON 來源檔案統一產生
 - `新增` 預覽計數器支援增量更新與關閉後的回呼清理, 更新被拒絕時保留上一次有效介面
 - `相依` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)
 - `相依` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `相依` 附加 compose-ui-api.aar V1 (MPL 2.0, 雜湊鎖定), 共用相依性與宿主對齊
+- `相依` 附加與 AutoJs6 6.8.0 (5316) 對齊的 compose-ui-api.aar V1 (MPL 2.0, 雜湊鎖定), 共用相依性與宿主對齊
 
 ##### 更多版本歷史可參閱
 

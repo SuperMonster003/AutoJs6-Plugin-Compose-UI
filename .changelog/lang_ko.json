@@ -6,10 +6,10 @@
   "changelog_label_dependency": "의존성",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/10/02",
+      "released_date": "2026/10/03",
       "hint": [
         "P1 개발 미리보기: V1 호스트 로더와 세션으로 전용 테스트 호스트에서 Column / Text / Button 카운터를 실행할 수 있습니다. 전체 렌더러와 compose 스크립트 API는 개발 중입니다",
-        "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 이상이 필요합니다 (정확한 최소 빌드 번호는 호스트 쪽 변경이 반영된 뒤 채워집니다)"
+        "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 이상이 필요합니다"
       ],
       "feature": [
         "플러그인 저장소 골격: 플랫폼 버전 플러그인 빌드 체인, Jetpack Compose BOM {{ compose_bom }} 의존성, Wake Activity 활성화 프로토콜, INFO 서비스 (카테고리 {{ plugin_info_category }})",
@@ -19,7 +19,7 @@
       "dependency": [
         "common-plugin-api.aar 버전 6.8.0 (5307) 추가 (MPL 2.0, 해시 고정)",
         "Jetpack Compose BOM {{ compose_bom }} 추가 (Apache 2.0)",
-        "compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴"
+        "AutoJs6 6.8.0 (5316)에 맞춘 compose-ui-api.aar V1 추가 (MPL 2.0, 해시 고정), 공유 의존성을 호스트와 일치시킴"
       ]
     }
   }

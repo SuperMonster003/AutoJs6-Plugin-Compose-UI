@@ -39,7 +39,7 @@
   "h3_compatibility": "Совместимость",
   "p_compatibility_intro": "Требования к среде выполнения и ограничения плагина",
   "compatibility_points": [
-    "Версия AutoJs6: {{ required_host_version_name }} ({{ required_host_version_code }}) или новее; более старые хосты помечают плагин как несовместимый в центре плагинов",
+    "Минимальная версия AutoJs6: {{ required_host_version_name }} ({{ required_host_version_code }}) или новее; более старые хосты помечают плагин как несовместимый в центре плагинов",
     "Версия Android: {{ min_android_version }} (API {{ android_min_sdk }}) или новее",
     "Архитектура процессора: arm64-v8a / armeabi-v7a / x86_64 / x86 (все четыре встроены в единый APK, выбирать сборку по архитектуре не нужно)",
     "Версия Compose: поставляется вместе с плагином (BOM {{ compose_bom }}), не зависит от среды Compose хоста",

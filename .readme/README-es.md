@@ -75,7 +75,7 @@ Capacidades principales que el plugin entregara:
 
 ******
 
-1. Instale AutoJs6 6.8.0 (5308) o una version posterior
+1. Instale AutoJs6 6.8.0 (5316) o una version posterior
 2. Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)
 3. Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado
 4. Use directamente el objeto global `compose` en los scripts (el renderizado llega con la version 1.0.0)
@@ -126,7 +126,7 @@ La referencia completa de la API (catalogo de componentes, operaciones de Modifi
 
 Requisitos de ejecucion y limites del plugin:
 
-- Version de AutoJs6: 6.8.0 (5308) o posterior; los hosts anteriores marcan el plugin como incompatible en el centro de plugins
+- Version minima de AutoJs6: 6.8.0 (5316) o posterior; los hosts anteriores marcan el plugin como incompatible en el centro de plugins
 - Version de Android: 7.0 (API 24) o posterior
 - Arquitectura del procesador: arm64-v8a / armeabi-v7a / x86_64 / x86 (las cuatro integradas en el unico APK, sin elegir por arquitectura)
 - Version de Compose: incluida en el plugin (BOM 2026.09.00), independiente del runtime de Compose del host
@@ -175,7 +175,7 @@ info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5308 (6.8.0)
+minimum host build: 5316 (6.8.0)
 ```
 
 El host descubre el plugin mediante `org.autojs.plugin.INFO` y lee datos de capacidad como `requiresHostVersion`; la clase de fabrica del renderizador se declara con el metadato `org.autojs.plugin.compose.RENDERER_FACTORY`, y el host crea un cargador de clases a partir de la ruta del APK del plugin (con el host como padre) y lo instancia dentro de su propio proceso.
@@ -198,16 +198,16 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 #### v1.0.0
 
-_2026/10/02_
+_2026/10/03_
 
 - `Aviso` Vista previa de desarrollo P1: el cargador V1 y las sesiones ejecutan un contador Column / Text / Button en un host de prueba dedicado. El renderizador completo y la API de scripts compose siguen en desarrollo
-- `Aviso` Requiere AutoJs6 6.8.0 (5308) o posterior (el numero minimo exacto de compilacion se completara cuando se integren los cambios del lado del host)
+- `Aviso` Requiere AutoJs6 6.8.0 (5316) o posterior
 - `Novedad` Esqueleto del repositorio del plugin: cadena de compilacion del plugin de versiones de plataforma, dependencias de Jetpack Compose BOM 2026.09.00, protocolo de activacion Wake Activity y servicio INFO (categoria compose-ui)
 - `Novedad` README, instruccion del centro de plugins y registro de cambios en 10 idiomas, generados a partir de fuentes JSON
 - `Novedad` El contador de vista previa admite actualizaciones incrementales y libera los callbacks al cerrar; las actualizaciones rechazadas conservan la última interfaz válida
 - `Dependencia` Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)
 - `Dependencia` Se agrega Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependencia` Añadir compose-ui-api.aar V1 (MPL 2.0, hash fijado), con las dependencias compartidas alineadas con el host
+- `Dependencia` Añadir compose-ui-api.aar V1 alineado con AutoJs6 6.8.0 (5316) (MPL 2.0, hash fijado), con las dependencias compartidas alineadas con el host
 
 ##### Para ver mas historial de versiones, consulte
 

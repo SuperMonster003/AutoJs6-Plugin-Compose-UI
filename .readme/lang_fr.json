@@ -39,7 +39,7 @@
   "h3_compatibility": "Compatibilite",
   "p_compatibility_intro": "Exigences d'execution et limites du plugin",
   "compatibility_points": [
-    "Version d'AutoJs6 : {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins",
+    "Version minimale d'AutoJs6 : {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins",
     "Version d'Android : {{ min_android_version }} (API {{ android_min_sdk }}) ou ulterieure",
     "Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)",
     "Version de Compose : embarquee dans le plugin (BOM {{ compose_bom }}), independante du runtime Compose de l'hote",

@@ -6,10 +6,10 @@
   "changelog_label_dependency": "相依",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/10/02",
+      "released_date": "2026/10/03",
       "hint": [
         "P1 開發預覽: V1 宿主載入器與工作階段已可在專用測試宿主中執行 Column / Text / Button 計數器. 完整轉譯器與 compose 指令碼 API 仍在開發中",
-        "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更新版本 (準確的最低版本號待宿主端變更落地後回填)"
+        "需要 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更新版本"
       ],
       "feature": [
         "外掛程式存放庫骨架: 平台版本外掛程式建置鏈, Jetpack Compose BOM {{ compose_bom }} 相依, Wake Activity 啟用協定與 INFO 服務 (類別 {{ plugin_info_category }})",
@@ -19,7 +19,7 @@
       "dependency": [
         "附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)",
         "附加 Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "附加 compose-ui-api.aar V1 (MPL 2.0, 雜湊鎖定), 共用相依性與宿主對齊"
+        "附加與 AutoJs6 6.8.0 (5316) 對齊的 compose-ui-api.aar V1 (MPL 2.0, 雜湊鎖定), 共用相依性與宿主對齊"
       ]
     }
   }

@@ -39,7 +39,7 @@
   "h3_compatibility": "互換性",
   "p_compatibility_intro": "プラグインの動作要件と制限",
   "compatibility_points": [
-    "AutoJs6 のバージョン: {{ required_host_version_name }} ({{ required_host_version_code }}) 以降. それより古いホストではプラグインセンターに非互換と表示されます",
+    "AutoJs6 の対応最小バージョン: {{ required_host_version_name }} ({{ required_host_version_code }}) 以降. それより古いホストではプラグインセンターに非互換と表示されます",
     "Android のバージョン: {{ min_android_version }} (API {{ android_min_sdk }}) 以降",
     "プロセッサアーキテクチャ: arm64-v8a / armeabi-v7a / x86_64 / x86 (単一の APK に 4 つすべてを内蔵, アーキテクチャ別の選択は不要)",
     "Compose のバージョン: プラグインに同梱 (BOM {{ compose_bom }}). ホストの Compose ランタイムには依存しません",

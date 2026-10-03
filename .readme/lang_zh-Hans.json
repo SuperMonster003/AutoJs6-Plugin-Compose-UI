@@ -39,7 +39,7 @@
   "h3_compatibility": "兼容性",
   "p_compatibility_intro": "插件的运行要求与限制",
   "compatibility_points": [
-    "AutoJs6 版本: {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高; 低于该版本的宿主会在插件中心提示不兼容",
+    "最低 AutoJs6 版本: {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高; 低于该版本的宿主会在插件中心提示不兼容",
     "Android 版本: {{ min_android_version }} (API {{ android_min_sdk }}) 或更高",
     "处理器架构: arm64-v8a / armeabi-v7a / x86_64 / x86 (单一 APK 内置全部四种, 无需按架构选择安装包)",
     "Compose 版本: 由插件自带 (BOM {{ compose_bom }}), 不依赖宿主的 Compose 运行时",

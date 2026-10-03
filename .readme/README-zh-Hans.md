@@ -75,7 +75,7 @@ P1 开发预览: V1 宿主装载器与会话已可在专用测试宿主中运行
 
 ******
 
-1. 安装 AutoJs6 6.8.0 (5308) 或更高版本
+1. 安装 AutoJs6 6.8.0 (5316) 或更高版本
 2. 安装本插件 APK (无需打开, 插件没有启动器入口)
 3. 在 AutoJs6 的插件中心确认 Compose UI 已被识别并处于启用状态
 4. 在脚本中直接使用 `compose` 全局对象 (渲染能力将随 1.0.0 版本交付)
@@ -126,7 +126,7 @@ threads.start(() => {
 
 插件的运行要求与限制:
 
-- AutoJs6 版本: 6.8.0 (5308) 或更高; 低于该版本的宿主会在插件中心提示不兼容
+- 最低 AutoJs6 版本: 6.8.0 (5316) 或更高; 低于该版本的宿主会在插件中心提示不兼容
 - Android 版本: 7.0 (API 24) 或更高
 - 处理器架构: arm64-v8a / armeabi-v7a / x86_64 / x86 (单一 APK 内置全部四种, 无需按架构选择安装包)
 - Compose 版本: 由插件自带 (BOM 2026.09.00), 不依赖宿主的 Compose 运行时
@@ -175,7 +175,7 @@ info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5308 (6.8.0)
+minimum host build: 5316 (6.8.0)
 ```
 
 宿主通过 `org.autojs.plugin.INFO` 发现插件并读取 `requiresHostVersion` 等能力信息; 渲染器工厂类名由 `org.autojs.plugin.compose.RENDERER_FACTORY` 元数据声明, 宿主以插件 APK 路径创建类加载器 (父加载器为宿主) 并在宿主进程内实例化.
@@ -198,16 +198,16 @@ minimum host build: 5308 (6.8.0)
 
 #### v1.0.0
 
-_2026/10/02_
+_2026/10/03_
 
 - `提示` P1 开发预览: V1 宿主装载器与会话已可在专用测试宿主中运行 Column / Text / Button 计数器. 完整渲染器与 compose 脚本 API 仍在开发中
-- `提示` 需要 AutoJs6 6.8.0 (5308) 或更高版本 (准确的最低版本号待宿主侧改动落地后回填)
+- `提示` 需要 AutoJs6 6.8.0 (5316) 或更高版本
 - `新增` 插件仓库骨架: 平台版本插件构建链, Jetpack Compose BOM 2026.09.00 依赖, Wake Activity 激活协议与 INFO 服务 (类别 compose-ui)
 - `新增` 10 种语言的 README, 插件中心说明与更新日志, 由 JSON 源文件统一生成
 - `新增` 预览计数器支持增量更新与关闭后的回调清理, 更新被拒绝时保留上一次有效界面
 - `依赖` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)
 - `依赖` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `依赖` 附加 compose-ui-api.aar V1 (MPL 2.0, 摘要锁定), 共享依赖与宿主对齐
+- `依赖` 附加与 AutoJs6 6.8.0 (5316) 对齐的 compose-ui-api.aar V1 (MPL 2.0, 摘要锁定), 共用依赖与宿主对齐
 
 ##### 更多版本历史可参阅
 

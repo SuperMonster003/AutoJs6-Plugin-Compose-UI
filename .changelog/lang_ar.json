@@ -6,10 +6,10 @@
   "changelog_label_dependency": "اعتمادية",
   "$data": {
     "v1.0.0": {
-      "released_date": "2026/10/02",
+      "released_date": "2026/10/03",
       "hint": [
         "معاينة التطوير P1: يشغل محمل المضيف V1 والجلسات عدادا بمكونات Column / Text / Button في مضيف اختبار مخصص. لا يزال العارض الكامل وواجهة برمجة نصوص compose قيد التطوير",
-        "يتطلب AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) أو أحدث (يستكمل رقم البناء الأدنى الدقيق بعد اعتماد تغييرات جانب المضيف)"
+        "يتطلب AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) أو أحدث"
       ],
       "feature": [
         "هيكل مستودع الإضافة: سلسلة بناء إضافة إصدارات المنصة, اعتماديات Jetpack Compose BOM {{ compose_bom }}, بروتوكول التفعيل Wake Activity وخدمة INFO (الفئة {{ plugin_info_category }})",
@@ -19,7 +19,7 @@
       "dependency": [
         "إرفاق common-plugin-api.aar الإصدار 6.8.0 (5307) (MPL 2.0, مثبت بالتجزئة)",
         "إرفاق Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
-        "إضافة compose-ui-api.aar V1 (MPL 2.0, بصمة مقفلة), مع مواءمة الاعتماديات المشتركة مع المضيف"
+        "إضافة compose-ui-api.aar V1 المتوافق مع AutoJs6 6.8.0 (5316) (MPL 2.0, بصمة مقفلة), مع مواءمة الاعتماديات المشتركة مع المضيف"
       ]
     }
   }
