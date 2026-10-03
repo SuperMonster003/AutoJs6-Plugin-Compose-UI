@@ -79,8 +79,24 @@ Ace1.22.0/build124 incorporates this into its regular verify-runtime.mjs alongsi
 regression, JVM171/32 classes, debug APK and native16 KB alignment all pass.
 The pre-existing untracked releases directory is not modified or committed.
 
+## P6.3 README and final integration history
+
+Ten-language plugin README/instructions/changelog now describe the delivered V1
+features and matching local builds, including two API styles, both hosting surfaces,
+packaged-app plugin requirements, literal selector tags and real rotation/destruction
+semantics. The quick HUD closes its own worker and ignores late posted updates;
+the five already tested bundled example assets are unchanged. Twenty localized
+README JS blocks passed syntax checks, and all36 generated documents match sources.
+
+The host's ten-language Compose entries are consolidated without rewriting unrelated
+history or refreshing online metadata. The protocol status is frozen V1 with host
+commit ec34abc00f. Both protocol copies remain identical. Shared AAR/lock values,
+native libraries, component catalog and renderer production code do not change.
+Local-preview/official-release distinctions and the placeholder artwork status are
+retained; no claim of remote deployment is added.
+
 ## Remaining local gate recording
 
-P6.3 finalized copy and P6.4 final APK/device results
+P6.4 final APK/device results
 are added here when their corresponding local checks and commits are complete.
 This interim document does not claim those gates have already passed.

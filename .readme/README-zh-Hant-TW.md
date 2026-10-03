@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供�
 
 ******
 
-P5 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 已完成穩健性檢查, 六台裝置/模擬器相容性矩陣與封裝應用程式驗證, 並記錄效能基準. 完整 API 文件與型別宣告將於 P6 交付. 目前僅為本機預覽, 尚無官方發行版.
+1.0.0 本機開發預覽: 需要相符的 AutoJs6 宿主建置, 並安裝和啟用本外掛. 本機配套提供 UI 頁面, 浮動視窗, 五個範例, API 參考與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在藍圖中. 目前未登錄官方索引, 尚無官方發行版. 圖示圖案仍為臨時預留, 等待維護者提供正式來源圖片.
 
 ******
 
@@ -63,12 +63,12 @@ P5 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長
 目前開發預覽的核心能力:
 
 - 宣告式介面: `compose.state` + `compose.mount(render)` 依狀態變化自動重繪, 同時提供可長期持有的節點控制代碼 (`compose.Text({...})` 等) 直接修改屬性與子節點
-- Material 3 元件核心集: 版面配置 (Column / Row / Box / LazyColumn 等), 文字, 按鈕, 輸入欄位, 開關, 滑桿, 進度列, 卡片, 對話方塊等
+- Material 3 核心集: 29 個節點工廠涵蓋版面配置, 文字, 圖示, 圖片, 按鈕, 輸入, 選擇控制項, 惰性清單, 對話方塊與進度; Snackbar 是工作階段命令, 不是 compose.Snackbar 工廠
 - 鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 範圍限定操作在宿主端驗證
 - 兩種承載方式: `"ui";` 指令碼透過 `compose.mount` 或可呼叫的 `compose` / `$compose` 掛載 Activity 內容; `compose.floaty` 建立 raw 或可調整懸浮視窗, 同樣支援非 ui 指令碼
-- 處理程序內轉譯: 轉譯器在宿主處理程序中執行, 沒有跨處理程序介面橋接, 事件與狀態更新低延遲
-- 單一安裝套件: 不區分 ABI, 不含外掛程式自有原生程式碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助程式庫, 四種 ABI 全部內建), 一個 APK 適用所有裝置
-- 指令碼入口: `compose` / `$compose`, 29 個節點工廠與長期持有的控制代碼, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`
+- 行程內繪製: 外掛在宿主行程套用介面更新, 事件排隊回到所屬指令碼執行緒; 工作執行緒透過 compose.post 請求更新
+- 一個 APK 包含 arm64-v8a / armeabi-v7a / x86_64 / x86, 無外掛自有原生程式碼; 隨附的 AndroidX graphics-path 輔助程式庫仍需符合 Android, 宿主與外掛相容條件
+- 原生文字編輯保留選取範圍與輸入法組合狀態, 支援焦點和明確編輯, 拒絕覆寫較新輸入的延遲編輯; 開關與滑桿仍由指令碼控制狀態
 - 整合防護: 外掛程式缺少或不相容時可用性探測傳回不可用, 錯誤使用 `ComposeError`, 關閉工作階段或停止指令碼會釋放所屬視窗與回呼
 - 計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類
 
@@ -105,21 +105,25 @@ compose.mount(() => compose.Column({ modifier: compose.modifier().fillMaxSize().
 
 ```js
 // 懸浮視窗 HUD (節點控制代碼層)
-let status = compose.Text({ text: '準備中...' });
+let worker = null;
+let status = compose.Text({ text: '準備中...', color: '#FFFFFF' });
 let win = compose.floaty(compose.Column({ padding: 12, bg: '#CC000000' }, [
     status,
-    compose.TextButton({ onClick: () => win.close() }, '關閉'),
+    compose.TextButton({ contentColor: '#FFFFFF', onClick: () => win.close() }, '關閉'),
 ]), { x: 50, y: 300, raw: true });
+win.on('close', () => { if (worker) worker.interrupt(); });
 
-threads.start(() => {
+worker = threads.start(() => {
     for (let i = 1; i <= 100; i++) {
         sleep(1000);
-        compose.post(() => status.set({ text: `進度 ${i}%` }));
+        compose.post(() => {
+            if (!win.isClosed()) status.text = `進度 ${i}%`;
+        });
     }
 });
 ```
 
-五個可執行範例隨套件放在 `assets/examples/`, 由 `index.json` 列出; 相符宿主的 "範例程式碼 > Compose UI" 提供相同指令碼 (`sample/Compose UI/`). 每例開頭說明執行模式與權限前提. 完整 API 說明與 TypeScript 型別宣告仍待交付, 目前 API 形態以藍圖附錄 A 為準.
+五個可執行指令碼由 assets/examples/index.json 列出, 同步至相符宿主的 Compose UI 範例分類. 每例開頭說明模式與權限. 節點, 修飾鏈, 主題, 工作階段與浮動視窗詳情請使用同批本機 API 文件及 TypeScript/編輯器宣告; 線上網站不一定已包含這些本機變更.
 
 ******
 
@@ -134,6 +138,7 @@ threads.start(() => {
 - 處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內建全部四種, 無需依架構選擇安裝套件)
 - Compose 版本: 由外掛程式自帶 (BOM 2026.09.00), 不依賴宿主的 Compose 執行階段
 - 契約版本: 1; 宿主與外掛程式透過契約版本協商, 不相符時拒絕載入並給出明確錯誤
+- 打包應用程式仍需另外安裝相容的 Compose UI 外掛, 啟用/授權記錄屬於該應用程式; 相容性檢查依據內建 AutoJs6 執行階段, 不是打包應用程式自身的 versionCode
 
 ******
 
@@ -144,8 +149,11 @@ threads.start(() => {
 - 為什麼安裝後找不到外掛程式圖示? 外掛程式沒有獨立介面, 也不會在啟動器顯示, 請在 AutoJs6 的外掛程式中心查看
 - 為什麼找不到 `compose`? 全域物件由相符的本機宿主建置提供, 單獨安裝外掛程式 APK 不會加入該入口
 - 是否需要解除安裝其它介面外掛程式? 不需要, Compose UI 與現有 `ui` 模組及其它外掛程式互不影響
-- 外掛程式更新後指令碼需要修改嗎? 契約版本不變時無需修改; 契約升級會在更新日誌中明確標註
+- 外掛變更時會怎樣? 更新, 解除安裝或停用外掛會關閉作用中的工作階段並報告對應錯誤; 相容且啟用的外掛允許重新掛載
 - 懸浮視窗需要什麼條件? 先授予宿主懸浮視窗權限, 輸入文字前呼叫 `window.requestFocus()`. 若 HyperOS 未顯示視窗, 請先返回桌面. 缺少權限會傳回 PERMISSION_REQUIRED, 不會自動彈出授權介面
+- 能否直接呼叫任意 Compose 函式或使用 JSX/TSX? 不能. 請使用文件中的節點工廠和命令; 外掛不編譯 Kotlin, 也不公開任意 Composable 函式
+- 旋轉是否遺失狀態? 目前宿主自行處理一般方向變化, 保留指令碼引擎. 真正的 Activity 重建或銷毀會關閉該引擎及所屬工作階段, 不自動還原業務狀態
+- 選擇器如何尋找元件? testTag 按原樣公開為 ID, 不加入套件名稱前綴. id/testTag 與 desc/contentDescription 是不同資訊; Button 的文字可能是子節點, 必要時沿 parent() 尋找可點擊祖先
 
 ******
 
@@ -204,20 +212,20 @@ minimum host build: 5316 (6.8.0)
 
 _2026/10/03_
 
-- `提示` P5 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, batch/post/theme, ui 指令碼掛載及 raw / 可調整懸浮視窗已可在相符的本機 AutoJs6 宿主建置中使用. 已包含可用性探測, 型別化錯誤與工作階段清理. 已附帶計數器, 表單, 1000 項清單, 浮動 HUD 與主題五個範例, 同步至相符宿主的 Compose UI 範例分類. 已完成穩健性檢查, 六台裝置/模擬器相容性矩陣與封裝應用程式驗證, 並記錄效能基準. 完整 API 文件與型別宣告將於 P6 交付. 目前僅為本機預覽, 尚無官方發行版
+- `提示` 1.0.0 本機開發預覽: 需要相符的 AutoJs6 宿主建置, 並安裝和啟用本外掛. 本機配套提供 UI 頁面, 浮動視窗, 五個範例, API 參考與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在藍圖中. 目前未登錄官方索引, 尚無官方發行版. 圖示圖案仍為臨時預留, 等待維護者提供正式來源圖片
 - `提示` 需要 AutoJs6 6.8.0 (5316) 或更新版本
-- `新增` 外掛程式存放庫骨架: 平台版本外掛程式建置鏈, Jetpack Compose BOM 2026.09.00 相依, Wake Activity 啟用協定與 INFO 服務 (類別 compose-ui)
-- `新增` 10 種語言的 README, 外掛程式中心說明與更新日誌, 由 JSON 來源檔案統一產生
-- `新增` 預覽轉譯支援版面配置, 文字, 圖示, 圖片, 按鈕, 選取控制項與滑桿; 傳入點陣圖仍由呼叫端持有並負責回收
+- `提示` 打包應用程式仍需另外安裝相容的 Compose UI 外掛, 啟用/授權記錄屬於該應用程式; 相容性檢查依據內建 AutoJs6 執行階段, 不是打包應用程式自身的 versionCode
+- `提示` 保留亮色/深色兩類 mipmap 入口; 目前圖案為預留, 待維護者提供正式黑白來源圖片後替換
+- `新增` 可呼叫的 compose / $compose, 長期節點控制代碼, 響應式 state/render/ref, 批次變更, 排隊調度與主題控制
+- `新增` Material 3 核心集: 29 個節點工廠涵蓋版面配置, 文字, 圖示, 圖片, 按鈕, 輸入, 選擇控制項, 惰性清單, 對話方塊與進度; Snackbar 是工作階段命令, 不是 compose.Snackbar 工廠
+- `新增` UI 指令碼可掛載 Activity 內容; compose.floaty 同時支援非 UI 指令碼的 raw / 可調整視窗, 像素位置與尺寸, 觸控/焦點控制及所屬資源清理
 - `新增` 全部 20 種 Modifier 操作保留宣告順序, 支援版面配置作用域驗證, 捲動與無障礙標籤
 - `新增` Material 3 主題支援種子色, 明暗模式, Android 12+ 系統動態色, 字型與字級縮放
-- `新增` 介面更新以完整交易套用, 拒絕更新時保留上一次有效介面; 受控輸入透過佇列回呼回報變更, 關閉後釋放回呼
-- `新增` 預覽輸入欄位保留選取範圍與輸入法組合文字, 支援焦點和明確編輯, 拒絕覆寫較新輸入的延遲編輯
-- `新增` 預覽新增支援穩定項目 key 與索引捲動的延遲載入清單, Scaffold 與頂端應用程式列插槽, 受控對話方塊, 進度指示器, 以及按佇列回傳操作或關閉結果的 Snackbar
-- `新增` 指令碼預覽提供可呼叫的 compose / $compose, 29 個節點工廠, 長期持有的控制代碼, 響應式 state/render/ref, 批次處理, 排程與主題控制
-- `新增` ui 指令碼可掛載 Compose 內容; 取代掛載或停止指令碼時釋放舊工作階段及回呼
-- `新增` 非 ui 指令碼可建立 raw 或可調整 Compose 懸浮視窗, 修改像素位置和尺寸, 觸控及焦點設定, 並透過視窗控制項, floaty.closeAll 或指令碼結束關閉
+- `新增` 原生文字編輯保留選取範圍與輸入法組合狀態, 支援焦點和明確編輯, 拒絕覆寫較新輸入的延遲編輯; 開關與滑桿仍由指令碼控制狀態
+- `新增` 核心圖示與 ImageWrapper/Bitmap, 本機檔案和宿主 drawable 圖片; 繪製器不自動回收呼叫端持有的圖片資源
 - `新增` 計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類
+- `新增` 配套 API 參考與 TypeScript 宣告, 以及 10 語言 README, 外掛中心說明和更新日誌
+- `新增` 外掛中心探索與宿主版本, 契約, 授權檢查, 無獨立介面和啟動器入口
 - `修正` Compose UI 在轉譯回呼中拒絕再次掛載頁面或浮動視窗並保留目前頁面, 支援外掛程式更新後重新掛載頁面
 - `最佳化` 可用性探測與 ComposeError 統一報告外掛程式缺少, 停用, 未授權, 不相容, 權限不足及工作階段關閉; 生命週期清理涵蓋原生視窗附加前即被取消的情況; 外掛程式更新, 解除安裝或停用時關閉作用中的工作階段並回報對應錯誤
 - `相依` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 雜湊鎖定)
