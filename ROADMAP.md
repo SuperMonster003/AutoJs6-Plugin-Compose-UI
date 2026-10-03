@@ -253,7 +253,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 已完成 (2026-10-03, P3.1 - P3.5) |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
-| P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 未开始 |
+| P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | 未开始 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
@@ -486,7 +486,7 @@ P6.1 证据 (2026-10-03): 文档 `2832a4d` (完整8页及导航), `2de38ab` (同
 
 - [x] (文档) `AutoJs6-TypeScript-Declarations/declarations/autojs6/aj6-int-compose.d.ts` (`Internal.Compose`, 元素工厂重载按目录生成, `ComposeNode` / `ComposeState<T>` / `ComposeModifier` / `ComposeSession` / `ComposeFloatyWindow` / `ComposeError`, 事件 payload 类型), `index.d.ts` 引用; `aj6dts.bat -Publish` 后同步两个仓库的 `aj6-int-compose.d.ts`, Ace 仓库执行 `:app:generateAutoJs6LspDeclarations`, 版本号与版本名按 AGENTS 规则加一并提交.
 
-P6.2 证据 (2026-10-03): 声明4.30.0 / `43b29d7`, Ace1.22.0 / build124; 实际Publish生成并同步配套宿主Java/资源/库, 手写声明镜像与30/114目录通过. TypeScript5.1.3正例及39负例+2项exact-nullish用例通过, 新声明本体不跳过检查也无诊断. 实际TS6.0.3语言服务默认/全部声明组均验证29工厂、签名与错误输入诊断, 新回归接入原verifier; Ace JVM171与debug/原生对齐通过. 未开启额外默认声明组或改变运行时API, 未触碰Ace预存未跟踪releases目录. 详见 `docs/dev/p6-release-gate.md`.
+P6.2 证据 (2026-10-03): 声明4.30.0 / `43b29d7`, Ace1.22.0 / build124; 实际Publish生成并同步配套宿主Java/资源/库, 手写声明镜像与30/114目录通过. TypeScript5.1.3正例及39负例+2项exact-nullish用例通过, 新声明本体不跳过检查也无诊断. 实际TS6.0.3语言服务默认/全部声明组均验证29工厂, 签名与错误输入诊断, 新回归接入原verifier; Ace JVM171与debug/原生对齐通过. 未开启额外默认声明组或改变运行时API, 未触碰Ace预存未跟踪releases目录. 详见 `docs/dev/p6-release-gate.md`.
 
 ### P6.3 README 与 changelog
 
@@ -497,8 +497,10 @@ P6.3 证据 (2026-10-03): 插件10语言/36产物与宿主10语言历史最终�
 
 ### P6.4 本地发布 gate
 
-- [ ] (发布) 插件: `py .python/generate_markdown.py --check`, `testDebugUnitTest`, `assembleDebug assembleDebugAndroidTest lintDebug`, `connectedDebugAndroidTest` (至少一台), `appendDigestToReleasedFiles` 产出 1 个已签名 APK 且 CRC32 一致; 宿主: 相关 JVM 测试 + `assembleDebug`; 全部结果与未执行项写入 `docs/dev/p6-release-gate.md`.
-- [ ] (发布) 按 D7 不推送, 不登记索引, 不发 Release; 在本文件 "会话记录" 写明 gate 达成的提交 hash, 等待维护者恢复推送后再做远端步骤 (登记 `official-repositories.json`, Release, 索引生成).
+- [x] (发布) 插件: `py .python/generate_markdown.py --check`, `testDebugUnitTest`, `assembleDebug assembleDebugAndroidTest lintDebug`, `connectedDebugAndroidTest` (至少一台), `appendDigestToReleasedFiles` 产出 1 个已签名 APK 且 CRC32 一致; 宿主: 相关 JVM 测试 + `assembleDebug`; 全部结果与未执行项写入 `docs/dev/p6-release-gate.md`.
+- [x] (发布) 按 D7 不推送, 不登记索引, 不发 Release; 在本文件 "会话记录" 写明 gate 达成的提交 hash, 等待维护者恢复推送后再做远端步骤 (登记 `official-repositories.json`, Release, 索引生成).
+
+P6.4 证据 (2026-10-04): 插件build26签名APK `autojs6-plugin-compose-ui-v1.0.0-d9cdec3c.apk`, 2378609B, 7143类/44721方法引用, 未超过已批准Q5复核线. JVM63, 独立API35 x86_64 AVD的connectedDebugAndroidTest32, 最终release宿主实际五例/JNI/INFO共7项通过; debug lint无问题, 签名/CRC32/依赖归属/四ABI原生对齐通过. 宿主JVM200/API16与debug装配通过. 配套文档/声明/插件验收和未执行项见 `docs/dev/p6-release-gate.md`; 两类图标资源有效, 图案仍保留占位源图. AVD和自有包已清理, 未操作远端.
 
 ---
 
@@ -962,5 +964,17 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 验证: 宿主选定JVM200, API16, 插件JVM63, APK Builder38, Python16; 插件API24/35各32项通过. API37额外插件ComposeTestRule尝试中5契约项通过, 27项受Espresso已移除InputManager反射入口阻断, 不计入通过; 该设备真实宿主16项和inrt通过. 宿主debug / androidTest / inrt RuntimeKit, 插件debug / androidTest / release与debug lint通过; 完整宿主JVM / lint, 长期堆泄漏测试, release宿主性能基线及远端CI未执行.
 - 提交定位: 插件 `004f9fd` (P5.1, build19), `5013b57` (P5.2, build20), 本条所在提交 (P5.3基线, build21); 宿主 `472f52e39b` (健壮性), `ec34abc00f` (启动登记与inrt), `ef707fd667` (性能工具与基线); APK Builder `4884075` (两构建别名与计数50对齐); 外部文档 `7dc1add`. 宿主仍在独立 `spike/compose-ui-p0` 分支.
 - 最终插件签名产物 `autojs6-plugin-compose-ui-v1.0.0-5c0881dc.apk`, build21, 2376581B, SHA-256 `0978455b1bc5c04415fc4b6860be49dfd749deb9472b1392be67525aa0578640`, 7143类 / 44721方法引用. 与实测release19相比仅版本/预览说明改变, renderer源码不变; 最终APK在API24的JNI/计数器/停止清理3项及API37真实inrt1项均通过. 性能基线继续绑定原实测19, 未把新APK冒称重测.
-- 清理: 六设备本次安装的23个自有包全部卸载并确认不存在. 两台专用AVD `compose_p5_api24` / `compose_p5_api37_16k` 经名称、已解析数据路径与注册核对后停机并由SDK删除, 注册和数据均不存在. 四台真机原宿主版本与既有APK Builder保留, 其它设备/AVD与共享SDK未处理. 四个本次修改仓库均按逻辑本地提交; 无推送, 官方索引登记或公开Release.
+- 清理: 六设备本次安装的23个自有包全部卸载并确认不存在. 两台专用AVD `compose_p5_api24` / `compose_p5_api37_16k` 经名称, 已解析数据路径与注册核对后停机并由SDK删除, 注册和数据均不存在. 四台真机原宿主版本与既有APK Builder保留, 其它设备/AVD与共享SDK未处理. 四个本次修改仓库均按逻辑本地提交; 无推送, 官方索引登记或公开Release.
 - 下一起点为Q5回归线确认与P6.1完整API文档, 随后按P6继续声明/Ace与Offline Docs同步. Q6正式图标仍待维护者源图. 完整证据见 `docs/dev/p5-robustness-evidence.md`, `docs/dev/p5-compatibility-evidence.md`, `docs/dev/p5-performance-evidence.md`.
+
+### 2026-10-04: 决策确认与 P6 全部本地交付
+
+- 维护者确认 Q2 core+ImageWrapper, Q3 缺 key 每会话 warn, Q4 仅 compose.floaty, Q5 首版耗时约+50% / APK与DEX+10%人工复核规则, Q6 仅亮/暗两类mipmap图标, Q7 按F.1至F.6顺序. Q5数值及超线复测或说明并由维护者确认的流程写入AGENTS第14节, 原236条实测/采样参数/摘要未改变. 冷启动/PSS/滚动继续观察. P5全部完成.
+- P6.1: 完整compose模块页和七个类型/组件页, 所有方法/属性/回调/生命周期边界按实际实现核对, 30项/114属性与声明双向守卫. 文档152模块, 搜索6543条; BAT完成dry-run与verify-offline, Offline Docs同步208资产并通过JVM2/Python4/debug-release内容与签名验证. 文档内容版本仍6.8.0, 项目计数90, 离线插件6.8.6/build71.
+- P6.2: Declarations4.30.0与Ace1.22.0/build124, 运行实际aj6dts -Publish和Ace聚合, 只作本地文件同步. 39个严格负例+2个exact-nullish用例通过; 实际TS6.0.3默认/全组语言服务验证29工厂, 字段与签名, 并在常规verifier新增回归. 修复缺少可选原生声明时error-any吞掉非法图片/颜色输入的声明问题, 保留完整图原生可赋值性与默认分组策略. Ace JVM171/debug/原生对齐通过.
+- P6.3: 插件与宿主10语言使用/历史说明最终化, 36个插件生成物一致; README HUD关闭时中断worker并避免迟到更新, 20个本地化脚本语法通过, 五个已实测示例未变. 协议标记frozen V1 with host commit ec34abc00f. V1 AAR与51项共享依赖, 渲染器生产代码均未改变.
+- P6.4: 插件JVM63, debug/androidTest/release, debug lint, 定向独立API35 x86_64 AVD的connectedDebugAndroidTest32全部通过. 宿主选定JVM200/API16与debug装配通过; 最终release宿主实际五例+JNI/INFO共7项通过. 首次门禁发现路线图中的两处非ASCII标点, 修正后完整通过, 未弱化断言. 完整证据和未执行项见 `docs/dev/p6-release-gate.md`.
+- 提交定位: 插件 `27be441` (Q2-Q7, build22), `27a397a` (P6.1, build23), `63b22f0` (P6.2, build24), `5cb77ef` (P6.3, build25), 本条所在提交 (本地gate, build26). 宿主 `d29eb47782` (Q5), `417f469975` (最终协议/历史), `4823e04a78` (gate证据). 文档 `2832a4d` / `2de38ab`, Offline Docs `396f191`, Declarations `43b29d7`, Ace `07a4831`.
+- 最终签名APK `autojs6-plugin-compose-ui-v1.0.0-d9cdec3c.apk`, 2378609B, SHA-256 `c2d7ddae7d8311b4b82c991b7fe6f1c92547b4b1df7dfd018f1f43b0be7be8cc`, 7143类/44721方法引用. 相对P5基线仅增加3540B, 方法引用不变, 均在已批准复核线内; 未把P5时序与内存数据冒称本轮新测量.
+- 清理与边界: 自有安装包均已移除; compose_p6_api35核对名称/序列号/已解析路径后由SDK删除, 数据与注册不存在. 物理设备, 其它AVD, 共享SDK和原宿主工作区未修改. 六个任务仓库均按范围提交, Ace保留原有未跟踪releases目录, 未整理或删除. 无Git推送/npm发布/官方索引/公开Release.
+- P0-P6的既定本地实现与gate完成; 图标两类资源有效, 正式图案仍待源图. 完整宿主JVM/lint, 本轮再跑六设备矩阵, release宿主性能/长期堆泄漏/新的冷启动PSS滚动稳定性证据和远端CI未执行. 下一起点为已批准顺序的P7 F.1 TSX工厂, 远端步骤继续等待D7明确解除.
