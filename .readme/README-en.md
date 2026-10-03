@@ -42,7 +42,7 @@ This document is available in the following languages:
 
 ******
 
-Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare their interface through the host's built-in `compose` global object, and the plugin renders it inside the host process with Jetpack Compose and Material 3, giving `"ui";` mode activities and floating windows one declarative UI solution.
+Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports `"ui";` activity content; floating windows are planned for P3.4.
 
 The plugin ships no standalone screens and adds no launcher entry. The host discovers it through the INFO service, reads its version and compatibility data, then loads the renderer inside the host process according to the contract (`org.autojs.plugin.compose.api`). The UI tree, state, and events live on the script side; the renderer only applies patches to the Compose composition and forwards user events back to the script.
 
@@ -52,7 +52,7 @@ The plugin ships no standalone screens and adds no launcher entry. The host disc
 
 ******
 
-P2 development preview: all 30 V1 catalog entries are implemented in a dedicated test host, including 29 node components and the Snackbar command. Native text fields, lazy lists, Scaffold, dialogs, and progress indicators are available in the preview. The public compose script API is still planned for P3.
+P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, and UI script mounting work with a matching local AutoJs6 host build. Floating windows remain planned for P3.4. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release.
 
 ******
 
@@ -60,14 +60,15 @@ P2 development preview: all 30 V1 catalog entries are implemented in a dedicated
 
 ******
 
-Core capabilities the plugin is set to deliver:
+Capabilities of the current preview and planned hosting support:
 
 - Declarative UI: `compose.state` + `compose.mount(render)` re-render on state changes, while long-lived node handles (`compose.Text({...})` and friends) allow direct property and child updates
 - Material 3 component core set: layouts (Column / Row / Box / LazyColumn and more), text, buttons, text fields, switches, sliders, progress indicators, cards, dialogs
 - Chained modifiers: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` keeps operation order, and scoped operations are validated on the host side
-- Two hosting surfaces: activity content of `"ui";` scripts (`compose.mount`) and floating windows of any script (`compose.floaty`)
+- Hosting: activity content of `"ui";` scripts is available through `compose.mount` or the callable `compose` / `$compose`; floating windows (`compose.floaty`) are planned for P3.4
 - In-process rendering: the renderer runs inside the host process without any cross-process UI bridge, so events and state updates stay low-latency
 - Single package: no ABI variants and no first-party native code (only the AndroidX graphics-path helper bundled with Compose, built in for all four ABIs), one APK fits every device
+- Script entry: `compose` / `$compose`, 29 node factories and retained handles, plus `compose.ref`, `compose.batch`, `compose.post`, and `compose.theme`
 
 ******
 
@@ -75,10 +76,10 @@ Core capabilities the plugin is set to deliver:
 
 ******
 
-1. Install AutoJs6 6.8.0 (5316) or later
+1. Install a matching local AutoJs6 build with the compose script entry (minimum 6.8.0 / 5316)
 2. Install this plugin APK (there is nothing to open, the plugin has no launcher entry)
 3. Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled
-4. Try this preview through the dedicated test host; the public `compose` script entry is planned for P3
+4. Use `compose` or `$compose` in scripts; mount activity content from a `"ui";` script
 
 ******
 
@@ -86,7 +87,7 @@ Core capabilities the plugin is set to deliver:
 
 ******
 
-The examples below show the target API shape (roadmap appendix A); they cannot run until the P3 script entry is delivered:
+The counter below can run with the matching local preview host. The floating HUD is a target example for P3.4 and is not runnable yet:
 
 ```js
 "ui";
@@ -116,7 +117,7 @@ threads.start(() => {
 });
 ```
 
-The full API reference (component catalog, modifier operations, session objects, error codes) lives in the compose module chapter of the AutoJs6 documentation.
+Bundled examples, the complete API reference, and TypeScript declarations are still pending. Roadmap appendix A defines the current API shape.
 
 ******
 
@@ -139,7 +140,7 @@ Runtime requirements and limits of the plugin:
 ******
 
 - Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
-- Why does `compose` not work in scripts yet? This P2 development preview runs through a dedicated test host; the compose script entry is planned for P3
+- Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
 - Do scripts need changes after a plugin update? Not while the contract version stays the same; contract upgrades are called out explicitly in the changelog
 
@@ -200,7 +201,7 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 _2026/10/03_
 
-- `Hint` P2 development preview: all 30 V1 catalog entries are implemented in a dedicated test host, including 29 node components and the Snackbar command. Native text fields, lazy lists, Scaffold, dialogs, and progress indicators are available in the preview. The public compose script API is still planned for P3
+- `Hint` P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, and UI script mounting work with a matching local AutoJs6 host build. Floating windows remain planned for P3.4. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release
 - `Hint` Requires AutoJs6 6.8.0 (5316) or later
 - `Feature` Plugin repository skeleton: platform versions plugin build chain, Jetpack Compose BOM 2026.09.00 dependencies, Wake Activity activation protocol, and INFO service (category compose-ui)
 - `Feature` README, plugin center instruction, and changelog in 10 languages, generated from JSON sources
@@ -210,6 +211,8 @@ _2026/10/03_
 - `Feature` Interface updates apply atomically and rejected updates keep the last valid view; controlled inputs report changes through queued callbacks, and closing releases callbacks
 - `Feature` Preview text fields preserve selection and IME composition, support focus and explicit edits, and reject delayed edits that would overwrite newer input
 - `Feature` Preview adds lazy lists with stable item keys and indexed scrolling, Scaffold and top app bar slots, controlled dialogs, progress indicators, and queued Snackbar action or dismissal callbacks
+- `Feature` The script preview exposes callable compose / $compose, 29 node factories, retained handles, reactive state/render/ref, batching, posting, and theme control
+- `Feature` UI scripts can mount Compose content; replacing the mount or stopping the script releases the old session and callbacks, while floating hosting remains planned for P3.4
 - `Dependency` Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)
 - `Dependency` Attach Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `Dependency` Attach compose-ui-api.aar V1 aligned to AutoJs6 6.8.0 (5316) (MPL 2.0, hash-locked), with shared dependencies aligned to the host

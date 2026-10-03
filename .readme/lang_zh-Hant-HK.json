@@ -5,29 +5,30 @@
   "h3_languages_with_ascii": "Languages / 語言",
   "p_languages_all_supported_for_readme": "本文件支援以下語言",
   "h3_introduction": "簡介",
-  "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 腳本透過宿主內置的 `compose` 全域物件宣告界面, 插件在宿主進程內以 Jetpack Compose 與 Material 3 完成渲染, 為 `\"ui\";` 模式 Activity 內容與懸浮窗提供統一的宣告式界面方案.",
+  "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 腳本透過宿主提供的 `compose` / `$compose` 入口宣告界面, 插件在宿主進程內以 Jetpack Compose 與 Material 3 完成渲染. 目前預覽支援 `\"ui\";` 模式的 Activity 內容, 懸浮窗計劃在 P3.4 交付.",
   "p_introduction_how": "插件不包含任何獨立界面, 也不在啟動器中顯示入口. 宿主透過 INFO 服務發現插件並讀取版本與兼容資訊, 再按契約 (`org.autojs.plugin.compose.api`) 在宿主進程內載入渲染器. 界面樹, 狀態與事件在腳本側描述, 渲染器只負責把補丁套用到 Compose 組合並把用戶事件回傳給腳本.",
   "h3_status": "當前狀態",
-  "p_status": "P2 開發預覽: V1 目錄的全部 30 項能力已在專用測試宿主中實現, 包含 29 個節點組件與 Snackbar 命令. 原生輸入框, 懶加載列表, Scaffold, 對話框與進度指示器已可在預覽中使用. 公開的 compose 腳本 API 仍計劃在 P3 交付.",
+  "p_status": "P3 開發預覽: 可呼叫的 compose / $compose 入口, 29 個節點工廠, 長期持有的句柄, 響應式 state/render/ref, batch/post/theme 與 ui 腳本掛載已可在匹配的本地 AutoJs6 宿主構建中使用. 懸浮窗仍計劃在 P3.4 交付. 示例包, 完整 API 文件, 型別宣告與後續完整驗證矩陣尚待交付. 目前僅為本地預覽, 尚無官方發行版.",
   "h3_features": "功能特性",
-  "p_features_intro": "插件計劃交付的核心能力",
+  "p_features_intro": "目前開發預覽的能力與後續承載支援",
   "features": [
     "宣告式界面: `compose.state` + `compose.mount(render)` 按狀態變化自動重繪, 同時提供可長期持有的節點句柄 (`compose.Text({...})` 等) 直接修改屬性與子節點",
     "Material 3 組件核心集: 佈局 (Column / Row / Box / LazyColumn 等), 文字, 按鈕, 輸入框, 開關, 滑桿, 進度條, 卡片, 對話框等",
     "鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 作用域操作在宿主側校驗",
-    "兩種承載面: `\"ui\";` 腳本的 Activity 內容 (`compose.mount`) 與任意腳本的懸浮窗 (`compose.floaty`)",
+    "承載方式: `\"ui\";` 腳本的 Activity 內容可透過 `compose.mount` 或可呼叫的 `compose` / `$compose` 掛載; 懸浮窗 (`compose.floaty`) 計劃在 P3.4 交付",
     "進程內渲染: 渲染器在宿主進程中運行, 沒有跨進程界面橋接, 事件與狀態更新低延遲",
-    "單一安裝包: 不區分 ABI, 不含插件自有原生代碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助庫, 四種 ABI 全部內置), 一個 APK 適配所有裝置"
+    "單一安裝包: 不區分 ABI, 不含插件自有原生代碼 (僅隨 Compose 附帶的 AndroidX graphics-path 輔助庫, 四種 ABI 全部內置), 一個 APK 適配所有裝置",
+    "腳本入口: `compose` / `$compose`, 29 個節點工廠與長期持有的句柄, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`"
   ],
   "h3_usage": "使用方式",
   "usage_steps": [
-    "安裝 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高版本",
+    "安裝包含 compose 腳本入口的匹配本地 AutoJs6 構建 (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
     "安裝本插件 APK (無需開啟, 插件沒有啟動器入口)",
     "在 AutoJs6 的插件中心確認 Compose UI 已被識別並處於啟用狀態",
-    "透過專用測試宿主體驗本開發預覽; 公開的 `compose` 腳本入口計劃在 P3 交付"
+    "在腳本中使用 `compose` 或 `$compose`; 透過 `\"ui\";` 腳本掛載 Activity 內容"
   ],
   "h3_quick_start": "快速開始",
-  "p_quick_start_intro": "以下示例展示目標 API 形態 (以路線圖附錄 A 為準); P3 腳本入口交付前尚不能運行:",
+  "p_quick_start_intro": "以下計數器可在匹配的本地預覽宿主中運行. 懸浮窗 HUD 展示 P3.4 的目標 API, 目前尚不能運行:",
   "example_counter": "計數器 (宣告式 render 層)",
   "example_counter_text": "已點擊 ${count.value} 次",
   "example_counter_button": "加一",
@@ -35,7 +36,7 @@
   "example_hud_preparing": "準備中...",
   "example_hud_close": "關閉",
   "example_hud_progress": "進度 ${i}%",
-  "p_quick_start_details": "完整的 API 說明 (組件目錄, Modifier 操作, 會話物件, 錯誤碼) 見 AutoJs6 文件的 compose 模組章節.",
+  "p_quick_start_details": "示例包, 完整 API 說明與 TypeScript 型別宣告尚待交付. 目前 API 形態以路線圖附錄 A 為準.",
   "h3_compatibility": "兼容性",
   "p_compatibility_intro": "插件的運行要求與限制",
   "compatibility_points": [
@@ -48,7 +49,7 @@
   "h3_faq": "常見問題",
   "faq_items": [
     "為什麼安裝後找不到插件圖示? 插件沒有獨立界面, 也不會在啟動器顯示, 請在 AutoJs6 的插件中心查看",
-    "為什麼腳本裏的 `compose` 還不能用? 當前 P2 開發預覽透過專用測試宿主運行, compose 腳本入口計劃在 P3 交付",
+    "為甚麼找不到 `compose`? 全域物件由匹配的本地宿主構建提供, 單獨安裝插件 APK 不會加入該入口",
     "是否需要卸載其它界面插件? 不需要, Compose UI 與現有 `ui` 模組及其它插件互不影響",
     "插件更新後腳本需要修改嗎? 契約版本不變時無需修改; 契約升級會在更新日誌中明確標註"
   ],
