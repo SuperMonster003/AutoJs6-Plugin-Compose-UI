@@ -82,7 +82,7 @@ sed -i "s/^VERSION_BUILD=.*/VERSION_BUILD=$next/" version.properties
 AutoJs6-Plugin-Compose-UI/
 |-- .changelog/                 lang_*.json x 10 + template_changelog.md (文案源)
 |-- .github/workflows/          build.yml (JVM / APK / lint + API 24 x86 / API 35 x86_64 模拟器契约测试), markdown.yml
-|-- .python/                    generate_markdown.py (+ .bat, check_markdown.bat), generate_launcher_icons.py, icons/
+|-- .python/                    generate_markdown.py (+ .bat, check_markdown.bat), generate_launcher_icons.py, sync_examples.py, icons/
 |-- .readme/                    common.json, lang_*.json x 10, template_readme.md, template_plugin_instruction.md, README-*.md (生成)
 |-- app/
 |   |-- src/main/java/io/github/supermonster003/autojs6/plugin/compose/ui/
@@ -94,6 +94,7 @@ AutoJs6-Plugin-Compose-UI/
 |   |   `-- renderer/                          (路线图 P0.2 / P2 起: ComposeUiRendererFactoryImpl, 渲染器, 组件目录, 补丁应用)
 |   |-- src/main/res/           values*/ x 11 (strings), mipmap*/ (生成), raw*/plugin_instruction.md (生成), xml/data_extraction_rules.xml
 |   |-- src/main/assets/doc/    CHANGELOG*.md (生成)
+|   |-- src/main/assets/examples/ counter.js, form.js, list.js, floaty-hud.js, theme.js, index.json
 |   |-- src/test/               JVM 契约与资源守卫 (第 13.1 节)
 |   |-- src/androidTest/        激活 / 发现 / 打包契约 instrumentation (第 13.2 节)
 |   |-- sm003.jks               本地签名密钥, Git 忽略
@@ -151,7 +152,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `name` 来自不可翻译的 `app_name`, `description` 来自当前 locale 的 `plugin_description`, `instruction` 来自 `@raw/plugin_instruction`, `versionName` / `versionCode` 来自已安装包, `versionDate` 来自 `plugin_version_date` resValue, `id` / `engine` / `variant` / `author` 来自 `ComposeUiPlugin`.
 - `supportedAbis` 恒为空数组 (D22: 单 APK 内置全部四种 ABI 的 graphics-path 辅助库, 对设备没有 ABI 限制), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
-- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 `RendererCatalog` 声明的完整 30 项 V1 目录 (29 个节点组件与仅命令的 Snackbar), FEATURES 为空. P2.4 / P2.5 已补齐原生输入框, 列表, Scaffold, 顶部应用栏, 对话框与进度指示器. P3.1 - P3.5 已在匹配的本地宿主交付可调用的 `compose` / `$compose`, 29 个节点工厂, 句柄, 响应式 state/render/ref, batch/post/theme, ui 模式挂载与非 ui 脚本的 raw / 可调整悬浮窗, 以及错误 / 探测 / 生命周期守卫. 悬浮窗复用宿主授权, 缺失权限返回 `PERMISSION_REQUIRED`, 不自动弹出授权界面; 文档与完整验证矩阵仍由后续阶段交付.
+- INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 `RendererCatalog` 声明的完整 30 项 V1 目录 (29 个节点组件与仅命令的 Snackbar), FEATURES 为空. P2.4 / P2.5 已补齐原生输入框, 列表, Scaffold, 顶部应用栏, 对话框与进度指示器. P3.1 - P3.5 已在匹配的本地宿主交付可调用的 `compose` / `$compose`, 29 个节点工厂, 句柄, 响应式 state/render/ref, batch/post/theme, ui 模式挂载与非 ui 脚本的 raw / 可调整悬浮窗, 以及错误 / 探测 / 生命周期守卫. 悬浮窗复用宿主授权, 缺失权限返回 `PERMISSION_REQUIRED`, 不自动弹出授权界面. P4 五例已随包提供并同步至匹配宿主的 Compose UI 示例分类; 完整 API 文档, 类型声明与 P5 完整验证矩阵仍由后续阶段交付.
 - 新增可选能力时先协商, 不通过捕获异常猜测协议版本.
 
 ## 8. 进程内渲染器与公共 API 设计 (CONDITIONAL, P0.2 起)
@@ -183,7 +184,8 @@ AutoJs6-Plugin-Compose-UI/
 
 - `.readme/lang_*.json` (10 语言, 键集合一致, 列表键 `features` / `usage_steps` / `compatibility_points` / `faq_items` / `security_points`) 与 `.changelog/lang_*.json` 是唯一文案源; 生成物 (`README.md`, `.readme/README-*.md`, `app/src/main/assets/doc/CHANGELOG*.md`, `app/src/main/res/raw*/plugin_instruction.md`, 共 36 个) 不手工编辑.
 - 修改 JSON 或模板后运行 `py .python/generate_markdown.py` 再 `--check`; CI `markdown.yml` 在 Windows 上执行 `.python/check_markdown.bat`.
-- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 当前状态段落 MUST 如实说明 "P3 本地开发预览, 脚本入口, ui 模式与悬浮窗承载及错误 / 生命周期守卫已实现, 需要匹配的本地宿主构建, 尚无官方发行版". 计数器与悬浮窗 HUD 均为可运行的本地预览示例, HUD 说明宿主悬浮窗授权前提; 示例包, 完整 API 文档, 类型声明与完整验证矩阵仍待后续阶段.
+- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 当前状态段落 MUST 如实说明 "P4 本地开发预览, 脚本入口, ui 模式与悬浮窗承载及错误 / 生命周期守卫已实现, 五个示例已随包交付, 需要匹配的本地宿主构建, 尚无官方发行版". `assets/examples/` 由 `index.json` 列出计数器, 表单, 1000 项列表, 非 ui 悬浮 HUD 与主题五例, 每例头部说明模式及权限前提; 完整 API 文档, 类型声明与 P5 完整验证矩阵仍待后续阶段.
+- 修改示例后, 使用 `py .python/sync_examples.py --host <明确的宿主仓库路径>` 同步五个 JS 至宿主 `app/src/main/assets-app/sample/Compose UI/`, 清单同步至 `app/src/main/assets-app/indices/compose-examples.json`, 再以 `--check` 确认字节一致. 宿主通过 `AssetManager.list` 动态发现分类, 没有静态分类总表; 不在可执行示例目录放清单 JSON. 插件 Gradle 构建不依赖宿主目录.
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.
 
@@ -203,6 +205,8 @@ AutoJs6-Plugin-Compose-UI/
 
 - `ComposeUiPluginContractTest`: Wake Activity 契约与四项 application meta-data, 无启动器入口, INFO 服务 `getInfo()` 往返 (空 `supportedAbis`, capabilities 仅 `requiresHostVersion`), APK 为单文件且原生库恰好为四个 ABI 的 `libandroidx.graphics.path.so` 并可在当前设备加载, 无导出 provider.
 - P0.2 起: 宿主侧加载探针 (在宿主仓库); P2 起: 渲染器在宿主进程内的组合 / 事件 / 生命周期用例 (宿主 androidTest), 本仓库保留不依赖宿主的渲染器单元 instrumentation.
+- P4 示例守卫: 宿主 `ComposeExampleCatalogTest` 校验目录发现, Rhino 语法与运行模式; `ComposeExamplesDeviceTest` 逐字节比较已安装插件与宿主的示例资产并执行实际脚本, 不在示例内加入测试开关. 设备必须安装包含当前示例的插件 APK.
+- 可选覆盖率使用 `-PcomposeUiCoverage=true`, JaCoCo 0.8.14 由版本目录锁定, 仅为测试插桩与报告使用, 不进入 release 包. 度量值与设备结果以阶段证据为准, 不以启用插桩代替通过验证.
 - 设备池与证据等级见 `ROADMAP.md` 附录 E; 多台设备时用明确 serial; 不卸载用户的已安装应用, 不清空启动器数据, 不删除用户的 `/sdcard` 内容.
 
 ### 13.3 CI

@@ -8,6 +8,7 @@ import java.nio.ByteOrder
 import java.util.Properties
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     id("org.autojs.build.utils")
@@ -16,11 +17,13 @@ plugins {
     id("org.autojs.build.jvm-convention")
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("jacoco")
 }
 
 val globalApplicationId = "io.github.supermonster003.autojs6.plugin.compose.ui"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
+val composeUiCoverage = providers.gradleProperty("composeUiCoverage").map(String::toBoolean).getOrElse(false)
 
 // ---------------------------------------------------------------------------
 // Host protocol AARs are consumed only from libs/ and are pinned by locks/host-api-aars.lock.
@@ -247,6 +250,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            enableAndroidTestCoverage = composeUiCoverage
             proguardFiles(*proguardFiles)
             niceSigningConfig?.let { signingConfig = it }
         }
@@ -265,6 +269,8 @@ android {
         compose = true
         resValues = true
     }
+
+    testCoverage { jacocoVersion = libs.versions.jacoco.get() }
 
     sourceSets.named("main") {
         kotlin.directories += "src/main/java"
@@ -406,4 +412,35 @@ tasks {
 
 extra {
     versions.handleIfNeeded(project, "", listOf(buildTypeDebug, buildTypeRelease))
+}
+
+jacoco { toolVersion = libs.versions.jacoco.get() }
+
+// adb runs use explicit owned serials; collected .ec files can be reported without discovering
+// or installing on any other connected device. These are the original, uninstrumented classes.
+tasks.register<JacocoReport>("reportComposeUiDeviceCoverage") {
+    group = "verification"
+    description = "Reports plugin-source coverage from explicitly collected device execution data"
+    dependsOn("bundleDebugClassesToCompileJar")
+    executionData.from(fileTree(layout.buildDirectory.dir("outputs/compose-coverage")) { include("*.ec") })
+    classDirectories.from(zipTree(layout.buildDirectory.file(
+        "intermediates/compile_app_classes_jar/debug/bundleDebugClassesToCompileJar/classes.jar",
+    )).matching {
+        include("io/github/supermonster003/autojs6/plugin/compose/ui/**")
+        exclude("**/BuildConfig.class")
+    })
+    sourceDirectories.from("src/main/java")
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/compose-coverage/html"))
+        xml.outputLocation.set(layout.buildDirectory.file("reports/compose-coverage/coverage.xml"))
+        csv.outputLocation.set(layout.buildDirectory.file("reports/compose-coverage/coverage.csv"))
+    }
+    setOnlyIf {
+        check(composeUiCoverage) { "Build and report with -PcomposeUiCoverage=true" }
+        check(executionData.files.any { it.isFile && it.length() > 0 }) { "No collected device coverage in outputs/compose-coverage" }
+        true
+    }
 }

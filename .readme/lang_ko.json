@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI는 AutoJs6의 UI 렌더링 플러그인입니다. 스크립트는 호스트가 제공하는 `compose` / `$compose` API로 UI를 선언하고, 플러그인은 호스트 프로세스 안에서 Jetpack Compose와 Material 3로 렌더링합니다. 현재 미리보기는 `\"ui\";` 모드의 Activity 콘텐츠와 비 UI 스크립트의 플로팅 창을 모두 지원합니다.",
   "p_introduction_how": "플러그인은 독립적인 화면이 없으며 런처에도 표시되지 않습니다. 호스트는 INFO 서비스로 플러그인을 발견하고 버전과 호환성 정보를 읽은 뒤, 계약 (`org.autojs.plugin.compose.api`)에 따라 호스트 프로세스 안에 렌더러를 로드합니다. UI 트리, 상태, 이벤트는 스크립트 쪽에서 기술되며, 렌더러는 Compose 컴포지션에 패치를 적용하고 사용자 이벤트를 스크립트로 되돌려 보내는 역할만 합니다.",
   "h3_status": "현재 상태",
-  "p_status": "P3 개발 미리보기: 호출 가능한 compose / $compose, 노드 팩터리 29개, 유지 가능한 핸들, 반응형 state/render/ref, batch/post/theme, UI 스크립트 마운트와 raw 또는 크기 조절 가능한 플로팅 창을 호환 로컬 AutoJs6 호스트 빌드에서 사용할 수 있습니다. 가용성 확인, 형식화된 오류 및 세션 정리도 포함됩니다. 예제 모음, 전체 API 문서, 타입 선언 및 더 넓은 검증 매트릭스는 아직 제공되지 않습니다. 현재는 공식 릴리스가 아닌 로컬 미리보기입니다.",
+  "p_status": "P4 개발 미리보기: 호출 가능한 compose / $compose, 노드 팩터리 29개, 유지 가능한 핸들, 반응형 state/render/ref, batch/post/theme, UI 스크립트 마운트와 raw 또는 크기 조절 가능한 플로팅 창을 호환 로컬 AutoJs6 호스트 빌드에서 사용할 수 있습니다. 가용성 확인, 형식화된 오류 및 세션 정리도 포함됩니다. 카운터, 폼, 1000개 항목 목록, 플로팅 HUD, 테마 예제 5개가 포함되며 호환 호스트의 Compose UI 예제 분류에도 동기화됩니다. 전체 API 문서, 타입 선언 및 P5 전체 검증 매트릭스는 추후 제공됩니다. 현재는 공식 릴리스가 아닌 로컬 미리보기입니다.",
   "h3_features": "기능",
   "p_features_intro": "현재 개발 미리보기의 핵심 기능",
   "features": [
@@ -19,7 +19,8 @@
     "프로세스 내 렌더링: 렌더러가 호스트 프로세스 안에서 실행되고 프로세스 간 UI 브리지가 없어 이벤트와 상태 갱신의 지연이 낮습니다",
     "단일 패키지: ABI 구분 없음, 플러그인 자체 네이티브 코드 없음 (Compose에 포함된 AndroidX graphics-path 보조 라이브러리만 네 가지 ABI로 내장), 하나의 APK로 모든 기기 지원",
     "스크립트 API: `compose` / `$compose`, 노드 팩터리 29개와 유지 가능한 핸들, `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`",
-    "통합 보호: 플러그인이 없거나 호환되지 않으면 가용성 확인이 사용 불가를 반환하고 `ComposeError`로 오류를 보고. 세션 종료나 스크립트 중지 시 소유 창과 콜백 해제"
+    "통합 보호: 플러그인이 없거나 호환되지 않으면 가용성 확인이 사용 불가를 반환하고 `ComposeError`로 오류를 보고. 세션 종료나 스크립트 중지 시 소유 창과 콜백 해제",
+    "카운터, 폼 검증, 안정적인 키를 사용하는 1000개 항목 목록, 비 UI 플로팅 HUD, 테마 예제 5개를 요구 사항과 목록과 함께 제공하며 호환 호스트의 Compose UI 예제 분류에도 동기화"
   ],
   "h3_usage": "사용 방법",
   "usage_steps": [
@@ -37,7 +38,7 @@
   "example_hud_preparing": "준비 중...",
   "example_hud_close": "닫기",
   "example_hud_progress": "진행률 ${i}%",
-  "p_quick_start_details": "예제 모음, 전체 API 설명 및 TypeScript 타입 선언은 추후 제공됩니다. 현재 API 형태는 로드맵 부록 A를 따릅니다.",
+  "p_quick_start_details": "실행 가능한 예제 5개가 `assets/examples/`에 포함되고 `index.json`에 나열됩니다. 호환 호스트의 Compose UI 예제 분류 (`sample/Compose UI/`)에서도 같은 스크립트를 제공합니다. 각 파일의 머리말에 실행 모드와 권한 요구 사항을 설명합니다. 전체 API 설명 및 TypeScript 타입 선언은 추후 제공되며, 현재 API 형태는 로드맵 부록 A를 따릅니다.",
   "h3_compatibility": "호환성",
   "p_compatibility_intro": "플러그인의 실행 요구 사항과 제한",
   "compatibility_points": [

@@ -8,7 +8,7 @@
 
 ###### 2026/10/03
 
-* `Indication` Aperçu de développement P3: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Les exemples inclus, la documentation complète, les déclarations de types et la matrice de vérification élargie restent à livrer. Cet aperçu local n'a pas de publication officielle
+* `Indication` Aperçu de développement P4: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Cinq exemples de compteur, formulaire, liste de 1000 éléments, HUD flottant et thèmes sont inclus et synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant. La documentation API complète, les déclarations de types et la matrice complète de vérification P5 restent à livrer. Cet aperçu local n'a pas de publication officielle
 * `Indication` Necessite AutoJs6 6.8.0 (5316) ou ulterieur
 * `Nouveaute` Squelette du depot du plugin : chaine de compilation du plugin de versions de plateforme, dependances Jetpack Compose BOM 2026.09.00, protocole d'activation Wake Activity et service INFO (categorie compose-ui)
 * `Nouveaute` README, instruction du centre de plugins et journal des modifications en 10 langues, generes a partir de sources JSON
@@ -21,8 +21,10 @@
 * `Nouveaute` L'aperçu de script fournit compose / $compose appelables, 29 fabriques de noeuds, des handles persistants, state/render/ref réactifs, le regroupement, la planification et le contrôle du thème
 * `Nouveaute` Les scripts UI peuvent monter du contenu Compose; remplacer le montage ou arrêter le script libère l'ancienne session et ses rappels
 * `Nouveaute` Les scripts non UI peuvent créer des fenêtres Compose raw ou redimensionnables, modifier position et taille en pixels, toucher et focus, puis les fermer via leurs commandes, floaty.closeAll ou l'arrêt du script
+* `Nouveaute` Cinq exemples exécutables de compteur, validation de formulaire, liste à clés stables de 1000 éléments, HUD flottant hors mode UI et thèmes, avec prérequis et index, synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant
 * `Amelioration` Les vérifications et ComposeError signalent uniformément les plugins absents, désactivés, non autorisés ou incompatibles, les permissions manquantes et les sessions fermées; la libération couvre aussi les fenêtres annulées avant leur attachement natif
 * `Dependance` Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)
 * `Dependance` Ajout de Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 * `Dependance` Ajout de compose-ui-api.aar V1 aligné sur AutoJs6 6.8.0 (5316) (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte
 * `Dependance` Ajout de Compose UI Test géré par BOM 2026.09.00 (Apache 2.0, uniquement pour les tests)
+* `Dependance` Ajout de JaCoCo version 0.8.14 (couverture des tests facultative uniquement, exclu des paquets de publication)

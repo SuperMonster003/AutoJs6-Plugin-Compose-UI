@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "Aperçu de développement P3: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Les exemples inclus, la documentation complète, les déclarations de types et la matrice de vérification élargie restent à livrer. Cet aperçu local n'a pas de publication officielle",
+        "Aperçu de développement P4: compose / $compose appelables, 29 fabriques de noeuds, handles persistants, state/render/ref réactifs, batch/post/theme, montage UI et fenêtres flottantes raw ou redimensionnables fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les vérifications de disponibilité, erreurs typées et libération des sessions sont incluses. Cinq exemples de compteur, formulaire, liste de 1000 éléments, HUD flottant et thèmes sont inclus et synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant. La documentation API complète, les déclarations de types et la matrice complète de vérification P5 restent à livrer. Cet aperçu local n'a pas de publication officielle",
         "Necessite AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieur"
       ],
       "feature": [
@@ -22,13 +22,15 @@
         "L'aperçu ajoute des listes à chargement différé avec clés stables et défilement par indice, les emplacements de Scaffold et de la barre supérieure, des dialogues contrôlés, des indicateurs de progression et des rappels en file pour les actions ou fermetures de Snackbar",
         "L'aperçu de script fournit compose / $compose appelables, 29 fabriques de noeuds, des handles persistants, state/render/ref réactifs, le regroupement, la planification et le contrôle du thème",
         "Les scripts UI peuvent monter du contenu Compose; remplacer le montage ou arrêter le script libère l'ancienne session et ses rappels",
-        "Les scripts non UI peuvent créer des fenêtres Compose raw ou redimensionnables, modifier position et taille en pixels, toucher et focus, puis les fermer via leurs commandes, floaty.closeAll ou l'arrêt du script"
+        "Les scripts non UI peuvent créer des fenêtres Compose raw ou redimensionnables, modifier position et taille en pixels, toucher et focus, puis les fermer via leurs commandes, floaty.closeAll ou l'arrêt du script",
+        "Cinq exemples exécutables de compteur, validation de formulaire, liste à clés stables de 1000 éléments, HUD flottant hors mode UI et thèmes, avec prérequis et index, synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant"
       ],
       "dependency": [
         "Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)",
         "Ajout de Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
         "Ajout de compose-ui-api.aar V1 aligné sur AutoJs6 6.8.0 (5316) (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte",
-        "Ajout de Compose UI Test géré par BOM {{ compose_bom }} (Apache 2.0, uniquement pour les tests)"
+        "Ajout de Compose UI Test géré par BOM {{ compose_bom }} (Apache 2.0, uniquement pour les tests)",
+        "Ajout de JaCoCo version 0.8.14 (couverture des tests facultative uniquement, exclu des paquets de publication)"
       ],
       "improvement": [
         "Les vérifications et ComposeError signalent uniformément les plugins absents, désactivés, non autorisés ou incompatibles, les permissions manquantes et les sessions fermées; la libération couvre aussi les fenêtres annulées avant leur attachement natif"

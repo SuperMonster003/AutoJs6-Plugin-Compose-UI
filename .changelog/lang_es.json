@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "Vista previa de desarrollo P3: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial",
+        "Vista previa de desarrollo P4: compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme, montaje UI y ventanas flotantes raw o redimensionables funcionan con una compilación local compatible del host AutoJs6. Incluye comprobaciones de disponibilidad, errores tipados y limpieza de sesiones. Se incluyen cinco ejemplos de contador, formulario, lista de 1000 elementos, HUD flotante y temas, sincronizados con la categoría Compose UI del host correspondiente. La documentación completa de la API, las declaraciones de tipos y la matriz completa de verificación P5 siguen pendientes. Es una vista previa local sin publicación oficial",
         "Requiere AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) o posterior"
       ],
       "feature": [
@@ -22,13 +22,15 @@
         "La vista previa incorpora listas de carga diferida con claves de elemento estables y desplazamiento por índice, ranuras de Scaffold y barra superior, diálogos controlados, indicadores de progreso y callbacks en cola de acción o cierre de Snackbar",
         "La vista previa de scripts ofrece compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, lotes, programación y control de temas",
         "Los scripts UI pueden montar contenido Compose; sustituir el montaje o detener el script libera la sesión anterior y sus callbacks",
-        "Los scripts no UI pueden crear ventanas Compose raw o redimensionables, cambiar posición y tamaño en píxeles, tactilidad y foco, y cerrarlas con sus controles, floaty.closeAll o al terminar el script"
+        "Los scripts no UI pueden crear ventanas Compose raw o redimensionables, cambiar posición y tamaño en píxeles, tactilidad y foco, y cerrarlas con sus controles, floaty.closeAll o al terminar el script",
+        "Cinco ejemplos ejecutables de contador, validación de formularios, lista de 1000 elementos con claves estables, HUD flotante sin modo UI y temas, con requisitos e índice, sincronizados con la categoría Compose UI del host correspondiente"
       ],
       "dependency": [
         "Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)",
         "Se agrega Jetpack Compose BOM {{ compose_bom }} (Apache 2.0)",
         "Añadir compose-ui-api.aar V1 alineado con AutoJs6 6.8.0 (5316) (MPL 2.0, hash fijado), con las dependencias compartidas alineadas con el host",
-        "Añadir Compose UI Test gestionado por BOM {{ compose_bom }} (Apache 2.0, solo para pruebas)"
+        "Añadir Compose UI Test gestionado por BOM {{ compose_bom }} (Apache 2.0, solo para pruebas)",
+        "Añadir JaCoCo versión 0.8.14 (solo cobertura opcional de pruebas, excluido de los paquetes de publicación)"
       ],
       "improvement": [
         "Las comprobaciones y ComposeError informan de plugins ausentes, desactivados, no autorizados o incompatibles, permisos insuficientes y sesiones cerradas; la limpieza también cubre ventanas canceladas antes de su conexión nativa"

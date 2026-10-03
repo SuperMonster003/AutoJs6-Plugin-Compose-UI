@@ -57,6 +57,11 @@ Gradle, the Android Gradle Plugin (with its built-in Kotlin support), the Compos
 `build-logic/` and the Gradle build only. Python 3 with Pillow generates the launcher icons and the localized
 documentation (`.python/`).
 
+JaCoCo 0.8.14 (`org.jacoco:org.jacoco.agent` and report tooling, Eclipse Public License 2.0,
+from Maven Central, [project](https://www.jacoco.org/jacoco/)) measures P4 device coverage.
+Its runtime is included only in debug test builds made with `-PcomposeUiCoverage=true`.
+It is never included in the release plugin. Reports exclude dependency classes and generated BuildConfig.
+
 ## Renderer test dependency
 
 The instrumentation APK uses `androidx.compose.ui:ui-test-junit4` (Android variant

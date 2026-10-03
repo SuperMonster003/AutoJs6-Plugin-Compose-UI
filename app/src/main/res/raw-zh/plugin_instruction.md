@@ -1,6 +1,6 @@
 Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `"ui";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.
 
-P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
+P4 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme, ui 脚本挂载及 raw / 可调整悬浮窗已可在匹配的本地 AutoJs6 宿主构建中使用. 已包含可用性探测, 类型化错误与会话清理. 已附带计数器, 表单, 1000 项列表, 悬浮 HUD 与主题五个示例, 同步至匹配宿主的 Compose UI 示例分类. 完整 API 文档, 类型声明与 P5 完整验证矩阵仍待后续交付. 当前仅为本地预览, 尚无官方发行版.
 
 ### 使用方式
 

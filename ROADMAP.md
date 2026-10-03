@@ -251,7 +251,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 已完成 (2026-10-03, P1.1 - P1.3) |
 | P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6) |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 已完成 (2026-10-03, P3.1 - P3.5) |
-| P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
+| P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 未开始 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 未开始 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | 未开始 |
@@ -428,20 +428,23 @@ P3.4 - P3.5 证据 (2026-10-03): `docs/dev/p34-p35-evidence.md`. 宿主相关 JV
 
 ### P4.1 示例脚本
 
-- [ ] (插件) `assets/examples/`: `counter.js` (state + render), `form.js` (节点句柄层, TextField / Switch / Slider / 校验), `list.js` (LazyColumn 1000 项, key 重排, scrollTo), `floaty-hud.js` (非 ui 脚本悬浮 HUD), `theme.js` (seed / dark / dynamicColor); `index.json` 列表; 每个示例头部注释说明前置条件.
-- [ ] (宿主) 同步到 `app/src/main/assets-app/sample/` 的 Compose 分类 (核对现有分类命名后决定目录名), 示例目录索引更新.
-- [ ] (测试) 示例在兼容矩阵至少两台设备运行通过, 作为 P5.1 回归集.
+- [x] (插件) `assets/examples/`: `counter.js` (state + render), `form.js` (节点句柄层, TextField / Switch / Slider / 校验), `list.js` (LazyColumn 1000 项, key 重排, scrollTo), `floaty-hud.js` (非 ui 脚本悬浮 HUD), `theme.js` (seed / dark / dynamicColor); `index.json` 列表; 每个示例头部注释说明前置条件.
+- [x] (宿主) 同步到 `app/src/main/assets-app/sample/` 的 Compose 分类 (核对现有分类命名后决定目录名), 示例目录索引更新.
+- [x] (测试) 示例在兼容矩阵至少两台设备运行通过, 作为 P5.1 回归集.
 
 ### P4.2 无障碍与选择器
 
-- [ ] (宿主 / 插件) 核实 `testTag` 经 `testTagsAsResourceId` 暴露为 `viewIdResourceName` 的确切字符串, 宿主 `id()` / `idContains()` / `idMatches()` 对其匹配结果, `desc()` 对 `contentDescription` 的匹配, `text()` 对 Text 节点的匹配, `click()` 动作在 Button 语义节点上的可用性; 合并语义节点 (Button 内 Text) 的查找路径.
-- [ ] (文档) 把规则写入 `api/compose.md` "无障碍与选择器" 节与协议文档; 不兼容之处如实记录 (例如 tag 不带包前缀, 与旧 View `id()` 的 `pkg:id/` 匹配不同).
-- [ ] (测试) instrumentation: 在 ui 模式页面上用宿主 a11y 服务 (`Three Adapt A11y` 或内置) 以 `id('start_button').findOnce().click()` 触发 Compose Button 回调.
+- [x] (宿主 / 插件) 核实 `testTag` 经 `testTagsAsResourceId` 暴露为 `viewIdResourceName` 的确切字符串, 宿主 `id()` / `idContains()` / `idMatches()` 对其匹配结果, `desc()` 对 `contentDescription` 的匹配, `text()` 对 Text 节点的匹配, `click()` 动作在 Button 语义节点上的可用性; 合并语义节点 (Button 内 Text) 的查找路径.
+- [x] (文档) 把规则写入 `api/compose.md` "无障碍与选择器" 节与协议文档; 不兼容之处如实记录 (例如 tag 不带包前缀, 与旧 View `id()` 的 `pkg:id/` 匹配不同).
+- [x] (测试) instrumentation: 在 ui 模式页面上用宿主 a11y 服务 (`Three Adapt A11y` 或内置) 以 `id('start_button').findOnce().click()` 触发 Compose Button 回调.
 
 ### P4.3 守卫测试补全
 
-- [ ] (宿主) 目录 / d.ts / 文档三方一致性脚本 (P6 使用): 从 `ComponentCatalog.V1` 生成组件与属性清单, 与 `aj6-int-compose.d.ts` 和 `api/compose.md` 的组件表比对 (`build/tools/compose_catalog_check.py`, 位于宿主 `build/` 临时目录或 `.python/`).
-- [ ] (插件) instrumentation 全集可在 API 24 x86 与 API 35 x86_64 模拟器上通过; 覆盖率记录.
+- [x] (宿主) 目录 / d.ts / 文档三方一致性脚本 (P6 使用): 从 `ComponentCatalog.V1` 生成组件与属性清单, 与 `aj6-int-compose.d.ts` 和 `api/compose.md` 的组件表比对 (`build/tools/compose_catalog_check.py`, 位于宿主 `build/` 临时目录或 `.python/`).
+- [x] (插件) instrumentation 全集可在 API 24 x86 与 API 35 x86_64 模拟器上通过; 覆盖率记录.
+
+P4 证据 (2026-10-03): `docs/dev/p4-evidence.md`. 五个实际打包示例与宿主副本逐字节一致, API 24 x86 / API 35 x86_64 各 5 项示例和 2 项真实宿主无障碍选择器测试通过; 插件 instrumentation 全集各 31 项通过, 合计 76 项. 宿主相关 JVM 175, API JVM 16, 插件 JVM 63, Python 守卫 14 项通过. JaCoCo 实测源码行覆盖率 85.93%, 分支 59.60%; 完整记录包含分母与测量范围. 目录工具从真实 V1 导出 30 项 / 114 个规范属性 / 12 个别名, 能生成并严格比对 TS 与文档标记块; P6 正式声明和组件表尚未交付, 缺失时明确失败, 不宣称三方最终文档已通过. 外部文档新增无障碍章节及全量本地生成, 完整 API / 声明 / 离线插件同步仍按 P6. P4 全部完成, 下一起点为 P5.1.
+
 
 ---
 
@@ -912,3 +915,16 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 提交定位: 宿主 f7fcac31af (本地化错误), 065c8148e8 (原生控制 / 退出清理), 4d649bca96 (悬浮 API / 集成守卫 / 多语言历史), 证据另行提交. 插件本条所在提交为 build 16, 签名产物 autojs6-plugin-compose-ui-v1.0.0-f82f337c.apk, 2365090 B; 渲染器代码, 冻结 AAR, 51 项共享依赖与最低宿主 5316 保持不变, 脚本 API 需匹配当前本地宿主构建.
 - 清理: 三台设备本次安装的 3 个包均已卸载并确认不存在; 自建 compose_p34_api24 AVD 已停止, SDK 按名称删除后确认数据与注册均不存在. 用户应用, 文件和其它 AVD 未处理. 继续只做本地提交, 不推送 / 登记索引 / 发 Release.
 - 下一会话从 P4.1 示例脚本开始. 完整兼容 / inrt / 性能 / 长期内存验证继续按 P5, 用户文档与声明按 P6; Q6 正式图标仍待源图. 本轮没有执行宿主全量 JVM / lint, inrt 装配与远端 CI, 不把所选回归外推为这些门禁已通过.
+
+
+### 2026-10-03: P4 示例, 无障碍与守卫
+
+- 从插件 a4e9e66 (build 16) 与宿主 8e6b8b7e9a 继续; 已提交主线 d9dd9529c0 同步为 c6ef588315, 宿主 build 5317. 原工作区的其它数据集工作未修改. 完成原 P4.1 - P4.3, 未增加, 分拆或丢弃小节.
+- 五例覆盖计数器, 表单, 1000 项 key 列表, 非 ui HUD 与主题, 随插件 assets/examples 打包并显式同步到宿主 sample/Compose UI. 宿主沿用动态目录枚举, 索引在 assets-app/indices. 测试直接执行真实资产并比较插件 / 宿主全部字节.
+- 无障碍实测: 原样 testTag, id/idContains/idMatches, text/desc 与 Button 点击祖先; 使用真实内置服务和 Rhino, 不是以 UiAutomation 动作替代宿主验证. 外部文档 api/compose.md 及导航 / progress / HTML / JSON / 搜索索引已更新, 共 145 模块全量生成与 freshness 检查通过.
+- 守卫: JVM 强类型导出冻结目录, Python 生成 / 比对真实 TS 属性接口与 Markdown 表; 14 个正反例及 tsc 校验通过, 对缺失 P6 文件或标记明确失败. API main / AAR / 共享依赖与最低宿主 5316 保持不变. 可选 debug JaCoCo 覆盖率与 CI 报告收集已接入, release 不带覆盖率运行时.
+- 验证: 宿主相关 JVM 175, API JVM 16, 插件 JVM 63; API 24 x86 与 API 35 x86_64 插件各 31 项, 最终 release18 的示例 / 无障碍各 7 项通过. 覆盖率源码行 1545/1798 (85.93%), 分支 869/1458 (59.60%). 宿主 app debug / androidTest / release, 插件签名 / 对齐 / DEX 门禁通过; lint debug 无问题, release 仅 3 个既有身份资源警告. 证据详见 docs/dev/p4-evidence.md.
+- 修正与环境: 表单提示移动到输入框旁, 同文本的选区 / 组合通知不再覆盖已保存状态. instrumentation 强停进程后只重绑已启用的自有无障碍服务. API24 的旧系统 DEAD 绑定以重启专用 AVD 恢复; SDK 预先修改的 ramdisk 会启动崩溃的 Magisk stub, 最终使用已验证原始备份的工作区副本显式覆盖启动, 未修改共享 SDK 或 Magisk 配置 / 授权.
+- 提交定位: 插件 168268f (示例, build 17), 本条所在提交为 P4 收尾 (build 18); 宿主 d86d7a28a4 (目录工具), 24eb7ca2dc (示例), 214f8eedae (无障碍), 文档与证据另行提交. 外部文档 ac56189. 最终签名 APK autojs6-plugin-compose-ui-v1.0.0-3fc65a76.apk, 2373541 B, 7142 classes / 44715 method refs.
+- 清理: 两台专用 AVD 上 4 个自有测试包全部移除并确认不存在; compose_p4_api24 / compose_p4_api35 的数据与注册均已核对后由 SDK 删除. 其它 AVD, 实体设备和原宿主其它工作保留. 本轮仍仅本地提交, 不推送 / 登记索引 / 发 Release.
+- 下一会话从 P5.1 健壮性继续, 然后 P5.2 完整矩阵 / inrt 与 P5.3 性能体积. 本轮未执行宿主全量 JVM / lint, inrt 装配或远端 CI; 完整 API / 类型声明 / 离线插件同步留在 P6, 不提前勾选. Q6 正式图标仍待源图.
