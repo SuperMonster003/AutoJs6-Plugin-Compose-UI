@@ -42,7 +42,7 @@
 | D18 | 错误模型 | 脚本侧抛 `ComposeError` (可 `instanceof`, 有 `code` / `message` / `nodeId` / `prop`); 代码词汇见附录 B.4; 插件缺失 / 禁用 / 未授权 / 版本过低分别为 `PLUGIN_UNAVAILABLE` / `PLUGIN_DISABLED` / `PLUGIN_UNAUTHORIZED` / `PLUGIN_INCOMPATIBLE`, 消息以插件中心既有的本地化提示开头 (`AidlPluginHost.buildSelectionFailure` 的 5 条字符串复用); `compose.isAvailable()` 预探测不抛错 |
 | D19 | 主题 | 默认 Material 3 `ColorScheme` 从宿主主题色 (`ThemeColorManager`) 与夜间模式派生, 字体随系统; `compose.theme({ seed, colors, dark, dynamicColor, typography })` 可按会话覆盖, Android 12+ `dynamicColor: true` 使用系统动态色; 主题以 `ThemeSpec` (纯数据) 跨契约传递, 由渲染器构造 `MaterialTheme` |
 | D20 | 无障碍 | 每个节点可设 `testTag` / `contentDescription`; 渲染器在根 `semantics { testTagsAsResourceId = true }`; P4.2 核实宿主 `id()` / `desc()` 选择器对 Compose 语义节点的匹配规则 (无 `pkg:id/` 前缀的原样 tag) 并写入文档, 不预设与旧 View ID 的查找逻辑自动兼容 |
-| D21 | 生命周期 | Activity 重建 (旋转 / 多窗口) 沿用 ui 模式现状: `ScriptExecuteActivity.onDestroy` 销毁引擎, 不承诺恢复; 会话在引擎退出, Activity destroy, 窗口 close 时释放 Composition (`ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool` + 显式 `dispose`), 回调注册表与补丁队列; `rememberSaveable` 不暴露给脚本 (1.0.0) |
+| D21 | 生命周期 | 沿用 ui 模式现状: `ScriptExecuteActivity` 通过 Manifest 的 `configChanges` 自行处理旋转 / 尺寸等配置变化, 保留原引擎; 实际 Activity 重建或销毁时, `onDestroy` 销毁引擎, 不承诺恢复. 会话在引擎退出, Activity destroy, 窗口 close 时释放 Composition (`ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool` + 显式 `dispose`), 回调注册表与补丁队列; `rememberSaveable` 不暴露给脚本 (1.0.0). P5.1 以真实旋转后更新及显式 `recreate()` 验证, 修正原括注将旋转等同于重建的表述, 不改变宿主行为 |
 | D22 | 插件 APK 形态 | 无插件自有原生代码, 不启用 ABI 拆分; 单个发布文件 `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk`, `getInfo()` 显式 `supportedAbis = emptyArray()`. Compose graphics-path 1.0.1 自带 `libandroidx.graphics.path.so` x arm64-v8a / armeabi-v7a / x86_64 / x86, 各约 10 KB, APK 中未压缩, 发布门禁校验 ELF 与 zip 偏移 16 KB 对齐. P0.2 已验证 D10 的 `<apk>!/lib/<进程 ABI>` 搜索路径. release 保留 R8 裁剪 / 混淆与 `isShrinkResources = true`, 保持 Kotlin ABI, 使用插件私有混淆包名, 补回 compileOnly lifecycle 的 ViewModel 构造规则; 因 R8 专用 Kotlin 方法不在宿主副本中, P0 禁用优化变换 (`-dontoptimize`), 恢复优化前必须重跑宿主内装载验证 |
 | D23 | 插件中心与宿主注册 | INFO 服务 (action `org.autojs.plugin.INFO`, category `compose-ui`, 实现 `IPluginInfoProvider`), Wake Activity, meta-data `requiresHostVersion` 与 `org.autojs.plugin.compose.RENDERER_FACTORY`; 没有 Binder 能力服务 (与 ImGui 同形), 因此不进 `SERVICE_ACTION_BY_ENGINE`, 由 INFO 通用发现列出; 默认启用遵循 `PluginDefaultEnabledPolicy` 现状 (不新增例外); 宿主向导 `entry(official("compose.ui"), "Compose UI", UI)` 与 ImGui 同组 |
 | D24 | 宿主退化 | 宿主只保留契约模块, 装载器, 会话核心与脚本 API; 插件缺失 / 禁用 / 未授权 / 不兼容时 `compose.mount` / `compose.floaty` 抛 D18 的对应错误, 宿主不内置任何 Compose 渲染实现, 也不回退到 XML 布局 |
@@ -452,13 +452,15 @@ P4 证据 (2026-10-03): `docs/dev/p4-evidence.md`. 五个实际打包示例与�
 
 ### P5.1 健壮性
 
-- [ ] (测试) 敌意输入: 5001 个节点, 深度 65, 64 KiB + 1 的字符串, 2001 ops 的批, 非法颜色 / 尺寸 / 枚举, 循环子节点引用, 在回调中 `close()` 会话, render 中再次 `mount`, 工作线程直接改 state (应报错或经 `post`), 插件在会话存活期间被卸载 / 更新 (加载器失效 -> `PLUGIN_UNAVAILABLE`, 无崩溃).
-- [ ] (测试) 快速反复 mount / close 100 次, 停止脚本时 render 进行中, Activity 旋转 (引擎销毁语义), 低内存 (`am send-trim-memory`) 后界面仍可更新.
-- [ ] (宿主 / 插件) 修复发现的问题并补回归测试; 结论记入 `docs/dev/p5-robustness-evidence.md`.
+- [x] (测试) 敌意输入: 5001 个节点, 深度 65, 64 KiB + 1 的字符串, 2001 ops 的批, 非法颜色 / 尺寸 / 枚举, 循环子节点引用, 在回调中 `close()` 会话, render 中再次 `mount`, 工作线程直接改 state (应报错或经 `post`), 插件在会话存活期间被卸载 / 更新 (加载器失效 -> `PLUGIN_UNAVAILABLE`, 无崩溃).
+- [x] (测试) 快速反复 mount / close 100 次, 停止脚本时 render 进行中, Activity 旋转 (沿用既有配置处理, 实际重建时销毁引擎), 低内存 (`am send-trim-memory`) 后界面仍可更新.
+- [x] (宿主 / 插件) 修复发现的问题并补回归测试; 结论记入 `docs/dev/p5-robustness-evidence.md`.
+
+P5.1 证据 (2026-10-03): `docs/dev/p5-robustness-evidence.md`, 插件 build19 / 宿主5317. 宿主相关 JVM189 + API16, 插件 JVM63; API24 / API35 插件各32项通过, 最终宿主矩阵中的健壮性各7项通过. 专用 API24 AVD 真实更新 / 卸载各1项通过, 覆盖 release18 -> 19 和同引擎新loader/JNI重挂. 修复活动会话包失效通知, render内递归挂载, 迟到请求驱逐新loader, attach异常提前结束引擎, Compose1.12祖先context跨loader污染; 公共owner包装保留原宿主Lifecycle/registry. API37插件ComposeTestRule受Espresso已移除反射入口阻断的27项如实记录, 该设备真实宿主矩阵另行通过.
 
 ### P5.2 兼容矩阵
 
-- [ ] (测试) D28 六台设备 / 模拟器: 装载, 计数器, 表单 (含 IME), 列表, 悬浮窗, 停止清理; API 24 的 Compose 1.12 行为 (minSdk 21 以上, 预期可用) 与 API 37 (16 KB 页, 纯 bytecode 应无影响) 记录; HyperOS 悬浮窗焦点条件记录.
+- [ ] (测试) D28 六台设备 / 模拟器: 装载, 计数器, 表单 (含 IME), 列表, 悬浮窗, 停止清理; API 24 的 Compose 1.12 行为 (本项目 minSdk 24) 与 API 37 (16 KB 页, 按 D22 校验 graphics-path 原生辅助库) 记录; HyperOS 悬浮窗焦点条件记录.
 - [ ] (测试) inrt 打包 (D30): 打包一个使用 `compose` 的脚本应用, 在已安装 / 未安装插件的设备上运行, 错误提示可理解; 结果写入文档 "打包应用" 节.
 
 ### P5.3 性能与体积

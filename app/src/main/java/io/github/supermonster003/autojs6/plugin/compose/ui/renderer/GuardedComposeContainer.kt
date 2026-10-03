@@ -5,11 +5,17 @@ import android.content.Context
 import android.graphics.Canvas
 import android.view.View
 import android.widget.FrameLayout
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.SavedStateRegistryOwner
+import androidx.savedstate.findViewTreeSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
 /**
  * Contains failures raised by Compose during Android view traversal, outside any recomposer job.
  * A failed tree stays blank until the renderer publishes a replacement and calls [recover].
- * This view does not own a lifecycle or saved-state owner: its child inherits the host's owners.
+ * Its child receives a distinct owner identity delegating to the host's lifecycle and saved state.
+ * This keeps Compose's view-tree caches inside the renderer when the host replaces the plugin APK.
  */
 @SuppressLint("ViewConstructor") // Programmatic renderer container with a required error sink, never inflated from XML.
 internal class GuardedComposeContainer(
@@ -24,9 +30,28 @@ internal class GuardedComposeContainer(
         require(view.parent == null || view.parent === this) { "Renderer view already has a parent" }
         if (childCount != 1 || getChildAt(0) !== view) {
             removeAllViews()
+            if (isAttachedToWindow) installOwnerBoundary(view)
             addView(view, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
         }
         recover()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // ViewGroup attaches its children after this hook returns. Install public owner tags first,
+        // so Compose 1.12 stops its cache lookup at the child instead of a long-lived host ancestor.
+        for (index in 0 until childCount) installOwnerBoundary(getChildAt(index))
+    }
+
+    private fun installOwnerBoundary(view: View) {
+        val lifecycleOwner = findViewTreeLifecycleOwner() ?: return
+        val savedStateOwner = findViewTreeSavedStateRegistryOwner() ?: return
+        val boundary = object : SavedStateRegistryOwner {
+            override val lifecycle get() = lifecycleOwner.lifecycle
+            override val savedStateRegistry get() = savedStateOwner.savedStateRegistry
+        }
+        view.setViewTreeLifecycleOwner(boundary)
+        view.setViewTreeSavedStateRegistryOwner(boundary)
     }
 
     /** Retry explicitly; a traversal error never schedules an unbounded automatic retry loop. */
