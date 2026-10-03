@@ -5,29 +5,30 @@
   "h3_languages_with_ascii": "Languages / 언어",
   "p_languages_all_supported_for_readme": "이 문서는 다음 언어로 제공됩니다",
   "h3_introduction": "소개",
-  "p_introduction_what": "Compose UI는 AutoJs6의 UI 렌더링 플러그인입니다. 스크립트는 호스트에 내장된 `compose` 전역 객체로 UI를 선언하고, 플러그인은 호스트 프로세스 안에서 Jetpack Compose와 Material 3로 이를 렌더링하여 `\"ui\";` 모드 Activity 콘텐츠와 플로팅 창에 하나의 선언형 UI 방식을 제공합니다.",
+  "p_introduction_what": "Compose UI는 AutoJs6의 UI 렌더링 플러그인입니다. 스크립트는 호스트가 제공하는 `compose` / `$compose` API로 UI를 선언하고, 플러그인은 호스트 프로세스 안에서 Jetpack Compose와 Material 3로 이를 렌더링합니다. 현재 미리보기는 `\"ui\";` 모드의 Activity 콘텐츠를 지원하며 플로팅 창은 P3.4에서 제공할 예정입니다.",
   "p_introduction_how": "플러그인은 독립적인 화면이 없으며 런처에도 표시되지 않습니다. 호스트는 INFO 서비스로 플러그인을 발견하고 버전과 호환성 정보를 읽은 뒤, 계약 (`org.autojs.plugin.compose.api`)에 따라 호스트 프로세스 안에 렌더러를 로드합니다. UI 트리, 상태, 이벤트는 스크립트 쪽에서 기술되며, 렌더러는 Compose 컴포지션에 패치를 적용하고 사용자 이벤트를 스크립트로 되돌려 보내는 역할만 합니다.",
   "h3_status": "현재 상태",
-  "p_status": "P2 개발 미리보기: 전용 테스트 호스트에서 V1 목록의 30개 항목을 모두 구현했습니다. 노드 컴포넌트 29개와 Snackbar 명령이 포함됩니다. 네이티브 입력란, 지연 로딩 목록, Scaffold, 대화상자와 진행 표시기를 미리보기에서 사용할 수 있습니다. 공개 compose 스크립트 API는 계속 P3에서 제공할 예정입니다.",
+  "p_status": "P3 개발 미리보기: 호출 가능한 compose / $compose, 노드 팩터리 29개, 유지 가능한 핸들, 반응형 state/render/ref, batch/post/theme 및 UI 스크립트 마운트를 호환되는 로컬 AutoJs6 호스트 빌드에서 사용할 수 있습니다. 플로팅 창은 P3.4에서 제공할 예정입니다. 예제 모음, 전체 API 문서, 타입 선언 및 더 넓은 검증 매트릭스는 아직 제공되지 않습니다. 현재는 공식 릴리스가 아닌 로컬 미리보기입니다.",
   "h3_features": "기능",
-  "p_features_intro": "플러그인이 제공할 핵심 기능",
+  "p_features_intro": "현재 미리보기 기능과 향후 호스팅 지원",
   "features": [
     "선언형 UI: `compose.state` + `compose.mount(render)`가 상태 변화에 따라 자동으로 다시 그리며, 오래 보유할 수 있는 노드 핸들 (`compose.Text({...})` 등)로 속성과 자식 노드를 직접 수정할 수 있습니다",
     "Material 3 컴포넌트 핵심 세트: 레이아웃 (Column / Row / Box / LazyColumn 등), 텍스트, 버튼, 텍스트 필드, 스위치, 슬라이더, 진행 표시기, 카드, 대화상자",
     "체인형 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')`는 연산 순서를 유지하며, 범위 한정 연산은 호스트 쪽에서 검증됩니다",
-    "두 가지 표시 면: `\"ui\";` 스크립트의 Activity 콘텐츠 (`compose.mount`)와 모든 스크립트의 플로팅 창 (`compose.floaty`)",
+    "표시 위치: `\"ui\";` 스크립트의 Activity 콘텐츠는 `compose.mount` 또는 호출 가능한 `compose` / `$compose`로 마운트할 수 있습니다; 플로팅 창 (`compose.floaty`)은 P3.4에서 제공할 예정입니다",
     "프로세스 내 렌더링: 렌더러가 호스트 프로세스 안에서 실행되고 프로세스 간 UI 브리지가 없어 이벤트와 상태 갱신의 지연이 낮습니다",
-    "단일 패키지: ABI 구분 없음, 플러그인 자체 네이티브 코드 없음 (Compose에 포함된 AndroidX graphics-path 보조 라이브러리만 네 가지 ABI로 내장), 하나의 APK로 모든 기기 지원"
+    "단일 패키지: ABI 구분 없음, 플러그인 자체 네이티브 코드 없음 (Compose에 포함된 AndroidX graphics-path 보조 라이브러리만 네 가지 ABI로 내장), 하나의 APK로 모든 기기 지원",
+    "스크립트 API: `compose` / `$compose`, 노드 팩터리 29개와 유지 가능한 핸들, `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`"
   ],
   "h3_usage": "사용 방법",
   "usage_steps": [
-    "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 이상을 설치합니다",
+    "compose 스크립트 API가 포함된 호환 로컬 AutoJs6 빌드를 설치합니다 (최소 {{ required_host_version_name }} / {{ required_host_version_code }})",
     "이 플러그인 APK를 설치합니다 (열 필요가 없으며, 플러그인에는 런처 항목이 없습니다)",
     "AutoJs6 플러그인 센터에서 Compose UI가 인식되고 활성화되었는지 확인합니다",
-    "전용 테스트 호스트에서 이 개발 미리보기를 사용하세요; 공개 `compose` 스크립트 진입점은 P3에서 제공할 예정입니다"
+    "스크립트에서 `compose` 또는 `$compose`를 사용하고 `\"ui\";` 스크립트에서 Activity 콘텐츠를 마운트합니다"
   ],
   "h3_quick_start": "빠른 시작",
-  "p_quick_start_intro": "아래 예제는 목표 API 형태를 보여 줍니다 (로드맵 부록 A); P3 스크립트 진입점이 제공되기 전에는 실행할 수 없습니다:",
+  "p_quick_start_intro": "아래 카운터는 호환되는 로컬 미리보기 호스트에서 실행할 수 있습니다. 플로팅 HUD는 P3.4의 목표 API를 보여 주며 아직 실행할 수 없습니다:",
   "example_counter": "카운터 (선언형 render 계층)",
   "example_counter_text": "${count.value}번 클릭했습니다",
   "example_counter_button": "하나 더하기",
@@ -35,7 +36,7 @@
   "example_hud_preparing": "준비 중...",
   "example_hud_close": "닫기",
   "example_hud_progress": "진행률 ${i}%",
-  "p_quick_start_details": "전체 API 참조 (컴포넌트 카탈로그, Modifier 연산, 세션 객체, 오류 코드)는 AutoJs6 문서의 compose 모듈 장에 있습니다.",
+  "p_quick_start_details": "예제 모음, 전체 API 설명 및 TypeScript 타입 선언은 추후 제공됩니다. 현재 API 형태는 로드맵 부록 A를 따릅니다.",
   "h3_compatibility": "호환성",
   "p_compatibility_intro": "플러그인의 실행 요구 사항과 제한",
   "compatibility_points": [
@@ -48,7 +49,7 @@
   "h3_faq": "자주 묻는 질문",
   "faq_items": [
     "설치 후 플러그인 아이콘이 보이지 않는 이유는 무엇인가요? 플러그인에는 독립적인 UI와 런처 항목이 없습니다. AutoJs6 플러그인 센터에서 확인하세요",
-    "스크립트의 `compose`가 아직 동작하지 않는 이유는 무엇인가요? 이 P2 개발 미리보기는 전용 테스트 호스트에서 동작하며, compose 스크립트 진입점은 P3에서 제공할 예정입니다",
+    "`compose`를 찾을 수 없는 이유는 무엇인가요? 전역 객체는 호환되는 로컬 호스트 빌드에서 제공됩니다. 플러그인 APK만 설치하면 추가되지 않습니다",
     "다른 UI 플러그인을 제거해야 하나요? 아니요. Compose UI는 기존 `ui` 모듈이나 다른 플러그인에 영향을 주지 않습니다",
     "플러그인 업데이트 후 스크립트를 수정해야 하나요? 계약 버전이 그대로이면 필요 없습니다. 계약 업그레이드는 변경 로그에 명시됩니다"
   ],

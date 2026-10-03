@@ -249,8 +249,8 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | --- | --- | --- | --- |
 | P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 已完成 (2026-10-03, P1.1 - P1.3) |
-| P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6, 下一步 P3.1) |
-| P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
+| P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6) |
+| P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 进行中 (P3.1 - P3.3 完成, 下一步 P3.4) |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 未开始 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 未开始 |
@@ -364,7 +364,7 @@ P2.1 - P2.3 证据 (2026-10-03): `docs/dev/p13-p2-evidence.md`. 能力表与分�
 - [x] (插件) TextField / OutlinedTextField: `TextFieldState` 原生编辑态 (D15), `onValueChange(text, selection, editSeq)` 节流为每帧一次, `edit` 命令按 `editSeq` 仲裁, `label` / `placeholder` / `leadingIcon` / `trailingIcon` / `supportingText` 插槽, `singleLine` / `maxLines` / `keyboardType` / `imeAction` / `isError` / `readOnly` / `visualTransformation(password)`.
 - [x] (测试) instrumentation: 中文输入法组合 (API 33 真机 Gboard / 小米输入法), 连续删除, 粘贴, 光标移动, 脚本回写与用户输入竞争 (旧 editSeq 被拒), IME 弹出时 Scaffold 内容避让 (与宿主 Activity Insets 处理的分工在此定稿, 不双重 padding).
 
-P2.4 证据 (2026-10-03): 插件 `cebd1d3`, 宿主 `60bae7f8c5`; `docs/dev/p24-p25-evidence.md`. API 24 / 33 / 35 各 9 项输入框测试通过, 覆盖原生 InputConnection 组合 / 删除 / 粘贴 / UTF-16 选区 / editSeq 竞争与密码语义; API 33 小米搜狗实键拼音与“你好”候选提交单独通过. 宿主为唯一 Insets owner, 挂载期间选择 adjustResize 并按 max(systemBars.bottom, ime.bottom) 避让, Compose 不叠加系统栏或 IME padding; API 24 / 33 / 35 跨 APK 几何与恢复验证通过. 修复 Material 装饰层晚订阅丢失自动恢复 Focus 的竞态, 保留原始组件替换验收.
+P2.4 证据 (2026-10-03): 插件 `cebd1d3`, 宿主 `60bae7f8c5`; `docs/dev/p24-p25-evidence.md`. API 24 / 33 / 35 各 9 项输入框测试通过, 覆盖原生 InputConnection 组合 / 删除 / 粘贴 / UTF-16 选区 / editSeq 竞争与密码语义; API 33 小米搜狗实键拼音与"你好"候选提交单独通过. 宿主为唯一 Insets owner, 挂载期间选择 adjustResize 并按 max(systemBars.bottom, ime.bottom) 避让, Compose 不叠加系统栏或 IME padding; API 24 / 33 / 35 跨 APK 几何与恢复验证通过. 修复 Material 装饰层晚订阅丢失自动恢复 Focus 的竞态, 保留原始组件替换验收.
 
 ### P2.5 列表, 脚手架与提示
 
@@ -388,24 +388,26 @@ P2.6 证据 (2026-10-03): 完整 Modifier 链为本轮基础 / 交互组件提�
 
 ### P3.1 节点句柄层
 
-- [ ] (宿主) `Compose : Augmentable(), Invokable` (`AugmentableKey("compose")`, 别名 `$compose`), 注册于 `ScriptRuntime` (在 `PluginAutoMountManager.apply` 之前); `compose.isAvailable()`, `compose.version` (插件 / 契约 / Compose 版本, 不可用时 `null`), `compose.createElement(type, props, ...children)` 与按目录生成的元素工厂 `compose.Column / Text / ...` (名称表来自 `ComponentCatalog.V1`, 保证 d.ts 与运行时一致).
-- [ ] (宿主) `ComposeNode` 句柄: `type` / `key` / `nodeId` / `parent` / `children`; `set(props)` 与目录声明属性的代理读写 (`node.text = '...'`), `get(name)`, `append / insert / remove / replace / clear`, `slot(name, node)`, `on(event, fn) / off`, 命令 `focus() / blur() / scrollTo(index | { offset }) / edit({ text, selection })`; 未挂载的节点上操作只改本地状态, 挂载后每次操作进入当前批; 跨会话移动节点 -> `NODE_DETACHED` / `INVALID_ARGUMENT`.
-- [ ] (宿主) 值转换 `ComposeScriptValues`: 颜色 (与 `colors` 模块一致的解析), 尺寸 (数字默认 dp, 字符串 `16sp` / `8dp`), 文本样式对象, 图片 (`ImageWrapper` / 路径 / `@drawable` 名), 回调 (注册为 callbackId), 子节点 (数组 / 单节点 / 字符串 -> Text 简写); 未知属性 -> `UNKNOWN_PROP`, 类型错误 -> `INVALID_ARGUMENT` (消息含组件名与属性名).
-- [ ] (测试) JVM: 元素工厂与目录一致性, 值转换边界 (非法颜色, 负尺寸, 超长字符串, Unicode 补充平面), 代理属性读写, 子节点操作产生的补丁序列.
+- [x] (宿主) `Compose : Augmentable(), Invokable` (`AugmentableKey("compose")`, 别名 `$compose`), 注册于 `ScriptRuntime` (在 `PluginAutoMountManager.apply` 之前); `compose.isAvailable()`, `compose.version` (插件 / 契约 / Compose 版本, 不可用时 `null`), `compose.createElement(type, props, ...children)` 与按目录生成的元素工厂 `compose.Column / Text / ...` (名称表来自 `ComponentCatalog.V1`, 保证 d.ts 与运行时一致).
+- [x] (宿主) `ComposeNode` 句柄: `type` / `key` / `nodeId` / `parent` / `children`; `set(props)` 与目录声明属性的代理读写 (`node.text = '...'`), `get(name)`, `append / insert / remove / replace / clear`, `slot(name, node)`, `on(event, fn) / off`, 命令 `focus() / blur() / scrollTo(index | { offset }) / edit({ text, selection })`; 未挂载的节点上操作只改本地状态, 挂载后每次操作进入当前批; 跨会话移动节点 -> `NODE_DETACHED` / `INVALID_ARGUMENT`.
+- [x] (宿主) 值转换 `ComposeScriptValues`: 颜色 (与 `colors` 模块一致的解析), 尺寸 (数字默认 dp, 字符串 `16sp` / `8dp`), 文本样式对象, 图片 (`ImageWrapper` / 路径 / `@drawable` 名), 回调 (注册为 callbackId), 子节点 (数组 / 单节点 / 字符串 -> Text 简写); 未知属性 -> `UNKNOWN_PROP`, 类型错误 -> `INVALID_ARGUMENT` (消息含组件名与属性名).
+- [x] (测试) JVM: 元素工厂与目录一致性, 值转换边界 (非法颜色, 负尺寸, 超长字符串, Unicode 补充平面), 代理属性读写, 子节点操作产生的补丁序列.
 
 ### P3.2 state + render 层
 
-- [ ] (宿主) `compose.state(initial)` -> `{ value }` 对象: getter 在 render 期间登记依赖, setter 标记脏并在当前调度器 tick 末尾合并调度一次 render (`compose.batch(fn)` 显式合并); `compose.mount(render, options)` 执行 render 得到节点树, 经 `TreeReconciler` 产出补丁; render 抛错 -> `RENDER_FAILED` (含脚本堆栈), 保留上一版界面; render 返回非节点 -> `INVALID_ARGUMENT`.
-- [ ] (宿主) render 模式下的节点身份: 同一 render 内 `key` 重复 -> `DUPLICATE_KEY`; 缺 key 的同类兄弟按索引匹配并 warn 一次 (Q3); `compose.ref()` 在 render 中以 `ref` 属性绑定节点, 下一 tick 起 `ref.current` 指向复用后的句柄.
-- [ ] (宿主) `compose.post(fn)` (D12), `compose.theme(spec)` (会话级或全局默认).
-- [ ] (测试) JVM: 依赖收集与合并调度 (10 次 setter 只触发 1 次 render), 条件分支切换的依赖重算, render 异常回滚, ref 复用; 与节点句柄层混用 (render 返回的树里包含预先创建并手动修改的节点).
+- [x] (宿主) `compose.state(initial)` -> `{ value }` 对象: getter 在 render 期间登记依赖, setter 标记脏并在当前调度器 tick 末尾合并调度一次 render (`compose.batch(fn)` 显式合并); `compose.mount(render, options)` 执行 render 得到节点树, 经 `TreeReconciler` 产出补丁; render 抛错 -> `RENDER_FAILED` (含脚本堆栈), 保留上一版界面; render 返回非节点 -> `INVALID_ARGUMENT`.
+- [x] (宿主) render 模式下的节点身份: 同一 render 内 `key` 重复 -> `DUPLICATE_KEY`; 缺 key 的同类兄弟按索引匹配并 warn 一次 (Q3); `compose.ref()` 在 render 中以 `ref` 属性绑定节点, 下一 tick 起 `ref.current` 指向复用后的句柄.
+- [x] (宿主) `compose.post(fn)` (D12), `compose.theme(spec)` (会话级或全局默认).
+- [x] (测试) JVM: 依赖收集与合并调度 (10 次 setter 只触发 1 次 render), 条件分支切换的依赖重算, render 异常回滚, ref 复用; 与节点句柄层混用 (render 返回的树里包含预先创建并手动修改的节点).
 
 ### P3.3 ui 模式承载
 
-- [ ] (宿主) `compose.mount(nodeOrRender, options)` 在 `"ui";` 脚本中: 取当前 Activity (无 Activity -> `UI_MODE_REQUIRED`), 创建会话并把渲染器 `view()` 经既有 `setContentViewRhinoRuntime` 路径设为内容 (`ui.view` 指向该 View), 返回 `ComposeSession` 对象 (`root` / `update(fn)` / `post(fn)` / `close()` / `on('close')` / `showSnackbar`); 与 `ui.layout` 二选一, 后者覆盖前者时关闭会话并 warn; Activity `back_pressed` 等事件沿用 `ui` 既有 emitter.
-- [ ] (宿主) Insets 分工定稿 (P2.4 结论): 保持 Activity 对 `android.R.id.content` 的系统栏 padding, Compose 侧不再 `systemBarsPadding`; IME 由 Compose `imePadding` 或 Activity `adjustResize` 二选一并写入文档.
-- [ ] (宿主) 生命周期: `ScriptExecuteActivity.onDestroy` -> 引擎销毁 -> 会话 `close` (释放 Composition, 注册表, 队列); 停止脚本 (强制 / 正常) 同样触发; 重复 `mount` 先关闭旧会话.
-- [ ] (测试) instrumentation (API 33 真机 + API 24 AVD): 计数器, 表单 (TextField + Switch + Button), 1000 项列表三个脚本经 `RunIntentActivity` 运行并以 uiautomator 断言; 反复打开关闭 20 次无泄漏; 停止脚本后无残留回调.
+- [x] (宿主) `compose.mount(nodeOrRender, options)` 在 `"ui";` 脚本中: 取当前 Activity (无 Activity -> `UI_MODE_REQUIRED`), 创建会话并把渲染器 `view()` 经既有 `setContentViewRhinoRuntime` 路径设为内容 (`ui.view` 指向该 View), 返回 `ComposeSession` 对象 (`root` / `update(fn)` / `post(fn)` / `close()` / `on('close')` / `showSnackbar`); 与 `ui.layout` 二选一, 后者覆盖前者时关闭会话并 warn; Activity `back_pressed` 等事件沿用 `ui` 既有 emitter.
+- [x] (宿主) Insets 分工定稿 (P2.4 结论): 保持 Activity 对 `android.R.id.content` 的系统栏 padding, Compose 侧不再 `systemBarsPadding`; IME 由 Compose `imePadding` 或 Activity `adjustResize` 二选一并写入文档.
+- [x] (宿主) 生命周期: `ScriptExecuteActivity.onDestroy` -> 引擎销毁 -> 会话 `close` (释放 Composition, 注册表, 队列); 停止脚本 (强制 / 正常) 同样触发; 重复 `mount` 先关闭旧会话.
+- [x] (测试) instrumentation (API 33 真机 + API 24 AVD): 计数器, 表单 (TextField + Switch + Button), 1000 项列表三个脚本经 `RunIntentActivity` 运行并以 uiautomator 断言; 反复打开关闭 20 次无泄漏; 停止脚本后无残留回调.
+
+P3.1 - P3.3 证据 (2026-10-03): `docs/dev/p31-p33-evidence.md`. 宿主已提供 compose / $compose 与 29 个节点工厂, 句柄事务, state/render/ref/batch/post/theme 和真实 ui Activity 挂载. 111 项宿主相关 JVM (含节点图 18, 脚本 API 16, 响应式 9, 值转换 13, 错误 6) 及 13 项冻结契约测试通过. API 24 x86 与 API 33 Redmi 各 7 项 RunIntentActivity 真实脚本验收通过: 计数器, 表单及输入框移除/再插入, 1000 项 key 列表, 主线程 render 错误保留旧界面并恢复, 20 次挂载/关闭, XML 覆盖清理, 停止引擎后的延迟回调取消. UI 采用 P2.4 的宿主单一 Insets owner; 未指定主题保留宿主动态默认值. ComposeError 基础构造器随这些入口提供, P3.5 的完整集成守卫仍按原小节继续, 本轮不标记 P3.4 / P3.5 完成.
 
 ### P3.4 悬浮窗承载
 

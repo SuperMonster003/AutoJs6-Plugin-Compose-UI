@@ -42,7 +42,7 @@
 
 ******
 
-Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主内置的 `compose` 全局对象声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染, 为 `"ui";` 模式 Activity 内容与悬浮窗提供统一的声明式界面方案.
+Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览支持 `"ui";` 模式的 Activity 内容, 悬浮窗计划在 P3.4 交付.
 
 插件不包含任何独立界面, 也不在启动器中显示入口. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在宿主进程内加载渲染器. 界面树, 状态与事件在脚本侧描述, 渲染器只负责把补丁应用到 Compose 组合并把用户事件回传给脚本.
 
@@ -52,7 +52,7 @@ Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主内置的 `compo
 
 ******
 
-P2 开发预览: V1 目录的全部 30 项能力已在专用测试宿主中实现, 包含 29 个节点组件与 Snackbar 命令. 原生输入框, 懒加载列表, Scaffold, 对话框与进度指示器已可在预览中使用. 公开的 compose 脚本 API 仍计划在 P3 交付.
+P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme 与 ui 脚本挂载已可在匹配的本地 AutoJs6 宿主构建中使用. 悬浮窗仍计划在 P3.4 交付. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版.
 
 ******
 
@@ -60,14 +60,15 @@ P2 开发预览: V1 目录的全部 30 项能力已在专用测试宿主中实�
 
 ******
 
-插件计划交付的核心能力:
+当前开发预览的能力与后续承载支持:
 
 - 声明式界面: `compose.state` + `compose.mount(render)` 按状态变化自动重绘, 同时提供可长期持有的节点句柄 (`compose.Text({...})` 等) 直接修改属性与子节点
 - Material 3 组件核心集: 布局 (Column / Row / Box / LazyColumn 等), 文本, 按钮, 输入框, 开关, 滑块, 进度条, 卡片, 对话框等
 - 链式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作顺序, 作用域操作在宿主侧校验
-- 两种承载面: `"ui";` 脚本的 Activity 内容 (`compose.mount`) 与任意脚本的悬浮窗 (`compose.floaty`)
+- 承载方式: `"ui";` 脚本的 Activity 内容可通过 `compose.mount` 或可调用的 `compose` / `$compose` 挂载; 悬浮窗 (`compose.floaty`) 计划在 P3.4 交付
 - 进程内渲染: 渲染器在宿主进程中运行, 没有跨进程界面桥接, 事件与状态更新低延迟
 - 单一安装包: 不区分 ABI, 不含插件自有原生代码 (仅随 Compose 附带的 AndroidX graphics-path 辅助库, 四种 ABI 全部内置), 一个 APK 适配所有设备
+- 脚本入口: `compose` / `$compose`, 29 个节点工厂与长期持有的句柄, 以及 `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`
 
 ******
 
@@ -75,10 +76,10 @@ P2 开发预览: V1 目录的全部 30 项能力已在专用测试宿主中实�
 
 ******
 
-1. 安装 AutoJs6 6.8.0 (5316) 或更高版本
+1. 安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 6.8.0 / 5316)
 2. 安装本插件 APK (无需打开, 插件没有启动器入口)
 3. 在 AutoJs6 的插件中心确认 Compose UI 已被识别并处于启用状态
-4. 通过专用测试宿主体验本开发预览; 公开的 `compose` 脚本入口计划在 P3 交付
+4. 在脚本中使用 `compose` 或 `$compose`; 通过 `"ui";` 脚本挂载 Activity 内容
 
 ******
 
@@ -86,7 +87,7 @@ P2 开发预览: V1 目录的全部 30 项能力已在专用测试宿主中实�
 
 ******
 
-以下示例展示目标 API 形态 (以路线图附录 A 为准); P3 脚本入口交付前尚不能运行:
+以下计数器可在匹配的本地预览宿主中运行. 悬浮窗 HUD 展示 P3.4 的目标 API, 当前尚不能运行:
 
 ```js
 "ui";
@@ -116,7 +117,7 @@ threads.start(() => {
 });
 ```
 
-完整的 API 说明 (组件目录, Modifier 操作, 会话对象, 错误码) 见 AutoJs6 文档的 compose 模块章节.
+示例包, 完整 API 说明与 TypeScript 类型声明尚待交付. 当前 API 形态以路线图附录 A 为准.
 
 ******
 
@@ -139,7 +140,7 @@ threads.start(() => {
 ******
 
 - 为什么安装后找不到插件图标? 插件没有独立界面, 也不会在启动器显示, 请在 AutoJs6 的插件中心查看
-- 为什么脚本里的 `compose` 还不能用? 当前 P2 开发预览通过专用测试宿主运行, compose 脚本入口计划在 P3 交付
+- 为什么找不到 `compose`? 全局对象由匹配的本地宿主构建提供, 单独安装插件 APK 不会添加该入口
 - 是否需要卸载其它界面插件? 不需要, Compose UI 与现有 `ui` 模块及其它插件互不影响
 - 插件更新后脚本需要修改吗? 契约版本不变时无需修改; 契约升级会在更新日志中明确标注
 
@@ -200,7 +201,7 @@ minimum host build: 5316 (6.8.0)
 
 _2026/10/03_
 
-- `提示` P2 开发预览: V1 目录的全部 30 项能力已在专用测试宿主中实现, 包含 29 个节点组件与 Snackbar 命令. 原生输入框, 懒加载列表, Scaffold, 对话框与进度指示器已可在预览中使用. 公开的 compose 脚本 API 仍计划在 P3 交付
+- `提示` P3 开发预览: 可调用的 compose / $compose 入口, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, batch/post/theme 与 ui 脚本挂载已可在匹配的本地 AutoJs6 宿主构建中使用. 悬浮窗仍计划在 P3.4 交付. 示例包, 完整 API 文档, 类型声明与后续完整验证矩阵尚待交付. 当前仅为本地预览, 尚无官方发行版
 - `提示` 需要 AutoJs6 6.8.0 (5316) 或更高版本
 - `新增` 插件仓库骨架: 平台版本插件构建链, Jetpack Compose BOM 2026.09.00 依赖, Wake Activity 激活协议与 INFO 服务 (类别 compose-ui)
 - `新增` 10 种语言的 README, 插件中心说明与更新日志, 由 JSON 源文件统一生成
@@ -210,6 +211,8 @@ _2026/10/03_
 - `新增` 界面更新以完整事务应用, 拒绝更新时保留上一次有效界面; 受控输入通过队列回调报告变化, 关闭后释放回调
 - `新增` 预览输入框保留选区与输入法组合文本, 支持焦点和显式编辑, 拒绝覆盖较新输入的延迟编辑
 - `新增` 预览新增支持稳定条目 key 与索引滚动的懒加载列表, Scaffold 与顶部应用栏插槽, 受控对话框, 进度指示器, 以及按队列返回操作或关闭结果的 Snackbar
+- `新增` 脚本预览提供可调用的 compose / $compose, 29 个节点工厂, 长期持有的句柄, 响应式 state/render/ref, 批处理, 调度与主题控制
+- `新增` ui 脚本可挂载 Compose 内容; 替换挂载或停止脚本时释放旧会话及回调, 悬浮窗承载仍计划在 P3.4 交付
 - `依赖` 附加 common-plugin-api.aar 版本 6.8.0 (5307) (MPL 2.0, 哈希锁定)
 - `依赖` 附加 Jetpack Compose BOM 2026.09.00 (Apache 2.0)
 - `依赖` 附加与 AutoJs6 6.8.0 (5316) 对齐的 compose-ui-api.aar V1 (MPL 2.0, 摘要锁定), 共用依赖与宿主对齐

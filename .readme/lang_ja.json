@@ -5,29 +5,30 @@
   "h3_languages_with_ascii": "Languages / 言語",
   "p_languages_all_supported_for_readme": "このドキュメントは以下の言語で提供されています",
   "h3_introduction": "はじめに",
-  "p_introduction_what": "Compose UI は AutoJs6 の UI 描画プラグインです. スクリプトはホスト組み込みの `compose` グローバルオブジェクトで UI を宣言し, プラグインがホストプロセス内で Jetpack Compose と Material 3 により描画します. `\"ui\";` モードの Activity コンテンツとフローティングウィンドウに統一された宣言的 UI を提供します.",
+  "p_introduction_what": "Compose UI は AutoJs6 の UI 描画プラグインです. スクリプトはホストが提供する `compose` / `$compose` API で UI を宣言し, プラグインがホストプロセス内で Jetpack Compose と Material 3 により描画します. 現在のプレビューは `\"ui\";` モードの Activity 内容に対応し, フローティングウィンドウは P3.4 で提供予定です.",
   "p_introduction_how": "プラグインは独立した画面を持たず, ランチャーにも表示されません. ホストは INFO サービスでプラグインを検出し, バージョンと互換性情報を読み取った上で, 契約 (`org.autojs.plugin.compose.api`) に従ってホストプロセス内にレンダラーを読み込みます. UI ツリー, 状態, イベントはスクリプト側で記述され, レンダラーは Compose のコンポジションにパッチを適用し, ユーザーイベントをスクリプトへ返すだけです.",
   "h3_status": "現在の状態",
-  "p_status": "P2 開発プレビュー: V1 カタログの全 30 項目を専用テストホストで実装済みです. 29 個のノードコンポーネントと Snackbar コマンドが含まれます. ネイティブ入力欄, 遅延読み込みリスト, Scaffold, ダイアログ, 進捗インジケーターをプレビューで利用できます. 公開 compose スクリプト API は引き続き P3 で提供予定です.",
+  "p_status": "P3 開発プレビュー: 呼び出し可能な compose / $compose, 29 個のノードファクトリー, 保持可能なハンドル, リアクティブな state/render/ref, batch/post/theme, UI スクリプトのマウントを対応するローカル AutoJs6 ホストビルドで利用できます. フローティングウィンドウは P3.4 で提供予定です. サンプル集, 完全な API 文書, 型宣言, より広い検証マトリクスは未提供です. 現在はローカルプレビューであり, 公式リリースではありません.",
   "h3_features": "機能",
-  "p_features_intro": "プラグインが提供を予定している主要な機能",
+  "p_features_intro": "現在のプレビュー機能と今後のホスティング対応",
   "features": [
     "宣言的 UI: `compose.state` + `compose.mount(render)` が状態変化に応じて自動で再描画し, 長期保持できるノードハンドル (`compose.Text({...})` など) でプロパティや子ノードを直接変更できます",
     "Material 3 コンポーネントのコアセット: レイアウト (Column / Row / Box / LazyColumn など), テキスト, ボタン, テキストフィールド, スイッチ, スライダー, プログレスインジケーター, カード, ダイアログ",
     "チェーン式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` は操作順序を保持し, スコープ限定の操作はホスト側で検証されます",
-    "2 つの表示面: `\"ui\";` スクリプトの Activity コンテンツ (`compose.mount`) と任意のスクリプトのフローティングウィンドウ (`compose.floaty`)",
+    "表示先: `\"ui\";` スクリプトの Activity 内容は `compose.mount` または呼び出し可能な `compose` / `$compose` でマウントできます; フローティングウィンドウ (`compose.floaty`) は P3.4 で提供予定です",
     "プロセス内描画: レンダラーはホストプロセス内で動作し, プロセス間の UI ブリッジがないためイベントと状態更新の遅延が小さい",
-    "単一パッケージ: ABI の区分なし, プラグイン独自のネイティブコードなし (Compose に同梱される AndroidX graphics-path ヘルパーのみ, 4 つの ABI すべてを内蔵), 1 つの APK で全デバイスに対応"
+    "単一パッケージ: ABI の区分なし, プラグイン独自のネイティブコードなし (Compose に同梱される AndroidX graphics-path ヘルパーのみ, 4 つの ABI すべてを内蔵), 1 つの APK で全デバイスに対応",
+    "スクリプト API: `compose` / `$compose`, 29 個のノードファクトリーと保持可能なハンドル, `compose.ref`, `compose.batch`, `compose.post`, `compose.theme`"
   ],
   "h3_usage": "使い方",
   "usage_steps": [
-    "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 以降をインストールします",
+    "compose スクリプト API を含む対応ローカル AutoJs6 ビルドをインストールします (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
     "このプラグインの APK をインストールします (開く必要はありません. プラグインにはランチャーエントリがありません)",
     "AutoJs6 のプラグインセンターで Compose UI が認識され, 有効になっていることを確認します",
-    "この開発プレビューは専用テストホストで利用します; 公開 `compose` スクリプト API は P3 で提供予定です"
+    "スクリプトで `compose` または `$compose` を使用し, `\"ui\";` スクリプトから Activity 内容をマウントします"
   ],
   "h3_quick_start": "クイックスタート",
-  "p_quick_start_intro": "以下の例は目標とする API の形を示します (ロードマップ付録 A); P3 のスクリプト API 提供前は実行できません:",
+  "p_quick_start_intro": "以下のカウンターは対応するローカルプレビューホストで実行できます. フローティング HUD は P3.4 の目標 API を示しており, まだ実行できません:",
   "example_counter": "カウンター (宣言的 render 層)",
   "example_counter_text": "${count.value} 回クリックしました",
   "example_counter_button": "1 を加える",
@@ -35,7 +36,7 @@
   "example_hud_preparing": "準備中...",
   "example_hud_close": "閉じる",
   "example_hud_progress": "進捗 ${i}%",
-  "p_quick_start_details": "完全な API リファレンス (コンポーネントカタログ, Modifier 操作, セッションオブジェクト, エラーコード) は AutoJs6 ドキュメントの compose モジュールの章にあります.",
+  "p_quick_start_details": "サンプル集, 完全な API リファレンス, TypeScript 型宣言は今後提供されます. 現在の API の形はロードマップ付録 A に定義されています.",
   "h3_compatibility": "互換性",
   "p_compatibility_intro": "プラグインの動作要件と制限",
   "compatibility_points": [
@@ -48,7 +49,7 @@
   "h3_faq": "よくある質問",
   "faq_items": [
     "インストール後にプラグインのアイコンが見つからないのはなぜですか? プラグインには独立した UI もランチャーエントリもありません. AutoJs6 のプラグインセンターで確認してください",
-    "スクリプトの `compose` がまだ使えないのはなぜですか? この P2 開発プレビューは専用テストホストで動作し, compose スクリプトの入口は P3 で提供予定です",
+    "`compose` が見つからないのはなぜですか? グローバルオブジェクトは対応するローカルホストビルドが提供します. プラグイン APK のインストールだけでは追加されません",
     "他の UI プラグインをアンインストールする必要はありますか? ありません. Compose UI は既存の `ui` モジュールや他のプラグインに影響しません",
     "プラグインの更新後にスクリプトの修正は必要ですか? 契約バージョンが変わらない限り不要です. 契約の更新は更新履歴に明記されます"
   ],

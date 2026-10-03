@@ -1,13 +1,13 @@
-Compose UI est un plugin de rendu d'interface pour AutoJs6. Les scripts declarent leur interface via l'objet global `compose` integre a l'hote, et le plugin la rend dans le processus de l'hote avec Jetpack Compose et Material 3, offrant une solution declarative unique au contenu des activites en mode `"ui";` et aux fenetres flottantes.
+Compose UI est un plugin de rendu d'interface pour AutoJs6. Les scripts déclarent les interfaces via l'entrée `compose` / `$compose` de l'hôte, et le plugin les rend dans le processus de l'hôte avec Jetpack Compose et Material 3. L'aperçu actuel prend en charge le contenu des activités `"ui";`; les fenêtres flottantes sont prévues pour P3.4.
 
-Aperçu de développement P2: les 30 entrées du catalogue V1 sont implémentées dans un hôte de test dédié, avec 29 composants de noeud et la commande Snackbar. Les champs de texte natifs, listes à chargement différé, Scaffold, dialogues et indicateurs de progression sont disponibles dans cet aperçu. L'API publique de script compose reste prévue pour P3.
+Aperçu de développement P3: compose / $compose appelables, 29 fabriques de noeuds, des handles persistants, state/render/ref réactifs, batch/post/theme et le montage dans les scripts UI fonctionnent avec une compilation locale compatible de l'hôte AutoJs6. Les fenêtres flottantes restent prévues pour P3.4. Les exemples inclus, la documentation complète de l'API, les déclarations de types et la matrice de vérification élargie restent à livrer. Il s'agit d'un aperçu local sans publication officielle.
 
 ### Utilisation
 
-1. Installez AutoJs6 6.8.0 (5316) ou une version ulterieure
+1. Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum 6.8.0 / 5316)
 2. Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)
 3. Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active
-4. Essayez cet aperçu avec l'hôte de test dédié; le point d'entrée public des scripts `compose` est prévu pour P3
+4. Utilisez `compose` ou `$compose` dans les scripts; montez le contenu d'activité depuis un script `"ui";`
 
 ### Compatibilite
 
@@ -20,7 +20,7 @@ Aperçu de développement P2: les 30 entrées du catalogue V1 sont implémentée
 ### FAQ
 
 - Pourquoi aucune icone de plugin n'apparait apres l'installation ? Le plugin n'a ni interface autonome ni entree dans le lanceur ; consultez le centre de plugins d'AutoJs6
-- Pourquoi `compose` ne fonctionne-t-il pas encore dans les scripts ? Cet aperçu de développement P2 fonctionne dans un hôte de test dédié; le point d'entrée des scripts compose est prévu pour P3
+- Pourquoi `compose` est-il absent? L'objet global est fourni par la compilation locale compatible de l'hôte; installer uniquement l'APK du plugin ne l'ajoute pas
 - Faut-il desinstaller d'autres plugins d'interface ? Non, Compose UI n'interfere ni avec le module `ui` existant ni avec les autres plugins
 - Faut-il modifier les scripts apres une mise a jour du plugin ? Non tant que la version du contrat reste la meme ; les montees de version du contrat sont indiquees explicitement dans le journal des modifications
 

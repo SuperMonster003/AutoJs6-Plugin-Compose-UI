@@ -1,13 +1,13 @@
-Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare their interface through the host's built-in `compose` global object, and the plugin renders it inside the host process with Jetpack Compose and Material 3, giving `"ui";` mode activities and floating windows one declarative UI solution.
+Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports `"ui";` activity content; floating windows are planned for P3.4.
 
-P2 development preview: all 30 V1 catalog entries are implemented in a dedicated test host, including 29 node components and the Snackbar command. Native text fields, lazy lists, Scaffold, dialogs, and progress indicators are available in the preview. The public compose script API is still planned for P3.
+P3 development preview: the callable compose / $compose entry, 29 node factories, retained handles, reactive state/render/ref, batch/post/theme, and UI script mounting work with a matching local AutoJs6 host build. Floating windows remain planned for P3.4. Bundled examples, complete API documentation, type declarations, and the wider verification matrix are still pending. This is a local preview without an official release.
 
 ### Usage
 
-1. Install AutoJs6 6.8.0 (5316) or later
+1. Install a matching local AutoJs6 build with the compose script entry (minimum 6.8.0 / 5316)
 2. Install this plugin APK (there is nothing to open, the plugin has no launcher entry)
 3. Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled
-4. Try this preview through the dedicated test host; the public `compose` script entry is planned for P3
+4. Use `compose` or `$compose` in scripts; mount activity content from a `"ui";` script
 
 ### Compatibility
 
@@ -20,7 +20,7 @@ P2 development preview: all 30 V1 catalog entries are implemented in a dedicated
 ### FAQ
 
 - Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
-- Why does `compose` not work in scripts yet? This P2 development preview runs through a dedicated test host; the compose script entry is planned for P3
+- Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
 - Do scripts need changes after a plugin update? Not while the contract version stays the same; contract upgrades are called out explicitly in the changelog
 

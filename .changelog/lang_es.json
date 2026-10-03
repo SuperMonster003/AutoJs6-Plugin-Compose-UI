@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "Vista previa de desarrollo P2: las 30 entradas del catálogo V1 están implementadas en un host de prueba dedicado, con 29 componentes de nodo y el comando Snackbar. La vista previa incluye campos de texto nativos, listas de carga diferida, Scaffold, diálogos e indicadores de progreso. La API pública de scripts compose sigue prevista para P3",
+        "Vista previa de desarrollo P3: la entrada invocable compose / $compose, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, batch/post/theme y el montaje en scripts UI funcionan con una compilación local compatible del host AutoJs6. Las ventanas flotantes siguen previstas para P3.4. Los ejemplos incluidos, la documentación completa de la API, las declaraciones de tipos y la matriz ampliada de verificación siguen pendientes. Es una vista previa local sin publicación oficial",
         "Requiere AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) o posterior"
       ],
       "feature": [
@@ -19,7 +19,9 @@
         "Los temas Material 3 admiten colores semilla, modos claro y oscuro, colores dinámicos del sistema en Android 12+, familias tipográficas y escala de texto",
         "Las actualizaciones de interfaz son atómicas y, si se rechazan, conservan la última vista válida; las entradas controladas notifican cambios mediante callbacks en cola, que se liberan al cerrar",
         "Los campos de texto de la vista previa conservan la selección y la composición del IME, admiten el foco y la edición explícita, y rechazan ediciones retrasadas que sobrescribirían entradas más recientes",
-        "La vista previa incorpora listas de carga diferida con claves de elemento estables y desplazamiento por índice, ranuras de Scaffold y barra superior, diálogos controlados, indicadores de progreso y callbacks en cola de acción o cierre de Snackbar"
+        "La vista previa incorpora listas de carga diferida con claves de elemento estables y desplazamiento por índice, ranuras de Scaffold y barra superior, diálogos controlados, indicadores de progreso y callbacks en cola de acción o cierre de Snackbar",
+        "La vista previa de scripts ofrece compose / $compose invocables, 29 fábricas de nodos, manejadores persistentes, state/render/ref reactivos, lotes, programación y control de temas",
+        "Los scripts UI pueden montar contenido Compose; sustituir el montaje o detener el script libera la sesión anterior y sus callbacks. El alojamiento flotante sigue previsto para P3.4"
       ],
       "dependency": [
         "Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)",
