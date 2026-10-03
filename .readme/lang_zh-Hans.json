@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主内置的 `compose` 全局对象声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染, 为 `\"ui\";` 模式 Activity 内容与悬浮窗提供统一的声明式界面方案.",
   "p_introduction_how": "插件不包含任何独立界面, 也不在启动器中显示入口. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在宿主进程内加载渲染器. 界面树, 状态与事件在脚本侧描述, 渲染器只负责把补丁应用到 Compose 组合并把用户事件回传给脚本.",
   "h3_status": "当前状态",
-  "p_status": "P2 开发预览: 20 种布局, 展示与交互组件, 有序 Modifier 链及 Material 3 主题已可在专用测试宿主中运行. 输入框, 懒加载列表, Scaffold, 对话框等其余组件与 compose 脚本 API 仍在开发中.",
+  "p_status": "P2 开发预览: V1 目录的全部 30 项能力已在专用测试宿主中实现, 包含 29 个节点组件与 Snackbar 命令. 原生输入框, 懒加载列表, Scaffold, 对话框与进度指示器已可在预览中使用. 公开的 compose 脚本 API 仍计划在 P3 交付.",
   "h3_features": "功能特性",
   "p_features_intro": "插件计划交付的核心能力",
   "features": [
@@ -24,10 +24,10 @@
     "安装 AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 或更高版本",
     "安装本插件 APK (无需打开, 插件没有启动器入口)",
     "在 AutoJs6 的插件中心确认 Compose UI 已被识别并处于启用状态",
-    "在脚本中直接使用 `compose` 全局对象 (渲染能力将随 1.0.0 版本交付)"
+    "通过专用测试宿主体验本开发预览; 公开的 `compose` 脚本入口计划在 P3 交付"
   ],
   "h3_quick_start": "快速开始",
-  "p_quick_start_intro": "以下示例展示目标 API 形态 (以路线图附录 A 为准, 渲染能力交付前尚不能运行):",
+  "p_quick_start_intro": "以下示例展示目标 API 形态 (以路线图附录 A 为准); P3 脚本入口交付前尚不能运行:",
   "example_counter": "计数器 (声明式 render 层)",
   "example_counter_text": "已点击 ${count.value} 次",
   "example_counter_button": "加一",

@@ -249,7 +249,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | --- | --- | --- | --- |
 | P0 | 仓库骨架; 进程内装载 spike (加载器, owner, 资源, 计数器闭环) | 1.0.0 | 已完成 (2026-10-02, P0.1 - P0.3, Q1(b)) |
 | P1 | 宿主契约模块, 装载器, 会话核心, 注册与协议文档 | 1.0.0 | 已完成 (2026-10-03, P1.1 - P1.3) |
-| P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 进行中 (P2.1 - P2.3, P2.6 完成, 下一步 P2.4) |
+| P2 | 插件渲染器: 骨架, 核心集组件, 输入框, Modifier 链, 主题 | 1.0.0 | 已完成 (P2.1 - P2.6, 下一步 P3.1) |
 | P3 | 脚本 API `compose`: 节点句柄层, state + render 层, ui 模式与悬浮窗承载, refs / 命令 / 错误 | 1.0.0 | 未开始 |
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 未开始 |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 未开始 |
@@ -361,13 +361,17 @@ P2.1 - P2.3 证据 (2026-10-03): `docs/dev/p13-p2-evidence.md`. 能力表与分�
 
 ### P2.4 输入框
 
-- [ ] (插件) TextField / OutlinedTextField: `TextFieldState` 原生编辑态 (D15), `onValueChange(text, selection, editSeq)` 节流为每帧一次, `edit` 命令按 `editSeq` 仲裁, `label` / `placeholder` / `leadingIcon` / `trailingIcon` / `supportingText` 插槽, `singleLine` / `maxLines` / `keyboardType` / `imeAction` / `isError` / `readOnly` / `visualTransformation(password)`.
-- [ ] (测试) instrumentation: 中文输入法组合 (API 33 真机 Gboard / 小米输入法), 连续删除, 粘贴, 光标移动, 脚本回写与用户输入竞争 (旧 editSeq 被拒), IME 弹出时 Scaffold 内容避让 (与宿主 Activity Insets 处理的分工在此定稿, 不双重 padding).
+- [x] (插件) TextField / OutlinedTextField: `TextFieldState` 原生编辑态 (D15), `onValueChange(text, selection, editSeq)` 节流为每帧一次, `edit` 命令按 `editSeq` 仲裁, `label` / `placeholder` / `leadingIcon` / `trailingIcon` / `supportingText` 插槽, `singleLine` / `maxLines` / `keyboardType` / `imeAction` / `isError` / `readOnly` / `visualTransformation(password)`.
+- [x] (测试) instrumentation: 中文输入法组合 (API 33 真机 Gboard / 小米输入法), 连续删除, 粘贴, 光标移动, 脚本回写与用户输入竞争 (旧 editSeq 被拒), IME 弹出时 Scaffold 内容避让 (与宿主 Activity Insets 处理的分工在此定稿, 不双重 padding).
+
+P2.4 证据 (2026-10-03): 插件 `cebd1d3`, 宿主 `60bae7f8c5`; `docs/dev/p24-p25-evidence.md`. API 24 / 33 / 35 各 9 项输入框测试通过, 覆盖原生 InputConnection 组合 / 删除 / 粘贴 / UTF-16 选区 / editSeq 竞争与密码语义; API 33 小米搜狗实键拼音与“你好”候选提交单独通过. 宿主为唯一 Insets owner, 挂载期间选择 adjustResize 并按 max(systemBars.bottom, ime.bottom) 避让, Compose 不叠加系统栏或 IME padding; API 24 / 33 / 35 跨 APK 几何与恢复验证通过. 修复 Material 装饰层晚订阅丢失自动恢复 Focus 的竞态, 保留原始组件替换验收.
 
 ### P2.5 列表, 脚手架与提示
 
-- [ ] (插件) LazyColumn / LazyRow (子节点 key 映射 `items(key)`, `contentPadding`, `spacing`, `scrollTo` 命令, `onScroll` 事件可选节流), Scaffold (topBar / snackbarHost / floatingActionButton 插槽为 1.1 预留, 1.0.0 实现 topBar + content + snackbarHost), TopAppBar (title / navigationIcon / actions 插槽), AlertDialog (`open` 受控, title / text / confirm / dismiss 插槽, `onDismissRequest`), Snackbar (`session.showSnackbar(message, options)` 命令 -> `SnackbarHostState`, `onAction` / `onDismiss` 事件), CircularProgressIndicator / LinearProgressIndicator (确定 / 不确定).
-- [ ] (测试) 1000 项 LazyColumn 的补丁应用耗时与滚动帧时间 (记录, 不预设阈值; P5.3 定阈值); 列表重排 (key 移动) 保留条目内 Switch 状态.
+- [x] (插件) LazyColumn / LazyRow (子节点 key 映射 `items(key)`, `contentPadding`, `spacing`, `scrollTo` 命令, `onScroll` 事件可选节流), Scaffold (topBar / snackbarHost / floatingActionButton 插槽为 1.1 预留, 1.0.0 实现 topBar + content + snackbarHost), TopAppBar (title / navigationIcon / actions 插槽), AlertDialog (`open` 受控, title / text / confirm / dismiss 插槽, `onDismissRequest`), Snackbar (`session.showSnackbar(message, options)` 命令 -> `SnackbarHostState`, `onAction` / `onDismiss` 事件), CircularProgressIndicator / LinearProgressIndicator (确定 / 不确定).
+- [x] (测试) 1000 项 LazyColumn 的补丁应用耗时与滚动帧时间 (记录, 不预设阈值; P5.3 定阈值); 列表重排 (key 移动) 保留条目内 Switch 状态.
+
+P2.5 证据 (2026-10-03): 插件 `cebd1d3`, 宿主 `ee82363172`; `AdvancedRendererTest` 5 项在 API 24 / 33 / 35 通过. 1000 行 / 3001 节点的增量补丁分别为 18.610 / 89.125 / 34.624 ms, 滚动帧 p95 为 16.677 / 50.855 / 6.972 ms (debug 小样本, 不作为发布阈值). 同轮数据增长 / 缩减与 scrollTo, key 移动后的受控 Switch, 对话框, 进度与 Snackbar 终止结果均有断言. V1 29 个节点 + 命令式 Snackbar 全覆盖; 命令回调跨树提交保留并一次性释放. API 24 / 35 的 minified 插件跨 APK 各 6 项通过, 公开 compose 脚本入口仍属 P3.
 
 ### P2.6 Modifier 链与快捷属性
 
