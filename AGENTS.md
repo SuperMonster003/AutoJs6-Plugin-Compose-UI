@@ -227,7 +227,7 @@ py .python/generate_launcher_icons.py --check
 
 - 纯文档改动只需前两条; 涉及源码的改动至少跑 JVM 测试与 debug 装配; 涉及 Manifest, 渲染器工厂, 类加载边界或依赖集合的改动必须在至少一台真机或 AVD 上跑 instrumentation, 并在宿主侧跑加载探针 (P0.2 起).
 - Release 前额外执行 `:app:appendDigestToReleasedFiles`, 检查 `releases/` 恰好 1 个已签名 APK 且 CRC32 与内容一致.
-- 性能回归阈值 (路线图 P6 落档后填入): 首帧耗时, 补丁应用延迟, APK 大小.
+- 性能基线已由 P5.3 记录于 `docs/dev/p5-performance-evidence.md` 与 `docs/dev/p5-performance-summary.json`; 首帧, 更新, 列表, PSS 与 APK / DEX 的回归线按路线图 Q5, 经维护者确认后填入本节. 当前仅有候选复核线, 未确认的值不作为自动通过或失败的门禁. 冷启动各 3 个样本, PSS 各 1 个进程序列与波动较大的 AVD 帧指标只作观察; 可见性确认计时包含查询 / 截图开销, 不能称为纯渲染耗时.
 - 任何未执行的验证都在最终说明中明确列出原因.
 
 ## 15. 许可证, 安全与隐私
