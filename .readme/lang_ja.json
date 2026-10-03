@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI は AutoJs6 の UI 描画プラグインです. スクリプトはホスト組み込みの `compose` グローバルオブジェクトで UI を宣言し, プラグインがホストプロセス内で Jetpack Compose と Material 3 により描画します. `\"ui\";` モードの Activity コンテンツとフローティングウィンドウに統一された宣言的 UI を提供します.",
   "p_introduction_how": "プラグインは独立した画面を持たず, ランチャーにも表示されません. ホストは INFO サービスでプラグインを検出し, バージョンと互換性情報を読み取った上で, 契約 (`org.autojs.plugin.compose.api`) に従ってホストプロセス内にレンダラーを読み込みます. UI ツリー, 状態, イベントはスクリプト側で記述され, レンダラーは Compose のコンポジションにパッチを適用し, ユーザーイベントをスクリプトへ返すだけです.",
   "h3_status": "現在の状態",
-  "p_status": "P2 開発プレビュー: 20 種類のレイアウト, 表示, 操作コンポーネント, 順序付き Modifier, Material 3 テーマを専用テストホストで実行できます. 入力欄, 遅延読み込みリスト, Scaffold, ダイアログなどの残りのコンポーネントと compose スクリプト API は開発中です.",
+  "p_status": "P2 開発プレビュー: V1 カタログの全 30 項目を専用テストホストで実装済みです. 29 個のノードコンポーネントと Snackbar コマンドが含まれます. ネイティブ入力欄, 遅延読み込みリスト, Scaffold, ダイアログ, 進捗インジケーターをプレビューで利用できます. 公開 compose スクリプト API は引き続き P3 で提供予定です.",
   "h3_features": "機能",
   "p_features_intro": "プラグインが提供を予定している主要な機能",
   "features": [
@@ -24,10 +24,10 @@
     "AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) 以降をインストールします",
     "このプラグインの APK をインストールします (開く必要はありません. プラグインにはランチャーエントリがありません)",
     "AutoJs6 のプラグインセンターで Compose UI が認識され, 有効になっていることを確認します",
-    "スクリプトで `compose` グローバルオブジェクトをそのまま使用します (描画機能はバージョン 1.0.0 で提供されます)"
+    "この開発プレビューは専用テストホストで利用します; 公開 `compose` スクリプト API は P3 で提供予定です"
   ],
   "h3_quick_start": "クイックスタート",
-  "p_quick_start_intro": "以下の例は目標とする API の形を示します (ロードマップ付録 A に基づき, 描画機能の提供前は実行できません):",
+  "p_quick_start_intro": "以下の例は目標とする API の形を示します (ロードマップ付録 A); P3 のスクリプト API 提供前は実行できません:",
   "example_counter": "カウンター (宣言的 render 層)",
   "example_counter_text": "${count.value} 回クリックしました",
   "example_counter_button": "1 を加える",

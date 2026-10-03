@@ -1,13 +1,13 @@
 Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare their interface through the host's built-in `compose` global object, and the plugin renders it inside the host process with Jetpack Compose and Material 3, giving `"ui";` mode activities and floating windows one declarative UI solution.
 
-P2 development preview: 20 layout, display, and interactive components, ordered modifiers, and Material 3 themes run in a dedicated test host. Text fields, lazy lists, Scaffold, dialogs, other remaining components, and the compose script API are still under development.
+P2 development preview: all 30 V1 catalog entries are implemented in a dedicated test host, including 29 node components and the Snackbar command. Native text fields, lazy lists, Scaffold, dialogs, and progress indicators are available in the preview. The public compose script API is still planned for P3.
 
 ### Usage
 
 1. Install AutoJs6 6.8.0 (5316) or later
 2. Install this plugin APK (there is nothing to open, the plugin has no launcher entry)
 3. Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled
-4. Use the `compose` global object directly in scripts (rendering arrives with version 1.0.0)
+4. Try this preview through the dedicated test host; the public `compose` script entry is planned for P3
 
 ### Compatibility
 

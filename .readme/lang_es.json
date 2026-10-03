@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran su interfaz mediante el objeto global `compose` integrado en el host, y el plugin la renderiza dentro del proceso del host con Jetpack Compose y Material 3, ofreciendo una unica solucion declarativa para el contenido de las actividades en modo `\"ui\";` y para las ventanas flotantes.",
   "p_introduction_how": "El plugin no incluye pantallas independientes ni agrega una entrada en el lanzador. El host lo descubre mediante el servicio INFO, lee su version y sus datos de compatibilidad y luego carga el renderizador dentro del proceso del host segun el contrato (`org.autojs.plugin.compose.api`). El arbol de interfaz, el estado y los eventos viven en el lado del script; el renderizador solo aplica parches a la composicion de Compose y devuelve los eventos del usuario al script.",
   "h3_status": "Estado actual",
-  "p_status": "Vista previa de desarrollo P2: 20 componentes de diseño, visualización e interacción, modificadores ordenados y temas Material 3 funcionan en un host de prueba dedicado. Los campos de texto, las listas de carga diferida, Scaffold, los diálogos, los demás componentes pendientes y la API de scripts compose siguen en desarrollo.",
+  "p_status": "Vista previa de desarrollo P2: las 30 entradas del catálogo V1 están implementadas en un host de prueba dedicado, con 29 componentes de nodo y el comando Snackbar. La vista previa incluye campos de texto nativos, listas de carga diferida, Scaffold, diálogos e indicadores de progreso. La API pública de scripts compose sigue prevista para P3.",
   "h3_features": "Caracteristicas",
   "p_features_intro": "Capacidades principales que el plugin entregara",
   "features": [
@@ -24,10 +24,10 @@
     "Instale AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) o una version posterior",
     "Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)",
     "Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado",
-    "Use directamente el objeto global `compose` en los scripts (el renderizado llega con la version 1.0.0)"
+    "Pruebe esta vista previa mediante el host de prueba dedicado; la entrada pública de scripts `compose` está prevista para P3"
   ],
   "h3_quick_start": "Inicio rapido",
-  "p_quick_start_intro": "Los siguientes ejemplos muestran la forma objetivo de la API (definida en el apendice A de la hoja de ruta, no ejecutable hasta que se entregue el renderizado):",
+  "p_quick_start_intro": "Los siguientes ejemplos muestran la forma objetivo de la API (apéndice A de la hoja de ruta); no se pueden ejecutar hasta que se entregue la entrada de scripts de P3:",
   "example_counter": "Contador (capa render declarativa)",
   "example_counter_text": "${count.value} clics",
   "example_counter_button": "Sumar uno",

@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "Aperçu de développement P2: 20 composants de mise en page, d'affichage et d'interaction, des modificateurs ordonnés et les thèmes Material 3 fonctionnent dans un hôte de test dédié. Les champs de texte, listes à chargement différé, Scaffold, boîtes de dialogue, autres composants restants et l'API de script compose sont encore en développement",
+        "Aperçu de développement P2: les 30 entrées du catalogue V1 sont implémentées dans un hôte de test dédié, avec 29 composants de noeud et la commande Snackbar. Les champs de texte natifs, listes à chargement différé, Scaffold, dialogues et indicateurs de progression sont disponibles dans cet aperçu. L'API publique de script compose reste prévue pour P3",
         "Necessite AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) ou ulterieur"
       ],
       "feature": [
@@ -17,7 +17,9 @@
         "L'aperçu prend en charge les mises en page, textes, icônes, images, boutons, contrôles de sélection et curseurs; les bitmaps fournis restent la propriété de l'appelant, qui gère leur libération",
         "Les 20 opérations Modifier conservent l'ordre déclaré et prennent en charge la validation du contexte de mise en page, le défilement et les libellés d'accessibilité",
         "Les thèmes Material 3 prennent en charge les couleurs sources, les modes clair et sombre, les couleurs dynamiques du système sur Android 12+, les familles de polices et la taille du texte",
-        "Les mises à jour de l'interface sont atomiques et conservent la dernière vue valide en cas de rejet; les entrées contrôlées signalent les changements par des callbacks en file, libérés à la fermeture"
+        "Les mises à jour de l'interface sont atomiques et conservent la dernière vue valide en cas de rejet; les entrées contrôlées signalent les changements par des callbacks en file, libérés à la fermeture",
+        "Les champs de texte de l'aperçu conservent la sélection et la composition IME, prennent en charge le focus et les modifications explicites, et refusent les modifications retardées qui écraseraient une saisie plus récente",
+        "L'aperçu ajoute des listes à chargement différé avec clés stables et défilement par indice, les emplacements de Scaffold et de la barre supérieure, des dialogues contrôlés, des indicateurs de progression et des rappels en file pour les actions ou fermetures de Snackbar"
       ],
       "dependency": [
         "Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)",

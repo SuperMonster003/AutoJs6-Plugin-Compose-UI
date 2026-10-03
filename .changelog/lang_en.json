@@ -8,7 +8,7 @@
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
-        "P2 development preview: 20 layout, display, and interactive components, ordered modifiers, and Material 3 themes run in a dedicated test host. Text fields, lazy lists, Scaffold, dialogs, other remaining components, and the compose script API are still under development",
+        "P2 development preview: all 30 V1 catalog entries are implemented in a dedicated test host, including 29 node components and the Snackbar command. Native text fields, lazy lists, Scaffold, dialogs, and progress indicators are available in the preview. The public compose script API is still planned for P3",
         "Requires AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) or later"
       ],
       "feature": [
@@ -17,7 +17,9 @@
         "Preview rendering supports layouts, text, icons, images, buttons, selection controls, and sliders; supplied bitmaps remain owned and recycled by the caller",
         "All 20 modifier operations preserve declaration order, with layout scope checks, scrolling, and accessibility labels",
         "Material 3 themes support seed colors, light and dark modes, Android 12+ system dynamic colors, font families, and text scaling",
-        "Interface updates apply atomically and rejected updates keep the last valid view; controlled inputs report changes through queued callbacks, and closing releases callbacks"
+        "Interface updates apply atomically and rejected updates keep the last valid view; controlled inputs report changes through queued callbacks, and closing releases callbacks",
+        "Preview text fields preserve selection and IME composition, support focus and explicit edits, and reject delayed edits that would overwrite newer input",
+        "Preview adds lazy lists with stable item keys and indexed scrolling, Scaffold and top app bar slots, controlled dialogs, progress indicators, and queued Snackbar action or dismissal callbacks"
       ],
       "dependency": [
         "Attach common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, hash-locked)",

@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare their interface through the host's built-in `compose` global object, and the plugin renders it inside the host process with Jetpack Compose and Material 3, giving `\"ui\";` mode activities and floating windows one declarative UI solution.",
   "p_introduction_how": "The plugin ships no standalone screens and adds no launcher entry. The host discovers it through the INFO service, reads its version and compatibility data, then loads the renderer inside the host process according to the contract (`org.autojs.plugin.compose.api`). The UI tree, state, and events live on the script side; the renderer only applies patches to the Compose composition and forwards user events back to the script.",
   "h3_status": "Status",
-  "p_status": "P2 development preview: 20 layout, display, and interactive components, ordered modifiers, and Material 3 themes run in a dedicated test host. Text fields, lazy lists, Scaffold, dialogs, other remaining components, and the compose script API are still under development.",
+  "p_status": "P2 development preview: all 30 V1 catalog entries are implemented in a dedicated test host, including 29 node components and the Snackbar command. Native text fields, lazy lists, Scaffold, dialogs, and progress indicators are available in the preview. The public compose script API is still planned for P3.",
   "h3_features": "Features",
   "p_features_intro": "Core capabilities the plugin is set to deliver",
   "features": [
@@ -24,10 +24,10 @@
     "Install AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) or later",
     "Install this plugin APK (there is nothing to open, the plugin has no launcher entry)",
     "Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled",
-    "Use the `compose` global object directly in scripts (rendering arrives with version 1.0.0)"
+    "Try this preview through the dedicated test host; the public `compose` script entry is planned for P3"
   ],
   "h3_quick_start": "Quick Start",
-  "p_quick_start_intro": "The examples below show the target API shape (defined in roadmap appendix A, not runnable until rendering is delivered):",
+  "p_quick_start_intro": "The examples below show the target API shape (roadmap appendix A); they cannot run until the P3 script entry is delivered:",
   "example_counter": "Counter (declarative render layer)",
   "example_counter_text": "Clicked ${count.value} times",
   "example_counter_button": "Add one",
