@@ -52,7 +52,7 @@ The plugin ships no standalone screens and adds no launcher entry. The host disc
 
 ******
 
-1.0.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images.
+1.1.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images.
 
 ******
 
@@ -71,6 +71,7 @@ Capabilities of the current development preview:
 - Native text editing preserves selection and IME composition, supports focus and explicit edits, and rejects delayed edits that would overwrite newer input; switches and sliders remain script-controlled
 - Integration guards: availability probes return unavailable for missing or incompatible plugins, errors use `ComposeError`, and closing a session or stopping its script releases owned windows and callbacks
 - Five runnable examples for a counter, form validation, a keyed 1000-item list, a non-UI floating HUD, and themes, with prerequisites and an index, synchronized to the matching host's Compose UI sample category
+- TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
 
 ******
 
@@ -139,6 +140,7 @@ Runtime requirements and limits of the plugin:
 - Compose version: bundled with the plugin (BOM 2026.09.00), independent of the host's Compose runtime
 - Contract version: 1; host and plugin negotiate the contract version and refuse to load with a clear error when it does not match
 - Packaged apps also require a separately installed compatible Compose UI plugin, with enablement/authorization belonging to that app; compatibility checks the embedded AutoJs6 runtime, not the packaged app's own versionCode
+- TSX requires the matching AutoJs6 6.8.0 / 5319 local host and companion TypeScript Engine build with Compose declarations; installing the renderer alone does not add TSX support
 
 ******
 
@@ -151,7 +153,7 @@ Runtime requirements and limits of the plugin:
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
 - What do floating windows require? Grant overlay permission to the host. Call `window.requestFocus()` before text input; if a HyperOS window is not visible, return to the desktop. Missing permission reports PERMISSION_REQUIRED without opening a permission prompt automatically
-- Can scripts call arbitrary Compose functions or use JSX/TSX? No. Use the documented node factories and commands; the plugin does not compile Kotlin or expose arbitrary Composable functions
+- Can scripts use TSX or arbitrary Compose functions? TSX can use the documented Compose node factories with the matching host and TypeScript Engine. Arbitrary Kotlin Composable functions and user-defined TSX components are not supported
 - Does rotation lose state? The current host handles ordinary orientation changes without replacing the script engine. Actual Activity recreation or destruction closes that engine and its sessions; business state is not automatically restored
 - How do selectors find components? testTag is exposed as the raw ID without a package prefix. id/testTag and desc/contentDescription are distinct; Button text may be a child node, so follow parent() to a clickable ancestor when needed
 
@@ -207,6 +209,14 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 ### Release History
 
 ******
+
+#### v1.1.0
+
+_2026/10/04_
+
+- `Hint` 1.1.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images
+- `Hint` TSX requires the matching AutoJs6 6.8.0 / 5319 local host and companion TypeScript Engine build with Compose declarations; installing the renderer alone does not add TSX support
+- `Feature` TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
 
 #### v1.0.0
 

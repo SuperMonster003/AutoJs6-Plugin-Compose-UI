@@ -8,7 +8,7 @@
   "p_introduction_what": "Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `\"ui\";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.",
   "p_introduction_how": "外掛程式不包含任何獨立介面, 也不在啟動器中顯示進入點. 宿主透過 INFO 服務探索外掛程式並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在宿主處理程序內載入轉譯器. 介面樹, 狀態與事件在指令碼端描述, 轉譯器只負責把修補套用到 Compose 組合並把使用者事件回傳給指令碼.",
   "h3_status": "目前狀態",
-  "p_status": "1.0.0 本機開發預覽: 需要相符的 AutoJs6 宿主建置, 並安裝和啟用本外掛. 本機配套提供 UI 頁面, 浮動視窗, 五個範例, API 參考與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在藍圖中. 目前未登錄官方索引, 尚無官方發行版. 圖示圖案仍為臨時預留, 等待維護者提供正式來源圖片.",
+  "p_status": "1.1.0 本機開發預覽: 需要相符的 AutoJs6 宿主建置, 並安裝和啟用本外掛. 本機配套提供 UI 頁面, 浮動視窗, 五個範例, API 參考與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在藍圖中. 目前未登錄官方索引, 尚無官方發行版. 圖示圖案仍為臨時預留, 等待維護者提供正式來源圖片.",
   "h3_features": "功能特性",
   "p_features_intro": "目前開發預覽的核心能力",
   "features": [
@@ -20,7 +20,8 @@
     "一個 APK 包含 arm64-v8a / armeabi-v7a / x86_64 / x86, 無外掛自有原生程式碼; 隨附的 AndroidX graphics-path 輔助程式庫仍需符合 Android, 宿主與外掛相容條件",
     "原生文字編輯保留選取範圍與輸入法組合狀態, 支援焦點和明確編輯, 拒絕覆寫較新輸入的延遲編輯; 開關與滑桿仍由指令碼控制狀態",
     "整合防護: 外掛程式缺少或不相容時可用性探測傳回不可用, 錯誤使用 `ComposeError`, 關閉工作階段或停止指令碼會釋放所屬視窗與回呼",
-    "計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類"
+    "計數器, 表單驗證, 1000 項鍵控清單, 非 ui 浮動 HUD 與主題五個可執行範例, 包含前置條件與索引, 同步至相符宿主的 Compose UI 範例分類",
+    "TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點"
   ],
   "h3_usage": "使用方式",
   "usage_steps": [
@@ -47,7 +48,8 @@
     "處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內建全部四種, 無需依架構選擇安裝套件)",
     "Compose 版本: 由外掛程式自帶 (BOM {{ compose_bom }}), 不依賴宿主的 Compose 執行階段",
     "契約版本: {{ plugin_contract_version }}; 宿主與外掛程式透過契約版本協商, 不相符時拒絕載入並給出明確錯誤",
-    "打包應用程式仍需另外安裝相容的 Compose UI 外掛, 啟用/授權記錄屬於該應用程式; 相容性檢查依據內建 AutoJs6 執行階段, 不是打包應用程式自身的 versionCode"
+    "打包應用程式仍需另外安裝相容的 Compose UI 外掛, 啟用/授權記錄屬於該應用程式; 相容性檢查依據內建 AutoJs6 執行階段, 不是打包應用程式自身的 versionCode",
+    "TSX 需要相符的 AutoJs6 6.8.0 / 5319 本機宿主與內建 Compose 宣告的配套 TypeScript Engine 建置; 單獨安裝轉譯器不會增加 TSX 支援"
   ],
   "h3_faq": "常見問題",
   "faq_items": [
@@ -56,7 +58,7 @@
     "是否需要解除安裝其它介面外掛程式? 不需要, Compose UI 與現有 `ui` 模組及其它外掛程式互不影響",
     "外掛變更時會怎樣? 更新, 解除安裝或停用外掛會關閉作用中的工作階段並報告對應錯誤; 相容且啟用的外掛允許重新掛載",
     "懸浮視窗需要什麼條件? 先授予宿主懸浮視窗權限, 輸入文字前呼叫 `window.requestFocus()`. 若 HyperOS 未顯示視窗, 請先返回桌面. 缺少權限會傳回 PERMISSION_REQUIRED, 不會自動彈出授權介面",
-    "能否直接呼叫任意 Compose 函式或使用 JSX/TSX? 不能. 請使用文件中的節點工廠和命令; 外掛不編譯 Kotlin, 也不公開任意 Composable 函式",
+    "能否使用 TSX 或任意 Compose 函式? 配合相符的宿主與 TypeScript Engine, TSX 可使用文件列出的 Compose 節點工廠. 不支援任意 Kotlin Composable 函式或自訂 TSX 元件",
     "旋轉是否遺失狀態? 目前宿主自行處理一般方向變化, 保留指令碼引擎. 真正的 Activity 重建或銷毀會關閉該引擎及所屬工作階段, 不自動還原業務狀態",
     "選擇器如何尋找元件? testTag 按原樣公開為 ID, 不加入套件名稱前綴. id/testTag 與 desc/contentDescription 是不同資訊; Button 的文字可能是子節點, 必要時沿 parent() 尋找可點擊祖先"
   ],
