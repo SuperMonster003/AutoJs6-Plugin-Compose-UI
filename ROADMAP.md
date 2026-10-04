@@ -254,7 +254,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
-| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | 未开始 |
+| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 完成, F.2 起待实施 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
 
@@ -508,12 +508,14 @@ P6.4 证据 (2026-10-04): 插件build26签名APK `autojs6-plugin-compose-ui-v1.0
 
 以下条目在 1.0.0 gate 后按维护者已确认的 Q7 顺序推进, 详细说明见附录 F.
 
-- [ ] (宿主 / 文档) F.1 TSX 工厂: `__autojs6Tsx` 按 `type` 路由到 `compose.createElement`, `aj6-jsx-element-extension.d.ts` 增补 Compose 元素类型, TypeScript Engine 插件配合.
+- [x] (宿主 / 文档) F.1 TSX 工厂: `__autojs6Tsx` 按 `type` 路由到 `compose.createElement`, `aj6-jsx-element-extension.d.ts` 增补 Compose 元素类型, TypeScript Engine 插件配合.
 - [ ] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
 - [ ] (宿主 / 插件) F.3 `compose.dialog(nodeOrRender, options)`: 任意脚本弹出 Material 3 Dialog / ModalBottomSheet, 返回 Promise 或会话.
 - [ ] (插件 / 宿主 / 文档) F.4 宽集组件, 契约 `CONTRACT_VERSION = 2` (只追加).
 - [ ] (插件) F.5 组件画廊 Activity (若排期, 需同时遵循独立设置页与图标规范).
 - [ ] (宿主) F.6 细粒度更新与脚本侧依赖裁剪 (按 P5.3 数据决定).
+
+F.1 证据 (2026-10-04): `docs/dev/p7-tsx-evidence.md`. 宿主 5319 支持真实组件工厂引用 / 别名及 `compose:Name`, 有界中立 Fragment 保留根 / 插槽 / 跨脚本身份限制, XML 混域在替换页面前拒绝. 声明 4.31.0 的 29 项 JSX 映射由冻结目录生成, Ace 1.23.0 与 TypeScript Engine 0.6.4 使用实际配套声明; Engine 保留公开 2.1.3 tarball 锁, 明示本地补充来源. 宿主相关 JVM 173 + API 16, 插件 JVM 63, 目录 Python 16, Engine 相关 JVM 534 + 构建逻辑 4, Ace JVM 171 通过. API 35 x86_64 自建 AVD 上, 最终签名编译器 / 渲染器通过 6 项真实 TSX 与 5 项原有 JS 示例, 编译器 debug 声明清单另 2 项通过. 文档 152 模块 / 6548 搜索条目与 Offline Docs 同步 / 签名门禁通过. 插件 1.1.0 / 27 为本地预览, 普通工厂最低宿主 5316 不变; JSX 表达式精度与 namespace 属性补全限制已明确记录. 自建 AVD 与 5 个测试安装均已清理, 下一起点为 F.2.
 
 ---
 
@@ -978,3 +980,11 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 最终签名APK `autojs6-plugin-compose-ui-v1.0.0-d9cdec3c.apk`, 2378609B, SHA-256 `c2d7ddae7d8311b4b82c991b7fe6f1c92547b4b1df7dfd018f1f43b0be7be8cc`, 7143类/44721方法引用. 相对P5基线仅增加3540B, 方法引用不变, 均在已批准复核线内; 未把P5时序与内存数据冒称本轮新测量.
 - 清理与边界: 自有安装包均已移除; compose_p6_api35核对名称/序列号/已解析路径后由SDK删除, 数据与注册不存在. 物理设备, 其它AVD, 共享SDK和原宿主工作区未修改. 六个任务仓库均按范围提交, Ace保留原有未跟踪releases目录, 未整理或删除. 无Git推送/npm发布/官方索引/公开Release.
 - P0-P6的既定本地实现与gate完成; 图标两类资源有效, 正式图案仍待源图. 完整宿主JVM/lint, 本轮再跑六设备矩阵, release宿主性能/长期堆泄漏/新的冷启动PSS滚动稳定性证据和远端CI未执行. 下一起点为已批准顺序的P7 F.1 TSX工厂, 远端步骤继续等待D7明确解除.
+
+### 2026-10-04: P7 F.1 TSX 本地交付
+
+- 按既定顺序完成 F.1, 没有增加, 分拆或丢弃路线图小节. 宿主在同一 classic TSX ABI 内接入 29 个 Compose 工厂, 引用别名与命名空间标签, 中立 Fragment, 根 / 插槽限制及混域保留旧页面. 真实设备暴露的 NativeObject/Map 解包导致节点身份丢失问题已修复, 严格回归通过; 未改通用解包器或冻结 V1 契约.
+- 配套版本: 宿主 6.8.0/5319 (`b67d668f48`), Declarations 4.31.0 (`3213fb0`), Engine 0.6.4/84 (`be69923`), Ace 1.23.0/125 (`a1b7045`), 文档 6.8.0/91 (`4c3e292`, `55c033f`), Offline Docs 6.8.6/72 (`cbb7183`). 插件为本条所在 F.1 提交, 1.1.0/build27. 实际 aj6dts -Publish, Ace 聚合与离线 BAT 同步均已执行, 全部仅本地.
+- 验证: 宿主相关 JVM 173/API16, 插件63, Engine相关534/构建逻辑4, Ace171, catalog Python16, 真实TS5.1.3/6.0.3与语言服务回归通过. 自建API35 x86_64 AVD的最终签名编译器/渲染器通过6个真实TSX场景和5个原有JS示例; 编译器debug声明清单另2项通过. 原有36个XML标签保留, namespace属性补全及JSX表达式静态精度限制已在文档明确.
+- 最终插件签名产物 `autojs6-plugin-compose-ui-v1.1.0-0a1cb1c0.apk`, 2381737B, 44721 DEX方法引用, 都低于Q5已批准复核线; 完整摘要与各仓库验证见 `docs/dev/p7-tsx-evidence.md`. 原236条P5数据与门槛不变. 本轮未重跑完整设备矩阵/宿主全量JVM及lint/打包应用TSX/长期性能测量/远端CI.
+- 清理: 5个自有安装包全部移除, 自建compose_f1_api35停机并核对路径后经SDK删除, 注册与数据不存在. 原宿主并发codegen工作及Ace既有未跟踪releases保留, 物理设备与其他AVD未处理. Q6正式图案仍待源图. 下一起点为F.2与旧ui混合; D7继续有效.

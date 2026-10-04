@@ -19,7 +19,7 @@ class ComposeUiPluginRuntimeInfoTest {
             name = "Compose UI",
             description = "Renders script-declared user interfaces with Jetpack Compose and Material 3",
             instruction = "Compose UI is a user interface rendering plugin for AutoJs6.",
-            versionName = "1.0.0",
+            versionName = "1.1.0",
             versionCode = 4L,
             versionDate = "Oct 2, 2026",
         )
@@ -31,10 +31,10 @@ class ComposeUiPluginRuntimeInfoTest {
         assertEquals("compose-ui", info.id)
         assertEquals("compose", info.engine)
         assertEquals("default", info.variant)
-        assertEquals("1.0.0", info.versionName)
+        assertEquals("1.1.0", info.versionName)
         assertEquals(4L, info.versionCode)
         assertEquals("Oct 2, 2026", info.versionDate)
-        // Roadmap D22: pure bytecode APK, no ABI restriction reported to the plugin center.
+        // Roadmap D22: one universal APK, no ABI restriction reported to the plugin center.
         assertArrayEquals(emptyArray<String>(), info.supportedAbis)
         assertEquals(5316L, info.requiresHostVersion)
         assertEquals(ComposeUiPlugin.REQUIRED_HOST_VERSION, info.requiresHostVersion)
