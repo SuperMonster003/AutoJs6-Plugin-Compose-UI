@@ -1,0 +1,140 @@
+{
+  "reason": "First publication: replace the maintainer email with the GitHub noreply identity. Trees, author names, timestamps and commit messages are preserved.",
+  "commits": [
+    {
+      "originalLocalCommit": "e7efceac6f464e47e4a631ea0e7888e8d9a1915b",
+      "publishedCommit": "2b19e715cb0783ad509b7f1b4353b0807e14ad23",
+      "tree": "2e323a8cb1e28106c7b95977f4acea1716af5d43"
+    },
+    {
+      "originalLocalCommit": "aeb0af81711f4637ab4505886b4f8a063e24a2c2",
+      "publishedCommit": "c5830fe7471e8e2b09209bc2a94512deae5fc961",
+      "tree": "6ecd6f5bff69716d3daa5a0276b5e4d06bc154bc"
+    },
+    {
+      "originalLocalCommit": "9879baa13c40908b1ea29f4b10cee169993c28a6",
+      "publishedCommit": "b050368bed2030b717fc00b172e45f64346fa1f9",
+      "tree": "021cef4694dc7f0f2491ff3da0a72f7ee71ecd03"
+    },
+    {
+      "originalLocalCommit": "6cc0d52264f0931c7d71ccce8809eb7a9fc92b9c",
+      "publishedCommit": "7eef6a2266541f27d6de810dc1dcf258af280220",
+      "tree": "69268ac3665e7535037688e24db4e7fb7a6067ff"
+    },
+    {
+      "originalLocalCommit": "657f02108a5cb8f8ee1cb02b05d3e6581f19a67c",
+      "publishedCommit": "59f5a4dcf0f57b215e6a389725ba477c9844d2c8",
+      "tree": "c70f24b6d6ff8670a92f33cb9af425372dd36444"
+    },
+    {
+      "originalLocalCommit": "3af9f579a6188c2293ea9e9a55489955d1fb90ca",
+      "publishedCommit": "a0e7df4fb1667ba5a7a3652b665a454b5d9b4800",
+      "tree": "caf3c5cc15da2dd464e545fc271df2f122678e58"
+    },
+    {
+      "originalLocalCommit": "98bc63f79a97e0f254d489fe2733675a21d3c3bf",
+      "publishedCommit": "ced5a5199dd77a61c28d0bf32b62696f6c068607",
+      "tree": "e707ea3722b37d47ffc2e0506d27fd1509f58f91"
+    },
+    {
+      "originalLocalCommit": "f74a8998cf5f30aed64773edb92d0f63c81108ba",
+      "publishedCommit": "074f600efe9f51eced6acd17e2b688dbe6d58fe2",
+      "tree": "ba02b26469f4709f703ded0134aa9f5531c2aef7"
+    },
+    {
+      "originalLocalCommit": "340c6992b133a422cdb99137e235b811b5bffc1c",
+      "publishedCommit": "88f511faf065d979ed43bd718f1cbbee0fb26e60",
+      "tree": "b5969097ec48f67692fbbaa103908bfe1ced931b"
+    },
+    {
+      "originalLocalCommit": "d383be0173ebd581f2451ecd45edbe4c46d1851f",
+      "publishedCommit": "07e6526271f5462bb691c7803ba5bae09b83716f",
+      "tree": "7ab377d8ba89cb8895cc320cb5706e57547a9a1e"
+    },
+    {
+      "originalLocalCommit": "4b8990186df51a75a1fbbfa46c4b5ec46c60488a",
+      "publishedCommit": "74b563d0c859598cf7042bf8ba2875abc5f91f99",
+      "tree": "145e154ef12626c734a17dddeccbf81932d9bfc0"
+    },
+    {
+      "originalLocalCommit": "6e80267db2752bfec0344fbb635aa45681f8e32f",
+      "publishedCommit": "e3aa60abb64effce05307a7b9940cd23c8a3b9aa",
+      "tree": "6775610a581faf5394c6db40ec492715fdef4424"
+    },
+    {
+      "originalLocalCommit": "cebd1d39ab90b2a946e450e2dd9b16084481b79b",
+      "publishedCommit": "9ead5f7f58c8ede77b01086f2f96891dc5071068",
+      "tree": "6db7d895e65a8bbf2f972b51ffd7fd8ec3681735"
+    },
+    {
+      "originalLocalCommit": "d2ccbe449151a0aa0b34cc88341de11f5b3f06d6",
+      "publishedCommit": "d9a2da171439fafe722ea9d8e3771d13d39845d8",
+      "tree": "5366655a6bd08e6afed646c90751283966bf5d59"
+    },
+    {
+      "originalLocalCommit": "eec488968b843288251a0df5e665eafe9f60dc93",
+      "publishedCommit": "f85e24da0c4e9279feeedfee4eb152a6fb014567",
+      "tree": "2904f4acc8f278e713d4f53be42d5f80a59d7e9d"
+    },
+    {
+      "originalLocalCommit": "a4e9e6682d990148a977c465de017b4c8b058abc",
+      "publishedCommit": "0ec77500374d06e99c9d4c69d6a29c80ad0651e1",
+      "tree": "9ccc295a8195f9965fd1f1cfcb2b1aaa1f8c72f8"
+    },
+    {
+      "originalLocalCommit": "168268fe34491e869c55ae15fc1f60703840175e",
+      "publishedCommit": "4442977c529708ac5a8b2aa4dce1587b054e8937",
+      "tree": "04388198c24c60fa6f5f098bfc72712c2025aa21"
+    },
+    {
+      "originalLocalCommit": "99c4d1da853efd365f8912d9cd494e9b1fc9c8a3",
+      "publishedCommit": "99ee4ae76f02bcbe45e7916313623045e38e0a91",
+      "tree": "d73ef6ea88e9ada8e6dc1296e7318a87f90e3c0a"
+    },
+    {
+      "originalLocalCommit": "004f9fd60f4ca710c93c037ebdd5d246c219ef7c",
+      "publishedCommit": "c62f80875ecb95d76c296d11a8104eff1830cf28",
+      "tree": "659bfc7773d4d4e4c6d0967009a7d5ef5c668a01"
+    },
+    {
+      "originalLocalCommit": "5013b579377964540023432c650ae6c0603ad91f",
+      "publishedCommit": "92b3dba342a3a9fb1bbbf1b1025f7badbb3292fd",
+      "tree": "9671aff7ea71ebb6b474ded98f28851a3ae23c01"
+    },
+    {
+      "originalLocalCommit": "dbf2c26cb52fca69607ed660ce014cd892429d3a",
+      "publishedCommit": "0ac01efed8aa5369a6f0e9f5c52d4497a4570a19",
+      "tree": "2f959300ee292221231ee604d22d582612ef2374"
+    },
+    {
+      "originalLocalCommit": "27be441ee240ce6e0cc704f923b90451026d8321",
+      "publishedCommit": "822747482730772643aa43a6b71e811a0d3a1ef2",
+      "tree": "55f0bfe4fd3402497df59c5ad980e1517fd0e52d"
+    },
+    {
+      "originalLocalCommit": "27a397a1c4c8bb8ddcedb12c5f8d6f6bcfb9b744",
+      "publishedCommit": "02e9e0b6c734ee601888dabb6136f3adbf35b0f5",
+      "tree": "7715cbea9d9c64c14859d86c1dab258136e3f157"
+    },
+    {
+      "originalLocalCommit": "63b22f02388cabcf76173d20bb50699b405a08cd",
+      "publishedCommit": "743f28d40668b63b016569d25ac6a85030ef97a5",
+      "tree": "3ae41bbafd27d3b33bf90da3fe27eff2a5366b3a"
+    },
+    {
+      "originalLocalCommit": "5cb77eff97f34c4354043ce627bf22a02abcced4",
+      "publishedCommit": "2fa0ecf3c5edb354d61ed726d314ee165a2a5298",
+      "tree": "937e99a4c2a49888992828d6a66b99719a4102cf"
+    },
+    {
+      "originalLocalCommit": "9a54f41840f7877d58d0e070c67d1645fde01182",
+      "publishedCommit": "758aeeccdd65ca96be8a0b7c21daa62670313412",
+      "tree": "f4ae3d1640eefd16439b1e898ee686089a05bfc4"
+    },
+    {
+      "originalLocalCommit": "e5a959aff0208a47870f58fc17a7759d53adef9b",
+      "publishedCommit": "90421ec119690ea2a2d40abef82c435e5bfabd4b",
+      "tree": "2068be2509163afccfb5c402df5dee78d5f0cc07"
+    }
+  ]
+}

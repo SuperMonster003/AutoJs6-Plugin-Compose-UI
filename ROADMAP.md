@@ -988,3 +988,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 验证: 宿主相关 JVM 173/API16, 插件63, Engine相关534/构建逻辑4, Ace171, catalog Python16, 真实TS5.1.3/6.0.3与语言服务回归通过. 自建API35 x86_64 AVD的最终签名编译器/渲染器通过6个真实TSX场景和5个原有JS示例; 编译器debug声明清单另2项通过. 原有36个XML标签保留, namespace属性补全及JSX表达式静态精度限制已在文档明确.
 - 最终插件签名产物 `autojs6-plugin-compose-ui-v1.1.0-0a1cb1c0.apk`, 2381737B, 44721 DEX方法引用, 都低于Q5已批准复核线; 完整摘要与各仓库验证见 `docs/dev/p7-tsx-evidence.md`. 原236条P5数据与门槛不变. 本轮未重跑完整设备矩阵/宿主全量JVM及lint/打包应用TSX/长期性能测量/远端CI.
 - 清理: 5个自有安装包全部移除, 自建compose_f1_api35停机并核对路径后经SDK删除, 注册与数据不存在. 原宿主并发codegen工作及Ace既有未跟踪releases保留, 物理设备与其他AVD未处理. Q6正式图案仍待源图. 下一起点为F.2与旧ui混合; D7继续有效.
+
+
+### 2026-10-04 源码公开与图稿同步
+
+维护者已授权创建公开 GitHub 仓库并推送本插件源码, 提交采用 noreply 邮箱. 本条更新 D7 的源码推送门控; 既有开发阶段和实测记录保持其原有含义. 本次工作整理并提交当前工作区, 同步图稿与生成材料, 不以源码公开代替 APK 发布和发行验收. 宿主改动另行处理.
+
+首次公开前已将 27 个本地提交的邮箱改为 noreply, 保留作者名称, 时间, 消息和全部文件树. `docs/dev/commit-identity-map.json` 提供原本地提交与公开提交的对应关系, 供既有证据溯源.
