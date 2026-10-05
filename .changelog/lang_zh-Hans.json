@@ -6,13 +6,16 @@
   "changelog_label_dependency": "依赖",
   "$data": {
     "v1.1.0": {
-      "released_date": "2026/10/04",
+      "released_date": "2026/10/05",
       "hint": [
         "1.1.0 本地开发预览: 需要匹配的 AutoJs6 宿主构建, 并安装和启用本插件. 本地配套提供 UI 页面, 悬浮窗, 五个示例, API 参考与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标图案仍为临时占位, 等待维护者提供正式源图",
         "TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主与内置 Compose 声明的配套 TypeScript Engine 构建; 单独安装渲染器不会增加 TSX 支持"
       ],
       "feature": [
         "TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点"
+      ],
+      "improvement": [
+        "Android 系统应用信息图标与图标工作台共用图稿和亮暗底色, 保留插件中心透明图稿及现有启动器选项"
       ]
     },
     "v1.0.0": {

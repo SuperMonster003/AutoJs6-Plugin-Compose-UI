@@ -6,13 +6,16 @@
   "changelog_label_dependency": "相依",
   "$data": {
     "v1.1.0": {
-      "released_date": "2026/10/04",
+      "released_date": "2026/10/05",
       "hint": [
         "1.1.0 本機開發預覽: 需要相符的 AutoJs6 宿主建置, 並安裝和啟用本外掛. 本機配套提供 UI 頁面, 浮動視窗, 五個範例, API 參考與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在藍圖中. 目前未登錄官方索引, 尚無官方發行版. 圖示圖案仍為臨時預留, 等待維護者提供正式來源圖片",
         "TSX 需要相符的 AutoJs6 6.8.0 / 5319 本機宿主與內建 Compose 宣告的配套 TypeScript Engine 建置; 單獨安裝轉譯器不會增加 TSX 支援"
       ],
       "feature": [
         "TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點"
+      ],
+      "improvement": [
+        "Android 系統應用程式資訊圖示與圖示工作台共用圖稿及明暗底色, 保留外掛程式中心透明圖稿與現有啟動器選項"
       ]
     },
     "v1.0.0": {
