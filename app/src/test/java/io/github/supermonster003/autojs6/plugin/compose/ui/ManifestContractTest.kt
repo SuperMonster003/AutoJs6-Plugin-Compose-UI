@@ -39,7 +39,7 @@ class ManifestContractTest {
         assertEquals("false", application.androidAttribute("fullBackupContent"))
         assertEquals("@xml/data_extraction_rules", application.androidAttribute("dataExtractionRules"))
         assertEquals("@string/app_name", application.androidAttribute("label"))
-        assertEquals("@mipmap/ic_launcher", application.androidAttribute("icon"))
+        assertEquals("@mipmap/ic_icon_studio_application", application.androidAttribute("icon"))
         assertEquals("true", application.androidAttribute("supportsRtl"))
         assertNull("no application theme: the plugin has no screens of its own (roadmap D8)", application.androidAttributeOrNull("theme"))
         assertNull("no Application subclass before a renderer needs one", application.androidAttributeOrNull("name"))

@@ -258,3 +258,9 @@ py .python/generate_launcher_icons.py --check
 - Jetpack Compose 公共文档 (只读): `https://developer.android.com/compose`
 
 参考时以这些仓库的当前代码为准; 复制骨架后必须替换身份字段, URL, 文案, 常量, 版本与测试数据.
+
+## System application icon (2026-10-05)
+
+- The maintainer requested themed backgrounds for every official plugin's Android App info icon. The application icon and roundIcon now use `@mipmap/ic_icon_studio_application`; this supersedes earlier application-level `ic_launcher` or fixed-dark `ic_launcher_system` wiring. Existing transparent brand resources and launcher alias choices retain their roles.
+- `.icons/recipe.json` and the portable Icon Studio 1.3 renderer generate separate system resources from the saved artwork, geometry and backgrounds. Default and night adaptive XML prevent legacy night PNGs from overriding the adaptive icon on modern Android. Projects supporting API 24/25 use circular compatibility PNGs; projects with minSdk >= 26 use unqualified anydpi XML without legacy application PNGs. Android system surfaces follow the system theme; Plugin Center follows the host theme.
+- Regenerate and verify with `.python/generate_icon_studio.py --check`, including the application Manifest references. Do not add launcher entries, alter component identities or paint the Plugin Center PNG background. System icon updates require a rebuilt and installed APK; catalog updates alone do not replace it.
