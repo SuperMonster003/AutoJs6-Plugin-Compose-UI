@@ -25,10 +25,10 @@
         <meta-data
             android:name="org.autojs.plugin.compose.RENDERER_FACTORY"
             android:value="io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl" />
-        <!-- P1.3: first integrated host build containing the V1 loader, sessions and Plugin Center registration. -->
+        <!-- F.4: first integrated host build supporting the V2 component catalog. -->
         <meta-data
             android:name="requiresHostVersion"
-            android:value="5316" />
+            android:value="5322" />
 
         <activity
             android:name=".WakeActivity"

@@ -4,24 +4,22 @@ Compose UI 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供�
 
 ### 使用方式
 
-1. 安裝包含 compose 指令碼入口的相符本機 AutoJs6 建置 (最低 6.8.0 / 5316)
+1. 安裝包含 compose 指令碼入口的相符本機 AutoJs6 建置 (最低 6.8.0 / 5322)
 2. 安裝本外掛程式 APK (無需開啟, 外掛程式沒有啟動器進入點)
 3. 在 AutoJs6 的外掛程式中心確認 Compose UI 已被識別並處於啟用狀態
 4. 在指令碼中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮視窗權限再使用 `compose.floaty`
 
 ### 相容性
 
-- 最低 AutoJs6 版本: 6.8.0 (5316) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容
+- 最低 AutoJs6 版本: 6.8.0 (5322) 或更新; 低於該版本的宿主會在外掛程式中心提示不相容
 - Android 版本: 7.0 (API 24) 或更新
 - 處理器架構: arm64-v8a / armeabi-v7a / x86_64 / x86 (單一 APK 內建全部四種, 無需依架構選擇安裝套件)
 - Compose 版本: 由外掛程式自帶 (BOM 2026.09.00), 不依賴宿主的 Compose 執行階段
-- 契約版本: 1; 宿主與外掛程式透過契約版本協商, 不相符時拒絕載入並給出明確錯誤
+- 契約版本: 2; 宿主與外掛程式透過契約版本協商, 不相符時拒絕載入並給出明確錯誤
 - 打包應用程式仍需另外安裝相容的 Compose UI 外掛, 啟用/授權記錄屬於該應用程式; 相容性檢查依據內建 AutoJs6 執行階段, 不是打包應用程式自身的 versionCode
-- TSX 需要相符的 AutoJs6 6.8.0 / 5319 本機宿主與內建 Compose 宣告的配套 TypeScript Engine 建置; 單獨安裝轉譯器不會增加 TSX 支援
-- 互操作需要相符的 AutoJs6 6.8.0 / 5320 宿主與支援 AndroidView 擴充的 Compose UI 建置; TSX 另需 TypeScript Engine 0.6.5. 基礎 V1 轉譯最低宿主仍為 5316
 - View 工廠在轉譯前於主執行緒執行. 無效替換保留目前內容; 同一 View 不可屬於兩個節點, 也不會從其他父檢視被搶佔. 借用的 View 保留原有監聽器, 外部資源仍由呼叫端管理
-- 獨立彈窗需要配套 AutoJs6 6.8.0 / 5321 與支援 dialog-v1 的 Compose UI; TSX 另需 TypeScript Engine 0.6.6. 非 UI 指令碼需要宿主懸浮視窗權限
 - cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與指令碼結束仍會清理彈窗, 保留現有頁面和其他工作階段
+- 此版本使用 Compose UI 契約 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用舊 V1 轉譯器的原有元件, 擴充元件需要 V2 轉譯器
 
 ### 常見問題
 

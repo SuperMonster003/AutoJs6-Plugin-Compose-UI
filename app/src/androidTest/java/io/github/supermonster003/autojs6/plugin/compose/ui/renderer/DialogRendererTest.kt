@@ -45,7 +45,7 @@ class DialogRendererTest {
     private fun create(type: String = DialogInteropV1.ALERT, cancelable: Boolean = true, attach: Boolean = true) {
         rule.runOnUiThread {
             val capabilities = ComposeUiRendererFactoryImpl().capabilities()
-            assertEquals(30, capabilities.getStringArrayList(ComposeUiCapabilityKeys.COMPONENTS)!!.size)
+            assertEquals(55, capabilities.getStringArrayList(ComposeUiCapabilityKeys.COMPONENTS)!!.size)
             assertTrue(capabilities.getStringArrayList(ComposeUiCapabilityKeys.FEATURES)!!.contains(DialogInteropV1.FEATURE))
             val factory = Class.forName(capabilities.getString(DialogInteropV1.FACTORY_CLASS_KEY)!!)
                 .getDeclaredConstructor().newInstance() as DialogRendererFactoryV1

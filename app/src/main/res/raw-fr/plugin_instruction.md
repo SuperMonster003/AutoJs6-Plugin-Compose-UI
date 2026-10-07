@@ -4,24 +4,22 @@ Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et
 
 ### Utilisation
 
-1. Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum 6.8.0 / 5316)
+1. Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum 6.8.0 / 5322)
 2. Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)
 3. Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active
 4. Utilisez `compose` ou `$compose` dans les scripts; montez les activités avec `compose.mount`, ou accordez la permission de superposition à l'hôte et utilisez `compose.floaty`
 
 ### Compatibilite
 
-- Version minimale d'AutoJs6 : 6.8.0 (5316) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
+- Version minimale d'AutoJs6 : 6.8.0 (5322) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
 - Version d'Android : 7.0 (API 24) ou ulterieure
 - Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote
-- Version du contrat : 1 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
+- Version du contrat : 2 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
 - Les applications empaquetées nécessitent aussi l'installation séparée d'un plugin Compose UI compatible, avec activation/autorisation propres à cette application; la compatibilité porte sur le runtime AutoJs6 intégré, pas sur le versionCode de l'application
-- TSX nécessite le build local AutoJs6 6.8.0 / 5319 correspondant et TypeScript Engine avec les déclarations Compose; installer uniquement le moteur de rendu ne suffit pas
-- Cette intégration nécessite AutoJs6 6.8.0 / 5320 et un build Compose UI avec extension AndroidView; TSX nécessite aussi TypeScript Engine 0.6.5. Le rendu V1 de base conserve le minimum 5316
 - Les fabriques de View tournent sur le thread principal avant le rendu. Un remplacement invalide conserve le contenu courant; une View ne peut appartenir à deux noeuds ni être prise à un autre parent. Ses écouteurs et les ressources du code appelant sont préservés
-- Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte
 - cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
+- Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
 
 ### FAQ
 

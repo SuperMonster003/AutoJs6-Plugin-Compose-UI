@@ -36,7 +36,7 @@ class ComposeUiPluginRuntimeInfoTest {
         assertEquals("Oct 2, 2026", info.versionDate)
         // Roadmap D22: one universal APK, no ABI restriction reported to the plugin center.
         assertArrayEquals(emptyArray<String>(), info.supportedAbis)
-        assertEquals(5316L, info.requiresHostVersion)
+        assertEquals(5322L, info.requiresHostVersion)
         assertEquals(ComposeUiPlugin.REQUIRED_HOST_VERSION, info.requiresHostVersion)
     }
 
@@ -58,8 +58,8 @@ class ComposeUiPluginRuntimeInfoTest {
         assertTrue(ComposeUiPlugin.RENDERER_FACTORY_CLASS_NAME.startsWith(ComposeUiPlugin.PACKAGE_NAME + "."))
         assertEquals("requiresHostVersion", ComposeUiPlugin.META_REQUIRES_HOST_VERSION)
         assertEquals(PluginCapabilityKeys.REQUIRES_HOST_VERSION, ComposeUiPlugin.META_REQUIRES_HOST_VERSION)
-        assertEquals(1, ComposeUiPlugin.CONTRACT_VERSION)
-        assertEquals(5316L, ComposeUiPlugin.REQUIRED_HOST_VERSION)
+        assertEquals(2, ComposeUiPlugin.CONTRACT_VERSION)
+        assertEquals(5322L, ComposeUiPlugin.REQUIRED_HOST_VERSION)
     }
 
     @Test

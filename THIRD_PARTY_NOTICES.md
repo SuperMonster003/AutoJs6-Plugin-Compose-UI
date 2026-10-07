@@ -72,3 +72,24 @@ It is test-only and is not packaged in the plugin APK. JVM tests provide the sam
 AndroidX/coroutine dependencies as the host so pure value/theme tests can run without a host APK.
 No new runtime dependency or native library was added for P2. Theme seed colors use an independent
 CIELAB/LCh tonal construction with gamut reduction; this is not an implementation of Google's HCT.
+
+`androidx.activity:activity-compose:1.8.2` (Apache-2.0) is now an explicit
+implementation dependency for the public controlled-drawer BackHandler. The
+pre-change dependencyInsight report resolves this same version through
+Material3 1.4.0 at runtime; this only exposes it to the compile classpath and
+does not upgrade the runtime or the host's locked activity / activity-ktx 1.12.2.
+
+## F.4 V2 release artifact
+
+The current compose-ui-api.aar is the host release module for 6.8.0 / 5322.
+SHA-256: `3ebe1f887b7e3a9a98277bd0436e83e8e808b380cbf050d37da42975ea125351`. API source is the clean host commit
+`6a166c38415e7299ba034cd062dcc4c51a4b543a`; the API module was assembled with AGP
+9.4.0 before the concurrent platform upgrade. Its sources and the staged AAR
+were unchanged by that upgrade. Final host generation uses the same source at
+AGP 9.4.1. See `docs/dev/p7-wide-evidence.md` at the repository root. The MPL-2.0
+license and the 51 shared dependency entries are unchanged. The artifact adds
+25 component definitions and shared V2 validation. All 208 previous model, catalog,
+loading and optional extension class files are byte-identical; only
+ComposeUiContract changes its maximum supported version to 2. The V1 minimum
+is still 1, and its frozen catalog remains 30 entries. See
+`docs/dev/p7-wide-aar-compatibility.json` for the complete class comparison.

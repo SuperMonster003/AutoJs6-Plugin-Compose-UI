@@ -74,6 +74,7 @@ Fonctions de l'aperçu de développement actuel:
 - TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML
 - Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone
 - compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires
+- Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
 
 ******
 
@@ -81,7 +82,7 @@ Fonctions de l'aperçu de développement actuel:
 
 ******
 
-1. Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum 6.8.0 / 5316)
+1. Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum 6.8.0 / 5322)
 2. Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)
 3. Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active
 4. Utilisez `compose` ou `$compose` dans les scripts; montez les activités avec `compose.mount`, ou accordez la permission de superposition à l'hôte et utilisez `compose.floaty`
@@ -136,17 +137,15 @@ Les cinq scripts exécutables sont répertoriés dans assets/examples/index.json
 
 Exigences d'execution et limites du plugin:
 
-- Version minimale d'AutoJs6 : 6.8.0 (5316) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
+- Version minimale d'AutoJs6 : 6.8.0 (5322) ou ulterieure ; les hotes plus anciens signalent le plugin comme incompatible dans le centre de plugins
 - Version d'Android : 7.0 (API 24) ou ulterieure
 - Architecture du processeur : arm64-v8a / armeabi-v7a / x86_64 / x86 (les quatre integrees dans l'APK unique, aucun choix par architecture)
 - Version de Compose : embarquee dans le plugin (BOM 2026.09.00), independante du runtime Compose de l'hote
-- Version du contrat : 1 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
+- Version du contrat : 2 ; l'hote et le plugin negocient la version du contrat et refusent le chargement avec une erreur explicite en cas de desaccord
 - Les applications empaquetées nécessitent aussi l'installation séparée d'un plugin Compose UI compatible, avec activation/autorisation propres à cette application; la compatibilité porte sur le runtime AutoJs6 intégré, pas sur le versionCode de l'application
-- TSX nécessite le build local AutoJs6 6.8.0 / 5319 correspondant et TypeScript Engine avec les déclarations Compose; installer uniquement le moteur de rendu ne suffit pas
-- Cette intégration nécessite AutoJs6 6.8.0 / 5320 et un build Compose UI avec extension AndroidView; TSX nécessite aussi TypeScript Engine 0.6.5. Le rendu V1 de base conserve le minimum 5316
 - Les fabriques de View tournent sur le thread principal avant le rendu. Un remplacement invalide conserve le contenu courant; une View ne peut appartenir à deux noeuds ni être prise à un autre parent. Ses écouteurs et les ressources du code appelant sont préservés
-- Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte
 - cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
+- Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
 
 ******
 
@@ -194,8 +193,8 @@ variant: default
 info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
-contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5316 (6.8.0)
+contract package: org.autojs.plugin.compose.api (version 2)
+minimum host build: 5322 (6.8.0)
 ```
 
 L'hote decouvre le plugin via `org.autojs.plugin.INFO` et lit des informations de capacite telles que `requiresHostVersion` ; la classe de fabrique du moteur de rendu est declaree par la meta-donnee `org.autojs.plugin.compose.RENDERER_FACTORY`, et l'hote cree un chargeur de classes a partir du chemin de l'APK du plugin (avec l'hote comme parent) puis l'instancie dans son propre processus.
@@ -218,20 +217,20 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 #### v1.1.0
 
-_2026/10/07_
+_2026/10/08_
 
 - `Indication` Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur
-- `Indication` TSX nécessite le build local AutoJs6 6.8.0 / 5319 correspondant et TypeScript Engine avec les déclarations Compose; installer uniquement le moteur de rendu ne suffit pas
-- `Indication` Cette intégration nécessite AutoJs6 6.8.0 / 5320 et un build Compose UI avec extension AndroidView; TSX nécessite aussi TypeScript Engine 0.6.5. Le rendu V1 de base conserve le minimum 5316
-- `Indication` Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte
+- `Indication` Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
 - `Nouveaute` TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML
 - `Nouveaute` Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone
 - `Nouveaute` compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires
+- `Nouveaute` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
 - `Amelioration` Les icônes des informations d'application Android utilisent les illustrations et les fonds clairs et sombres d'Icon Studio, en conservant les images transparentes du centre de plugins et les choix du lanceur
 - `Amelioration` Les fabriques de View tournent sur le thread principal avant le rendu. Un remplacement invalide conserve le contenu courant; une View ne peut appartenir à deux noeuds ni être prise à un autre parent. Ses écouteurs et les ressources du code appelant sont préservés
 - `Amelioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
 - `Dependance` Mettre à jour compose-ui-api.aar avec une extension AndroidView optionnelle tout en préservant V1
 - `Dependance` Ajout de la capacité de dialogue optionnelle à compose-ui-api.aar en conservant les contrats V1 et AndroidView existants
+- `Dependance` Ajout du catalogue V2 de compose-ui-api.aar en conservant les modèles de noeuds et la sémantique des composants V1
 
 #### v1.0.0
 

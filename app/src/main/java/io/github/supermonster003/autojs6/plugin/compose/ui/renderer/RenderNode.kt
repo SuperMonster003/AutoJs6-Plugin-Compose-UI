@@ -146,6 +146,10 @@ internal fun RenderNode(
                 )
                 null -> if (extension?.handles(node.type) == true) extension.Content(node, modifier)
                     else if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>", modifier)
+                else -> WideComponents(node, modifier, commands,
+                    child = { frame.nodes.getValue(it) },
+                    renderChild = { RenderNode(frame, it, commands, fields, snackbar, emit, extension = extension) },
+                    emit = publish)
             }
         }
     }

@@ -6,17 +6,16 @@
   "changelog_label_dependency": "Dependencia",
   "$data": {
     "v1.1.0": {
-      "released_date": "2026/10/07",
+      "released_date": "2026/10/08",
       "hint": [
         "Vista previa local de desarrollo 1.1.0: requiere una compilación AutoJs6 correspondiente y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. El icono sigue siendo provisional hasta recibir las imágenes definitivas del mantenedor",
-        "TSX requiere el host local AutoJs6 6.8.0 / 5319 correspondiente y TypeScript Engine con declaraciones Compose; instalar solo el renderizador no añade soporte TSX",
-        "La integración requiere AutoJs6 6.8.0 / 5320 y un build de Compose UI con la extensión AndroidView; TSX también requiere TypeScript Engine 0.6.5. El renderizado V1 básico mantiene el mínimo 5316",
-        "Los diálogos independientes requieren AutoJs6 6.8.0 / 5321 y Compose UI con dialog-v1; TSX también requiere TypeScript Engine 0.6.6. Los scripts sin UI necesitan el permiso de superposición del anfitrión"
+        "Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2"
       ],
       "feature": [
         "TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes",
         "Los contenedores XML `<compose>` y compose.attach integran sesiones Compose independientes en páginas UI o ventanas flotantes existentes; compose.AndroidView muestra una View Android existente o devuelta por una fábrica síncrona",
-        "compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales"
+        "compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales",
+        "Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar"
       ],
       "improvement": [
         "Los iconos de información de la aplicación de Android comparten las imágenes y los fondos claros y oscuros de Icon Studio, conservando las imágenes transparentes del centro de plugins y las opciones del lanzador",
@@ -25,14 +24,15 @@
       ],
       "dependency": [
         "Actualizar compose-ui-api.aar con la extensión opcional AndroidView conservando V1",
-        "Añadir la capacidad opcional de diálogo a compose-ui-api.aar conservando los contratos V1 y AndroidView existentes"
+        "Añadir la capacidad opcional de diálogo a compose-ui-api.aar conservando los contratos V1 y AndroidView existentes",
+        "Añadir el catálogo V2 de compose-ui-api.aar conservando los modelos de nodos y la semántica de componentes V1"
       ]
     },
     "v1.0.0": {
       "released_date": "2026/10/03",
       "hint": [
         "Vista previa local de desarrollo 1.0.0: requiere una compilación AutoJs6 correspondiente y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. El icono sigue siendo provisional hasta recibir las imágenes definitivas del mantenedor",
-        "Requiere AutoJs6 {{ required_host_version_name }} ({{ required_host_version_code }}) o posterior",
+        "Requiere AutoJs6 6.8.0 (5316) o posterior",
         "Las aplicaciones empaquetadas también requieren instalar por separado un complemento Compose UI compatible, con activación/autorización propias de la aplicación; se comprueba el runtime AutoJs6 integrado, no el versionCode de la aplicación",
         "Se mantienen los dos mipmap claro/oscuro; el dibujo actual es provisional hasta que el mantenedor proporcione las imágenes definitivas en blanco y negro"
       ],

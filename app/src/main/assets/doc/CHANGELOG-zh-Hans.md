@@ -6,20 +6,20 @@
 
 # v1.1.0
 
-###### 2026/10/07
+###### 2026/10/08
 
 * `提示` 1.1.0 本地开发预览: 需要匹配的 AutoJs6 宿主构建, 并安装和启用本插件. 本地配套提供 UI 页面, 悬浮窗, 五个示例, API 参考与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标图案仍为临时占位, 等待维护者提供正式源图
-* `提示` TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主与内置 Compose 声明的配套 TypeScript Engine 构建; 单独安装渲染器不会增加 TSX 支持
-* `提示` 互操作需要匹配的 AutoJs6 6.8.0 / 5320 宿主与支持 AndroidView 扩展的 Compose UI 构建; TSX 还需 TypeScript Engine 0.6.5. 基础 V1 渲染最低宿主仍为 5316
-* `提示` 独立弹窗需要配套 AutoJs6 6.8.0 / 5321 与支持 dialog-v1 的 Compose UI; TSX 还需要 TypeScript Engine 0.6.6. 非 UI 脚本需要宿主悬浮窗权限
+* `提示` 本构建使用 Compose UI 契约 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用旧 V1 渲染器的原有组件, 宽集组件需要 V2 渲染器
 * `新增` TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点
 * `新增` XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View
 * `新增` compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用
+* `新增` Material 3 扩展组件: 导航栏与抽屉, 标签页, 底部弹层与菜单, 日期与时间选择器, 分页与网格, 芯片, 徽标, 分段按钮, 悬浮按钮, 搜索栏, 提示与下拉刷新
 * `优化` Android 系统应用信息图标与图标工作台共用图稿和亮暗底色, 保留插件中心透明图稿及现有启动器选项
 * `优化` View 工厂在渲染前于主线程执行. 无效替换保留当前内容; 同一 View 不可属于两个节点, 也不会从其他父视图被抢占. 借用的 View 保留原有监听器, 外部资源仍由调用方管理
 * `优化` cancelable=false 同时禁止返回键, 点击外部和下滑关闭; 主动关闭与脚本退出仍会清理弹窗, 保留已有页面和其他会话
 * `依赖` 升级 compose-ui-api.aar 契约制品, 保留冻结 V1 并附加可选 AndroidView 互操作扩展
 * `依赖` 附加可选对话框能力至 compose-ui-api.aar, 保留已有 V1 与 AndroidView 契约
+* `依赖` 附加 compose-ui-api.aar V2 组件目录, 保留已有节点模型和 V1 组件语义
 
 # v1.0.0
 

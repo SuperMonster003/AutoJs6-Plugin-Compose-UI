@@ -36,7 +36,7 @@ class AndroidViewRendererTest {
         lateinit var result: AndroidViewRendererV1
         rule.runOnUiThread {
             val capabilities = ComposeUiRendererFactoryImpl().capabilities()
-            assertEquals(30, capabilities.getStringArrayList(ComposeUiCapabilityKeys.COMPONENTS)!!.size)
+            assertEquals(55, capabilities.getStringArrayList(ComposeUiCapabilityKeys.COMPONENTS)!!.size)
             assertTrue(capabilities.getStringArrayList(ComposeUiCapabilityKeys.FEATURES)!!.contains(AndroidViewInteropV1.FEATURE))
             val type = Class.forName(capabilities.getString(AndroidViewInteropV1.FACTORY_CLASS_KEY)!!)
             val factory = type.getDeclaredConstructor().newInstance() as AndroidViewRendererFactoryV1

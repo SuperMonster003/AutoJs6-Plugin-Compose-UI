@@ -6,20 +6,20 @@
 
 # v1.1.0
 
-###### 2026/10/07
+###### 2026/10/08
 
 * `Indication` Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur
-* `Indication` TSX nécessite le build local AutoJs6 6.8.0 / 5319 correspondant et TypeScript Engine avec les déclarations Compose; installer uniquement le moteur de rendu ne suffit pas
-* `Indication` Cette intégration nécessite AutoJs6 6.8.0 / 5320 et un build Compose UI avec extension AndroidView; TSX nécessite aussi TypeScript Engine 0.6.5. Le rendu V1 de base conserve le minimum 5316
-* `Indication` Les dialogues indépendants nécessitent AutoJs6 6.8.0 / 5321 et Compose UI avec dialog-v1; TSX nécessite aussi TypeScript Engine 0.6.6. Les scripts hors UI nécessitent la permission de superposition de l'hôte
+* `Indication` Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
 * `Nouveaute` TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML
 * `Nouveaute` Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone
 * `Nouveaute` compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires
+* `Nouveaute` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
 * `Amelioration` Les icônes des informations d'application Android utilisent les illustrations et les fonds clairs et sombres d'Icon Studio, en conservant les images transparentes du centre de plugins et les choix du lanceur
 * `Amelioration` Les fabriques de View tournent sur le thread principal avant le rendu. Un remplacement invalide conserve le contenu courant; une View ne peut appartenir à deux noeuds ni être prise à un autre parent. Ses écouteurs et les ressources du code appelant sont préservés
 * `Amelioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
 * `Dependance` Mettre à jour compose-ui-api.aar avec une extension AndroidView optionnelle tout en préservant V1
 * `Dependance` Ajout de la capacité de dialogue optionnelle à compose-ui-api.aar en conservant les contrats V1 et AndroidView existants
+* `Dependance` Ajout du catalogue V2 de compose-ui-api.aar en conservant les modèles de noeuds et la sémantique des composants V1
 
 # v1.0.0
 

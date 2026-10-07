@@ -41,12 +41,27 @@ need to load the new shared types. The exact implementation commit and compatibi
 are recorded in `../docs/dev/p7-interop-evidence.md`.
 See `docs/dev/compose-ui-plugin-protocol-v1.md` for the frozen surface and BitmapRef transport limits.
 
-## Current F.3 dialog artifact
+## Prior F.3 dialog artifact
 
-The current release artifact adds the separately negotiated `dialog-v1` factory and
+The prior F.3 release artifact added the separately negotiated `dialog-v1` factory and
 options in `api.dialog`, from the matching 6.8.0 / 5321 host integration at commit
 `8cba2ce0e3aad5835879b0b91604caec9cb719b1`. SHA-256
 `e3a4f2003bb0336338e229cfc9220c2296a5de462957fd540a20c37d86996fe8`. All 206 prior V1 and F.2 class files remain byte-identical;
 three dialog classes are added, without changing the shared dependency lock or base
 minimum host version. See `../docs/dev/p7-dialog-aar-compatibility.json` for the exact
 class inventory and `../docs/dev/p7-dialog-evidence.md` for final source identity.
+
+## F.4 V2 release artifact
+
+The current compose-ui-api.aar is the host release module for 6.8.0 / 5322.
+SHA-256: `3ebe1f887b7e3a9a98277bd0436e83e8e808b380cbf050d37da42975ea125351`. API source is the clean host commit
+`6a166c38415e7299ba034cd062dcc4c51a4b543a`; the API module was assembled with AGP
+9.4.0 before the concurrent platform upgrade. Its sources and the staged AAR
+were unchanged by that upgrade. Final host generation uses the same source at
+AGP 9.4.1. See `docs/dev/p7-wide-evidence.md` at the repository root. The MPL-2.0
+license and the 51 shared dependency entries are unchanged. The artifact adds
+25 component definitions and shared V2 validation. All 208 previous model, catalog,
+loading and optional extension class files are byte-identical; only
+ComposeUiContract changes its maximum supported version to 2. The V1 minimum
+is still 1, and its frozen catalog remains 30 entries. See
+`docs/dev/p7-wide-aar-compatibility.json` for the complete class comparison.

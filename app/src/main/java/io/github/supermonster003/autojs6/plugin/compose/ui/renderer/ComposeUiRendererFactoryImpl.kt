@@ -6,15 +6,15 @@ import org.autojs.plugin.compose.api.ComposeUiCapabilityKeys as K
 import org.autojs.plugin.compose.api.ComposeUiContract
 import org.autojs.plugin.compose.api.loading.ComposeUiHostEnvironment
 import org.autojs.plugin.compose.api.loading.ComposeUiRendererFactory
+import org.autojs.plugin.compose.api.v2.ComposeUiV2
 
-/** V1 entry. Advertise only components backed by the renderer dispatch table. */
+/** V2 entry. V1 components retain their frozen definitions and renderer behavior. */
 class ComposeUiRendererFactoryImpl : ComposeUiRendererFactory {
     override fun contractVersion() = ComposeUiContract.CONTRACT_VERSION
     override fun capabilities() = Bundle().apply {
         putInt(K.CONTRACT_VERSION, contractVersion())
         putStringArrayList(K.COMPONENTS, ArrayList(RendererCatalog.components))
-        // Strings only: an old host lacks the optional interface and must still load this factory.
-        putStringArrayList(K.FEATURES, arrayListOf("android-view-interop-v1", "dialog-v1"))
+        putStringArrayList(K.FEATURES, arrayListOf("android-view-interop-v1", "dialog-v1", ComposeUiV2.FEATURE))
         putString("androidViewFactoryV1", "io.github.supermonster003.autojs6.plugin.compose.ui.renderer.interop.AndroidViewRendererFactoryImpl")
         putString("dialogFactoryV1", "io.github.supermonster003.autojs6.plugin.compose.ui.renderer.dialog.DialogRendererFactoryImpl")
         putString(K.COMPOSE_VERSION, BuildConfig.COMPOSE_VERSION)
