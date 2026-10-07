@@ -47,27 +47,28 @@ internal fun RenderNode(
     rowScope: RowScope? = null,
     columnScope: ColumnScope? = null,
     boxScope: BoxScope? = null,
+    extension: RendererExtension? = null,
 ) {
     val node = frame.nodes.getValue(id)
     key(id, node.type) {
-        if (RendererCatalog.dispatch[node.type] == null) {
+        if (RendererCatalog.dispatch[node.type] == null && extension?.handles(node.type) != true) {
             if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>")
         } else {
             val publish: (String, Int, Bundle) -> Unit = { type, callback, payload -> emit(frame.generation, id, type, callback, payload) }
             val modifier = with(ModifierMapper) { Modifier.map(node, commands, rowScope, columnScope, boxScope, publish) }
             val children = node.slots[S.CONTENT]?.let(::listOf) ?: node.children
-            val content: @Composable () -> Unit = { children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit) } }
+            val content: @Composable () -> Unit = { children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, extension = extension) } }
             val onClick = { ModifierMapper.clickCallback(node)?.let { publish(E.CLICK, it, Bundle()) }; Unit }
             val enabled = ModifierMapper.interactionEnabled(node)
             when (RendererCatalog.dispatch[node.type]) {
                 RenderKind.COLUMN -> Column(modifier, verticalArrangement = verticalArrangement(node), horizontalAlignment = horizontalAlignment(node.enum(P.ALIGNMENT, "start"))) {
-                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, columnScope = this) }
+                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, columnScope = this, extension = extension) }
                 }
                 RenderKind.ROW -> Row(modifier, horizontalArrangement = horizontalArrangement(node), verticalAlignment = verticalAlignment(node.enum(P.ALIGNMENT, "top"))) {
-                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, rowScope = this) }
+                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, rowScope = this, extension = extension) }
                 }
                 RenderKind.BOX -> Box(modifier, contentAlignment = boxAlignment(node.enum(P.ALIGNMENT, "topStart"))) {
-                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, boxScope = this) }
+                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, boxScope = this, extension = extension) }
                 }
                 RenderKind.SPACER -> Spacer(modifier)
                 RenderKind.SURFACE -> {
@@ -134,16 +135,17 @@ internal fun RenderNode(
                 }
                 RenderKind.TEXT_FIELD, RenderKind.OUTLINED_TEXT_FIELD -> RenderTextField(
                     node, fields.editor(id), fields.inputTransformation(id), modifier,
-                ) { name -> node.slots[name]?.let { RenderNode(frame, it, commands, fields, snackbar, emit) } }
+                ) { name -> node.slots[name]?.let { RenderNode(frame, it, commands, fields, snackbar, emit, extension = extension) } }
                 RenderKind.LAZY_COLUMN, RenderKind.LAZY_ROW, RenderKind.SCAFFOLD, RenderKind.TOP_APP_BAR,
                 RenderKind.ALERT_DIALOG, RenderKind.CIRCULAR_PROGRESS, RenderKind.LINEAR_PROGRESS -> AdvancedComponents(
                     node, modifier, commands, snackbar,
                     childKey = { child -> frame.nodes.getValue(child).key ?: child },
                     childType = { child -> frame.nodes.getValue(child).type },
-                    renderChild = { child -> RenderNode(frame, child, commands, fields, snackbar, emit) },
+                    renderChild = { child -> RenderNode(frame, child, commands, fields, snackbar, emit, extension = extension) },
                     emit = publish,
                 )
-                null -> if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>", modifier)
+                null -> if (extension?.handles(node.type) == true) extension.Content(node, modifier)
+                    else if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>", modifier)
             }
         }
     }

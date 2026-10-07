@@ -10,6 +10,21 @@ class NodeStoreTest {
     private fun batch(generation: Long, vararg patches: UiPatch) = UiPatchBatch(1, generation, patches.toList())
     private fun initial() = UiTree(1, listOf(UiNode(1, ComposeUiComponents.COLUMN, children = listOf(2, 3)), text(2, "a"), text(3, "b")))
 
+    @Test fun previewsRemainInvisibleAndCannotCommitAfterAnotherTransactionOrDispose() {
+        val store = NodeStore(1)
+        val preview = store.preview(batch(0, UiPatch.SetRoot(initial())))
+        assertNull(store.tree); assertEquals(0L, store.generation)
+        assertEquals(initial(), store.commit(preview))
+        val next = store.preview(batch(1, UiPatch.SetProps(2, mapOf(ComposeUiProps.TEXT to UiValue.Str("candidate")))))
+        assertEquals(UiValue.Str("a"), store.tree!!.nodes.single { it.nodeId == 2 }.props[ComposeUiProps.TEXT])
+        store.apply(batch(2, UiPatch.SetProps(2, mapOf(ComposeUiProps.TEXT to UiValue.Str("accepted")))))
+        try { store.commit(next); fail() } catch (error: ComposeUiContractException) { assertEquals(ComposeUiErrorCodes.INVALID_ARGUMENT, error.code) }
+        val disposed = store.preview(batch(3))
+        store.clear()
+        try { store.commit(disposed); fail() } catch (error: ComposeUiContractException) { assertEquals(ComposeUiErrorCodes.INVALID_ARGUMENT, error.code) }
+        assertNull(store.tree)
+    }
+
     @Test fun firstGenerationZeroIsAcceptedButCannotBeReplayed() {
         val store = NodeStore(1)
         val first = store.apply(batch(0, UiPatch.SetRoot(initial())))

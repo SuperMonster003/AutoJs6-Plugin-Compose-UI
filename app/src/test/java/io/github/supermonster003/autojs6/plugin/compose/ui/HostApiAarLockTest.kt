@@ -22,7 +22,7 @@ class HostApiAarLockTest {
     @Test
     fun `host api lock lists the INFO api and frozen renderer api with matching digests`() {
         val lock = readLock(root.resolve("locks/host-api-aars.lock"))
-        // V1 is frozen; the separate negative-version P0 fixture remains outside its public contract.
+        // V1 is frozen; F.2 adds a separately negotiated interop package in the same shared AAR.
         assertEquals(setOf("common-plugin-api", "compose-ui-api"), lock.keys)
         lock.forEach { (id, entry) ->
             val file = root.resolve("libs").resolve(entry.file)

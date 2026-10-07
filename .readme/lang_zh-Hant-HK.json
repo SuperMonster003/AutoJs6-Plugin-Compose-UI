@@ -21,7 +21,8 @@
     "原生文字編輯保留選取範圍與輸入法組合狀態, 支援焦點和明確編輯, 拒絕覆蓋較新輸入的延遲編輯; 開關與滑桿仍由腳本控制狀態",
     "整合守衛: 插件缺失或不相容時可用性探測回傳不可用, 錯誤使用 `ComposeError`, 關閉會話或停止腳本會釋放所屬窗口與回呼",
     "計數器, 表單驗證, 1000 項鍵控列表, 非 ui 懸浮 HUD 與主題五個可執行示例, 包含前置條件與索引, 同步至匹配宿主的 Compose UI 示例分類",
-    "TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點"
+    "TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點",
+    "XML `<compose>` 容器與 compose.attach 可在 UI 頁面或舊懸浮窗內嵌入獨立 Compose 工作階段; compose.AndroidView 可承載現有 Android View 或同步工廠傳回的 View"
   ],
   "h3_usage": "使用方式",
   "usage_steps": [
@@ -49,7 +50,9 @@
     "Compose 版本: 由插件自帶 (BOM {{ compose_bom }}), 不依賴宿主的 Compose 運行時",
     "契約版本: {{ plugin_contract_version }}; 宿主與插件透過契約版本協商, 不匹配時拒絕載入並給出明確錯誤",
     "打包應用仍需另外安裝兼容的 Compose UI 插件, 啟用/授權記錄屬於該應用; 兼容性檢查依據內置 AutoJs6 執行時, 不是打包應用自身的 versionCode",
-    "TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主與內置 Compose 宣告的配套 TypeScript Engine 建構; 單獨安裝渲染器不會增加 TSX 支援"
+    "TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主與內置 Compose 宣告的配套 TypeScript Engine 建構; 單獨安裝渲染器不會增加 TSX 支援",
+    "互操作需要匹配的 AutoJs6 6.8.0 / 5320 宿主與支援 AndroidView 擴充的 Compose UI 建構; TSX 另需 TypeScript Engine 0.6.5. 基礎 V1 渲染最低宿主仍為 5316",
+    "View 工廠在渲染前於主執行緒執行. 無效替換保留目前內容; 同一 View 不可屬於兩個節點, 也不會從其他父視圖被搶佔. 借用的 View 保留原有監聽器, 外部資源仍由呼叫方管理"
   ],
   "h3_faq": "常見問題",
   "faq_items": [

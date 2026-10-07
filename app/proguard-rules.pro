@@ -25,6 +25,7 @@
 # The host instantiates the renderer factory named by the org.autojs.plugin.compose.RENDERER_FACTORY meta-data
 # through Class.forName on the plugin class loader and casts it to the contract interface (roadmap D10 / D22).
 -keep class io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl { *; }
+-keep class io.github.supermonster003.autojs6.plugin.compose.ui.renderer.interop.AndroidViewRendererFactoryImpl { *; }
 -keep class * implements org.autojs.plugin.compose.api.loading.ComposeUiRendererFactory { *; }
 -keep class * implements org.autojs.plugin.compose.api.loading.ComposeUiRenderer { *; }
 

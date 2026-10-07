@@ -5,14 +5,20 @@ import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.model.*
 
 /** Private transaction workspace; visible state changes only after full validation. */
-internal class NodeStore(private val sessionId: Int, private val validateRendererNode: (UiNode) -> Unit = {}, private val allowUnknownDebug: Boolean = false) {
+internal class NodeStore(private val sessionId: Int, private val validateRendererNode: (UiNode) -> Unit = {},
+    private val allowUnknownDebug: Boolean = false, private val catalog: ComponentCatalog = ComponentCatalog.V1) {
     var tree: UiTree? = null
         private set
     var generation = 0L
         private set
     private var acceptedBatch = false
+    private var revision = 0L
+    class Preview internal constructor(val tree: UiTree?, val generation: Long, internal val owner: NodeStore, internal val revision: Long)
 
-    fun apply(batch: UiPatchBatch): UiTree? {
+    fun apply(batch: UiPatchBatch): UiTree? = commit(preview(batch))
+
+    /** No visible state changes until the renderer also validates its non-Parcelable bindings. */
+    fun preview(batch: UiPatchBatch): Preview {
         if (batch.sessionId != sessionId || acceptedBatch && batch.generation <= generation) invalid()
         var root = tree?.rootId
         val nodes = tree?.nodes?.associateBy { it.nodeId }?.toMutableMap() ?: linkedMapOf()
@@ -82,17 +88,23 @@ internal class NodeStore(private val sessionId: Int, private val validateRendere
         val parents = HashMap<Int, String>()
         candidate?.nodes?.forEach { parent -> (parent.children + parent.slots.values).forEach { parents[it] = parent.type } }
         candidate?.nodes?.forEach {
-            if (!allowUnknownDebug || ComponentCatalog.V1.component(it.type) != null) {
-                ComponentCatalog.V1.validateNode(it, parents[it.nodeId]); validateRendererNode(it)
+            if (!allowUnknownDebug || catalog.component(it.type) != null) {
+                catalog.validateNode(it, parents[it.nodeId]); validateRendererNode(it)
             }
         }
-        tree = candidate
-        generation = batch.generation
-        acceptedBatch = true
-        return candidate
+        return Preview(candidate, batch.generation, this, revision)
     }
 
-    fun clear() { tree = null }
+    fun commit(preview: Preview): UiTree? {
+        if (preview.owner !== this || preview.revision != revision) invalid()
+        tree = preview.tree
+        generation = preview.generation
+        acceptedBatch = true
+        revision++
+        return tree
+    }
+
+    fun clear() { tree = null; revision++ }
     private fun UiNode.with(children: List<Int> = this.children, slots: Map<String, Int> = this.slots) =
         UiNode(nodeId, type, key, props, modifier, children, slots, callbacks)
     private fun invalid(): Nothing = throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT)

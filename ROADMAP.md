@@ -254,7 +254,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
-| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 完成, F.2 起待实施 |
+| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 / F.2 完成, F.3 起待实施 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
 
@@ -509,13 +509,16 @@ P6.4 证据 (2026-10-04): 插件build26签名APK `autojs6-plugin-compose-ui-v1.0
 以下条目在 1.0.0 gate 后按维护者已确认的 Q7 顺序推进, 详细说明见附录 F.
 
 - [x] (宿主 / 文档) F.1 TSX 工厂: `__autojs6Tsx` 按 `type` 路由到 `compose.createElement`, `aj6-jsx-element-extension.d.ts` 增补 Compose 元素类型, TypeScript Engine 插件配合.
-- [ ] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
+- [x] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
 - [ ] (宿主 / 插件) F.3 `compose.dialog(nodeOrRender, options)`: 任意脚本弹出 Material 3 Dialog / ModalBottomSheet, 返回 Promise 或会话.
 - [ ] (插件 / 宿主 / 文档) F.4 宽集组件, 契约 `CONTRACT_VERSION = 2` (只追加).
 - [ ] (插件) F.5 组件画廊 Activity (若排期, 需同时遵循独立设置页与图标规范).
 - [ ] (宿主) F.6 细粒度更新与脚本侧依赖裁剪 (按 P5.3 数据决定).
 
 F.1 证据 (2026-10-04): `docs/dev/p7-tsx-evidence.md`. 宿主 5319 支持真实组件工厂引用 / 别名及 `compose:Name`, 有界中立 Fragment 保留根 / 插槽 / 跨脚本身份限制, XML 混域在替换页面前拒绝. 声明 4.31.0 的 29 项 JSX 映射由冻结目录生成, Ace 1.23.0 与 TypeScript Engine 0.6.4 使用实际配套声明; Engine 保留公开 2.1.3 tarball 锁, 明示本地补充来源. 宿主相关 JVM 173 + API 16, 插件 JVM 63, 目录 Python 16, Engine 相关 JVM 534 + 构建逻辑 4, Ace JVM 171 通过. API 35 x86_64 自建 AVD 上, 最终签名编译器 / 渲染器通过 6 项真实 TSX 与 5 项原有 JS 示例, 编译器 debug 声明清单另 2 项通过. 文档 152 模块 / 6548 搜索条目与 Offline Docs 同步 / 签名门禁通过. 插件 1.1.0 / 27 为本地预览, 普通工厂最低宿主 5316 不变; JSX 表达式精度与 namespace 属性补全限制已明确记录. 自建 AVD 与 5 个测试安装均已清理, 下一起点为 F.2.
+
+
+F.2 证据 (2026-10-07): `docs/dev/p7-interop-evidence.md`. XML `<compose>` / `compose.attach` 与 AndroidView 借用 View / 主线程工厂均已交付, 包含多容器, 旧悬浮窗, 生命周期清理及失败回滚. 可选 interop 能力独立协商, 冻结 V1 的 197 个保留 class 字节相同; 新旧宿主 / 渲染器双向验证通过. 宿主相关 JVM 197/API21, 插件 JVM64/设备40, 目录 Python19, Engine相关 JVM534/构建逻辑4, Ace JVM171及实际语言服务通过. API24/35各6个混合场景, 最终签名编译器/渲染器7个真实TSX场景通过. 配套声明4.33.0, Engine0.6.5, Ace1.26.0, 文档156模块与Offline Docs212文件完成本地同步. 插件1.1.0/build30, APK2472197B/DEX45285引用低于Q5复核线. 两台自建AVD及8个测试安装已清理, 下一起点为F.3.
 
 ---
 
@@ -995,3 +998,14 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 维护者已授权创建公开 GitHub 仓库并推送本插件源码, 提交采用 noreply 邮箱. 本条更新 D7 的源码推送门控; 既有开发阶段和实测记录保持其原有含义. 本次工作整理并提交当前工作区, 同步图稿与生成材料, 不以源码公开代替 APK 发布和发行验收. 宿主改动另行处理.
 
 首次公开前已将 27 个本地提交的邮箱改为 noreply, 保留作者名称, 时间, 消息和全部文件树. `docs/dev/commit-identity-map.json` 提供原本地提交与公开提交的对应关系, 供既有证据溯源.
+
+
+### 2026-10-07: P7 F.2 XML 与 Compose 互嵌本地交付
+
+- 完成原 F.2, 未增加, 分拆或丢弃路线图小节. XML 容器通过 compose.attach 承载 Compose, AndroidView 接受实际 View 或主线程同步工厂, ui.inflate 支持 XML TSX 及真实原生点击. 多容器相互独立, 支持离窗预创建, 聚焦, 旧 raw/resizable 悬浮窗, 关闭和引擎退出清理; 非法混域及原生归属冲突在替换前拒绝.
+- 宿主独立分支合入固定主线 8b5bef91f3 为 e05218974a, F.2 实现 d54f21b1ea. 保留颜色/主题与多语言历史. 新 AAR SHA-256 为 0aaff93a27d405e8db7a513172ba1a2ebe60a3b8a09d4f27d8c9eaa03544d4a3; 197 个保留 V1 class 字节相同, 新增9个可选互操作类, 按既定约定退役7个无引用 P0 spike 类. 51项共享锁与基础最低宿主5316不变, F.2使用匹配宿主5320.
+- 配套提交: Declarations4.33.0为26dcf6c, TypeScript Engine0.6.5/build86为c9cded8, 隔离Ace1.26.0/build137为aab24b8, 文档6.8.0/93为95b65af及ab541a5, Offline Docs6.8.6/build76为11911a1. 实际aj6dts -Publish以干净宿主提交为源并显式同步隔离Ace, Engine以已提交声明回填精确来源. 原宿主和原Ace的并发工作未修改或暂存.
+- 回归: 宿主相关JVM197/API21, 插件JVM64/设备40, 目录Python19, Engine相关JVM534(529+单独5)/构建逻辑4, Ace完整JVM171与最终语言服务通过. 真实TS5.1.3/6.0.3通过原25及新增31个负例; Ace默认/全原生组各30类非法输入保持拒绝. API24/35各6个互嵌场景, 最终签名包7个TSX场景, 旧宿主+新渲染器7项, 新宿主+实际旧渲染器1项均通过. 不能正常提交的原生恢复操作移到发布前; 原生回调中关闭后不再恢复旧View或claim.
+- 插件最终签名包autojs6-plugin-compose-ui-v1.1.0-a1de352a.apk, 2472197B, SHA-256 3dd4f45976568218335c879d67078dfe28a119d97603ac01bf5d4d8b1f45530d, 7237类/45285方法引用. 低于Q5的2612576B/49194引用复核线; 原236条性能记录与规则不变. 文档156模块/6673搜索条目, 离线212文件/12720268B, 全部生成/签名门禁通过. lint均无错误, 插件4项图标警告, Engine7项与Ace49项既有警告如实记录.
+- 两台自建compose_f2_api24/compose_f2_api35和8个自有安装均经身份/路径核验后清理, 注册与数据不存在. 物理设备, 其它AVD, 共享SDK及原工作区保持. 本轮仅本地提交, 没有推送/npm发布/官方索引登记/公开Release; 2026-10-04的插件源码公开授权仍按原记录有效.
+- 下一起点为F.3 compose.dialog. 本节已包含宿主, 渲染器, 编译器, 编辑器, 声明和离线文档完整链路, 本轮不开始F.3. 完整设备矩阵, 打包应用F.2, 宿主全量JVM/lint, 新的可比性能/长期内存基线和远端CI未执行, 不外推为通过. 详细修正过程, 环境波动, 产物和限制见F.2证据.
