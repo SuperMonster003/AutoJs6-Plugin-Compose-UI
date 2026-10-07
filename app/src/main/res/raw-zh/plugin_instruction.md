@@ -20,6 +20,8 @@ Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compo
 - TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主与内置 Compose 声明的配套 TypeScript Engine 构建; 单独安装渲染器不会增加 TSX 支持
 - 互操作需要匹配的 AutoJs6 6.8.0 / 5320 宿主与支持 AndroidView 扩展的 Compose UI 构建; TSX 还需 TypeScript Engine 0.6.5. 基础 V1 渲染最低宿主仍为 5316
 - View 工厂在渲染前于主线程执行. 无效替换保留当前内容; 同一 View 不可属于两个节点, 也不会从其他父视图被抢占. 借用的 View 保留原有监听器, 外部资源仍由调用方管理
+- 独立弹窗需要配套 AutoJs6 6.8.0 / 5321 与支持 dialog-v1 的 Compose UI; TSX 还需要 TypeScript Engine 0.6.6. 非 UI 脚本需要宿主悬浮窗权限
+- cancelable=false 同时禁止返回键, 点击外部和下滑关闭; 主动关闭与脚本退出仍会清理弹窗, 保留已有页面和其他会话
 
 ### 常见问题
 

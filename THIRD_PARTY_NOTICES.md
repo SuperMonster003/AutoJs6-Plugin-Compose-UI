@@ -10,15 +10,15 @@ reproduced in full in the distribution of the respective project.
 | --- | --- | --- | --- | --- |
 | `common-plugin-api.aar` | AutoJs6 module `plugin-api/common-plugin-api` (https://github.com/SuperMonster003/AutoJs6): `IPluginInfoProvider` AIDL, `PluginInfo`, `PluginActions`, `PluginCapabilityKeys` | host build 6.8.0 / 5307, commit `77b5a3b0c5` (module byte-identical to the copies staged by the other official plugins) | MPL 2.0 | `ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15` |
 
-The `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in
-AutoJs6 branch `spike/compose-ui-p0` for F.2 (6.8.0 / 5320, commit
-`d54f21b1ea408dfcb66e58f663d71d2f10fade8a`, source and checks in
-`docs/dev/p7-interop-evidence.md`). It is MPL 2.0, SHA-256
-`0aaff93a27d405e8db7a513172ba1a2ebe60a3b8a09d4f27d8c9eaa03544d4a3`, consumed as
-`compileOnly` by the plugin and packaged by the host. It contains no Compose implementation
-dependency. All 197 retained V1 class files are byte-identical to the P1.3 artifact; the new
-`api.interop` package is an explicitly negotiated optional extension. The seven unused
-negative-version `api.spike` classes, which were outside frozen V1, have been removed.
+The current `compose-ui-api.aar` release is from AutoJs6 branch `spike/compose-ui-p0`
+for F.3 (6.8.0 / 5321, commit `8cba2ce0e3aad5835879b0b91604caec9cb719b1`;
+source and checks in `docs/dev/p7-dialog-evidence.md`).
+It is MPL 2.0, SHA-256 `e3a4f2003bb0336338e229cfc9220c2296a5de462957fd540a20c37d86996fe8`, consumed as
+`compileOnly` by the plugin and packaged by the host, with no Compose implementation
+dependency. All 206 previous V1 and F.2 classes remain byte-identical. The new
+`api.dialog` package adds a separately negotiated presentation factory and options.
+F.2 previously added `api.interop` and removed seven unused negative-version P0
+fixtures outside frozen V1; no previously retained class is removed in F.3.
 
 Shared host components are pinned in `locks/host-shared-deps.lock` (Q1(b), approved for app/inrt debug/release on 2026-10-02).
 AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table

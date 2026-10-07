@@ -22,7 +22,8 @@ import org.autojs.plugin.compose.api.model.*
 
 /** V1 renderer: publish immutable validated frames and queue every event through the host sink. */
 class ComposeUiRendererImpl internal constructor(private val environment: ComposeUiHostEnvironment,
-    private val extension: RendererExtension? = null) : ComposeUiRenderer {
+    private val extension: RendererExtension? = null,
+    private val presentation: RendererPresentation? = null) : ComposeUiRenderer {
     private val fields = TextFieldController(::emit, ::error, ::ensureScope)
     private val snackbar = SnackbarController(::ensureScope, ::emit)
     private val store = NodeStore(environment.sessionId, { node ->
@@ -36,6 +37,9 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
     private var container: GuardedComposeContainer? = null
     private var recomposer: Recomposer? = null
     private var scope: CoroutineScope? = null
+    private val presentationContentEnabled = mutableStateOf(false)
+    private var presentationInitializer: Runnable? = null
+    private var presentationAttachment: View.OnAttachStateChangeListener? = null
     private var closed = false
 
     init { main() }
@@ -48,13 +52,22 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
             owner.launch { composer.runRecomposeAndApplyChanges() }
             output.setParentCompositionContext(composer)
             output.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool)
-            output.setContent {
-                ThemeMapper.Content(theme.value) {
-                    Box(Modifier.semantics { testTagsAsResourceId = true }) {
-                        frame.value?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit, extension = extension) }
+            val renderContent: @androidx.compose.runtime.Composable () -> Unit = {
+                if (presentation == null || presentationContentEnabled.value) {
+                    ThemeMapper.Content(theme.value) {
+                        val current = frame.value
+                        val content: @androidx.compose.runtime.Composable () -> Unit = {
+                            Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                                current?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit, extension = extension) }
+                            }
+                        }
+                        if (presentation == null) content()
+                        else if (current != null) presentation.Content(current.generation, content)
                     }
                 }
             }
+            if (presentation == null) output.setContent(renderContent)
+            else preparePresentation(output, renderContent)
             view = output
             root.mount(output)
             container = root
@@ -64,6 +77,34 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
         val prepared = preview(batch)
         prepareCommit()
         commit(prepared)
+    }
+    /**
+     * Dialog.show can run synchronously during the first composition on View attachment. Keeping
+     * setContent out of the attaching stack lets us catch that failure even when the host decor
+     * itself was unattached at mount time. A detached/re-attached anchor starts with empty content.
+     */
+    private fun preparePresentation(output: ComposeView, content: @androidx.compose.runtime.Composable () -> Unit) {
+        val initialize = Runnable {
+            if (!closed && output.isAttachedToWindow) {
+                try {
+                    presentationContentEnabled.value = true
+                    output.setContent(content)
+                } catch (failure: Exception) { presentation!!.handleFailure(failure) }
+                catch (failure: LinkageError) { presentation!!.handleFailure(failure) }
+            }
+        }
+        val attachment = object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(view: View) {
+                if (!closed) { output.removeCallbacks(initialize); output.post(initialize) }
+            }
+            override fun onViewDetachedFromWindow(view: View) {
+                output.removeCallbacks(initialize)
+                presentationContentEnabled.value = false
+            }
+        }
+        presentationInitializer = initialize
+        presentationAttachment = attachment
+        output.addOnAttachStateChangeListener(attachment)
     }
     internal fun preview(batch: UiPatchBatch): NodeStore.Preview {
         usable()
@@ -80,6 +121,7 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
         val tree = store.commit(preview)
         fields.acceptFrame(tree, store.generation)
         snackbar.acceptFrame(tree, store.generation)
+        presentation?.onFrameAccepted(store.generation)
         frame.value = tree?.let { RenderFrame(it.rootId, it.nodes.associateBy { node -> node.nodeId }, store.generation) }
     }
     /** Native parent callbacks can fail; perform them before publishing a new tree/generation. */
@@ -127,13 +169,23 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
             is UiCommand.ShowSnackbar -> { snackbar.execute(command); return }
             else -> Unit
         }
-        val action = commands.resolve(command)
-        ensureScope().launch { try {
+        fun executeReady() {
+            val action = commands.resolve(command)
+            ensureScope().launch { try {
+                val current = validateLiveNode()
+                if (current?.type != acceptedType) throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED, nodeId = current?.nodeId)
+                action()
+            } catch (cancelled: CancellationException) { throw cancelled }
+                catch (failure: Exception) { error(failure) } catch (failure: LinkageError) { error(failure) } }
+        }
+        // A dialog's real content is a different window from the host's composition anchor.
+        if (presentation?.deferCommand(command) {
+            usable()
             val current = validateLiveNode()
             if (current?.type != acceptedType) throw ComposeUiContractException(ComposeUiErrorCodes.NODE_DETACHED, nodeId = current?.nodeId)
-            action()
-        } catch (cancelled: CancellationException) { throw cancelled }
-            catch (failure: Exception) { error(failure) } catch (failure: LinkageError) { error(failure) } }
+            executeReady()
+        } == true) return
+        executeReady()
     }
     override fun setTheme(theme: ThemeSpec) {
         usable()
@@ -145,6 +197,11 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
         main()
         if (closed) return
         closed = true
+        presentationInitializer?.let { view?.removeCallbacks(it) }
+        presentationAttachment?.let { view?.removeOnAttachStateChangeListener(it) }
+        presentationInitializer = null; presentationAttachment = null
+        presentationContentEnabled.value = false
+        presentation?.dispose()
         try { view?.disposeComposition() } finally {
             fields.dispose(); snackbar.close(); extension?.dispose(); commands.clear(); recomposer?.cancel(); scope?.cancel()
             container?.removeAllViews(); container = null
@@ -152,7 +209,9 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
         }
     }
     private fun ensureScope(): CoroutineScope = scope ?: CoroutineScope(
-        AndroidUiDispatcher.Main + SupervisorJob() + CoroutineExceptionHandler { _, failure -> error(failure) }
+        AndroidUiDispatcher.Main + SupervisorJob() + CoroutineExceptionHandler { _, failure ->
+            if (presentation?.handleFailure(failure) != true) error(failure)
+        }
     ).also { scope = it }
     private fun main() { check(Looper.myLooper() == Looper.getMainLooper()) { "Renderer methods require the main thread" } }
     private fun usable() { main(); if (closed) throw ComposeUiContractException(ComposeUiErrorCodes.SESSION_CLOSED) }
@@ -170,4 +229,6 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
     }
     internal fun reportFailure(failure: Throwable) = error(failure)
     internal fun currentView(): View? = container
+    internal fun enqueueSystemEvent(type: String, payload: Bundle = Bundle()) = emit(store.generation,
+        ComposeUiContract.NO_NODE_ID, type, ComposeUiContract.SYSTEM_CALLBACK_ID, payload)
 }

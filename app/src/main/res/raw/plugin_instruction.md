@@ -20,6 +20,8 @@ Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare int
 - TSX requires the matching AutoJs6 6.8.0 / 5319 local host and companion TypeScript Engine build with Compose declarations; installing the renderer alone does not add TSX support
 - Interop requires the matching AutoJs6 6.8.0 / 5320 host and a Compose UI build with the AndroidView extension; TSX also requires TypeScript Engine 0.6.5. Basic V1 rendering keeps the 5316 minimum
 - View factories run on the main thread before rendering. Invalid replacements preserve the current content; a View cannot belong to two nodes or be taken from another parent. Borrowed Views retain their listeners and caller-owned resources
+- Independent dialogs require AutoJs6 6.8.0 / 5321 and Compose UI with dialog-v1 support; TSX also requires TypeScript Engine 0.6.6. Non-UI scripts need the host overlay permission
+- cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
 
 ### FAQ
 

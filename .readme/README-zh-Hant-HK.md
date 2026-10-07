@@ -73,6 +73,7 @@ Compose UI 是 AutoJs6 的界面渲染插件. 腳本透過宿主提供的 `compo
 - 計數器, 表單驗證, 1000 項鍵控列表, 非 ui 懸浮 HUD 與主題五個可執行示例, 包含前置條件與索引, 同步至匹配宿主的 Compose UI 示例分類
 - TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點
 - XML `<compose>` 容器與 compose.attach 可在 UI 頁面或舊懸浮窗內嵌入獨立 Compose 工作階段; compose.AndroidView 可承載現有 Android View 或同步工廠傳回的 View
+- compose.dialog 傳回可更新和關閉的工作階段, 支援一般對話框與模態底部面板, 可在 UI 或一般腳本中使用
 
 ******
 
@@ -144,6 +145,8 @@ worker = threads.start(() => {
 - TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主與內置 Compose 宣告的配套 TypeScript Engine 建構; 單獨安裝渲染器不會增加 TSX 支援
 - 互操作需要匹配的 AutoJs6 6.8.0 / 5320 宿主與支援 AndroidView 擴充的 Compose UI 建構; TSX 另需 TypeScript Engine 0.6.5. 基礎 V1 渲染最低宿主仍為 5316
 - View 工廠在渲染前於主執行緒執行. 無效替換保留目前內容; 同一 View 不可屬於兩個節點, 也不會從其他父視圖被搶佔. 借用的 View 保留原有監聽器, 外部資源仍由呼叫方管理
+- 獨立彈窗需要配套 AutoJs6 6.8.0 / 5321 與支援 dialog-v1 的 Compose UI; TSX 另需 TypeScript Engine 0.6.6. 非 UI 腳本需要宿主懸浮視窗權限
+- cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與腳本結束仍會清理彈窗, 保留現有頁面和其他工作階段
 
 ******
 
@@ -220,11 +223,15 @@ _2026/10/07_
 - `提示` 1.1.0 本地開發預覽: 需要匹配的 AutoJs6 宿主構建, 並安裝和啟用本插件. 本地配套提供 UI 頁面, 懸浮窗, 五個示例, API 參考與 TypeScript 宣告. 已驗證的兼容性及效能範圍記錄在路線圖中. 目前未登記官方索引, 尚無官方發行版. 圖示圖案仍為臨時佔位, 等待維護者提供正式源圖
 - `提示` TSX 需要匹配的 AutoJs6 6.8.0 / 5319 本地宿主與內置 Compose 宣告的配套 TypeScript Engine 建構; 單獨安裝渲染器不會增加 TSX 支援
 - `提示` 互操作需要匹配的 AutoJs6 6.8.0 / 5320 宿主與支援 AndroidView 擴充的 Compose UI 建構; TSX 另需 TypeScript Engine 0.6.5. 基礎 V1 渲染最低宿主仍為 5316
+- `提示` 獨立彈窗需要配套 AutoJs6 6.8.0 / 5321 與支援 dialog-v1 的 Compose UI; TSX 另需 TypeScript Engine 0.6.6. 非 UI 腳本需要宿主懸浮視窗權限
 - `新增` TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點
 - `新增` XML `<compose>` 容器與 compose.attach 可在 UI 頁面或舊懸浮窗內嵌入獨立 Compose 工作階段; compose.AndroidView 可承載現有 Android View 或同步工廠傳回的 View
+- `新增` compose.dialog 傳回可更新和關閉的工作階段, 支援一般對話框與模態底部面板, 可在 UI 或一般腳本中使用
 - `優化` Android 系統應用程式資訊圖示與圖示工作台共用圖稿及明暗底色, 保留外掛程式中心透明圖稿與現有啟動器選項
 - `優化` View 工廠在渲染前於主執行緒執行. 無效替換保留目前內容; 同一 View 不可屬於兩個節點, 也不會從其他父視圖被搶佔. 借用的 View 保留原有監聽器, 外部資源仍由呼叫方管理
+- `優化` cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與腳本結束仍會清理彈窗, 保留現有頁面和其他工作階段
 - `依賴` 升級 compose-ui-api.aar 契約檔案, 保留凍結 V1 並附加可選 AndroidView 互操作擴充
+- `依賴` 附加可選對話框功能至 compose-ui-api.aar, 保留現有 V1 與 AndroidView 契約
 
 #### v1.0.0
 

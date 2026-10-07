@@ -10,18 +10,22 @@
       "hint": [
         "1.1.0 ローカル開発プレビュー: 対応する AutoJs6 ホストビルドと, インストールして有効化したプラグインが必要です. UI ページ, フローティングウィンドウ, 5 サンプル, API リファレンス, TypeScript 型宣言をローカル連携向けに提供します. 検証済みの互換性と性能の範囲はロードマップに記録しています. 公式インデックスへの登録と正式リリースは行っていません. アイコンは仮の図案で, メンテナーの正式な画像を待っています",
         "TSX には対応する AutoJs6 6.8.0 / 5319 ローカルホストと Compose 宣言を含む TypeScript Engine ビルドが必要です. レンダラーのインストールだけでは TSX は利用できません",
-        "相互運用には対応する AutoJs6 6.8.0 / 5320 ホストと AndroidView 拡張対応の Compose UI が必要です. TSX には TypeScript Engine 0.6.5 も必要です. 基本 V1 描画の最小ホストは引き続き 5316 です"
+        "相互運用には対応する AutoJs6 6.8.0 / 5320 ホストと AndroidView 拡張対応の Compose UI が必要です. TSX には TypeScript Engine 0.6.5 も必要です. 基本 V1 描画の最小ホストは引き続き 5316 です",
+        "独立ダイアログには AutoJs6 6.8.0 / 5321 と dialog-v1 対応の Compose UI が必要です. TSX には TypeScript Engine 0.6.6 も必要です. 非 UI スクリプトにはホストのオーバーレイ権限が必要です"
       ],
       "feature": [
         "TSX は `<compose.Column>`, `<compose:Text>`, ノードファクトリへの参照, Fragment, スロットとリアクティブなコールバックに対応. 同じツリーで Compose と従来の XML ノードを混在させることはできません",
-        "XML `<compose>` コンテナと compose.attach は UI ページや既存のフローティングウィンドウに独立した Compose セッションを埋め込みます. compose.AndroidView は既存の Android View または同期ファクトリが返す View を表示します"
+        "XML `<compose>` コンテナと compose.attach は UI ページや既存のフローティングウィンドウに独立した Compose セッションを埋め込みます. compose.AndroidView は既存の Android View または同期ファクトリが返す View を表示します",
+        "compose.dialog は更新と終了が可能なセッションを返し, UI スクリプトと通常のスクリプトでダイアログやモーダルボトムシートを表示できます"
       ],
       "improvement": [
         "Android のアプリ情報アイコンに Icon Studio と共通の図案と明暗の背景色を使用し, プラグインセンターの透明な図案と既存のランチャー設定を維持",
-        "View ファクトリは描画前にメインスレッドで実行されます. 無効な置換では現在の内容を保持します. 同じ View の二重所有や別の親からの移動は拒否されます. 借用 View のリスナーと呼び出し側のリソース所有権は維持されます"
+        "View ファクトリは描画前にメインスレッドで実行されます. 無効な置換では現在の内容を保持します. 同じ View の二重所有や別の親からの移動は拒否されます. 借用 View のリスナーと呼び出し側のリソース所有権は維持されます",
+        "cancelable=false は戻る操作, 外側のクリック, 下方向のスワイプによる終了を禁止します. 明示的な終了やスクリプト終了時にはダイアログを解放し, 既存のページと他のセッションを維持します"
       ],
       "dependency": [
-        "凍結 V1 を維持し, 任意の AndroidView 相互運用拡張を持つ compose-ui-api.aar に更新"
+        "凍結 V1 を維持し, 任意の AndroidView 相互運用拡張を持つ compose-ui-api.aar に更新",
+        "既存の V1 と AndroidView 契約を維持したまま, compose-ui-api.aar に任意のダイアログ機能を追加"
       ]
     },
     "v1.0.0": {

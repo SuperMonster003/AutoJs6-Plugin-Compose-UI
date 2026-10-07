@@ -1,7 +1,9 @@
 package io.github.supermonster003.autojs6.plugin.compose.ui.renderer.interop
 
+import android.os.Bundle
 import android.view.View
 import io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererImpl
+import io.github.supermonster003.autojs6.plugin.compose.ui.renderer.RendererPresentation
 import org.autojs.plugin.compose.api.interop.AndroidViewBindingV1
 import org.autojs.plugin.compose.api.interop.AndroidViewInteropV1
 import org.autojs.plugin.compose.api.interop.AndroidViewRendererFactoryV1
@@ -17,16 +19,19 @@ class AndroidViewRendererFactoryImpl : AndroidViewRendererFactoryV1 {
     override fun create(environment: ComposeUiHostEnvironment): AndroidViewRendererV1 = AndroidViewRenderer(environment)
 }
 
-private class AndroidViewRenderer(environment: ComposeUiHostEnvironment) : AndroidViewRendererV1 {
+internal class AndroidViewRenderer(environment: ComposeUiHostEnvironment,
+    presentation: RendererPresentation? = null) : AndroidViewRendererV1 {
     private lateinit var delegate: ComposeUiRendererImpl
     private val content = AndroidViewContent(this, { delegate.currentView() }, { delegate.reportFailure(it) })
 
-    init { delegate = ComposeUiRendererImpl(environment, content) }
+    init { delegate = ComposeUiRendererImpl(environment, content, presentation) }
 
     override fun view(): View = delegate.view()
     override fun execute(command: UiCommand) = delegate.execute(command)
     override fun setTheme(theme: ThemeSpec) = delegate.setTheme(theme)
     override fun dispose() = delegate.dispose()
+    internal fun enqueueSystemEvent(type: String, payload: Bundle = Bundle()) = delegate.enqueueSystemEvent(type, payload)
+    internal fun reportFailure(failure: Throwable) = delegate.reportFailure(failure)
 
     /** Without an explicit binding snapshot, optional nodes cannot enter through the V1 method. */
     override fun apply(batch: UiPatchBatch) = applyWithViews(batch, emptyList())
