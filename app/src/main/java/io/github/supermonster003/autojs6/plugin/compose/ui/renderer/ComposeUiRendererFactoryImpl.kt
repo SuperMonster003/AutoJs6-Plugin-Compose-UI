@@ -14,8 +14,9 @@ class ComposeUiRendererFactoryImpl : ComposeUiRendererFactory {
         putInt(K.CONTRACT_VERSION, contractVersion())
         putStringArrayList(K.COMPONENTS, ArrayList(RendererCatalog.components))
         // Strings only: an old host lacks the optional interface and must still load this factory.
-        putStringArrayList(K.FEATURES, arrayListOf("android-view-interop-v1"))
+        putStringArrayList(K.FEATURES, arrayListOf("android-view-interop-v1", "dialog-v1"))
         putString("androidViewFactoryV1", "io.github.supermonster003.autojs6.plugin.compose.ui.renderer.interop.AndroidViewRendererFactoryImpl")
+        putString("dialogFactoryV1", "io.github.supermonster003.autojs6.plugin.compose.ui.renderer.dialog.DialogRendererFactoryImpl")
         putString(K.COMPOSE_VERSION, BuildConfig.COMPOSE_VERSION)
         putString(K.SHARED_DEPS_FINGERPRINT, BuildConfig.SHARED_DEPS_FINGERPRINT)
     }
