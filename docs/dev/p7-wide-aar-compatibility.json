@@ -1,0 +1,23 @@
+{
+  "source": "AutoJs6 plugin-api/compose-ui-api release, F.4 integration commit recorded in p7-wide-evidence.md",
+  "oldSha256": "e3a4f2003bb0336338e229cfc9220c2296a5de462957fd540a20c37d86996fe8",
+  "sha256": "3ebe1f887b7e3a9a98277bd0436e83e8e808b380cbf050d37da42975ea125351",
+  "priorClasses": 209,
+  "newClasses": 215,
+  "unchangedClasses": 208,
+  "changed": [
+    "org/autojs/plugin/compose/api/ComposeUiContract.class"
+  ],
+  "changeReason": "CONTRACT_VERSION becomes 2 and supports accepts versions 1 through 2; prior model/catalog/loading/extension classes are byte-identical.",
+  "removed": [],
+  "added": [
+    "org/autojs/plugin/compose/api/v2/ComposeUiV2$Components.class",
+    "org/autojs/plugin/compose/api/v2/ComposeUiV2$Events.class",
+    "org/autojs/plugin/compose/api/v2/ComposeUiV2$Fields.class",
+    "org/autojs/plugin/compose/api/v2/ComposeUiV2$Props.class",
+    "org/autojs/plugin/compose/api/v2/ComposeUiV2$Slots.class",
+    "org/autojs/plugin/compose/api/v2/ComposeUiV2.class"
+  ],
+  "sourceCommit": "6a166c38415e7299ba034cd062dcc4c51a4b543a",
+  "sourceApiUnchangedSinceArtifactAssembly": true
+}

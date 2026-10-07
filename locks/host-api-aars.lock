@@ -1,9 +1,9 @@
 # AutoJs6 6.8.0 host API release AAR, staged on 2026-10-02 from the host snapshot 77b5a3b0c5 (build 5307, roadmap P0.1).
 # common-plugin-api: module unchanged since host commit 9c3ba2e520 (2026-09-15); byte-identical to the artifact staged by
 #   3-Setup Installer and 3-Shell Terminal. compose-ui-api preserves frozen V1 and adds the negotiated F.2
-#   interop and F.3 dialog extensions from host branch spike/compose-ui-p0 (build 5321); see libs/README.md.
+#   interop / F.3 dialog extensions plus the F.4 V2 catalog from host branch spike/compose-ui-p0 (build 5322); see libs/README.md.
 format=1
 common-plugin-api.file=common-plugin-api.aar
 common-plugin-api.sha256=ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15
 compose-ui-api.file=compose-ui-api.aar
-compose-ui-api.sha256=e3a4f2003bb0336338e229cfc9220c2296a5de462957fd540a20c37d86996fe8
+compose-ui-api.sha256=3ebe1f887b7e3a9a98277bd0436e83e8e808b380cbf050d37da42975ea125351

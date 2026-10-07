@@ -254,7 +254,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
-| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 - F.3 完成, F.4 起待实施 |
+| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 - F.4 已完成本地实现与门禁; F.5 未排期, F.6 按性能证据决定 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
 
@@ -511,7 +511,7 @@ P6.4 证据 (2026-10-04): 插件build26签名APK `autojs6-plugin-compose-ui-v1.0
 - [x] (宿主 / 文档) F.1 TSX 工厂: `__autojs6Tsx` 按 `type` 路由到 `compose.createElement`, `aj6-jsx-element-extension.d.ts` 增补 Compose 元素类型, TypeScript Engine 插件配合.
 - [x] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
 - [x] (宿主 / 插件) F.3 `compose.dialog(nodeOrRender, options)`: 任意脚本弹出 Material 3 Dialog / ModalBottomSheet, 返回 Promise 或会话.
-- [ ] (插件 / 宿主 / 文档) F.4 宽集组件, 契约 `CONTRACT_VERSION = 2` (只追加).
+- [x] (插件 / 宿主 / 文档) F.4 宽集组件, 契约 `CONTRACT_VERSION = 2` (只追加).
 - [ ] (插件) F.5 组件画廊 Activity (若排期, 需同时遵循独立设置页与图标规范).
 - [ ] (宿主) F.6 细粒度更新与脚本侧依赖裁剪 (按 P5.3 数据决定).
 
@@ -522,6 +522,9 @@ F.2 证据 (2026-10-07): `docs/dev/p7-interop-evidence.md`. XML `<compose>` / `c
 
 
 F.3 证据 (2026-10-07): `docs/dev/p7-dialog-evidence.md`. compose.dialog 返回原会话, 支持 alert / bottomSheet, cancelable 与 theme; UI 使用真实绑定 Activity, 非 UI 复用悬浮窗权限与保活. 独立 dialog-v1 仅附加3个共享类, 原206类字节不变. 锁定 Material3 原 ModalBottomSheet 无公开 overlay 类型入口, 本节明确使用公开 Compose Dialog + M3 BottomSheetScaffold/SheetState/scrim 组合, 未改变路线图条目或依赖版本. 宿主 JVM214/API23, 插件JVM64/API35设备49与API24弹窗9, 宿主两设备各6个弹窗场景, 两设备权限负例, 最终宿主20项回归和签名包8个TSX+5个JS示例通过. 声明4.34.0, Engine0.6.6, Ace1.28.0, 文档与Offline Docs完成本地配套. 插件1.1.0/build31, 2545465B/46345方法引用低于Q5线, 下一起点F.4.
+
+
+F.4 证据 (2026-10-07 - 2026-10-08): `docs/dev/p7-wide-evidence.md`. 19 类宽集组件与 6 个配套 item 节点已实现, 契约 V2 的基础目录为 55 项, 协商 AndroidView 后为 56 项. 原 209 个共享 class 中 208 个字节相同, 仅 ComposeUiContract 的版本上限改为 2, 另追加 6 个 V2 类; 匹配宿主最低 5322, 保留实际 V1 provider 兼容性. 最终插件 1.1.0/build33 的 JVM 70 项, API24/35 各完整 64 项, 宿主 JVM 224/API 29 与两设备各完整 29 场景通过. 签名包 ffee2730 为 3022152 B/53842 方法引用; 维护者于 2026-10-07 接受 d4f266d2 的 F.4 功能增长 (3022148 B/53838 引用), 最终原生输入守卫及元数据/计数对齐带来的 +4 B/+4 引用另行记录, 不改原 Q5 门槛或 236 条 P5 观测. Declarations 4.35.0, 文档 6.8.0/96 与 Offline Docs 6.8.6/build81 已完成本地来源与内容检查. Engine 0.6.7/build89 与 Ace 1.29.0/build143 的最终 JVM, 完整编译/语言服务及签名门禁均通过; 最终签名组合的9个TSX和5个原JS示例共14项通过. 各仓库按逻辑本地提交, 两台专用AVD与10个自有安装已清理, 本节完成.
 
 ---
 
@@ -1024,3 +1027,13 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 签名产物autojs6-plugin-compose-ui-v1.1.0-c8dddb90.apk, 2545465B, SHA-256 469314d90a9d85271e9278d5309130c75c433bda97fe5144e59294a3aaa7752d, 7478类/46345方法引用, 低于Q5的2612576B/49194线. 原236条性能观测与规则保持. 文档156模块/6675搜索条目, 离线212文件/12735581B同步和签名门禁通过. lint无错误, 插件4项/Engine7项/Ace49项既有警告保留记录.
 - 环境与夹具: API24旧模拟器显示后端发生system_server/goldfish_dma崩溃, 仅切换自有AVD到受支持的swiftshader后重跑. 实际drag等待公开可交互状态, 焦点序列使用真实活动窗口输入模式, 清理检查绑定具体anchor对象, IME检查区分focus请求与真实点击显示键盘, 未增加超时或跳过平台. 两台自建AVD及9个自有安装的最终清理记录见F.3证据.
 - 下一起点为F.4宽集组件/契约V2. 本轮没有推送/npm发布/官方索引登记/公开Release, 不把既有源码公开授权等同于本轮已发布. 全设备矩阵, 打包应用F.3, 宿主全量JVM/lint, 新可比性能/长期内存与远端CI未执行, 明确保留验证边界.
+
+
+### 2026-10-07 - 2026-10-08: P7 F.4 宽集组件与契约 V2 本地交付
+
+- 按原 F.4 实现全部 19 类组件和 6 个 item 节点, 基础目录 55 项, AndroidView 协商后 56 项. V1 目录, 模型, Parcel tag, 上限, 修饰符与 F.2/F.3 可选接口保留; 新旧实际宿主/renderer 的准入与回滚均已验证. 未增加, 分拆或丢弃路线图小节, 未开始 F.5/F.6.
+- 窗口与输入边界已修正: ModalBottomSheet 沿用公开 Dialog + BottomSheetScaffold, 跨 popup 仍保留外层 overlay 类型; raw 与旧 ui 悬浮容器通过公开 owner 接收 Back, 保留原生焦点和调用方 View. Drawer 区分用户请求与原生 anchor/动画校正; DatePicker 模式切换先同步已接受日期和月份; TimePicker 保留有界待确认字段. SearchBar 拒绝 65537 个 UTF-16 单元的原生输入并报告 LIMIT_EXCEEDED, 保留 65536 边界, 忽略受控 query 的同值回声且继续允许同值 search.
+- 最终匹配产物验证: 插件 1.1.0/build33 的 JVM 70, lint 0 错误/5 警告, 签名/摘要/类归属/原生对齐均通过. API24 x86 与 API35 x86_64 各完整 64 项插件测试通过; 宿主 6.8.0/5322 的 JVM 224/API 29, 两设备使用最终签名 renderer 的各完整 29 场景通过. 最终完整运行证据以插件 `docs/dev/p7-wide-evidence.md` 为准, 不用分批重跑的并集替代.
+- 当前来源: 干净宿主 `6a166c38415e7299ba034cd062dcc4c51a4b543a`, 声明 4.35.0 为 `de51858b59ec88f75c56d94bcf4af600c54ff34f`; 实际 aj6dts 使用该宿主及生成器 `525bebdaa157087b1295d80cef0dae861152eda5`. TS5.1.3/6.0.3 的 F1/F2/F3/F4 25/31/22/42 负例与 P6 strict/exact, 声明体检查通过. 文档 6.8.0/96 为 `c5a9658`, 内容 `479d8f1`; Offline Docs 6.8.6/build81 为 `f1bfc004d189750949df48b3a9673418eebfc1fe`, 212 资产/12828821 B 与最终签名内容门禁通过. 并发平台提交及其已包含的 F.4 文件保留既有历史, 具体来源见证据.
+- 最终 Compose APK `autojs6-plugin-compose-ui-v1.1.0-ffee2730.apk` 为 3022152 B, 9031 类/53842 DEX 方法引用, SHA-256 `3ece8a8885b0a2b9ab7edf2e1eeaf5aeeeebc3b6a0b3f4936b868da5ae0ab755`. Q5 于 2026-10-07 批准的候选为 d4f266d2 (3022148 B/53838 引用); 最终 +4 B/+4 引用和审批参照同时记录在 `docs/dev/p7-wide-size-review.json`, 不冒称维护者重新确认了新精确值. 原复核线和 236 条 P5 观测不变, 未重新定义性能基线.
+- 配套已完成: Engine 0.6.7/build89 提交 `527d892`, Ace 1.29.0/build143 提交 `5b1b0e9`; Engine JVM534/构建逻辑4/full Worker/C8/配额, Ace JVM171/完整浏览器语言服务以及各自签名门禁通过. 最终签名 Engine + renderer 的9个真实TSX和5个原JS示例共14项通过. 插件为本条所在build33提交, 各插件计数一致. 两台专用AVD与10个自有安装经身份和路径核对后已清理. 下一起点保留原F.5条件项与F.6性能判断, 本轮不增加或拆分小节. 原宿主和原 Ace 没有被本次工作编辑或暂存; 已有外部提交变化, 不沿用原宿主早先的脏工作区描述. 本轮未执行宿主全量 JVM/lint, 新六设备矩阵, inrt F.4, 新计时/内存基线或远端 CI, 也没有本轮 Git 推送/npm 发布/官方索引登记/公开 Release.

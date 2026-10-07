@@ -24,9 +24,9 @@
 | 插件 ID / engine / variant | `compose-ui` / `compose` / `default` |
 | INFO 服务 | `ComposeUiPluginInfoService`, action `org.autojs.plugin.INFO`, category `compose-ui` (D23: 仅 INFO 注册, 与 ImGui 插件同形) |
 | 渲染器工厂 meta-data | application 级 `org.autojs.plugin.compose.RENDERER_FACTORY` = `io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl` (类随 P0.2 技术验证落地) |
-| 宿主契约标识 | 契约包 `org.autojs.plugin.compose.api` (宿主 `plugin-api/compose-ui-api`, 路线图 P1.1), `CONTRACT_VERSION = 1`; P1.1 已冻结 V1, `ComposeUiPlugin` 引用 `ComposeUiIds` / `ComposeUiContract` 的内联常量 |
-| 最低宿主 versionCode | `ComposeUiPlugin.REQUIRED_HOST_VERSION` = 5316 (P1.3 确认: AutoJs6 6.8.0 / 5316 首次完整集成 V1 装载器, 会话核心与插件中心注册; Manifest, `common.json`, changelog 与测试保持一致) |
-| 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.8.3 (与兄弟仓库统一升级时再更新); 不使用 `autojs6-native-alignment` |
+| 宿主契约标识 | 契约包 `org.autojs.plugin.compose.api` (宿主 `plugin-api/compose-ui-api`, 路线图 P1.1), `CONTRACT_VERSION = 2`; P1.1 已冻结 V1, F.4 只追加 V2 目录, `ComposeUiPlugin` 引用 `ComposeUiIds` / `ComposeUiContract` 的内联常量 |
+| 最低宿主 versionCode | `ComposeUiPlugin.REQUIRED_HOST_VERSION` = 5322 (F.4 的 V2 目录与协商需要配套 AutoJs6 6.8.0 / 5322; 历史 V1 最低宿主 5316 保留在冻结常量中. Manifest, `common.json`, changelog 与测试保持一致) |
+| 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.9.0 (与兄弟仓库统一升级时再更新); 不使用 `autojs6-native-alignment` |
 | Compose 版本 | BOM `2026.09.00` (runtime / ui / foundation / animation 1.12.1, material3 1.4.0, material-icons-core 1.7.8), 由 `gradle/libs.versions.toml` 单点声明; Compose 编译器插件版本 = `System.getProperty("gradle.kotlin.version")` (D25) |
 | 发布文件名 | `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk` (1 个) |
 | 原生库 / ABI | 无插件自有原生代码; `libandroidx.graphics.path.so` (graphics-path 1.0.1, 随 Compose BOM 变动) x `arm64-v8a` / `armeabi-v7a` / `x86_64` / `x86`, 单 APK 内置; `nativeAbis` / `allowedNativeLibraries` / `nativePageAlignment` 在 `app/build.gradle.kts` 单点声明 |
@@ -153,6 +153,8 @@ AutoJs6-Plugin-Compose-UI/
 - `name` 来自不可翻译的 `app_name`, `description` 来自当前 locale 的 `plugin_description`, `instruction` 来自 `@raw/plugin_instruction`, `versionName` / `versionCode` 来自已安装包, `versionDate` 来自 `plugin_version_date` resValue, `id` / `engine` / `variant` / `author` 来自 `ComposeUiPlugin`.
 - `supportedAbis` 恒为空数组 (D22: 单 APK 内置全部四种 ABI 的 graphics-path 辅助库, 对设备没有 ABI 限制), 在 `ComposeUiPluginInfoService.getInfo()` 中显式写出以便审计.
 - INFO `capabilities` 仍只含 `PluginCapabilityKeys.REQUIRES_HOST_VERSION`. P2 渲染器工厂通过 V1 `capabilities()` 协商契约版本, Compose 运行时版本, 共享依赖指纹和 `RendererCatalog` 声明的完整 30 项 V1 目录 (29 个节点组件与仅命令的 Snackbar), FEATURES 现在包含可选 `android-view-interop-v1` / `dialog-v1`, 配套类名 key 为 `androidViewFactoryV1` / `dialogFactoryV1`; 旧 V1 COMPONENTS 仍为 30 项, 新宿主协商后才加载独立扩展入口. 基础工厂与普通渲染路径不得直接引用扩展共享类型, 保证旧宿主类加载兼容性. P2.4 / P2.5 已补齐原生输入框, 列表, Scaffold, 顶部应用栏, 对话框与进度指示器. P3.1 - P3.5 已在匹配的本地宿主交付可调用的 `compose` / `$compose`, 29 个节点工厂, 句柄, 响应式 state/render/ref, batch/post/theme, ui 模式挂载与非 ui 脚本的 raw / 可调整悬浮窗, 以及错误 / 探测 / 生命周期守卫. 悬浮窗复用宿主授权, 缺失权限返回 `PERMISSION_REQUIRED`, 不自动弹出授权界面. P4 五例已随包提供并同步至匹配宿主的 Compose UI 示例分类; P5 健壮性, 六设备矩阵, 真实打包应用与性能基线见阶段证据. P6 已交付完整 API 文档, TypeScript 声明及配套 Ace / Offline Docs 本地同步; 性能复核规则按已确认的 Q5 记录在第 14 节.
+- F.4 将基础契约版本提升为 2, 最低宿主改为 5322. `api.v2.ComposeUiV2` 追加 25 个节点 (19 类组件和 6 个配套子项), 基础工厂 COMPONENTS 共 55 项, 与已协商 AndroidView 合用时共 56 项. 宿主接受 V1/V2, 旧插件只允许其实际声明的组件; V2 插件在旧宿主的版本门禁被拒绝. 原 V1 目录, Parcelable, F.2 / F.3 接口继续保留, 不把历史 V1 扩展目录直接替换为 V2.
+- V2 节点的交叉属性, 直接父子关系与树边界由共享验证器在宿主和插件发布前校验. Pager / Grid 的每节点子项上限遵循原 UiNode 的 2000, 会话总节点仍为 5000. 可见状态仍由脚本控制; 交互只排队发送事件, 不在 Compose 回调中直接执行 JS.
 - 新增可选能力时先协商, 不通过捕获异常猜测协议版本.
 - F.3 弹窗由插件创建真正的 Compose Dialog, UI 脚本使用其 Activity 窗口, 非 UI 使用宿主既有悬浮窗权限及 WindowTypeCompat. 宿主仅持有非交互 composition anchor, 会话仍计入共同上限. 锁定 Material3 1.4.0 的 ModalBottomSheet 没有公开的 show 前 overlay 类型参数, 因此底部弹层由公开 BottomSheetScaffold / SheetState 与模态 Dialog 组合, 不使用私有反射或提前升级依赖. 取消经独立生命周期事件排队返回宿主, 不在组合中调用 JS.
 
@@ -186,7 +188,7 @@ AutoJs6-Plugin-Compose-UI/
 
 - `.readme/lang_*.json` (10 语言, 键集合一致, 列表键 `features` / `usage_steps` / `compatibility_points` / `faq_items` / `security_points`) 与 `.changelog/lang_*.json` 是唯一文案源; 生成物 (`README.md`, `.readme/README-*.md`, `app/src/main/assets/doc/CHANGELOG*.md`, `app/src/main/res/raw*/plugin_instruction.md`, 共 36 个) 不手工编辑.
 - 修改 JSON 或模板后运行 `py .python/generate_markdown.py` 再 `--check`; CI `markdown.yml` 在 Windows 上执行 `.python/check_markdown.bat`.
-- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 当前状态段落 MUST 如实说明 "1.1.0 本地开发预览, 两层 API 与 UI / 悬浮窗承载已实现, 五个示例已随包交付, 完整 API 参考与 TypeScript / Ace / Offline Docs 本地配套内容已提供, 需要匹配的本地宿主构建, 尚无官方发行版". 兼容性段落明确 TSX 需要匹配的 5319 宿主与内置 Compose 声明的 TypeScript Engine, 普通工厂最低宿主仍为 5316; F.2 的 XML 容器与原生 View 互操作需要匹配的 5320 宿主, TSX 配套需要 TypeScript Engine 0.6.5. `assets/examples/` 由 `index.json` 列出计数器, 表单, 1000 项列表, 非 ui 悬浮 HUD 与主题五例, 每例头部说明模式及权限前提; API 文档与声明按 P6 的目录守卫维护; HUD 示例关闭时停止自身工作线程, 不在关闭后继续更新节点.
+- 根 `README.md` 为简体中文, 与 `.readme/README-zh-Hans.md` 同源. 快速开始示例以路线图附录 A 为准 (A.3 计数器, A.8 悬浮窗 HUD); 当前状态段落 MUST 如实说明 "1.1.0 本地开发预览, 两层 API 与 UI / 悬浮窗承载已实现, 五个示例已随包交付, 完整 API 参考与 TypeScript / Ace / Offline Docs 本地配套内容已提供, 需要匹配的本地宿主构建, 尚无官方发行版". 兼容性段落明确 TSX 需要匹配的 5319 宿主与内置 Compose 声明的 TypeScript Engine, 这些是历史版本的最低要求; 当前 V2 包统一需要匹配的 5322 宿主, TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用旧 V1 插件的原有组件. `assets/examples/` 由 `index.json` 列出计数器, 表单, 1000 项列表, 非 ui 悬浮 HUD 与主题五例, 每例头部说明模式及权限前提; API 文档与声明按 P6 的目录守卫维护; HUD 示例关闭时停止自身工作线程, 不在关闭后继续更新节点.
 - 修改示例后, 使用 `py .python/sync_examples.py --host <明确的宿主仓库路径>` 同步五个 JS 至宿主 `app/src/main/assets-app/sample/Compose UI/`, 清单同步至 `app/src/main/assets-app/indices/compose-examples.json`, 再以 `--check` 确认字节一致. 宿主通过 `AssetManager.list` 动态发现分类, 没有静态分类总表; 不在可执行示例目录放清单 JSON. 插件 Gradle 构建不依赖宿主目录.
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.

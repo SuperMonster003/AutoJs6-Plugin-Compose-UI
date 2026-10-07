@@ -29,7 +29,7 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
     private val store = NodeStore(environment.sessionId, { node ->
         if (extension?.handles(node.type) != true) RendererCatalog.validate(node)
         fields.validateNode(node)
-    }, allowUnknownDebug = BuildConfig.DEBUG, catalog = extension?.catalog ?: ComponentCatalog.V1)
+    }, allowUnknownDebug = BuildConfig.DEBUG, catalog = extension?.catalog ?: RendererCatalog.catalog)
     private val frame = mutableStateOf<RenderFrame?>(null)
     private val theme = mutableStateOf(environment.initialTheme)
     private val commands = NodeCommandRegistry()
@@ -57,8 +57,10 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
                     ThemeMapper.Content(theme.value) {
                         val current = frame.value
                         val content: @androidx.compose.runtime.Composable () -> Unit = {
-                            Box(Modifier.semantics { testTagsAsResourceId = true }) {
-                                current?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit, extension = extension) }
+                            RendererWindowContext {
+                                Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                                    current?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit, extension = extension) }
+                                }
                             }
                         }
                         if (presentation == null) content()
@@ -146,7 +148,7 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
                 is UiCommand.ShowSnackbar -> null
             }
             if (node != null && name != null) {
-                val catalog = extension?.catalog ?: ComponentCatalog.V1
+                val catalog = extension?.catalog ?: RendererCatalog.catalog
                 if (name !in catalog.requireComponent(node.type).commands && node.modifier.none {
                     name in catalog.modifier(it.name)!!.commands
                 }) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
@@ -154,11 +156,11 @@ class ComposeUiRendererImpl internal constructor(private val environment: Compos
             if (command is UiCommand.Edit && !TextFieldController.isTextField(node!!)) {
                 throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
             }
-            if (command is UiCommand.ScrollTo && node?.type in setOf(ComposeUiComponents.LAZY_COLUMN, ComposeUiComponents.LAZY_ROW)) {
+            if (command is UiCommand.ScrollTo && node?.type in RendererCatalog.indexedComponents) {
                 val index = command.index
                 if (index != null && index >= node!!.children.size) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
             }
-            if (command is UiCommand.ScrollTo && command.index != null && node?.type !in setOf(ComposeUiComponents.LAZY_COLUMN, ComposeUiComponents.LAZY_ROW)) {
+            if (command is UiCommand.ScrollTo && command.index != null && node?.type !in RendererCatalog.indexedComponents) {
                 throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
             }
             return node

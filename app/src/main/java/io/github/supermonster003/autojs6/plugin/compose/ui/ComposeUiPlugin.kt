@@ -2,13 +2,14 @@ package io.github.supermonster003.autojs6.plugin.compose.ui
 
 import org.autojs.plugin.compose.api.ComposeUiContract
 import org.autojs.plugin.compose.api.ComposeUiIds
+import org.autojs.plugin.compose.api.v2.ComposeUiV2
 
 /**
  * Identity constants shared by the manifest, the INFO service, the documentation and the tests.
  * They must stay identical to the host-side registration (roadmap D1 / D23 and section 4.4); the
  * JVM manifest contract test fails when the manifest drifts from them.
  *
- * The values reference the frozen V1 contract AAR. These const values are inlined so the INFO
+ * The values reference the host contract AAR. These const values are inlined so the INFO
  * service remains independent of the host-provided API classes in its own process.
  */
 object ComposeUiPlugin {
@@ -38,6 +39,6 @@ object ComposeUiPlugin {
     /** Contract version this plugin targets (roadmap D29 / appendix B.6). */
     const val CONTRACT_VERSION = ComposeUiContract.CONTRACT_VERSION
 
-    /** Minimum AutoJs6 build containing the V1 loader, session core and Plugin Center registration (P1.3). */
-    const val REQUIRED_HOST_VERSION = ComposeUiIds.REQUIRED_HOST_VERSION_CODE
+    /** Minimum AutoJs6 build containing the additive V2 catalog and negotiation (F.4). */
+    const val REQUIRED_HOST_VERSION = ComposeUiV2.REQUIRED_HOST_VERSION_CODE
 }

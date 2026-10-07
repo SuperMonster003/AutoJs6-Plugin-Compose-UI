@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.drop
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.v2.ComposeUiV2.Components as V
 
 /** Resolved arguments have catalog defaults applied, without changing the operation order. */
 internal data class ModifierInstruction(val name: String, val args: List<UiValue>) {
@@ -120,6 +121,9 @@ internal object ModifierMapper {
         ComposeUiComponents.BUTTON, ComposeUiComponents.ELEVATED_BUTTON, ComposeUiComponents.FILLED_TONAL_BUTTON,
         ComposeUiComponents.OUTLINED_BUTTON, ComposeUiComponents.TEXT_BUTTON, ComposeUiComponents.ICON_BUTTON,
         ComposeUiComponents.SWITCH, ComposeUiComponents.CHECKBOX, ComposeUiComponents.RADIO_BUTTON,
+        V.NAVIGATION_BAR_ITEM, V.NAVIGATION_RAIL_ITEM, V.NAVIGATION_DRAWER_ITEM,
+        V.TAB, V.DROPDOWN_MENU_ITEM, V.ASSIST_CHIP, V.FILTER_CHIP, V.INPUT_CHIP,
+        V.SEGMENTED_BUTTON_ITEM, V.FLOATING_ACTION_BUTTON,
     )
 
     /** Pure boundary validation used both by rendering and JVM tests. */
@@ -168,7 +172,7 @@ internal object ModifierMapper {
         val focusManager = LocalFocusManager.current
         val focused = remember(node.nodeId) { booleanArrayOf(false) }
         val hasExplicitClick = operations.any { it.name == ComposeUiModifiers.CLICKABLE }
-        val focusable = ComponentCatalog.V1.component(node.type)?.commands?.contains(ComposeUiCommands.FOCUS) == true || hasExplicitClick
+        val focusable = RendererCatalog.catalog.component(node.type)?.commands?.contains(ComposeUiCommands.FOCUS) == true || hasExplicitClick
         val scrollStates = ArrayList<ScrollState>()
         val operationOccurrences = HashMap<String, Int>()
         var modifier: Modifier = this
@@ -237,7 +241,7 @@ internal object ModifierMapper {
 
         val enabled = interactionEnabled(node)
         val longClick = node.callbacks[ComposeUiEvents.LONG_CLICK]
-        if (TextFieldController.isTextField(node)) {
+        if (TextFieldController.isTextField(node) || node.type == V.SEARCH_BAR) {
             // Text editors own selection, caret placement, IME activation and the native toolbar.
             // Observe their gestures without competing for consumed events or swallowing release.
             // Explicit clickable modifier operations above retain their declared chain semantics.

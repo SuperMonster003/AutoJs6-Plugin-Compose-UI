@@ -158,7 +158,7 @@ class ComposeRendererTest {
         val bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888)
         try {
             // Stateful fields, lazy layouts, modal windows and commands have separate fixtures.
-            val basic = RendererCatalog.components - setOf(C.TEXT_FIELD, C.OUTLINED_TEXT_FIELD, C.LAZY_COLUMN, C.LAZY_ROW,
+            val basic = org.autojs.plugin.compose.api.catalog.ComponentCatalog.V1.components.map { it.name }.toSet() - setOf(C.TEXT_FIELD, C.OUTLINED_TEXT_FIELD, C.LAZY_COLUMN, C.LAZY_ROW,
                 C.SCAFFOLD, C.TOP_APP_BAR, C.ALERT_DIALOG, C.CIRCULAR_PROGRESS_INDICATOR, C.LINEAR_PROGRESS_INDICATOR, C.SNACKBAR)
             val children = basic.mapIndexed { index, name ->
                 val props = when (name) {

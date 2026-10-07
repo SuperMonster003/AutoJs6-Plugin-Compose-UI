@@ -3,6 +3,7 @@ package io.github.supermonster003.autojs6.plugin.compose.ui.renderer
 import org.autojs.plugin.compose.api.*
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.model.*
+import org.autojs.plugin.compose.api.v2.ComposeUiV2
 
 /** Private transaction workspace; visible state changes only after full validation. */
 internal class NodeStore(private val sessionId: Int, private val validateRendererNode: (UiNode) -> Unit = {},
@@ -92,6 +93,7 @@ internal class NodeStore(private val sessionId: Int, private val validateRendere
                 catalog.validateNode(it, parents[it.nodeId]); validateRendererNode(it)
             }
         }
+        if (candidate?.nodes?.any { it.type in ComposeUiV2.componentNames } == true) ComposeUiV2.validateTree(candidate)
         return Preview(candidate, batch.generation, this, revision)
     }
 

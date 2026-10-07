@@ -74,6 +74,7 @@ Compose UI는 AutoJs6의 UI 렌더링 플러그인입니다. 스크립트는 호
 - TSX는 `<compose.Column>`, `<compose:Text>`, 노드 팩토리 참조, Fragment, 슬롯 및 반응형 콜백을 지원합니다. 하나의 트리에서 Compose와 기존 XML 노드를 혼합할 수 없습니다
 - XML `<compose>` 컨테이너와 compose.attach로 UI 페이지나 기존 플로팅 창에 독립적인 Compose 세션을 삽입합니다. compose.AndroidView는 기존 Android View 또는 동기 팩토리가 반환하는 View를 표시합니다
 - compose.dialog는 UI 또는 일반 스크립트에서 대화상자와 모달 하단 시트를 표시하고 업데이트 및 종료 가능한 세션을 반환합니다
+- Material 3 확장 구성요소: 탐색 및 서랍, 탭, 하단 시트 및 메뉴, 날짜와 시간 선택, 페이징 및 그리드, 칩, 배지, 분할 버튼, 플로팅 버튼, 검색창, 도움말 및 당겨서 새로고침
 
 ******
 
@@ -81,7 +82,7 @@ Compose UI는 AutoJs6의 UI 렌더링 플러그인입니다. 스크립트는 호
 
 ******
 
-1. compose 스크립트 API가 포함된 호환 로컬 AutoJs6 빌드를 설치합니다 (최소 6.8.0 / 5316)
+1. compose 스크립트 API가 포함된 호환 로컬 AutoJs6 빌드를 설치합니다 (최소 6.8.0 / 5322)
 2. 이 플러그인 APK를 설치합니다 (열 필요가 없으며, 플러그인에는 런처 항목이 없습니다)
 3. AutoJs6 플러그인 센터에서 Compose UI가 인식되고 활성화되었는지 확인합니다
 4. 스크립트에서 `compose` 또는 `$compose`를 사용합니다. Activity 콘텐츠는 `compose.mount`, 플로팅 창은 호스트에 오버레이 권한을 부여한 뒤 `compose.floaty`를 사용합니다
@@ -136,17 +137,15 @@ worker = threads.start(() => {
 
 플러그인의 실행 요구 사항과 제한:
 
-- 최소 AutoJs6 버전: 6.8.0 (5316) 이상. 더 낮은 버전의 호스트는 플러그인 센터에서 비호환으로 표시합니다
+- 최소 AutoJs6 버전: 6.8.0 (5322) 이상. 더 낮은 버전의 호스트는 플러그인 센터에서 비호환으로 표시합니다
 - Android 버전: 7.0 (API 24) 이상
 - 프로세서 아키텍처: arm64-v8a / armeabi-v7a / x86_64 / x86 (네 가지 모두 단일 APK에 내장, 아키텍처별 선택 불필요)
 - Compose 버전: 플러그인에 포함 (BOM 2026.09.00), 호스트의 Compose 런타임에 의존하지 않습니다
-- 계약 버전: 1. 호스트와 플러그인은 계약 버전을 협상하며, 일치하지 않으면 명확한 오류와 함께 로드를 거부합니다
+- 계약 버전: 2. 호스트와 플러그인은 계약 버전을 협상하며, 일치하지 않으면 명확한 오류와 함께 로드를 거부합니다
 - 패키징된 앱에도 호환 Compose UI 플러그인을 별도로 설치해야 하며 활성화/승인 기록은 해당 앱에 속합니다; 호환성은 내장 AutoJs6 런타임을 검사하며 앱 자체의 versionCode를 사용하지 않습니다
-- TSX에는 일치하는 AutoJs6 6.8.0 / 5319 로컬 호스트와 Compose 선언이 포함된 TypeScript Engine 빌드가 필요합니다. 렌더러만 설치하면 TSX를 사용할 수 없습니다
-- 상호 운용에는 일치하는 AutoJs6 6.8.0 / 5320 호스트와 AndroidView 확장을 지원하는 Compose UI가 필요합니다. TSX에는 TypeScript Engine 0.6.5도 필요합니다. 기본 V1 렌더링의 최소 호스트는 계속 5316입니다
 - View 팩토리는 렌더링 전에 메인 스레드에서 실행됩니다. 잘못된 교체는 현재 내용을 보존합니다. 하나의 View를 두 노드가 소유하거나 다른 부모에서 가져올 수 없습니다. 빌린 View의 리스너와 호출자의 리소스 소유권은 유지됩니다
-- 독립 대화상자에는 AutoJs6 6.8.0 / 5321과 dialog-v1을 지원하는 Compose UI가 필요합니다. TSX에는 TypeScript Engine 0.6.6도 필요합니다. UI가 아닌 스크립트에는 호스트의 오버레이 권한이 필요합니다
 - cancelable=false는 뒤로 가기, 바깥쪽 클릭, 아래로 밀기를 통한 닫기를 막습니다. 명시적 닫기와 스크립트 종료는 대화상자를 정리하고 기존 페이지와 다른 세션을 유지합니다
+- 이 빌드는 Compose UI 계약 V2를 사용하며 AutoJs6 6.8.0 / 5322가 필요합니다. TSX에는 TypeScript Engine 0.6.7이 필요합니다. 새 호스트는 기존 V1 렌더러의 구성요소도 지원합니다. 확장 구성요소에는 V2가 필요합니다
 
 ******
 
@@ -194,8 +193,8 @@ variant: default
 info action: org.autojs.plugin.INFO
 info category: compose-ui
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
-contract package: org.autojs.plugin.compose.api (version 1)
-minimum host build: 5316 (6.8.0)
+contract package: org.autojs.plugin.compose.api (version 2)
+minimum host build: 5322 (6.8.0)
 ```
 
 호스트는 `org.autojs.plugin.INFO`으로 플러그인을 발견하고 `requiresHostVersion` 등의 기능 정보를 읽습니다. 렌더러 팩토리 클래스 이름은 `org.autojs.plugin.compose.RENDERER_FACTORY` 메타데이터로 선언되며, 호스트는 플러그인 APK 경로로 클래스 로더 (부모는 호스트)를 만들어 호스트 프로세스 안에서 인스턴스화합니다.
@@ -218,20 +217,20 @@ minimum host build: 5316 (6.8.0)
 
 #### v1.1.0
 
-_2026/10/07_
+_2026/10/08_
 
 - `안내` 1.1.0 로컬 개발 미리 보기: 호환 AutoJs6 호스트 빌드와 설치 및 활성화된 플러그인이 필요합니다. UI 페이지, 플로팅 창, 예제 5개, API 참조 및 TypeScript 선언을 로컬 연동용으로 제공합니다. 검증된 호환성과 성능 범위는 로드맵에 기록되어 있습니다. 공식 인덱스 등록이나 정식 배포는 하지 않았습니다. 아이콘 그림은 임시이며 관리자의 최종 원본 이미지를 기다리고 있습니다
-- `안내` TSX에는 일치하는 AutoJs6 6.8.0 / 5319 로컬 호스트와 Compose 선언이 포함된 TypeScript Engine 빌드가 필요합니다. 렌더러만 설치하면 TSX를 사용할 수 없습니다
-- `안내` 상호 운용에는 일치하는 AutoJs6 6.8.0 / 5320 호스트와 AndroidView 확장을 지원하는 Compose UI가 필요합니다. TSX에는 TypeScript Engine 0.6.5도 필요합니다. 기본 V1 렌더링의 최소 호스트는 계속 5316입니다
-- `안내` 독립 대화상자에는 AutoJs6 6.8.0 / 5321과 dialog-v1을 지원하는 Compose UI가 필요합니다. TSX에는 TypeScript Engine 0.6.6도 필요합니다. UI가 아닌 스크립트에는 호스트의 오버레이 권한이 필요합니다
+- `안내` 이 빌드는 Compose UI 계약 V2를 사용하며 AutoJs6 6.8.0 / 5322가 필요합니다. TSX에는 TypeScript Engine 0.6.7이 필요합니다. 새 호스트는 기존 V1 렌더러의 구성요소도 지원합니다. 확장 구성요소에는 V2가 필요합니다
 - `새 기능` TSX는 `<compose.Column>`, `<compose:Text>`, 노드 팩토리 참조, Fragment, 슬롯 및 반응형 콜백을 지원합니다. 하나의 트리에서 Compose와 기존 XML 노드를 혼합할 수 없습니다
 - `새 기능` XML `<compose>` 컨테이너와 compose.attach로 UI 페이지나 기존 플로팅 창에 독립적인 Compose 세션을 삽입합니다. compose.AndroidView는 기존 Android View 또는 동기 팩토리가 반환하는 View를 표시합니다
 - `새 기능` compose.dialog는 UI 또는 일반 스크립트에서 대화상자와 모달 하단 시트를 표시하고 업데이트 및 종료 가능한 세션을 반환합니다
+- `새 기능` Material 3 확장 구성요소: 탐색 및 서랍, 탭, 하단 시트 및 메뉴, 날짜와 시간 선택, 페이징 및 그리드, 칩, 배지, 분할 버튼, 플로팅 버튼, 검색창, 도움말 및 당겨서 새로고침
 - `개선` Android 앱 정보 아이콘에 Icon Studio의 그림과 밝은 배경 및 어두운 배경을 사용하고 플러그인 센터의 투명 그림과 기존 런처 옵션을 유지
 - `개선` View 팩토리는 렌더링 전에 메인 스레드에서 실행됩니다. 잘못된 교체는 현재 내용을 보존합니다. 하나의 View를 두 노드가 소유하거나 다른 부모에서 가져올 수 없습니다. 빌린 View의 리스너와 호출자의 리소스 소유권은 유지됩니다
 - `개선` cancelable=false는 뒤로 가기, 바깥쪽 클릭, 아래로 밀기를 통한 닫기를 막습니다. 명시적 닫기와 스크립트 종료는 대화상자를 정리하고 기존 페이지와 다른 세션을 유지합니다
 - `의존성` 동결된 V1을 유지하고 선택적 AndroidView 상호 운용 확장을 포함하도록 compose-ui-api.aar 업데이트
 - `의존성` 기존 V1 및 AndroidView 계약을 유지하면서 compose-ui-api.aar에 선택적 대화상자 기능 추가
+- `의존성` 기존 노드 모델 및 V1 구성요소 의미를 유지하며 compose-ui-api.aar V2 카탈로그 추가
 
 #### v1.0.0
 

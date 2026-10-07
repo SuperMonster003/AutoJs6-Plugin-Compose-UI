@@ -14,6 +14,7 @@ import org.autojs.plugin.compose.api.interop.AndroidViewInteropV1
 import org.autojs.plugin.compose.api.model.UiNode
 import org.autojs.plugin.compose.api.model.UiTree
 import org.autojs.plugin.compose.api.model.UiValue
+import org.autojs.plugin.compose.api.v2.ComposeUiV2
 import java.util.IdentityHashMap
 
 /** All mutations and native parent transitions are main-thread confined by the renderer. */
@@ -22,7 +23,7 @@ internal class AndroidViewContent(
     private val rendererRoot: () -> View?,
     private val report: (Throwable) -> Unit,
 ) : RendererExtension {
-    override val catalog get() = AndroidViewInteropV1.catalog
+    override val catalog get() = ComposeUiV2.interopCatalog
     override fun handles(type: String) = type == AndroidViewInteropV1.COMPONENT
     private var bindings = emptyMap<Int, AndroidViewBindingV1>()
     private val slots = LinkedHashSet<GuardedAndroidViewSlot>()

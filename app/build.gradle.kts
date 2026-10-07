@@ -343,6 +343,8 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.animation)
     implementation(libs.compose.material.icons.core)
+    // Material3 already supplies 1.8.2 at runtime. V2's controlled drawer uses its public BackHandler.
+    implementation(libs.activity.compose)
     debugImplementation(libs.compose.ui.tooling)
 
     testImplementation(libs.junit)

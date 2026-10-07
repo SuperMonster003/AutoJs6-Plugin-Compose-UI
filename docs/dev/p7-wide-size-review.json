@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-07",
+  "status": "accepted-by-maintainer",
+  "baseline": {
+    "pluginBuild": 19,
+    "apkBytes": 2375069,
+    "methodReferences": 44721
+  },
+  "previous": {
+    "pluginBuild": 31,
+    "apkBytes": 2545465,
+    "methodReferences": 46345
+  },
+  "reviewLimits": {
+    "apkBytes": 2612576,
+    "methodReferences": 49194
+  },
+  "candidate": {
+    "version": "1.1.0",
+    "build": 33,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-ffee2730.apk",
+    "apkBytes": 3022152,
+    "sha256": "3ece8a8885b0a2b9ab7edf2e1eeaf5aeeeebc3b6a0b3f4936b868da5ae0ab755",
+    "classDefinitions": 9031,
+    "methodReferences": 53842,
+    "dex": [
+      {
+        "file": "classes.dex",
+        "bytes": 7531296,
+        "compressedBytes": 2715218,
+        "methodReferences": 53842,
+        "classDefinitions": 9031
+      }
+    ]
+  },
+  "exceeds": {
+    "apkBytes": true,
+    "methodReferences": true
+  },
+  "reason": "F.4 adds 25 nodes using existing Material3/foundation runtime components; no runtime version or extended icon artifact is added. Shrinking now retains their implementation. activity-compose 1.8.2 changes from transitive runtime exposure to explicit compile exposure at the same resolved version.",
+  "originalP5ObservationsChanged": false,
+  "newTimingBaseline": false,
+  "acceptance": {
+    "date": "2026-10-07",
+    "decision": "Accept this F.4 functional growth while retaining the original Q5 review limits.",
+    "scope": "1.1.0/build32, d4f266d2, 3022148 bytes and 53838 DEX method references",
+    "reviewLimitsChanged": false
+  },
+  "approvalReferenceCandidate": {
+    "version": "1.1.0",
+    "build": 32,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-d4f266d2.apk",
+    "apkBytes": 3022148,
+    "sha256": "957ae7e988d18d5116c39e23986ae442f4813528f3e9dc9c6794977e9a05da35",
+    "classDefinitions": 9030,
+    "methodReferences": 53838,
+    "dex": [
+      {
+        "file": "classes.dex",
+        "bytes": 7530028,
+        "compressedBytes": 2715285,
+        "methodReferences": 53838,
+        "classDefinitions": 9030
+      }
+    ]
+  },
+  "finalArtifactDate": "2026-10-08",
+  "afterReviewChanges": {
+    "apkBytes": 4,
+    "methodReferences": 4,
+    "reason": "Current-date metadata, commit-count alignment after the concurrent platform upgrade, and the native SearchBar input-limit/disabled-callback/no-op-echo guard; no additional component or runtime dependency.",
+    "reviewedArtifactArchive": "Host app/build/compose-f4/baseline/renderer32-reviewed-d4f266d2.apk"
+  }
+}
