@@ -168,7 +168,7 @@ internal object ModifierMapper {
         val focusManager = LocalFocusManager.current
         val focused = remember(node.nodeId) { booleanArrayOf(false) }
         val hasExplicitClick = operations.any { it.name == ComposeUiModifiers.CLICKABLE }
-        val focusable = ComposeUiCommands.FOCUS in ComponentCatalog.V1.requireComponent(node.type).commands || hasExplicitClick
+        val focusable = ComponentCatalog.V1.component(node.type)?.commands?.contains(ComposeUiCommands.FOCUS) == true || hasExplicitClick
         val scrollStates = ArrayList<ScrollState>()
         val operationOccurrences = HashMap<String, Int>()
         var modifier: Modifier = this

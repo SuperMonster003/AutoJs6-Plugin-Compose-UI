@@ -13,7 +13,9 @@ class ComposeUiRendererFactoryImpl : ComposeUiRendererFactory {
     override fun capabilities() = Bundle().apply {
         putInt(K.CONTRACT_VERSION, contractVersion())
         putStringArrayList(K.COMPONENTS, ArrayList(RendererCatalog.components))
-        putStringArrayList(K.FEATURES, arrayListOf())
+        // Strings only: an old host lacks the optional interface and must still load this factory.
+        putStringArrayList(K.FEATURES, arrayListOf("android-view-interop-v1"))
+        putString("androidViewFactoryV1", "io.github.supermonster003.autojs6.plugin.compose.ui.renderer.interop.AndroidViewRendererFactoryImpl")
         putString(K.COMPOSE_VERSION, BuildConfig.COMPOSE_VERSION)
         putString(K.SHARED_DEPS_FINGERPRINT, BuildConfig.SHARED_DEPS_FINGERPRINT)
     }

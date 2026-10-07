@@ -10,21 +10,23 @@ reproduced in full in the distribution of the respective project.
 | --- | --- | --- | --- | --- |
 | `common-plugin-api.aar` | AutoJs6 module `plugin-api/common-plugin-api` (https://github.com/SuperMonster003/AutoJs6): `IPluginInfoProvider` AIDL, `PluginInfo`, `PluginActions`, `PluginCapabilityKeys` | host build 6.8.0 / 5307, commit `77b5a3b0c5` (module byte-identical to the copies staged by the other official plugins) | MPL 2.0 | `ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15` |
 
-The frozen V1 `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in
-AutoJs6 branch `spike/compose-ui-p0` (6.8.0 / 5316, P1.3 integration commit recorded in `docs/dev/p13-p2-evidence.md`).
-It is MPL 2.0, SHA-256 `3ba7c215262e889034eef61e6ba0d5414839712a03284e3d009a96696cce5266`,
-consumed as `compileOnly` by the plugin and packaged by the host. It contains no Compose
-implementation dependency. The retained `api.spike` negative-version fixture is excluded from
-V1 compatibility guarantees. P1.2 retired its implementation/test consumers; the locked AAR is
-unchanged, so these unused legacy definitions remain until the next artifact maintenance.
+The `compose-ui-api.aar` is built with `:plugin-api:compose-ui-api:assembleRelease` in
+AutoJs6 branch `spike/compose-ui-p0` for F.2 (6.8.0 / 5320, commit
+`d54f21b1ea408dfcb66e58f663d71d2f10fade8a`, source and checks in
+`docs/dev/p7-interop-evidence.md`). It is MPL 2.0, SHA-256
+`0aaff93a27d405e8db7a513172ba1a2ebe60a3b8a09d4f27d8c9eaa03544d4a3`, consumed as
+`compileOnly` by the plugin and packaged by the host. It contains no Compose implementation
+dependency. All 197 retained V1 class files are byte-identical to the P1.3 artifact; the new
+`api.interop` package is an explicitly negotiated optional extension. The seven unused
+negative-version `api.spike` classes, which were outside frozen V1, have been removed.
 
 Shared host components are pinned in `locks/host-shared-deps.lock` (Q1(b), approved for app/inrt debug/release on 2026-10-02).
 AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table
 are compile-only; Compose integration artifacts whose names end in `-compose` remain bundled.
 Kotlin standard library 2.4.0 (Apache 2.0) remains bundled for the plugin's INFO/Wake process;
 parent-first loading resolves the host's identical version when rendering. Q1(b) aligns lifecycle
-2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. V1 contract classes are supplied by the host. P1.2 now supplies the production
-host loader/session and a limited V1 renderer preview; the complete renderer remains P2 work.
+2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. V1 contract and
+the negotiated optional interop classes are supplied by the matching host.
 Sources: Google Maven (AndroidX) and Maven Central (org.jetbrains.kotlin / org.jetbrains.kotlinx).
 
 ## Runtime dependencies (Gradle)

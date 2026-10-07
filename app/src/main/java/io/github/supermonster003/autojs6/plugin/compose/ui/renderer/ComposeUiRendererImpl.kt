@@ -21,13 +21,14 @@ import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.model.*
 
 /** V1 renderer: publish immutable validated frames and queue every event through the host sink. */
-class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) : ComposeUiRenderer {
+class ComposeUiRendererImpl internal constructor(private val environment: ComposeUiHostEnvironment,
+    private val extension: RendererExtension? = null) : ComposeUiRenderer {
     private val fields = TextFieldController(::emit, ::error, ::ensureScope)
     private val snackbar = SnackbarController(::ensureScope, ::emit)
     private val store = NodeStore(environment.sessionId, { node ->
-        RendererCatalog.validate(node)
+        if (extension?.handles(node.type) != true) RendererCatalog.validate(node)
         fields.validateNode(node)
-    }, allowUnknownDebug = BuildConfig.DEBUG)
+    }, allowUnknownDebug = BuildConfig.DEBUG, catalog = extension?.catalog ?: ComponentCatalog.V1)
     private val frame = mutableStateOf<RenderFrame?>(null)
     private val theme = mutableStateOf(environment.initialTheme)
     private val commands = NodeCommandRegistry()
@@ -50,7 +51,7 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
             output.setContent {
                 ThemeMapper.Content(theme.value) {
                     Box(Modifier.semantics { testTagsAsResourceId = true }) {
-                        frame.value?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit) }
+                        frame.value?.let { RenderNode(it, it.rootId, commands, fields, snackbar, ::emit, extension = extension) }
                     }
                 }
             }
@@ -60,13 +61,29 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
         }
     }
     override fun apply(batch: UiPatchBatch) {
+        val prepared = preview(batch)
+        prepareCommit()
+        commit(prepared)
+    }
+    internal fun preview(batch: UiPatchBatch): NodeStore.Preview {
         usable()
-        val tree = store.apply(batch)
+        val preview = store.preview(batch)
+        // This reserved optional component must never become the debug unknown-node placeholder
+        // through an unnegotiated legacy entry point. The string creates no new shared API link.
+        if (extension == null && preview.tree?.nodes?.any { it.type == "AndroidView" } == true) {
+            throw ComposeUiContractException(ComposeUiErrorCodes.UNKNOWN_COMPONENT)
+        }
+        return preview
+    }
+    internal fun commit(preview: NodeStore.Preview) {
+        usable()
+        val tree = store.commit(preview)
         fields.acceptFrame(tree, store.generation)
         snackbar.acceptFrame(tree, store.generation)
         frame.value = tree?.let { RenderFrame(it.rootId, it.nodes.associateBy { node -> node.nodeId }, store.generation) }
-        container?.recover()
     }
+    /** Native parent callbacks can fail; perform them before publishing a new tree/generation. */
+    internal fun prepareCommit() { usable(); container?.recover() }
     override fun execute(command: UiCommand) {
         usable()
         fun validateLiveNode(): UiNode? {
@@ -87,7 +104,7 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
                 is UiCommand.ShowSnackbar -> null
             }
             if (node != null && name != null) {
-                val catalog = ComponentCatalog.V1
+                val catalog = extension?.catalog ?: ComponentCatalog.V1
                 if (name !in catalog.requireComponent(node.type).commands && node.modifier.none {
                     name in catalog.modifier(it.name)!!.commands
                 }) throw ComposeUiContractException(ComposeUiErrorCodes.INVALID_ARGUMENT, nodeId = id)
@@ -129,7 +146,7 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
         if (closed) return
         closed = true
         try { view?.disposeComposition() } finally {
-            fields.dispose(); snackbar.close(); commands.clear(); recomposer?.cancel(); scope?.cancel()
+            fields.dispose(); snackbar.close(); extension?.dispose(); commands.clear(); recomposer?.cancel(); scope?.cancel()
             container?.removeAllViews(); container = null
             view = null; recomposer = null; scope = null; frame.value = null; store.clear()
         }
@@ -151,4 +168,6 @@ class ComposeUiRendererImpl(private val environment: ComposeUiHostEnvironment) :
                 contract?.prop?.let { putString(ComposeUiEventFields.PROP, it) }
             })
     }
+    internal fun reportFailure(failure: Throwable) = error(failure)
+    internal fun currentView(): View? = container
 }
