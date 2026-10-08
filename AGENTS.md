@@ -8,7 +8,7 @@
 - 用户在当前任务中的明确要求优先于本文件.
 - 本仓库是 **进程内渲染器插件** (路线图 D10 / D23): 宿主用 `PathClassLoader(插件 APK, parent = 宿主类加载器)` 在宿主进程内实例化渲染器工厂, 不存在 Binder 能力服务, 不存在插件自有进程中的界面. 参考规范中 Binder 服务, AIDL 冻结, 前台服务, 跨包 `queries` 的条款不适用.
 - 单一通用 APK (D22, 经 P0.1 证据修正): 插件自身没有原生代码, 不使用 ABI 拆分; 唯一的原生库是 Compose `ui-graphics` 传递依赖 `androidx.graphics:graphics-path` 1.0.1 自带的 `libandroidx.graphics.path.so` (四种 ABI, 各约 10 KB, 16 KB 页对齐). 不使用 `autojs6-native-alignment` 插件, 没有原生库重建配方; `appendDigestToReleasedFiles` 校验 "原生库集合恰好为这四个文件, 未压缩, ELF `PT_LOAD` 与 zip 数据偏移均 16 KB 对齐" (第 9 节).
-- 没有独立界面, 没有启动器入口 (D8): 不适用 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md`; 图标只需 `mipmap/ic_launcher.png` 与 `mipmap-night/ic_launcher.png` (插件中心与 README 使用), 不需要四个自适应 alias; Icon Studio 另行生成插件中心 `ic_plugin_center` 与系统应用信息图标 `ic_icon_studio_application` (见文末 System application icon 节), 均不构成启动器入口.
+- 独立界面只有组件画廊与设置页 (D8 于 2026-10-08 按维护者要求修订, 路线图 F.5 / D32): 画廊从启动器打开, 在插件自身进程以 Compose 展示组件预览与示例脚本, 只复制脚本或交给已安装的 AutoJs6 运行, 自身不执行脚本; 设置页按 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md` 提供语言 / 夜间模式 / 主题色 / 启动器图标, 前三项默认跟随 AutoJs6 (`AutoJs6HostSettingsContract` Provider), 图标按 `AUTOJS6_PLUGIN_BLACK_N_WHITE_ADAPTIVE_ICON_AGENTS.md` 用四个固定 alias 持久化. 渲染器仍在宿主进程运行, 画廊不改变装载方式, 契约或最低宿主.
 - 没有特权进程 (Shizuku / Root), 没有隐藏 API, 不访问网络.
 
 ## 2. 仓库身份
@@ -30,7 +30,8 @@
 | Compose 版本 | BOM `2026.09.00` (runtime / ui / foundation / animation 1.12.1, material3 1.4.0, material-icons-core 1.7.8), 由 `gradle/libs.versions.toml` 单点声明; Compose 编译器插件版本 = `System.getProperty("gradle.kotlin.version")` (D25) |
 | 发布文件名 | `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk` (1 个) |
 | 原生库 / ABI | 无插件自有原生代码; `libandroidx.graphics.path.so` (graphics-path 1.0.1, 随 Compose BOM 变动) x `arm64-v8a` / `armeabi-v7a` / `x86_64` / `x86`, 单 APK 内置; `nativeAbis` / `allowedNativeLibraries` / `nativePageAlignment` 在 `app/build.gradle.kts` 单点声明 |
-| 图标源图 | Icon Studio recipe `.icons/recipe.json` + `.icons/assets/` (亮 / 暗图稿为 P0.1 生成的 432 x 432 占位 `ic_launcher.png`, 图案 `#272727` / `#D8D8D8`); P0.1 原始占位源 `.python/icons/compose-ui-ic-launcher-light.png` / `-dark.png` (1024 x 1024 RGBA, `UI_GLYPH = 0.66`) 保留备查. **当前为临时占位图** (路线图 Q6), 维护者提供正式源图后替换并重新生成 |
+| 图标源图 | Icon Studio recipe `.icons/recipe.json` + `.icons/assets/` (亮 / 暗图稿为 P0.1 生成的 432 x 432 占位 `ic_launcher.png`, 图案 `#272727` / `#D8D8D8`, 底色 `#FAFAFA` / `#212121`, `launcher: true` 另生成四个 alias 的 `ic_launcher_system*` 与 `ic_launcher_monochrome`); P0.1 原始占位源 `.python/icons/compose-ui-ic-launcher-light.png` / `-dark.png` (1024 x 1024 RGBA, `UI_GLYPH = 0.66`) 保留备查. **当前为临时占位图** (路线图 Q6), 维护者提供正式源图后替换并重新生成 |
+| 独立界面 | `app.GalleryActivity` (画廊, 启动器 alias `launcher.Adaptive{Light,Dark,Auto}IconAlias` / `launcher.TransparentIconAlias` 的目标), `app.SettingsActivity`; 宿主运行入口 `org.autojs.autojs.external.open.RunIntentActivity` + extra `script`; 主题色派生 `com.materialkolor:material-color-utilities` 4.1.1 |
 
 ## 3. 工作区与提交
 
@@ -92,8 +93,9 @@ AutoJs6-Plugin-Compose-UI/
 |   |   |-- ComposeUiPluginInfo.kt             Context -> RuntimeInfo -> PluginInfo / capabilities
 |   |   |-- ComposeUiPluginInfoService.kt      IPluginInfoProvider
 |   |   |-- WakeActivity.kt
-|   |   `-- renderer/                          ComposeUiRendererFactoryImpl, 渲染器, 组件目录, 补丁应用, V2 宽集组件; dialog/ (F.3 弹窗工厂), interop/ (F.2 AndroidView 工厂)
-|   |-- src/main/res/           values*/ x 11 (strings), values*/icon_studio_backgrounds.xml, mipmap*/ (生成), raw*/plugin_instruction.md (生成), raw/keep_*.xml (Icon Studio 保留规则), xml/data_extraction_rules.xml
+|   |   |-- renderer/                          ComposeUiRendererFactoryImpl, 渲染器, 组件目录, 补丁应用, V2 宽集组件; dialog/ (F.3 弹窗工厂), interop/ (F.2 AndroidView 工厂)
+|   |   `-- app/                               F.5 独立界面 (不引用契约类): GalleryActivity / GalleryCatalog / GalleryPreviews, SettingsActivity / SettingsDialogs, StandaloneActivity, Appearance (宿主设置 Provider 读取与偏好), StandalonePalette (HCT 强调色与中性色), LauncherIcons, ScriptLauncher
+|   |-- src/main/res/           values*/ x 11 (strings), values*/{icon_studio_backgrounds,standalone_colors,themes}.xml, values/ic_launcher_background*.xml, mipmap*/ (生成; 含 alias 的 ic_launcher_system* 与 anydpi / notnight XML), raw*/plugin_instruction.md (生成), raw/keep_*.xml (Icon Studio 保留规则), xml/{data_extraction_rules,locales_config}.xml
 |   |-- src/debug/              RendererTestActivity (仅 debug, 承载本仓库渲染器 instrumentation)
 |   |-- src/main/assets/doc/    CHANGELOG*.md (生成)
 |   |-- src/main/assets/examples/ counter.js, form.js, list.js, floaty-hud.js, theme.js, index.json
@@ -131,8 +133,8 @@ AutoJs6-Plugin-Compose-UI/
 - Gradle 构建 MUST 自包含, 禁止引用兄弟仓库或宿主的路径, JAR / AAR 或 `flatDir`.
 - 宿主 AAR 只从 `libs/` 消费, 由 `locks/host-api-aars.lock` 锁定 SHA-256; `app/build.gradle.kts` 在配置期拒绝缺失文件, debug 产物, 占位哈希, 多余锁条目与摘要不符. 更新任一 AAR 时同一提交内更新锁文件, `libs/README.md` 与 `THIRD_PARTY_NOTICES.md`.
 - `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. JVM 与设备测试提供同一份共享依赖锁的运行时副本, 正式插件仍以 compileOnly 消费共享库. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. F.2 在独立 `.interop` 包附加通过能力协商加载的 AndroidView 接口; F.3 在 `.dialog` 包附加可选弹窗工厂与参数, 原 206 个 V1 / F.2 class 字节不变. 无引用且不属于冻结面的 `.spike` 版本 -1 已在本次制品维护中移除.
-- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 非 Kotlin 项均 `compileOnly` 并从插件 runtime classpath 排除; Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 仍随插件打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本与运行时排除集合. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; P1.2 的正式装载器与会话使用 V1, 负版本探针已退役. 最低正式宿主版本已于 P1.3 确认为 5316.
-- 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等本插件不需要的 View 体系库.
+- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 全部 `compileOnly`; D32 (F.5) 起其中 Compose 自身运行所需的 36 项 (`standaloneRuntime` 集合: activity / annotation / arch core / collection / concurrent / core / interpolator / lifecycle runtime+viewmodel+savedstate / profileinstaller / savedstate / startup / tracing / versionedparcelable / kotlinx-coroutines) 不再从 runtime classpath 排除, 由 Compose 传递带入并用 Gradle constraints 钉在锁定版本, 供画廊在插件自身进程运行; 其余 (appcompat / emoji2 / window / serialization / lifecycle-process / livedata) 仍排除. 宿主内 parent-first 使这些副本被宿主类遮蔽, `proguard-rules.pro` 对这些包 `-keepnames` 以保持引用名一致. Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 照旧打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本, 运行时打包集合恰好等于 `standaloneRuntime` 且版本等于锁; `.python/verify_apk_classpath.py` 校验 APK 含独立运行时类而不含 appcompat / window / emoji2 / serialization 与契约类. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; P1.2 的正式装载器与会话使用 V1, 负版本探针已退役. 最低正式宿主版本已于 P1.3 确认为 5316.
+- 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等 View 体系库; 独立界面全部用 Compose Material 3 实现. 主题色派生使用 `com.materialkolor:material-color-utilities` 4.1.1 (MIT, Material Color Utilities 的 Kotlin 移植), `StandalonePaletteTest` 用 Material Components 1.13.0 产出的 21 组色值校验与其他独立插件一致.
 
 ### 5.3 签名与发布构建
 
@@ -142,12 +144,12 @@ AutoJs6-Plugin-Compose-UI/
 
 ## 6. Manifest 与激活协议
 
-- `org.autojs.permission.PLUGIN` 是唯一权限; 无 `<queries>`, 无 `uses-sdk` 覆盖, 无 `uses-feature`.
+- `org.autojs.permission.PLUGIN` 是唯一权限; `<queries>` 仅声明宿主包 `org.autojs.autojs6` (读取设置 Provider 与解析运行入口); 无 `uses-sdk` 覆盖, 无 `uses-feature`.
 - application 级 meta-data 恰好四项: `org.autojs.plugin.WAKE_ACTIVITY` = `.WakeActivity`, `org.autojs.plugin.info.AUTHOR` = `@string/plugin_author`, `org.autojs.plugin.compose.RENDERER_FACTORY` = 渲染器工厂全限定类名, `requiresHostVersion` = 最低宿主 versionCode (application 级, 与 ImGui 插件同形; 宿主插件中心从 `PluginInfo.capabilities` 读取同一值).
 - `WakeActivity`: exported, `Theme.NoDisplay`, PLUGIN 权限, `excludeFromRecents`, `finishOnTaskLaunch`, WAKE action + DEFAULT category, `onCreate` 立即 `finish()`.
 - `ComposeUiPluginInfoService`: exported, enabled, PLUGIN 权限, intent-filter `org.autojs.plugin.INFO` + category `compose-ui`, 无 meta-data, 默认进程.
-- 不存在 launcher intent-filter, activity-alias, receiver, provider; 导出组件只有上述两个且都受 PLUGIN 权限保护 (`ManifestContractTest` 守卫).
-- `allowBackup=false`, `fullBackupContent=false`, `dataExtractionRules` 排除全部域; 不设 application `theme` 与 `name` (渲染器需要 `Application` 子类时再加并说明).
+- F.5 组件: `.app.GalleryActivity` 与 `.app.SettingsActivity` 不导出, `configChanges="uiMode|locale|layoutDirection"`; 四个 `activity-alias` (`.launcher.AdaptiveLightIconAlias` / `AdaptiveDarkIconAlias` / `AdaptiveAutoIconAlias` / `TransparentIconAlias`) 指向画廊并各带 MAIN / LAUNCHER, 图标分别为 `ic_launcher_system_light` / `ic_launcher_system` / `ic_launcher_system_auto` / `ic_launcher`, 只有 Auto 默认启用; `.app.LauncherIconUpdateReceiver` 不导出, 只接收 `MY_PACKAGE_REPLACED`; `androidx.startup.InitializationProvider` 以 `tools:node="remove"` 移除, 安装包不声明任何 provider. 受 PLUGIN 权限保护的导出组件仍只有 Wake 与 INFO (`ManifestContractTest` 守卫).
+- `allowBackup=false`, `fullBackupContent=false`, `dataExtractionRules` 排除全部域; application `theme` 为 `@style/Theme.ComposeUi` (仅窗口背景, 无 ActionBar), `localeConfig` 列出 10 语言; 不设 application `name`.
 - 渲染器工厂类由宿主在宿主进程内按 meta-data 类名反射创建; 它不是 Android 组件, 不在 Manifest 中注册, 但 R8 规则 MUST 保留其类名与无参构造 (`proguard-rules.pro`). P0.2 额外要求保持 `kotlin.**` ABI, 关闭 R8 优化变换 (仍裁剪 / 混淆 / 缩减资源), 以插件私有包承载混淆类名, 并补回 compileOnly lifecycle 的 ViewModel 无参构造规则; 原因与失败栈见 `docs/dev/p0-spike-evidence.md`.
 
 ## 7. PluginInfo 与能力协商
@@ -181,11 +183,11 @@ AutoJs6-Plugin-Compose-UI/
 
 ## 10. 字符串资源
 
-- 11 个目录: `values/` (默认英语) 与 `values-en/` 逐字相同, 另有 ar, es, fr, ja, ko, ru, zh, zh-rHK, zh-rTW. 没有 `locales_config.xml` (无界面, 不参与系统的按应用语言设置).
+- 11 个目录: `values/` (默认英语) 与 `values-en/` 逐字相同, 另有 ar, es, fr, ja, ko, ru, zh, zh-rHK, zh-rTW. `xml/locales_config.xml` 列出 10 语言 (画廊与设置页参与系统的按应用语言设置). 外观与启动器图标相关文案 (`app_language_*`, `app_settings_*`, `launcher_icon_*`, `theme_picker_*`, `about_*`) 与其他独立插件同源, 新增的画廊文案以 `gallery_*` 为前缀.
 - `strings.xml` 按 `name` 升序; 不可翻译项 (`app_name`) 放 `strings_donottranslate.xml`.
 - 全部 locale 使用 ASCII 标点 (含日语, 韩语, 阿拉伯语的逗号与句号), 省略号写 `...` (lint 已全局禁用 `TypographyEllipsis`). `ApplicationTextPunctuationTest` 扫描 `app/src/main`, `.readme`, `.changelog`, `docs`, `README.md`, `ROADMAP.md`, `AGENTS.md`, `THIRD_PARTY_NOTICES.md` 的 xml / md / json.
 - `plugin_description` 句尾无点号, 不含 "AutoJs6" 字样, 含 "Jetpack Compose" (`StringResourceParityTest`). 繁体中文 (台灣) 用 "指令碼 / 介面 / 轉譯", 繁体中文 (香港) 用 "腳本 / 界面 / 渲染".
-- 图标由 Icon Studio 从 `.icons/recipe.json` 与 `.icons/assets/` 确定性生成 (`py .python/generate_icon_studio.py`; `generate_launcher_icons.py` 在 recipe 存在时转交同一入口), 不手工编辑 `mipmap*/` 输出. recipe 的亮 / 暗图稿即 P0.1 由 `.python/icons/compose-ui-ic-launcher-light.png` 生成的两张占位 `ic_launcher.png`, 正式源图到位后替换 recipe 图稿并重新生成, 运行 `--check`, 并更新第 2 节与 changelog. 不创建同名自适应 XML 或圆形 `ic_launcher` (`StringResourceParityTest` 守卫); 系统应用信息图标 `ic_icon_studio_application` 的自适应资源按文末 System application icon 节处理.
+- 图标由 Icon Studio 从 `.icons/recipe.json` 与 `.icons/assets/` 确定性生成 (`py .python/generate_icon_studio.py`; `generate_launcher_icons.py` 在 recipe 存在时转交同一入口), 不手工编辑 `mipmap*/` 输出. recipe 的亮 / 暗图稿即 P0.1 由 `.python/icons/compose-ui-ic-launcher-light.png` 生成的两张占位 `ic_launcher.png`, 正式源图到位后替换 recipe 图稿并重新生成, 运行 `--check`, 并更新第 2 节与 changelog. 不创建同名自适应 XML 或圆形 `ic_launcher` (`StringResourceParityTest` 守卫); 系统应用信息图标 `ic_icon_studio_application` 的自适应资源按文末 System application icon 节处理. recipe `launcher: true` 生成四个 alias 的 PNG (`ic_launcher_system`, `_light`, 两个前景与 `ic_launcher_monochrome`); `mipmap*/ic_launcher_system*.xml` (anydpi-v26 / notnight) 与 `values/ic_launcher_background*.xml` 为手工维护的静态资源, Auto 使用独立资源 ID, 不用 values alias.
 
 ## 11. README, 插件说明与 changelog
 
@@ -196,21 +198,26 @@ AutoJs6-Plugin-Compose-UI/
 - changelog 分类只用 `hint` / `feature` / `fix` / `improvement` / `dependency`; 简体中文依赖条目用 `附加` / `升级` / `降级` / `替换` / `移除`; 当前版本 key 为 `v{VERSION_NAME}` (忽略后缀), `released_date` 为当日 `YYYY/MM/DD`; 涉及 feature / fix / improvement / dependency 的提交 MUST 更新 10 语言 JSON.
 - 文案面向使用者, 不写内部类拆分, 类加载细节或测试数量; 行为变化, 权限, 默认值与兼容性必须如实记录.
 
-## 12. 独立界面与设置 (不适用)
+## 12. 独立界面与设置 (F.5 起适用)
 
-- 本插件没有独立界面, 设置页, 关于页或发行历史页 (D8); 插件中心展示 `plugin_instruction` 与 `CHANGELOG-*.md` 即可. 若路线图修订引入界面, 再按 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md` 补齐.
+- 画廊与设置页在插件自身进程运行, 不能引用 `org.autojs.plugin.compose.api` 契约类 (它们由宿主提供, 插件进程没有); `app/` 包只依赖 Android / Compose / `common-plugin-api` (设置 Provider 契约常量). 画廊示例脚本用 `GalleryNode` 数据描述并序列化为 JS, `GalleryCatalogTest` 在 JVM 上用真实目录校验每个节点的属性 / 别名 / 快捷属性 / 插槽 / 事件 / 子节点策略, 每个节点组件与 Snackbar 恰好一条示例.
+- 设置页遵循 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md`: 外观分组顺序语言 -> 夜间模式 -> 主题色 -> 启动器图标, 关于分组列出版本 / 最低宿主 / 开发者; 选择器先改草稿, 确定才保存一次, 取消 / 返回 / 外部点击不保存; 主题色对话框提供跟随 AutoJs6, 16 色预设, HEX / RGB 输入与局部预览; 中性灰阶表面, 强调色按 HCT 规则派生并保证 4.5:1 可读. 跟随宿主只读取 `AutoJs6HostSettingsContract` Provider, 校验协议版本与包名, 宿主缺失时回退系统, 不写回宿主.
+- 启动器图标按图标规范: 选择持久化为四个 alias 的组件启用状态, `LauncherIcons.select` 回滚失败并迁移可变快捷方式归属, 包更新后 `LauncherIconUpdateReceiver` 归一化; 默认 Auto.
+- 发行历史仍由插件中心展示 `CHANGELOG-*.md`, 不另做页面.
 
 ## 13. 测试要求
 
 ### 13.1 JVM
 
-- `ManifestContractTest` (权限, 无 queries, application meta-data 四项, Wake Activity, INFO 服务发现契约, 无 launcher / alias / receiver / provider, 导出组件集合), `ComposeUiPluginRuntimeInfoTest` (PluginInfo 纯数据映射, 空 ABI, 身份常量对齐 `common.json` / `build.gradle.kts` / `proguard-rules.pro` / `settings.gradle.kts`), `StringResourceParityTest` (键集合与排序, 描述规则, 11 份 `plugin_instruction.md`, 图标文件), `ApplicationTextPunctuationTest`, `HostApiAarLockTest` (锁与文件摘要, AAR 纯字节码, 声明文件与 `libs/README.md` 复述摘要, 构建脚本消费的 id 集合).
+- `ManifestContractTest` (权限, 仅宿主包 queries, application meta-data 四项与主题 / localeConfig, Wake 与画廊 / 设置 Activity, INFO 服务发现契约, 四个启动器 alias 及其图标与默认启用态, 更新接收器, startup provider 移除, 导出组件集合), `ComposeUiPluginRuntimeInfoTest` (PluginInfo 纯数据映射, 空 ABI, 身份常量对齐 `common.json` / `build.gradle.kts` / `proguard-rules.pro` / `settings.gradle.kts`), `StringResourceParityTest` (键集合与排序, 描述规则, 11 份 `plugin_instruction.md`, 图标文件), `ApplicationTextPunctuationTest`, `HostApiAarLockTest` (锁与文件摘要, AAR 纯字节码, 声明文件与 `libs/README.md` 复述摘要, 构建脚本消费的 id 集合).
 - P1.1: 宿主契约模块的 `ComposeUiContractTest`, `ComponentCatalogConsistencyTest`, `ComposeUiModelTest`, `ComposeUiHostCompileGuardTest` 及设备 `ComposeUiParcelTest` 守卫冻结面与传输边界. 详细模型语义见 `docs/dev/compose-ui-plugin-protocol-v1.md`.
 - P0.2 起: 类加载边界与依赖锁的 JVM 守卫; P2 起: 组件目录 / 补丁合并 / Modifier 链 / 事件队列的纯逻辑测试.
+- F.5: `GalleryCatalogTest` (示例覆盖与属性校验), `AppearancePreferencesTest` (外观解析优先级与回退), `StandalonePaletteTest` (HCT 色值对照 Material Components 1.13.0, 可读性, 输入解析), `LauncherIconStatePolicyTest`; `StringResourceParityTest` 另校验 `locales_config.xml` 与 alias 图标资源.
 
 ### 13.2 Android instrumentation
 
-- `ComposeUiPluginContractTest`: Wake Activity 契约与四项 application meta-data, 无启动器入口, INFO 服务 `getInfo()` 往返 (空 `supportedAbis`, capabilities 仅 `requiresHostVersion`), APK 为单文件且原生库恰好为四个 ABI 的 `libandroidx.graphics.path.so` 并可在当前设备加载, 无导出 provider.
+- `ComposeUiPluginContractTest`: Wake Activity 契约与四项 application meta-data, 恰好一个已启用的启动器 alias 指向画廊且四个 alias 各有独立图标资源, INFO 服务 `getInfo()` 往返 (空 `supportedAbis`, capabilities 仅 `requiresHostVersion`), APK 为单文件且原生库恰好为四个 ABI 的 `libandroidx.graphics.path.so` 并可在当前设备加载, 不声明任何 provider.
+- F.5 画廊 (在插件进程运行): `GalleryDeviceTest` (56 条示例逐一打开并组合预览, 复制到剪贴板, 运行 Intent 指向宿主并在宿主已安装时可解析, 设置入口), `SettingsDeviceTest` (选择不保存 / 取消无变化 / 确定只保存一次, 主题色输入校验与预设, 图标选择持久化, 宿主外观可选), `LauncherIconDeviceTest` (每种模式只剩一个启动器条目且资源独立, 混合状态归一化). 更换打包集合或 R8 规则后 MUST 重新在宿主侧跑完整设备矩阵, 证明 parent-first 装载未受影响.
 - P0.2 起: 宿主侧加载探针 (在宿主仓库); P2 起: 渲染器在宿主进程内的组合 / 事件 / 生命周期用例 (宿主 androidTest), 本仓库保留不依赖宿主的渲染器单元 instrumentation.
 - P4 示例守卫: 宿主 `ComposeExampleCatalogTest` 校验目录发现, Rhino 语法与运行模式; `ComposeExamplesDeviceTest` 逐字节比较已安装插件与宿主的示例资产并执行实际脚本, 不在示例内加入测试开关. 设备必须安装包含当前示例的插件 APK.
 - 可选覆盖率使用 `-PcomposeUiCoverage=true`, JaCoCo 0.8.14 由版本目录锁定, 仅为测试插桩与报告使用, 不进入 release 包. 度量值与设备结果以阶段证据为准, 不以启用插桩代替通过验证.
@@ -227,7 +234,7 @@ AutoJs6-Plugin-Compose-UI/
 
 ```powershell
 py .python/generate_markdown.py --check
-py .python/generate_launcher_icons.py --check
+py .python/generate_icon_studio.py --check
 .\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:testDebugUnitTest
 .\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug :app:assembleRelease
 .\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:connectedDebugAndroidTest
@@ -254,7 +261,7 @@ py .python/generate_launcher_icons.py --check
 ## 15. 许可证, 安全与隐私
 
 - `LICENSE` 为 MPL-2.0 完整文本, README 徽章与 `THIRD_PARTY_NOTICES.md` 一致; Jetpack Compose / AndroidX (Apache-2.0) 与宿主 AAR (MPL-2.0) 在声明文件中列出.
-- `allowBackup=false` 且 `dataExtractionRules` 排除全部数据; 导出组件最小化并受签名权限保护; 不申请任何运行时权限.
+- `allowBackup=false` 且 `dataExtractionRules` 排除全部数据; 受 PLUGIN 权限保护的导出组件只有 Wake 与 INFO, 四个启动器 alias 是唯一的无权限导出组件; 不申请任何运行时权限, 不访问网络 (开发者页面只经系统 VIEW Intent 打开). 画廊不执行脚本, 复制只写入剪贴板, 运行只把脚本文本交给宿主的公开入口; 设置偏好存于插件私有 SharedPreferences, 不写回宿主.
 - 渲染器在宿主进程内运行, 沿用宿主的脚本权限模型, 不扩大脚本可访问的系统能力; 不记录界面文本正文.
 - 第三方组件的版本, 来源, 许可证与 SHA-256 (宿主 AAR) 记录在 `THIRD_PARTY_NOTICES.md`.
 
@@ -271,4 +278,4 @@ py .python/generate_launcher_icons.py --check
 
 - The maintainer requested themed backgrounds for every official plugin's Android App info icon. The application icon and roundIcon now use `@mipmap/ic_icon_studio_application`; this supersedes earlier application-level `ic_launcher` or fixed-dark `ic_launcher_system` wiring. Existing transparent brand resources and launcher alias choices retain their roles.
 - `.icons/recipe.json` and the portable Icon Studio 1.3 renderer generate separate system resources from the saved artwork, geometry and backgrounds. Default and night adaptive XML prevent legacy night PNGs from overriding the adaptive icon on modern Android. Projects supporting API 24/25 use circular compatibility PNGs; projects with minSdk >= 26 use unqualified anydpi XML without legacy application PNGs. Android system surfaces follow the system theme; Plugin Center follows the host theme.
-- Regenerate and verify with `.python/generate_icon_studio.py --check`, including the application Manifest references. Do not add launcher entries, alter component identities or paint the Plugin Center PNG background. System icon updates require a rebuilt and installed APK; catalog updates alone do not replace it.
+- Regenerate and verify with `.python/generate_icon_studio.py --check`, including the application Manifest references. Launcher entries are limited to the four F.5 icon aliases that target the gallery (section 6); do not add other launcher entries, alter component identities or paint the Plugin Center PNG background. System icon updates require a rebuilt and installed APK; catalog updates alone do not replace it.

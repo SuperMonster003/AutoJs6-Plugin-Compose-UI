@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-08",
+  "status": "accepted-by-maintainer",
+  "reviewLimits": {
+    "apkBytes": 2612576,
+    "methodReferences": 49194
+  },
+  "approvedReference": {
+    "build": 38,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-2740f0ee.apk",
+    "apkBytes": 3023736,
+    "methodReferences": 53842,
+    "record": "docs/dev/p7-f6-size-review.json"
+  },
+  "previousFinal": {
+    "build": 38,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-2740f0ee.apk",
+    "apkBytes": 3023736,
+    "methodReferences": 53842,
+    "classDefinitions": 9031
+  },
+  "candidate": {
+    "version": "1.1.0",
+    "build": 40,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-70369027.apk",
+    "apkBytes": 3624284,
+    "sha256": "9f686d5824a2618eea58c44ca0ee0b38ca6a9f844d85034153088e148e5397e3",
+    "classDefinitions": 10473,
+    "methodReferences": 60613,
+    "dex": [
+      {
+        "file": "classes.dex",
+        "bytes": 8764516,
+        "compressedBytes": 3175601,
+        "methodReferences": 60613,
+        "classDefinitions": 10473
+      }
+    ]
+  },
+  "deltaFromPreviousFinal": {
+    "apkBytes": 600548,
+    "methodReferences": 6771,
+    "classDefinitions": 1442
+  },
+  "exceeds": {
+    "apkBytes": true,
+    "methodReferences": true
+  },
+  "reason": "F.5 component gallery and settings (roadmap D32). The plugin now packages the 36 host-locked AndroidX runtime artifacts that Compose needs (activity, core, lifecycle runtime / viewmodel / savedstate, savedstate, collection, startup, tracing, profileinstaller, kotlinx-coroutines) so the gallery and settings Activities run in the plugin process, plus material-color-utilities 4.1.1 for the shared theme color derivation, the gallery catalog with 56 example scripts and live Material 3 previews of all 55 components, the settings dialogs, four launcher icon aliases with their adaptive resources, 10-language strings and locale configuration. Inside the host these runtime copies are shadowed parent-first by the host classes and are never loaded, so in-host rendering, the renderer contract and the minimum host version are unchanged.",
+  "originalP5ObservationsChanged": false,
+  "newTimingBaseline": false,
+  "acceptance": {
+    "date": "2026-10-08",
+    "decision": "The maintainer scheduled F.5 on 2026-10-08 and accepted the plugin size growth required by the standalone gallery before implementation (\"插件包体积增量可接受\"); the measured +600548 B / +6771 method references of build40 (70369027) are recorded against that acceptance. The original Q5 review limits are unchanged and remain exceeded.",
+    "reviewLimitsChanged": false
+  }
+}
