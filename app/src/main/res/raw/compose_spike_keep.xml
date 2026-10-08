@@ -1,2 +1,0 @@
-<!-- P0 diagnostic uses the public Resources name lookup to audit the Material 3 resource table. -->
-<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/m3c_dialog" />
