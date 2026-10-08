@@ -145,7 +145,8 @@ worker = threads.start(() => {
 - 打包應用仍需另外安裝兼容的 Compose UI 插件, 啟用/授權記錄屬於該應用; 兼容性檢查依據內置 AutoJs6 執行時, 不是打包應用自身的 versionCode
 - View 工廠在渲染前於主執行緒執行. 無效替換保留目前內容; 同一 View 不可屬於兩個節點, 也不會從其他父視圖被搶佔. 借用的 View 保留原有監聽器, 外部資源仍由呼叫方管理
 - cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與腳本結束仍會清理彈窗, 保留現有頁面和其他工作階段
-- 此版本使用 Compose UI 契約 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用舊 V1 轉譯器的原有元件, 擴充元件需要 V2 轉譯器
+- 此版本使用 Compose UI 契約 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用舊 V1 渲染器的原有元件, 擴充元件需要 V2 渲染器
+- compose.memo 由 AutoJs6 6.8.0 / 5323 提供, 可在 render 中重用依賴未變化的片段; 此插件無需更新, TSX 配套需要 TypeScript Engine 0.6.8
 
 ******
 
@@ -220,7 +221,8 @@ minimum host build: 5322 (6.8.0)
 _2026/10/08_
 
 - `提示` 1.1.0 本地開發預覽: 需要匹配的 AutoJs6 宿主構建, 並安裝和啟用本插件. 本地配套提供 UI 頁面, 懸浮窗, 五個示例, API 參考與 TypeScript 宣告. 已驗證的兼容性及效能範圍記錄在路線圖中. 目前未登記官方索引, 尚無官方發行版. 圖示圖案仍為臨時佔位, 等待維護者提供正式源圖
-- `提示` 此版本使用 Compose UI 契約 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用舊 V1 轉譯器的原有元件, 擴充元件需要 V2 轉譯器
+- `提示` 此版本使用 Compose UI 契約 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用舊 V1 渲染器的原有元件, 擴充元件需要 V2 渲染器
+- `提示` compose.memo 由 AutoJs6 6.8.0 / 5323 提供, 可在 render 中重用依賴未變化的片段; 此插件無需更新, TSX 配套需要 TypeScript Engine 0.6.8
 - `新增` TSX 支援 `<compose.Column>`, `<compose:Text>`, 節點工廠參照, Fragment, 插槽及響應式回呼; 同一棵樹不能混用 Compose 與舊 XML 節點
 - `新增` XML `<compose>` 容器與 compose.attach 可在 UI 頁面或舊懸浮窗內嵌入獨立 Compose 工作階段; compose.AndroidView 可承載現有 Android View 或同步工廠傳回的 View
 - `新增` compose.dialog 傳回可更新和關閉的工作階段, 支援一般對話框與模態底部面板, 可在 UI 或一般腳本中使用

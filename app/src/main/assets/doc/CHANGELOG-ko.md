@@ -10,6 +10,7 @@
 
 * `안내` 1.1.0 로컬 개발 미리 보기: 호환 AutoJs6 호스트 빌드와 설치 및 활성화된 플러그인이 필요합니다. UI 페이지, 플로팅 창, 예제 5개, API 참조 및 TypeScript 선언을 로컬 연동용으로 제공합니다. 검증된 호환성과 성능 범위는 로드맵에 기록되어 있습니다. 공식 인덱스 등록이나 정식 배포는 하지 않았습니다. 아이콘 그림은 임시이며 관리자의 최종 원본 이미지를 기다리고 있습니다
 * `안내` 이 빌드는 Compose UI 계약 V2를 사용하며 AutoJs6 6.8.0 / 5322가 필요합니다. TSX에는 TypeScript Engine 0.6.7이 필요합니다. 새 호스트는 기존 V1 렌더러의 구성요소도 지원합니다. 확장 구성요소에는 V2가 필요합니다
+* `안내` compose.memo는 AutoJs6 6.8.0 / 5323에서 제공되며 의존 값이 바뀌지 않은 render 조각을 재사용합니다. 이 플러그인은 업데이트가 필요 없으며 TSX에는 TypeScript Engine 0.6.8이 필요합니다
 * `새 기능` TSX는 `<compose.Column>`, `<compose:Text>`, 노드 팩토리 참조, Fragment, 슬롯 및 반응형 콜백을 지원합니다. 하나의 트리에서 Compose와 기존 XML 노드를 혼합할 수 없습니다
 * `새 기능` XML `<compose>` 컨테이너와 compose.attach로 UI 페이지나 기존 플로팅 창에 독립적인 Compose 세션을 삽입합니다. compose.AndroidView는 기존 Android View 또는 동기 팩토리가 반환하는 View를 표시합니다
 * `새 기능` compose.dialog는 UI 또는 일반 스크립트에서 대화상자와 모달 하단 시트를 표시하고 업데이트 및 종료 가능한 세션을 반환합니다
