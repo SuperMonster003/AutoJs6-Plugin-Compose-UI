@@ -103,7 +103,9 @@ def find_node(adb: Adb, description: str, predicate, clickable: bool = False) ->
         last_tree[:] = [root]
         parents = {child: parent for parent in root.iter() for child in parent}
         for node in root.iter("node"):
-            if not predicate(node):
+            # Only the plugin's own window counts: a system dialog left on a busy CI emulator (for example the
+            # "Close app" button of an ANR dialog) must not be mistaken for a catalog entry.
+            if node.get("package") != PACKAGE or not predicate(node):
                 continue
             if not clickable:
                 return node, node
