@@ -108,9 +108,9 @@ jobs:
             chmod +x gradlew
             # Run activation/discovery plus renderer-local semantics and pixel tests. Cross-APK loading
             # and script-dispatch tests remain in the AutoJs6 host device matrix.
-            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true \
-              -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false \
-              --console=plain --stacktrace
+            # The emulator runner executes every script line as a separate shell command, so a
+            # backslash continuation becomes a literal Gradle task name; keep the command on one line.
+            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace
 
       - name: Upload instrumentation and coverage reports
         if: always()
