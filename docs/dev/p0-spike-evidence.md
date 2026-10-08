@@ -43,6 +43,12 @@ Material Button/Text tree, while the private Material resource name is a diagnos
 No private Compose API is linked and no TalkBack manual acceptance or broad Material component
 coverage is claimed. The resource is retained explicitly in `raw/compose_spike_keep.xml`.
 
+2026-10-08 review: the name-based diagnostic was retired together with the P0 spike classes,
+and no plugin or host source looks up `m3c_dialog` by name any longer. The orphaned keep file
+was removed. A rebuilt release keeps the same 119 resource names and values; the only content
+change is the shifted `raw/plugin_instruction` ID constant (0x7f050004 to 0x7f050003), and
+`m3c_dialog` stays because Material 3 references it from code.
+
 ## R8 findings that debug builds did not reveal
 
 1. Removing Kotlin from the plugin APK is not viable while the Kotlin INFO service runs in the
