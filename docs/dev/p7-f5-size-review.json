@@ -1,6 +1,6 @@
 {
   "date": "2026-10-08",
-  "status": "accepted-by-maintainer",
+  "status": "accepted-by-maintainer-for-f5; build44 growth reported for confirmation",
   "reviewLimits": {
     "apkBytes": 2612576,
     "methodReferences": 49194
@@ -13,45 +13,58 @@
     "record": "docs/dev/p7-f6-size-review.json"
   },
   "previousFinal": {
-    "build": 38,
-    "file": "autojs6-plugin-compose-ui-v1.1.0-2740f0ee.apk",
-    "apkBytes": 3023736,
-    "methodReferences": 53842,
-    "classDefinitions": 9031
-  },
-  "candidate": {
-    "version": "1.1.0",
     "build": 42,
     "file": "autojs6-plugin-compose-ui-v1.1.0-2f1127ce.apk",
     "apkBytes": 3624288,
-    "sha256": "505ea68bb2a23ff81d01ad0735048fa5835fc9ac36d12c503b137c1290c35992",
-    "classDefinitions": 10473,
     "methodReferences": 60613,
+    "classDefinitions": 10473,
+    "sha256": "505ea68bb2a23ff81d01ad0735048fa5835fc9ac36d12c503b137c1290c35992"
+  },
+  "candidate": {
+    "version": "1.1.0",
+    "build": 44,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-5d2ce3ef.apk",
+    "apkBytes": 4673146,
+    "sha256": "9856d4f57b361d7597cfcee39c9e50b5466cca644029a6081127c057e2890dd7",
+    "classDefinitions": 13482,
+    "methodReferences": 82466,
     "dex": [
       {
         "file": "classes.dex",
-        "bytes": 8764636,
-        "compressedBytes": 3175722,
-        "methodReferences": 60613,
-        "classDefinitions": 10473
+        "bytes": 8677568,
+        "compressedBytes": 3226055,
+        "methodReferences": 64794,
+        "classDefinitions": 11228
+      },
+      {
+        "file": "classes2.dex",
+        "bytes": 3155900,
+        "compressedBytes": 953387,
+        "methodReferences": 17672,
+        "classDefinitions": 2254
       }
     ]
   },
   "deltaFromPreviousFinal": {
-    "apkBytes": 600552,
-    "methodReferences": 6771,
-    "classDefinitions": 1442
+    "apkBytes": 1048858,
+    "methodReferences": 21853,
+    "classDefinitions": 3009
   },
   "exceeds": {
     "apkBytes": true,
     "methodReferences": true
   },
-  "reason": "F.5 component gallery and settings (roadmap D32). The plugin now packages the 36 host-locked AndroidX runtime artifacts that Compose needs (activity, core, lifecycle runtime / viewmodel / savedstate, savedstate, collection, startup, tracing, profileinstaller, kotlinx-coroutines) so the gallery and settings Activities run in the plugin process, plus material-color-utilities 4.1.1 for the shared theme color derivation, the gallery catalog with 56 example scripts and live Material 3 previews of all 55 components, the settings dialogs, four launcher icon aliases with their adaptive resources, 10-language strings and locale configuration. Inside the host these runtime copies are shadowed parent-first by the host classes and are never loaded, so in-host rendering, the renderer contract and the minimum host version are unchanged. Build42 only reworks the launcher icon normalization (no write when the alias state is already consistent) and the device tests after the first remote CI run.",
+  "reason": "F.5 component gallery and settings (roadmap D32). The plugin now packages the 36 host-locked AndroidX runtime artifacts that Compose needs (activity, core, lifecycle runtime / viewmodel / savedstate, savedstate, collection, startup, tracing, profileinstaller, kotlinx-coroutines) so the gallery and settings Activities run in the plugin process, plus material-color-utilities 4.1.1 for the shared theme color derivation, the gallery catalog with 56 example scripts and live Material 3 previews of all 55 components, the settings dialogs, four launcher icon aliases with their adaptive resources, 10-language strings and locale configuration. Inside the host these runtime copies are shadowed parent-first by the host classes and are never loaded, so in-host rendering, the renderer contract and the minimum host version are unchanged. Build42 only reworks the launcher icon normalization (no write when the alias state is already consistent) and the device tests after the first remote CI run. Build44 fixes the launcher crash of build42: the gallery process lacked androidx.arch.core:core-runtime (ArchTaskExecutor), customview-poolingcontainer, emoji2 (with lifecycle-process) and androidx.window, which the instrumentation APK had masked. The shared packages are now fully kept by R8 like kotlin.** (a -keepnames candidate compiled Compose's EmojiCompatStatus into 'EmojiCompat.get(); throw null' because the plugin never initializes EmojiCompat, which crashed inside the host), so they are no longer shrunk and the release carries a second DEX; the fully kept savedstate / lifecycle members reference lifecycle-livedata-core and kotlinx-serialization, which are packaged too. The standalone runtime now packages 47 host-locked artifacts (everything in the lock except appcompat) and the device test APK carries no host-only component.",
   "originalP5ObservationsChanged": false,
   "newTimingBaseline": false,
   "acceptance": {
     "date": "2026-10-08",
-    "decision": "The maintainer scheduled F.5 on 2026-10-08 and accepted the plugin size growth required by the standalone gallery before implementation (\"插件包体积增量可接受\"); the measured +600552 B / +6771 method references of build42 (2f1127ce) are recorded against that acceptance. The original Q5 review limits are unchanged and remain exceeded.",
+    "decision": "The maintainer scheduled F.5 on 2026-10-08 and accepted the plugin size growth required by the standalone gallery before implementation (\"插件包体积增量可接受\"); the measured +600552 B / +6771 method references of build42 (2f1127ce) are recorded against that acceptance. The original Q5 review limits are unchanged and remain exceeded. Build44 (5d2ce3ef) adds the missing runtime groups and the full keep of the shared packages, +1048858 B / +21853 method references over build42 and +1649410 B / +28624 over the approved build38 reference; the maintainer's advance acceptance covered the F.5 gallery, and this larger figure is reported for explicit confirmation.",
     "reviewLimitsChanged": false
+  },
+  "deltaFromApprovedReference": {
+    "apkBytes": 1649410,
+    "methodReferences": 28624,
+    "classDefinitions": 4451
   }
 }

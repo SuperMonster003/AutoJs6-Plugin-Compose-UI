@@ -84,7 +84,7 @@ AutoJs6-Plugin-Compose-UI/
 |-- .changelog/                 lang_*.json x 10 + template_changelog.md (文案源)
 |-- .github/workflows/          build.yml (JVM / APK / lint + API 24 x86 / API 35 x86_64 模拟器契约测试), markdown.yml, icon-studio.yml
 |-- .icons/                     recipe.json + assets/ (Icon Studio 图稿与参数, 第 10 节与文末 System application icon 节)
-|-- .python/                    generate_markdown.py (+ .bat, check_markdown.bat), generate_icon_studio.py + icon_studio_runtime.py, generate_launcher_icons.py (兼容入口), sync_examples.py, verify_apk_classpath.py, icons/ (P0.1 占位源图)
+|-- .python/                    generate_markdown.py (+ .bat, check_markdown.bat), generate_icon_studio.py + icon_studio_runtime.py, generate_launcher_icons.py (兼容入口), sync_examples.py, verify_apk_classpath.py, verify_standalone_launch.py, icons/ (P0.1 占位源图)
 |-- .readme/                    common.json, lang_*.json x 10, template_readme.md, template_plugin_instruction.md, README-*.md (生成)
 |-- app/
 |   |-- src/main/java/io/github/supermonster003/autojs6/plugin/compose/ui/
@@ -132,8 +132,8 @@ AutoJs6-Plugin-Compose-UI/
 
 - Gradle 构建 MUST 自包含, 禁止引用兄弟仓库或宿主的路径, JAR / AAR 或 `flatDir`.
 - 宿主 AAR 只从 `libs/` 消费, 由 `locks/host-api-aars.lock` 锁定 SHA-256; `app/build.gradle.kts` 在配置期拒绝缺失文件, debug 产物, 占位哈希, 多余锁条目与摘要不符. 更新任一 AAR 时同一提交内更新锁文件, `libs/README.md` 与 `THIRD_PARTY_NOTICES.md`.
-- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. JVM 与设备测试提供同一份共享依赖锁的运行时副本, 正式插件仍以 compileOnly 消费共享库. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. F.2 在独立 `.interop` 包附加通过能力协商加载的 AndroidView 接口; F.3 在 `.dialog` 包附加可选弹窗工厂与参数, 原 206 个 V1 / F.2 class 字节不变. 无引用且不属于冻结面的 `.spike` 版本 -1 已在本次制品维护中移除.
-- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 全部 `compileOnly`; D32 (F.5) 起其中 Compose 自身运行所需的 36 项 (`standaloneRuntime` 集合: activity / annotation / arch core / collection / concurrent / core / interpolator / lifecycle runtime+viewmodel+savedstate / profileinstaller / savedstate / startup / tracing / versionedparcelable / kotlinx-coroutines) 不再从 runtime classpath 排除, 由 Compose 传递带入并用 Gradle constraints 钉在锁定版本, 供画廊在插件自身进程运行; 其余 (appcompat / emoji2 / window / serialization / lifecycle-process / livedata) 仍排除. 宿主内 parent-first 使这些副本被宿主类遮蔽, `proguard-rules.pro` 对这些包 `-keepnames` 以保持引用名一致. Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 照旧打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本, 运行时打包集合恰好等于 `standaloneRuntime` 且版本等于锁; `.python/verify_apk_classpath.py` 校验 APK 含独立运行时类而不含 appcompat / window / emoji2 / serialization 与契约类. Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; P1.2 的正式装载器与会话使用 V1, 负版本探针已退役. 最低正式宿主版本已于 P1.3 确认为 5316.
+- `common-plugin-api.aar` 为 `implementation` (INFO 服务在插件自身进程回答宿主); `compose-ui-api.aar` 为 `compileOnly` (类由宿主提供, D26), 测试为 `testImplementation` / `androidTestImplementation`. JVM 测试提供整份共享依赖锁的运行时副本; 设备测试 APK 只携带插件自身也打包的部分 (下一条), 宿主独有构件在 `debugAndroidTestRuntimeClasspath` 同样排除, 以免测试进程掩盖插件进程缺类. P1.1 已冻结 `.loading` / `.model` / `.catalog` 的 V1. F.2 在独立 `.interop` 包附加通过能力协商加载的 AndroidView 接口; F.3 在 `.dialog` 包附加可选弹窗工厂与参数, 原 206 个 V1 / F.2 class 字节不变. 无引用且不属于冻结面的 `.spike` 版本 -1 已在本次制品维护中移除.
+- Compose 依赖 (runtime / ui / foundation / material3 / animation / material-icons-core) 以 `implementation` 打进插件 APK, 由 BOM 管理版本; `ui-tooling` 只在 `debugImplementation`. P0.2 的共享依赖表 `locks/host-shared-deps.lock` 锁定宿主 app / inrt 的 debug / release 共用的 51 个构件, 全部 `compileOnly`; D32 (F.5, 2026-10-08 修订) 起其中插件 APK 在运行时引用的 47 项 (`standaloneRuntime` 集合: activity / annotation / arch core-common+core-runtime / collection / concurrent / core / customview-poolingcontainer / emoji2 / interpolator / lifecycle common+livedata-core+process+runtime+viewmodel+savedstate / profileinstaller / savedstate / startup / tracing / versionedparcelable / window / kotlinx-coroutines / kotlinx-serialization) 不再从 runtime classpath 排除, 由 Compose 传递带入并用 Gradle constraints 钉在锁定版本, 供画廊在插件自身进程运行; 只有无人引用的 appcompat 2 项仍排除 (livedata-core 与 kotlinx-serialization 由完整 keep 后保留的 savedstate / lifecycle 成员引用, 因此同样打包). build42 漏掉 arch core-runtime / poolingcontainer / emoji2 / window, 画廊从启动器打开即因 `NoClassDefFoundError` 崩溃, 而当时测试 APK 携带的宿主副本掩盖了缺口, 因此现在测试 APK 不再携带宿主独有构件. 宿主内 parent-first 使这些副本被宿主类遮蔽; `proguard-rules.pro` 对这些包与 `kotlin.**` 一样完整 `-keep` (不只是 `-keepnames`): build44 候选包只 `-keepnames` 时, R8 由 "插件程序从不初始化 EmojiCompat" 推断 `EmojiCompat.get()` 永不正常返回, 把 Compose 的 `EmojiCompatStatus` 编译成 `EmojiCompat.get(); throw null`, 在宿主内 (宿主已初始化 EmojiCompat) 每次文本布局都抛 NullPointerException; 完整 keep 使 R8 不再对共享副本做整程序假设, 代价是这些包不再裁剪. Compose 集成构件 (activity-compose / lifecycle-runtime-compose / savedstate-compose) 照旧打包. Kotlin stdlib 2.4.0 保留 `implementation`, 因 INFO / Wake 在插件自身进程也需要它, 装载渲染器时仍为 parent-first. `:app:verifySharedClasspath` 校验编译版本, 运行时打包集合恰好等于 `standaloneRuntime` 且版本等于锁, 测试 APK 不含宿主独有构件; `.python/verify_apk_classpath.py` 校验 APK 含独立运行时类而不含 appcompat 与契约类, 对 R8 发布包加 `--shrunk` 要求其引用的每个类都在 APK, 平台 (含 androidx.window 按需反射的 OEM 扩展) 或契约中; `.python/verify_standalone_launch.py` 在设备上安装 APK, 像启动器一样启动已启用的 alias, 打开首个条目与设置页并确认进程未崩溃 (测试 APK 与插件同进程, 只有这样才能证明插件进程自身可启动). Q1(b) 已由维护者于 2026-10-02 批准, 宿主版本在 `gradle/libs.versions.toml` 声明, `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath. V1 契约现由宿主 `implementation` 打包; P1.2 的正式装载器与会话使用 V1, 负版本探针已退役. 最低正式宿主版本已于 P1.3 确认为 5316.
 - 新增依赖优先 Maven Central / Google Maven. 不引入 `appcompat` / Material Components (XML 主题) 等 View 体系库; 独立界面全部用 Compose Material 3 实现. 主题色派生使用 `com.materialkolor:material-color-utilities` 4.1.1 (MIT, Material Color Utilities 的 Kotlin 移植), `StandalonePaletteTest` 用 Material Components 1.13.0 产出的 21 组色值校验与其他独立插件一致.
 
 ### 5.3 签名与发布构建
@@ -150,7 +150,7 @@ AutoJs6-Plugin-Compose-UI/
 - `ComposeUiPluginInfoService`: exported, enabled, PLUGIN 权限, intent-filter `org.autojs.plugin.INFO` + category `compose-ui`, 无 meta-data, 默认进程.
 - F.5 组件: `.app.GalleryActivity` 与 `.app.SettingsActivity` 不导出, `configChanges="uiMode|locale|layoutDirection"`; 四个 `activity-alias` (`.launcher.AdaptiveLightIconAlias` / `AdaptiveDarkIconAlias` / `AdaptiveAutoIconAlias` / `TransparentIconAlias`) 指向画廊并各带 MAIN / LAUNCHER, 图标分别为 `ic_launcher_system_light` / `ic_launcher_system` / `ic_launcher_system_auto` / `ic_launcher`, 只有 Auto 默认启用; `.app.LauncherIconUpdateReceiver` 不导出, 只接收 `MY_PACKAGE_REPLACED`; `androidx.startup.InitializationProvider` 以 `tools:node="remove"` 移除, 安装包不声明任何 provider. 受 PLUGIN 权限保护的导出组件仍只有 Wake 与 INFO (`ManifestContractTest` 守卫).
 - `allowBackup=false`, `fullBackupContent=false`, `dataExtractionRules` 排除全部域; application `theme` 为 `@style/Theme.ComposeUi` (仅窗口背景, 无 ActionBar), `localeConfig` 列出 10 语言; 不设 application `name`.
-- 渲染器工厂类由宿主在宿主进程内按 meta-data 类名反射创建; 它不是 Android 组件, 不在 Manifest 中注册, 但 R8 规则 MUST 保留其类名与无参构造 (`proguard-rules.pro`). P0.2 额外要求保持 `kotlin.**` ABI, 关闭 R8 优化变换 (仍裁剪 / 混淆 / 缩减资源), 以插件私有包承载混淆类名, 并补回 compileOnly lifecycle 的 ViewModel 无参构造规则; 原因与失败栈见 `docs/dev/p0-spike-evidence.md`.
+- 渲染器工厂类由宿主在宿主进程内按 meta-data 类名反射创建; 它不是 Android 组件, 不在 Manifest 中注册, 但 R8 规则 MUST 保留其类名与无参构造 (`proguard-rules.pro`). P0.2 额外要求保持 `kotlin.**` ABI, 关闭 R8 优化变换 (仍裁剪 / 混淆 / 缩减资源), 以插件私有包承载混淆类名, 并补回 compileOnly lifecycle 的 ViewModel 无参构造规则; 原因与失败栈见 `docs/dev/p0-spike-evidence.md`. D32 打包的共享 AndroidX / kotlinx-coroutines 副本同样完整 `-keep` (第 5.2 节): `-dontoptimize` 不阻止 R8 的整程序推断 (如 "永不正常返回" 的调用点被替换为 `throw null`), 只有完整 keep 才能让插件副本在宿主内与宿主副本行为一致.
 
 ## 7. PluginInfo 与能力协商
 
@@ -200,7 +200,7 @@ AutoJs6-Plugin-Compose-UI/
 
 ## 12. 独立界面与设置 (F.5 起适用)
 
-- 画廊与设置页在插件自身进程运行, 不能引用 `org.autojs.plugin.compose.api` 契约类 (它们由宿主提供, 插件进程没有); `app/` 包只依赖 Android / Compose / `common-plugin-api` (设置 Provider 契约常量). 画廊示例脚本用 `GalleryNode` 数据描述并序列化为 JS, `GalleryCatalogTest` 在 JVM 上用真实目录校验每个节点的属性 / 别名 / 快捷属性 / 插槽 / 事件 / 子节点策略, 每个节点组件与 Snackbar 恰好一条示例.
+- 画廊与设置页在插件自身进程运行, 不能引用 `org.autojs.plugin.compose.api` 契约类 (它们由宿主提供, 插件进程没有); `app/` 包只依赖 Android / Compose / `common-plugin-api` (设置 Provider 契约常量). 插件进程只有插件 APK 自带的类: 发布包引用的每个类都必须在 APK, 平台或契约中 (`verify_apk_classpath.py --shrunk`), 设备测试 APK 不携带宿主独有构件, 真实可启动性由 `verify_standalone_launch.py` 在设备上证明 (第 5.2 / 13.2 节). 画廊示例脚本用 `GalleryNode` 数据描述并序列化为 JS, `GalleryCatalogTest` 在 JVM 上用真实目录校验每个节点的属性 / 别名 / 快捷属性 / 插槽 / 事件 / 子节点策略, 每个节点组件与 Snackbar 恰好一条示例.
 - 设置页遵循 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md`: 外观分组顺序语言 -> 夜间模式 -> 主题色 -> 启动器图标, 关于分组列出版本 / 最低宿主 / 开发者; 选择器先改草稿, 确定才保存一次, 取消 / 返回 / 外部点击不保存; 主题色对话框提供跟随 AutoJs6, 16 色预设, HEX / RGB 输入与局部预览; 中性灰阶表面, 强调色按 HCT 规则派生并保证 4.5:1 可读. 跟随宿主只读取 `AutoJs6HostSettingsContract` Provider, 校验协议版本与包名, 宿主缺失时回退系统, 不写回宿主.
 - 启动器图标按图标规范: 选择持久化为四个 alias 的组件启用状态, `LauncherIcons.select` 回滚失败并迁移可变快捷方式归属, 包更新后 `LauncherIconUpdateReceiver` 归一化; 默认 Auto.
 - 发行历史仍由插件中心展示 `CHANGELOG-*.md`, 不另做页面.
@@ -217,7 +217,7 @@ AutoJs6-Plugin-Compose-UI/
 ### 13.2 Android instrumentation
 
 - `ComposeUiPluginContractTest`: Wake Activity 契约与四项 application meta-data, 恰好一个已启用的启动器 alias 指向画廊且四个 alias 各有独立图标资源, INFO 服务 `getInfo()` 往返 (空 `supportedAbis`, capabilities 仅 `requiresHostVersion`), APK 为单文件且原生库恰好为四个 ABI 的 `libandroidx.graphics.path.so` 并可在当前设备加载, 不声明任何 provider.
-- F.5 画廊 (在插件进程运行): `GalleryDeviceTest` (56 条示例逐一打开并组合预览, 复制到剪贴板, 运行 Intent 指向宿主并在宿主已安装时可解析, 设置入口), `SettingsDeviceTest` (选择不保存 / 取消无变化 / 确定只保存一次, 主题色输入校验与预设, 图标选择持久化, 宿主外观可选), `LauncherIconDeviceTest` (每种模式只剩一个启动器条目且资源独立, 混合状态归一化). 更换打包集合或 R8 规则后 MUST 重新在宿主侧跑完整设备矩阵, 证明 parent-first 装载未受影响.
+- F.5 画廊 (在插件进程运行): `GalleryDeviceTest` (56 条示例逐一打开并组合预览, 复制到剪贴板, 运行 Intent 指向宿主并在宿主已安装时可解析, 设置入口), `SettingsDeviceTest` (选择不保存 / 取消无变化 / 确定只保存一次, 主题色输入校验与预设, 图标选择持久化, 宿主外观可选), `LauncherIconDeviceTest` (每种模式只剩一个启动器条目且资源独立, 混合状态归一化). 这些测试与插件同进程且测试 APK 带有契约 AAR 与测试库, 不能单独证明插件进程可启动: `py .python/verify_standalone_launch.py --serial <serial> --apk <apk>` 安装 debug 或已签名 release APK, 从已启用的启动器 alias 启动画廊, 打开首个条目与设置页, 以进程存活与 logcat 无 FATAL 为准, 本地与 CI 模拟器作业都在 instrumentation 后执行. 更换打包集合或 R8 规则后 MUST 重新在宿主侧跑完整设备矩阵, 证明 parent-first 装载未受影响.
 - P0.2 起: 宿主侧加载探针 (在宿主仓库); P2 起: 渲染器在宿主进程内的组合 / 事件 / 生命周期用例 (宿主 androidTest), 本仓库保留不依赖宿主的渲染器单元 instrumentation.
 - P4 示例守卫: 宿主 `ComposeExampleCatalogTest` 校验目录发现, Rhino 语法与运行模式; `ComposeExamplesDeviceTest` 逐字节比较已安装插件与宿主的示例资产并执行实际脚本, 不在示例内加入测试开关. 设备必须安装包含当前示例的插件 APK.
 - 可选覆盖率使用 `-PcomposeUiCoverage=true`, JaCoCo 0.8.14 由版本目录锁定, 仅为测试插桩与报告使用, 不进入 release 包. 度量值与设备结果以阶段证据为准, 不以启用插桩代替通过验证.
@@ -225,7 +225,7 @@ AutoJs6-Plugin-Compose-UI/
 
 ### 13.3 CI
 
-- `build.yml`: JVM 测试编译, `testDebugUnitTest`, `verifySharedClasspath`, androidTest 与 release APK, lint debug / release, `verify_apk_classpath.py`; API 24 x86 与 API 35 x86_64 模拟器运行本仓库完整 instrumentation 并收集覆盖率 (含 graphics-path 原生库加载).
+- `build.yml`: JVM 测试编译, `testDebugUnitTest`, `verifySharedClasspath`, androidTest 与 release APK, lint debug / release, `verify_apk_classpath.py` (debug) 与 `--shrunk` (release); API 24 x86 与 API 35 x86_64 模拟器运行本仓库完整 instrumentation 并收集覆盖率 (含 graphics-path 原生库加载), 随后用 debug APK 执行 `verify_standalone_launch.py --uninstall`.
 - `markdown.yml`: Windows 上 `check_markdown.bat`. `icon-studio.yml`: Ubuntu / Windows 上 `generate_icon_studio.py --check`.
 - 源码仓库自 2026-10-04 公开后, 推送会触发上述工作流; 推送前仍须先完成第 14 节的本地验证, 远端结果不替代本地证据.
 - `reactivecircus/android-emulator-runner` 把 `script` 的每一行作为独立命令执行, 不支持反斜杠续行; Gradle 命令 MUST 写在一行内 (2026-10-04 首次远端运行的两个模拟器作业因续行符被当作任务名而失败).
@@ -236,11 +236,14 @@ AutoJs6-Plugin-Compose-UI/
 py .python/generate_markdown.py --check
 py .python/generate_icon_studio.py --check
 .\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:testDebugUnitTest
-.\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug :app:assembleRelease
+.\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug :app:assembleRelease :app:verifySharedClasspath
+py .python/verify_apk_classpath.py app/build/outputs/apk/debug/autojs6-plugin-compose-ui-v1.1.0.apk
+py .python/verify_apk_classpath.py --shrunk app/build/outputs/apk/release/autojs6-plugin-compose-ui-v1.1.0.apk
 .\gradlew.bat '-Pautojs.gradle.build.number.auto.increment.enabled=false' '-Pautojs.gradle.build.time.update.enabled=false' :app:connectedDebugAndroidTest
+py .python/verify_standalone_launch.py --serial <serial> --apk app/build/outputs/apk/release/autojs6-plugin-compose-ui-v1.1.0.apk
 ```
 
-- 纯文档改动只需前两条; 涉及源码的改动至少跑 JVM 测试与 debug 装配; 涉及 Manifest, 渲染器工厂, 类加载边界或依赖集合的改动必须在至少一台真机或 AVD 上跑 instrumentation, 并在宿主侧跑加载探针 (P0.2 起).
+- 纯文档改动只需前两条; 涉及源码的改动至少跑 JVM 测试与 debug 装配; 涉及 Manifest, 渲染器工厂, 类加载边界或依赖集合的改动必须在至少一台真机或 AVD 上跑 instrumentation 与独立进程启动检查 (`verify_standalone_launch.py`, 第 13.2 节), 并在宿主侧跑加载探针 (P0.2 起).
 - Release 前额外执行 `:app:appendDigestToReleasedFiles`, 检查 `releases/` 恰好 1 个已签名 APK 且 CRC32 与内容一致.
 - 性能基线见 `docs/dev/p5-performance-evidence.md` 与 `docs/dev/p5-performance-summary.json`. 维护者于 2026-10-03 按 Q5 确认以下第一版复核规则: 耗时采用实测 p90 约加 50% (向上取整至 5 ms), APK 与 DEX 方法引用数采用实测值加 10% (向上取整). 必须在相同设备, 工作负载, 预热 / 样本数与观察方法下比较, 并记录宿主 / 插件版本及源码提交; 改变环境时不得直接把候选值当作新基线.
 

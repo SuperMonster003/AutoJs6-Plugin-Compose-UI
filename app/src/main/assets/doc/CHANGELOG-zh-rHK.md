@@ -26,7 +26,7 @@
 * `依賴` 附加可選對話框功能至 compose-ui-api.aar, 保留現有 V1 與 AndroidView 契約
 * `依賴` 附加 compose-ui-api.aar V2 元件目錄, 保留現有節點模型和 V1 元件語義
 * `依賴` 附加 material-color-utilities 版本 4.1.1 (MIT), 用於設定頁與其他獨立插件一致的主題色推導
-* `依賴` 附加 AndroidX activity, core, lifecycle, savedstate 與 kotlinx-coroutines 的宿主鎖定版本副本, 供插件自身進程的展示使用; 宿主內仍優先使用宿主副本
+* `依賴` 附加 AndroidX activity, core, lifecycle, savedstate, emoji2, window 與 kotlinx-coroutines 等的宿主鎖定版本副本, 供插件自身進程的展示使用; 宿主內仍優先使用宿主副本
 
 # v1.0.0
 

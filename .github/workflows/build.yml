@@ -39,7 +39,9 @@ jobs:
             :app:assembleDebug :app:assembleDebugAndroidTest :app:assembleRelease :app:lintDebug :app:lintRelease \
             -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false \
             --console=plain --stacktrace
-          python3 .python/verify_apk_classpath.py app/build/outputs/apk/debug/*.apk app/build/outputs/apk/release/*.apk
+          python3 .python/verify_apk_classpath.py app/build/outputs/apk/debug/*.apk
+          # The shrunk release APK must reference nothing the plugin's own process cannot load (host contract excepted).
+          python3 .python/verify_apk_classpath.py --shrunk app/build/outputs/apk/release/*.apk
 
       - name: Upload debug, release, and test APKs
         uses: actions/upload-artifact@v7
@@ -110,7 +112,10 @@ jobs:
             # and script-dispatch tests remain in the AutoJs6 host device matrix.
             # The emulator runner executes every script line as a separate shell command, so a
             # backslash continuation becomes a literal Gradle task name; keep the command on one line.
-            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace; status=$?; mkdir -p app/build/reports/androidTests; adb logcat -d > app/build/reports/androidTests/logcat.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows.txt || true; exit $status
+            # After the suite, the debug APK alone is installed and opened from its launcher alias: the
+            # instrumented process also carries the test APK, so only a real launch proves that the plugin's own
+            # process has every class the gallery and settings screens need.
+            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace; status=$?; python3 .python/verify_standalone_launch.py --apk app/build/outputs/apk/debug/*.apk --uninstall || status=1; mkdir -p app/build/reports/androidTests; adb logcat -d > app/build/reports/androidTests/logcat.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows.txt || true; exit $status
 
       - name: Upload instrumentation and coverage reports
         if: always()

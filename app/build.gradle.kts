@@ -108,19 +108,32 @@ require(sharedDeps.isNotEmpty() && sharedDeps.keys.none { it.startsWith("android
 val sharedFingerprint = MessageDigest.getInstance("SHA-256")
     .digest(sharedDeps.toSortedMap().entries.joinToString("") { "${it.key}=${it.value}\n" }.toByteArray(Charsets.UTF_8))
     .joinToString("") { "%02x".format(it) }
-// F.5 (roadmap D32): the component gallery and settings screens run in the plugin's own process, where no
-// host class loader exists. The shared artifacts that Jetpack Compose itself needs at run time are therefore
-// packaged as well; inside the host they are shadowed by parent-first loading and keep their names (R8
-// -keepnames), so the renderer still binds to the host copies. Everything else in the lock stays compile-only.
+// F.5 (roadmap D32, revised 2026-10-08): the component gallery and settings screens run in the plugin's own
+// process, where no host class loader exists. Every shared artifact that the plugin APK references at run time
+// is therefore packaged at the locked host version: the AndroidX runtime Compose needs (activity / lifecycle /
+// savedstate / core / collection / startup / tracing / profileinstaller / kotlinx-coroutines) plus arch
+// core-runtime (LifecycleRegistry main-thread check), customview-poolingcontainer (ComposeView disposal),
+// emoji2 with lifecycle-process (Compose text) and androidx.window (WindowInfo.containerSize). Build 42 shipped
+// without the last four and crashed from the launcher; the device tests had not noticed because the test APK
+// carried the host copies. Inside the host these copies are shadowed by parent-first loading and keep their
+// names, so the renderer still binds to the host copies. Like kotlin.**, these packages are fully kept by R8
+// (proguard-rules.pro), because R8 must not specialize the plugin's copy on facts the host's copy violates;
+// the fully kept savedstate / lifecycle members reference LiveData and kotlinx.serialization, so those are
+// packaged too. Only appcompat (referenced by nothing in the plugin) stays compile-only;
+// .python/verify_apk_classpath.py --shrunk proves that the release APK references no class outside the APK,
+// the platform and the host contract.
 val standaloneRuntime = setOf(
     "androidx.activity:activity", "androidx.activity:activity-ktx",
     "androidx.annotation:annotation", "androidx.annotation:annotation-experimental", "androidx.annotation:annotation-jvm",
-    "androidx.arch.core:core-common",
+    "androidx.arch.core:core-common", "androidx.arch.core:core-runtime",
     "androidx.collection:collection", "androidx.collection:collection-jvm", "androidx.collection:collection-ktx",
     "androidx.concurrent:concurrent-futures",
     "androidx.core:core", "androidx.core:core-ktx", "androidx.core:core-viewtree",
+    "androidx.customview:customview-poolingcontainer",
+    "androidx.emoji2:emoji2",
     "androidx.interpolator:interpolator",
-    "androidx.lifecycle:lifecycle-common", "androidx.lifecycle:lifecycle-common-jvm",
+    "androidx.lifecycle:lifecycle-common", "androidx.lifecycle:lifecycle-common-jvm", "androidx.lifecycle:lifecycle-livedata-core",
+    "androidx.lifecycle:lifecycle-process",
     "androidx.lifecycle:lifecycle-runtime", "androidx.lifecycle:lifecycle-runtime-android",
     "androidx.lifecycle:lifecycle-runtime-ktx", "androidx.lifecycle:lifecycle-runtime-ktx-android",
     "androidx.lifecycle:lifecycle-viewmodel", "androidx.lifecycle:lifecycle-viewmodel-android", "androidx.lifecycle:lifecycle-viewmodel-ktx",
@@ -128,12 +141,18 @@ val standaloneRuntime = setOf(
     "androidx.profileinstaller:profileinstaller",
     "androidx.savedstate:savedstate", "androidx.savedstate:savedstate-android", "androidx.savedstate:savedstate-ktx",
     "androidx.startup:startup-runtime", "androidx.tracing:tracing", "androidx.versionedparcelable:versionedparcelable",
+    "androidx.window:window", "androidx.window:window-core", "androidx.window:window-core-android",
     "org.jetbrains.kotlinx:kotlinx-coroutines-android", "org.jetbrains.kotlinx:kotlinx-coroutines-bom",
     "org.jetbrains.kotlinx:kotlinx-coroutines-core", "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm",
+    "org.jetbrains.kotlinx:kotlinx-serialization-bom", "org.jetbrains.kotlinx:kotlinx-serialization-core", "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm",
 )
 require(standaloneRuntime.all { it in sharedDeps }) { "standaloneRuntime must be a subset of locks/host-shared-deps.lock" }
-configurations.matching { it.name in setOf("debugRuntimeClasspath", "releaseRuntimeClasspath") }.configureEach {
-    sharedDeps.keys.filterNot { it.startsWith("org.jetbrains.kotlin:") || it in standaloneRuntime }.forEach { coordinate ->
+val hostOnlyShared = sharedDeps.keys.filterNot { it.startsWith("org.jetbrains.kotlin:") || it in standaloneRuntime }
+// The device test APK is excluded as well: the instrumentation must see the same class universe as the plugin
+// process (plus the contract AAR and the test libraries), otherwise a missing runtime class stays hidden until
+// a user opens the gallery from the launcher.
+configurations.matching { it.name in setOf("debugRuntimeClasspath", "releaseRuntimeClasspath", "debugAndroidTestRuntimeClasspath") }.configureEach {
+    hostOnlyShared.forEach { coordinate ->
         exclude(group = coordinate.substringBefore(':'), module = coordinate.substringAfter(':'))
     }
 }
@@ -357,9 +376,10 @@ dependencies {
         } else {
             // Standalone runtime members are not declared directly: Compose pulls them transitively and
             // verifySharedClasspath checks that exactly the standaloneRuntime set lands at the locked versions.
+            // JVM tests get the whole lock; the device test APK only gets what the plugin process also has.
             compileOnly("$coordinate:$version")
             testImplementation("$coordinate:$version")
-            androidTestImplementation("$coordinate:$version")
+            if (coordinate in standaloneRuntime) androidTestImplementation("$coordinate:$version")
         }
     }
 
@@ -410,7 +430,14 @@ tasks {
                     "$variant packaged shared set drifted: unexpected ${packagedShared - standaloneRuntime}, missing ${standaloneRuntime - packagedShared}"
                 }
             }
-            println("Shared classpath verified: ${sharedDeps.size} components (${standaloneRuntime.size} packaged for the standalone process), SHA-256 $sharedFingerprint")
+            // The device test APK must not carry host-only components, or it would mask a missing runtime class.
+            val testRuntime = configurations.getByName("debugAndroidTestRuntimeClasspath").incoming.resolutionResult.allComponents
+                .mapNotNull { it.moduleVersion }.associate { "${it.group}:${it.name}" to it.version }
+            hostOnlyShared.forEach { id -> check(id !in testRuntime) { "the device test APK would mask the host-only component $id" } }
+            standaloneRuntime.forEach { id ->
+                check(testRuntime[id] == sharedDeps.getValue(id)) { "device tests resolve $id ${testRuntime[id]}, expected the locked host version ${sharedDeps.getValue(id)}" }
+            }
+            println("Shared classpath verified: ${sharedDeps.size} components (${standaloneRuntime.size} packaged for the standalone process, ${hostOnlyShared.size} host-only and absent from the test APK), SHA-256 $sharedFingerprint")
         }
     }
     withType(JavaCompile::class.java) {

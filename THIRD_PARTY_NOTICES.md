@@ -22,7 +22,10 @@ fixtures outside frozen V1; no previously retained class is removed in F.3.
 
 Shared host components are pinned in `locks/host-shared-deps.lock` (Q1(b), approved for app/inrt debug/release on 2026-10-02).
 AndroidX (Apache 2.0) and kotlinx.coroutines / kotlinx.serialization (Apache 2.0) in that table
-are compile-only; Compose integration artifacts whose names end in `-compose` remain bundled.
+were compile-only until build 42; since F.5 (roadmap D32, revised 2026-10-08) every entry except
+appcompat is bundled at the locked host version for the plugin's own gallery and settings process,
+fully kept by R8, and shadowed parent-first by the host's identical copies when rendering.
+Compose integration artifacts whose names end in `-compose` remain bundled as before.
 Kotlin standard library 2.4.0 (Apache 2.0) remains bundled for the plugin's INFO/Wake process;
 parent-first loading resolves the host's identical version when rendering. Q1(b) aligns lifecycle
 2.9.4, savedstate 1.3.2, emoji2 1.4.0 and window 1.5.0 in every host variant. V1 contract and

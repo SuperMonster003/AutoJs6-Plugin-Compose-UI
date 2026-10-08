@@ -32,7 +32,7 @@
         "إضافة قدرة حوار اختيارية إلى compose-ui-api.aar مع الحفاظ على عقدي V1 وAndroidView الحاليين",
         "إضافة كتالوج V2 إلى compose-ui-api.aar مع الحفاظ على نماذج العقد ودلالات مكونات V1",
         "إضافة material-color-utilities 4.1.1 (MIT) لاشتقاق لون السمة المشترك مع المكونات الإضافية المستقلة الأخرى",
-        "إضافة نسخ من AndroidX activity و core و lifecycle و savedstate و kotlinx-coroutines بالإصدارات المثبتة من المضيف لمعرض عملية المكون الإضافي; وداخل المضيف تظل نسخ المضيف هي المقدمة"
+        "إضافة نسخ من AndroidX activity و core و lifecycle و savedstate و emoji2 و window و kotlinx-coroutines وملحقاتها بالإصدارات المثبتة من المضيف لمعرض عملية المكون الإضافي; وداخل المضيف تظل نسخ المضيف هي المقدمة"
       ]
     },
     "v1.0.0": {

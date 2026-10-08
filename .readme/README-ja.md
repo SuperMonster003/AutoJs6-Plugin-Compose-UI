@@ -239,7 +239,7 @@ _2026/10/08_
 - `依存関係` 既存の V1 と AndroidView 契約を維持したまま, compose-ui-api.aar に任意のダイアログ機能を追加
 - `依存関係` 既存のノードモデルと V1 コンポーネントの意味を維持し, compose-ui-api.aar に V2 カタログを追加
 - `依存関係` material-color-utilities 4.1.1 (MIT) を追加. 他の独立プラグインと同じテーマカラー導出に使用します
-- `依存関係` AndroidX activity, core, lifecycle, savedstate と kotlinx-coroutines のホスト固定バージョンのコピーを追加. プラグイン自身のプロセスのギャラリーが使用し, ホスト内では引き続きホストのコピーが優先されます
+- `依存関係` AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines などのホスト固定バージョンのコピーを追加. プラグイン自身のプロセスのギャラリーが使用し, ホスト内では引き続きホストのコピーが優先されます
 
 #### v1.0.0
 
