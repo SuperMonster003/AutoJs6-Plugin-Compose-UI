@@ -110,7 +110,7 @@ jobs:
             # and script-dispatch tests remain in the AutoJs6 host device matrix.
             # The emulator runner executes every script line as a separate shell command, so a
             # backslash continuation becomes a literal Gradle task name; keep the command on one line.
-            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace
+            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace; status=$?; mkdir -p app/build/reports/androidTests; adb logcat -d > app/build/reports/androidTests/logcat.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows.txt || true; exit $status
 
       - name: Upload instrumentation and coverage reports
         if: always()

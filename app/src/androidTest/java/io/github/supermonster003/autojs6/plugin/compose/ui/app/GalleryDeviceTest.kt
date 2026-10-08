@@ -48,14 +48,12 @@ internal class GalleryDeviceTest {
         rule.onNodeWithTag("gallery-list").performScrollToNode(hasTestTag("gallery-Button"))
         rule.onNodeWithTag("gallery-Button").performClick()
         rule.waitForIdle()
+        // Clipboard reads need window focus on API 29+, and a CI emulator grants it later than a local one.
+        rule.waitUntil(timeoutMillis = 10_000) { rule.activity.hasWindowFocus() }
         rule.onNodeWithTag("gallery-copy").performClick()
-        rule.waitForIdle()
         val expected = GalleryCatalog.entry("Button")!!.script()
-        var clip: CharSequence? = null
-        InstrumentationRegistry.getInstrumentation().runOnMainSync {
-            clip = context.getSystemService(ClipboardManager::class.java)?.primaryClip?.getItemAt(0)?.text
-        }
-        assertEquals(expected, clip?.toString())
+        rule.waitUntil(timeoutMillis = 10_000) { clipboardText() == expected }
+        assertEquals(expected, clipboardText())
         assertTrue(expected.startsWith("\"ui\";"))
         val intent = ScriptLauncher.intent(expected)
         assertEquals(ComposeUiPlugin.HOST_PACKAGE_NAME, intent.component?.packageName)
@@ -71,12 +69,26 @@ internal class GalleryDeviceTest {
     @Test
     fun theSettingsActionOpensTheSettingsScreen() {
         rule.onNodeWithTag("gallery-settings").performClick()
-        rule.waitUntil(timeoutMillis = 10_000) {
-            var resumed = false
-            InstrumentationRegistry.getInstrumentation().runOnMainSync {
-                resumed = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED).any { it is SettingsActivity }
-            }
-            resumed
+        rule.waitUntil(timeoutMillis = 10_000) { resumedSettings().isNotEmpty() }
+        // Leave no second Activity behind for the following tests.
+        val open = resumedSettings()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync { open.forEach { it.finish() } }
+        rule.waitUntil(timeoutMillis = 10_000) { resumedSettings().isEmpty() }
+    }
+
+    private fun resumedSettings(): List<SettingsActivity> {
+        var resumed: List<SettingsActivity> = emptyList()
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            resumed = ActivityLifecycleMonitorRegistry.getInstance().getActivitiesInStage(Stage.RESUMED).filterIsInstance<SettingsActivity>()
         }
+        return resumed
+    }
+
+    private fun clipboardText(): String? {
+        var clip: CharSequence? = null
+        InstrumentationRegistry.getInstrumentation().runOnMainSync {
+            clip = context.getSystemService(ClipboardManager::class.java)?.primaryClip?.getItemAt(0)?.text
+        }
+        return clip?.toString()
     }
 }

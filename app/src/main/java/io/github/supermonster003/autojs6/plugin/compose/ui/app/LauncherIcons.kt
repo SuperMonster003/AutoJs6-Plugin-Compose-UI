@@ -38,7 +38,13 @@ internal object LauncherIcons {
     }
 
     fun current(context: Context) = LauncherIconStatePolicy.resolve(snapshot(context))
-    @Synchronized fun normalize(context: Context) = select(context, current(context))
+    /** Repairs a mixed or empty alias state; a consistent state is left untouched so no package change is announced. */
+    @Synchronized fun normalize(context: Context) {
+        val before = snapshot(context)
+        val mode = LauncherIconStatePolicy.resolve(before)
+        val consistent = LauncherIconMode.entries.all { LauncherIconStatePolicy.enabled(it, before.getValue(it)) == (it == mode) }
+        if (!consistent) select(context, mode)
+    }
 
     fun normalizeAsync(context: Context, onComplete: (() -> Unit)? = null) {
         val app = context.applicationContext

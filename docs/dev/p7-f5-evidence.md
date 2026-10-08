@@ -57,7 +57,7 @@ the Kotlin stdlib family) stay excluded or `implementation` as before.
 
 ## Verification
 
-Plugin 1.1.0 / build40, Compose BOM 2026.09.00, isolated host 6.8.0 / 5323
+Plugin 1.1.0 / build42, Compose BOM 2026.09.00, isolated host 6.8.0 / 5323
 (`-PcomposeUiSpike=true`, package `org.autojs.autojs6.compose.spike`) and the regular
 host debug build (`org.autojs.autojs6`) for the run-entry resolution, owned API35
 x86_64 google_apis AVD `compose_f5_api35` (emulator-5594, swiftshader).
@@ -71,8 +71,8 @@ x86_64 google_apis AVD `compose_f5_api35` (emulator-5594, swiftshader).
 | `lintDebug` | 0 errors, 10 warnings (Icon Studio icons with identical contents, launcher shape and the API 33 `localeConfig` attribute, as in the other standalone plugins) |
 | `verify_apk_classpath.py` (debug and signed release) | contract classes absent, standalone runtime and `GalleryActivity` present |
 | Plugin instrumentation (API35 AVD) | 73 tests passed (including the new GalleryDeviceTest 3 / SettingsDeviceTest 4 / LauncherIconDeviceTest 2); the gallery and settings tests were rerun (7 passed) after installing the regular host package `org.autojs.autojs6` (6.8.0 / 5325 debug), so the run Intent resolved and the appearance provider was read |
-| Host device suites with build40 renderer (API35 AVD) | 61 of 74 scenarios passed against the isolated host `org.autojs.autojs6.compose.spike` (master `b2404d3ae9`, 5325); the 13 others are opt-in phases (performance, legacy providers, packaged apps, package mutation, denied overlay permission) skipped by assumption. In the first run 5 example scenarios failed because the host working tree had CRLF copies of the example assets after the merge checkout (`core.autocrlf`); `sync_examples.py` restored the LF bytes and the host `.gitattributes` now pins `eol=lf` (host `de11353cc0`), after which they passed; 2 accessibility scenarios passed once the isolated host AccessibilityServiceUsher was enabled. TSX (10), F.2 / F.3 / F.4 / F.6 scenarios all used the build40 renderer |
-| Signed release | `autojs6-plugin-compose-ui-v1.1.0-70369027.apk`, 3624284 B, 10473 classes / 60613 DEX method references, SHA-256 `9f686d5824a2618eea58c44ca0ee0b38ca6a9f844d85034153088e148e5397e3`, native libraries and 16 KB alignment verified by `appendDigestToReleasedFiles` |
+| Host device suites with the build40 renderer (byte-identical to build42, which only changes the plugin-process icon normalization and the tests) (API35 AVD) | 61 of 74 scenarios passed against the isolated host `org.autojs.autojs6.compose.spike` (master `b2404d3ae9`, 5325); the 13 others are opt-in phases (performance, legacy providers, packaged apps, package mutation, denied overlay permission) skipped by assumption. In the first run 5 example scenarios failed because the host working tree had CRLF copies of the example assets after the merge checkout (`core.autocrlf`); `sync_examples.py` restored the LF bytes and the host `.gitattributes` now pins `eol=lf` (host `de11353cc0`), after which they passed; 2 accessibility scenarios passed once the isolated host AccessibilityServiceUsher was enabled. TSX (10), F.2 / F.3 / F.4 / F.6 scenarios all used the build42 renderer |
+| Signed release | `autojs6-plugin-compose-ui-v1.1.0-2f1127ce.apk`, 3624288 B, 10473 classes / 60613 DEX method references, SHA-256 `505ea68bb2a23ff81d01ad0735048fa5835fc9ac36d12c503b137c1290c35992`, native libraries and 16 KB alignment verified by `appendDigestToReleasedFiles` |
 
 New device tests: `GalleryDeviceTest` (56 entries open with a composed preview and
 their script, clipboard copy, run Intent targets the host and resolves when the host
@@ -84,9 +84,13 @@ only launcher entry with a distinct resource, mixed states normalize).
 ## Size review
 
 Recorded in `docs/dev/p7-f5-size-review.json`. The packaged runtime, catalog,
-previews and resources add +600548 B / +6771 method references / +1442 classes over build38; the maintainer accepted the
+previews and resources add +600552 B / +6771 method references / +1442 classes over build38; the maintainer accepted the
 growth in advance on 2026-10-08. The Q5 review limits are unchanged and remain
 exceeded, as they were since F.4.
+
+## Remote CI
+
+The push of build41 ran the public workflows: Markdown and Icon Studio passed, the API24 x86 job passed all 73 tests, and the API35 x86_64 job failed 10 tests: the gallery clipboard read returned null, and 9 existing renderer scenarios that depend on window focus, popups, the back key or the IME timed out. On API 29+ the clipboard is readable only by the focused app, and the settings Activity left behind by the previous test delayed focus of the new gallery window on the slower CI emulator. Build42 waits for window focus and polls the clipboard, finishes the settings Activity opened by the settings-entry test, makes `LauncherIcons.normalize` skip the component write when the alias state is already consistent, and uploads logcat and window state after the suite. Local rerun on a fresh API35 AVD: 72 of 73 passed (all 9 gallery / settings / icon tests including the clipboard fix); the only failure was the existing F.4 scenario `WideRendererTest.pullToRefreshUsesActualNestedScrollAndHonorsDisabledState`, where heavy jank on that AVD (Choreographer skipped 102 frames, HWUI frames of 2.3 s) kept the main thread busy during the refresh indicator animation for 60 s (Espresso AppNotIdleException); 3 isolated repeats gave 2 failures and 1 pass. The same scenario passed three full runs on the previous AVD and both remote API24 / API35 jobs; neither the scenario nor the renderer changed in this round, so it is recorded as environmental. Remote rerun: see the workflow run of the build42 push (not finished when this record was committed).
 
 ## Not executed
 
