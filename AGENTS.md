@@ -8,7 +8,7 @@
 - 用户在当前任务中的明确要求优先于本文件.
 - 本仓库是 **进程内渲染器插件** (路线图 D10 / D23): 宿主用 `PathClassLoader(插件 APK, parent = 宿主类加载器)` 在宿主进程内实例化渲染器工厂, 不存在 Binder 能力服务, 不存在插件自有进程中的界面. 参考规范中 Binder 服务, AIDL 冻结, 前台服务, 跨包 `queries` 的条款不适用.
 - 单一通用 APK (D22, 经 P0.1 证据修正): 插件自身没有原生代码, 不使用 ABI 拆分; 唯一的原生库是 Compose `ui-graphics` 传递依赖 `androidx.graphics:graphics-path` 1.0.1 自带的 `libandroidx.graphics.path.so` (四种 ABI, 各约 10 KB, 16 KB 页对齐). 不使用 `autojs6-native-alignment` 插件, 没有原生库重建配方; `appendDigestToReleasedFiles` 校验 "原生库集合恰好为这四个文件, 未压缩, ELF `PT_LOAD` 与 zip 数据偏移均 16 KB 对齐" (第 9 节).
-- 没有独立界面, 没有启动器入口 (D8): 不适用 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md`; 图标只需 `mipmap/ic_launcher.png` 与 `mipmap-night/ic_launcher.png` (插件中心与 README 使用), 不需要四个自适应 alias.
+- 没有独立界面, 没有启动器入口 (D8): 不适用 `AUTOJS6_PLUGIN_STANDALONE_SETTINGS_AGENTS.md`; 图标只需 `mipmap/ic_launcher.png` 与 `mipmap-night/ic_launcher.png` (插件中心与 README 使用), 不需要四个自适应 alias; Icon Studio 另行生成插件中心 `ic_plugin_center` 与系统应用信息图标 `ic_icon_studio_application` (见文末 System application icon 节), 均不构成启动器入口.
 - 没有特权进程 (Shizuku / Root), 没有隐藏 API, 不访问网络.
 
 ## 2. 仓库身份
@@ -30,7 +30,7 @@
 | Compose 版本 | BOM `2026.09.00` (runtime / ui / foundation / animation 1.12.1, material3 1.4.0, material-icons-core 1.7.8), 由 `gradle/libs.versions.toml` 单点声明; Compose 编译器插件版本 = `System.getProperty("gradle.kotlin.version")` (D25) |
 | 发布文件名 | `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk` (1 个) |
 | 原生库 / ABI | 无插件自有原生代码; `libandroidx.graphics.path.so` (graphics-path 1.0.1, 随 Compose BOM 变动) x `arm64-v8a` / `armeabi-v7a` / `x86_64` / `x86`, 单 APK 内置; `nativeAbis` / `allowedNativeLibraries` / `nativePageAlignment` 在 `app/build.gradle.kts` 单点声明 |
-| 图标源图 | `.python/icons/compose-ui-ic-launcher-light.png` / `-dark.png` (1024 x 1024 RGBA, alpha 一致, 图案 `#272727` / `#D8D8D8`); `UI_GLYPH = 0.66`. **当前为临时占位图** (路线图 Q6), 维护者提供正式源图后替换并重新生成 |
+| 图标源图 | Icon Studio recipe `.icons/recipe.json` + `.icons/assets/` (亮 / 暗图稿为 P0.1 生成的 432 x 432 占位 `ic_launcher.png`, 图案 `#272727` / `#D8D8D8`); P0.1 原始占位源 `.python/icons/compose-ui-ic-launcher-light.png` / `-dark.png` (1024 x 1024 RGBA, `UI_GLYPH = 0.66`) 保留备查. **当前为临时占位图** (路线图 Q6), 维护者提供正式源图后替换并重新生成 |
 
 ## 3. 工作区与提交
 
@@ -81,8 +81,9 @@ sed -i "s/^VERSION_BUILD=.*/VERSION_BUILD=$next/" version.properties
 ```text
 AutoJs6-Plugin-Compose-UI/
 |-- .changelog/                 lang_*.json x 10 + template_changelog.md (文案源)
-|-- .github/workflows/          build.yml (JVM / APK / lint + API 24 x86 / API 35 x86_64 模拟器契约测试), markdown.yml
-|-- .python/                    generate_markdown.py (+ .bat, check_markdown.bat), generate_launcher_icons.py, sync_examples.py, icons/
+|-- .github/workflows/          build.yml (JVM / APK / lint + API 24 x86 / API 35 x86_64 模拟器契约测试), markdown.yml, icon-studio.yml
+|-- .icons/                     recipe.json + assets/ (Icon Studio 图稿与参数, 第 10 节与文末 System application icon 节)
+|-- .python/                    generate_markdown.py (+ .bat, check_markdown.bat), generate_icon_studio.py + icon_studio_runtime.py, generate_launcher_icons.py (兼容入口), sync_examples.py, verify_apk_classpath.py, icons/ (P0.1 占位源图)
 |-- .readme/                    common.json, lang_*.json x 10, template_readme.md, template_plugin_instruction.md, README-*.md (生成)
 |-- app/
 |   |-- src/main/java/io/github/supermonster003/autojs6/plugin/compose/ui/
@@ -91,8 +92,9 @@ AutoJs6-Plugin-Compose-UI/
 |   |   |-- ComposeUiPluginInfo.kt             Context -> RuntimeInfo -> PluginInfo / capabilities
 |   |   |-- ComposeUiPluginInfoService.kt      IPluginInfoProvider
 |   |   |-- WakeActivity.kt
-|   |   `-- renderer/                          (路线图 P0.2 / P2 起: ComposeUiRendererFactoryImpl, 渲染器, 组件目录, 补丁应用)
-|   |-- src/main/res/           values*/ x 11 (strings), mipmap*/ (生成), raw*/plugin_instruction.md (生成), xml/data_extraction_rules.xml
+|   |   `-- renderer/                          ComposeUiRendererFactoryImpl, 渲染器, 组件目录, 补丁应用, V2 宽集组件; dialog/ (F.3 弹窗工厂), interop/ (F.2 AndroidView 工厂)
+|   |-- src/main/res/           values*/ x 11 (strings), values*/icon_studio_backgrounds.xml, mipmap*/ (生成), raw*/plugin_instruction.md (生成), raw/keep_*.xml (Icon Studio 保留规则), xml/data_extraction_rules.xml
+|   |-- src/debug/              RendererTestActivity (仅 debug, 承载本仓库渲染器 instrumentation)
 |   |-- src/main/assets/doc/    CHANGELOG*.md (生成)
 |   |-- src/main/assets/examples/ counter.js, form.js, list.js, floaty-hud.js, theme.js, index.json
 |   |-- src/test/               JVM 契约与资源守卫 (第 13.1 节)
@@ -103,7 +105,7 @@ AutoJs6-Plugin-Compose-UI/
 |-- docs/dev/                   各阶段证据 (P0.2 起)
 |-- gradle/                     wrapper, libs.versions.toml
 |-- libs/                       common-plugin-api.aar, compose-ui-api.aar (host-api-aars.lock 锁定); README.md
-|-- locks/                      host-api-aars.lock
+|-- locks/                      host-api-aars.lock, host-shared-deps.lock
 |-- AGENTS.md, ROADMAP.md, README.md (生成, 简体中文), LICENSE (MPL-2.0), THIRD_PARTY_NOTICES.md
 |-- build.gradle.kts, settings.gradle.kts, gradle.properties, version.properties, gradlew(.bat)
 `-- sign.properties             本地签名配置, Git 忽略
@@ -182,7 +184,7 @@ AutoJs6-Plugin-Compose-UI/
 - `strings.xml` 按 `name` 升序; 不可翻译项 (`app_name`) 放 `strings_donottranslate.xml`.
 - 全部 locale 使用 ASCII 标点 (含日语, 韩语, 阿拉伯语的逗号与句号), 省略号写 `...` (lint 已全局禁用 `TypographyEllipsis`). `ApplicationTextPunctuationTest` 扫描 `app/src/main`, `.readme`, `.changelog`, `docs`, `README.md`, `ROADMAP.md`, `AGENTS.md`, `THIRD_PARTY_NOTICES.md` 的 xml / md / json.
 - `plugin_description` 句尾无点号, 不含 "AutoJs6" 字样, 含 "Jetpack Compose" (`StringResourceParityTest`). 繁体中文 (台灣) 用 "指令碼 / 介面 / 轉譯", 繁体中文 (香港) 用 "腳本 / 界面 / 渲染".
-- 图标由 `.python/generate_launcher_icons.py` 从 `.python/icons/compose-ui-ic-launcher-light.png` 确定性生成, 不手工编辑 `mipmap*/` 输出; 修改源图或比例后重新生成, 运行 `--check`, 并更新第 2 节与 changelog. 不创建同名自适应 XML 或圆形图标 (`StringResourceParityTest` 守卫).
+- 图标由 Icon Studio 从 `.icons/recipe.json` 与 `.icons/assets/` 确定性生成 (`py .python/generate_icon_studio.py`; `generate_launcher_icons.py` 在 recipe 存在时转交同一入口), 不手工编辑 `mipmap*/` 输出. recipe 的亮 / 暗图稿即 P0.1 由 `.python/icons/compose-ui-ic-launcher-light.png` 生成的两张占位 `ic_launcher.png`, 正式源图到位后替换 recipe 图稿并重新生成, 运行 `--check`, 并更新第 2 节与 changelog. 不创建同名自适应 XML 或圆形 `ic_launcher` (`StringResourceParityTest` 守卫); 系统应用信息图标 `ic_icon_studio_application` 的自适应资源按文末 System application icon 节处理.
 
 ## 11. README, 插件说明与 changelog
 
@@ -215,9 +217,10 @@ AutoJs6-Plugin-Compose-UI/
 
 ### 13.3 CI
 
-- `build.yml`: JVM 测试编译, `testDebugUnitTest`, androidTest 与 release APK, lint debug / release; API 24 x86 与 API 35 x86_64 模拟器运行契约测试 (含 graphics-path 原生库加载).
-- `markdown.yml`: Windows 上 `check_markdown.bat`.
-- 仓库未推送期间工作流只做本地语法与路径校验.
+- `build.yml`: JVM 测试编译, `testDebugUnitTest`, `verifySharedClasspath`, androidTest 与 release APK, lint debug / release, `verify_apk_classpath.py`; API 24 x86 与 API 35 x86_64 模拟器运行本仓库完整 instrumentation 并收集覆盖率 (含 graphics-path 原生库加载).
+- `markdown.yml`: Windows 上 `check_markdown.bat`. `icon-studio.yml`: Ubuntu / Windows 上 `generate_icon_studio.py --check`.
+- 源码仓库自 2026-10-04 公开后, 推送会触发上述工作流; 推送前仍须先完成第 14 节的本地验证, 远端结果不替代本地证据.
+- `reactivecircus/android-emulator-runner` 把 `script` 的每一行作为独立命令执行, 不支持反斜杠续行; Gradle 命令 MUST 写在一行内 (2026-10-04 首次远端运行的两个模拟器作业因续行符被当作任务名而失败).
 
 ## 14. 验证顺序
 
