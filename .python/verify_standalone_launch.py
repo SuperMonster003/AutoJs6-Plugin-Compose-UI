@@ -74,7 +74,8 @@ def ui_tree(adb: Adb) -> ElementTree.Element:
     for attempt in range(6):
         output = adb.shell(f"uiautomator dump {UI_DUMP}", check=False, timeout=60)
         if "dumped to" in output:
-            xml = adb.shell(f"cat {UI_DUMP}")
+            # API 24 occasionally answers the first cat with exit 255 while the dump is still being written.
+            xml = adb.shell(f"cat {UI_DUMP}", check=False)
             try:
                 return ElementTree.fromstring(xml)
             except ElementTree.ParseError:
@@ -95,8 +96,11 @@ def find_node(adb: Adb, description: str, predicate, clickable: bool = False) ->
     clickable=True the tap target is the nearest ancestor that carries clickable="true"; a match without one
     (a category header, the title) is skipped.
     """
+    last_tree: list[ElementTree.Element] = []
+
     def search():
         root = ui_tree(adb)
+        last_tree[:] = [root]
         parents = {child: parent for parent in root.iter() for child in parent}
         for node in root.iter("node"):
             if not predicate(node):
@@ -109,7 +113,17 @@ def find_node(adb: Adb, description: str, predicate, clickable: bool = False) ->
             if candidate is not None:
                 return candidate, node
         return None
-    return wait_for(description, search)
+
+    try:
+        return wait_for(description, search)
+    except SystemExit as failure:
+        # Describe what was on screen instead, so a CI log explains the miss without the device.
+        visible = []
+        for node in (last_tree[0].iter("node") if last_tree else []):
+            label = (node.get("text") or "").strip() or (node.get("content-desc") or "").strip()
+            if label:
+                visible.append(label[:60])
+        raise SystemExit(f"{failure}\nvisible labels: {visible[:40]}") from None
 
 
 def crash_lines(adb: Adb) -> list[str]:
@@ -176,7 +190,11 @@ def walk(adb: Adb, settings_label: str, copy_label: str) -> tuple[str, int, str]
     entry, label = find_node(adb, "a catalog entry", lambda n: (n.get("text") or "").strip() != "", clickable=True)
     entry_label = label.get("text").strip()
     tap(adb, entry)
-    find_node(adb, f"the detail screen of {entry_label} with the copy button", lambda n: (n.get("text") or "").strip() == copy_label)
+    # The detail screen composes the preview and shows the generated script; on a 1080x1920 screen the copy
+    # and run buttons can sit below the fold, so the script text (compose.<Entry>( ) also proves the screen.
+    script_call = f"compose.{entry_label}("
+    find_node(adb, f"the detail screen of {entry_label} with its script or copy button",
+              lambda n: (n.get("text") or "").strip() == copy_label or script_call in (n.get("text") or ""))
     adb.shell("input keyevent KEYCODE_BACK")
     settings_action, _ = find_node(adb, "the settings action", lambda n: (n.get("content-desc") or "").strip() == settings_label, clickable=True)
     tap(adb, settings_action)
