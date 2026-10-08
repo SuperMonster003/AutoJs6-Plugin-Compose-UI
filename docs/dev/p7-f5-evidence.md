@@ -16,13 +16,14 @@ resources are generated from it and are replaced when the final artwork arrives.
 Compose cannot run without the AndroidX activity / lifecycle / savedstate runtime.
 Until now those artifacts were `compileOnly` because the host supplies them to the
 renderer (D26). A standalone Activity in the plugin process has no host classes, so
-D32 packages the 36 host-locked artifacts Compose needs (`standaloneRuntime` in
-`app/build.gradle.kts`) at the exact lock versions through Gradle constraints. Inside
+D32 packages the host-locked artifacts Compose needs (`standaloneRuntime` in
+`app/build.gradle.kts`) at the exact lock versions through Gradle constraints: 36 in
+build 42, 47 since build 44 (see "Launcher crash fix" below). Inside
 the host the parent-first `PathClassLoader` keeps resolving these names from the host,
-so the packaged copies are never loaded there; `-keepnames` rules keep the names
-stable so parent-first lookup still matches after R8. The remaining 15 shared
-artifacts (appcompat, emoji2, window, serialization, lifecycle-process, livedata and
-the Kotlin stdlib family) stay excluded or `implementation` as before.
+so the packaged copies are never loaded there; since build 44 these packages are fully
+kept by R8, like `kotlin.**`, so that names stay stable and R8 draws no whole-program
+conclusions from the plugin's copy. Only appcompat, which nothing in the plugin
+references, stays excluded; the Kotlin stdlib family stays `implementation` as before.
 
 ## Delivered behavior
 
@@ -92,6 +93,80 @@ exceeded, as they were since F.4.
 
 The push of build41 ran the public workflows: Markdown and Icon Studio passed, the API24 x86 job passed all 73 tests, and the API35 x86_64 job failed 10 tests: the gallery clipboard read returned null, and 9 existing renderer scenarios that depend on window focus, popups, the back key or the IME timed out. On API 29+ the clipboard is readable only by the focused app, and the settings Activity left behind by the previous test delayed focus of the new gallery window on the slower CI emulator. Build42 waits for window focus and polls the clipboard, finishes the settings Activity opened by the settings-entry test, makes `LauncherIcons.normalize` skip the component write when the alias state is already consistent, and uploads logcat and window state after the suite. Local rerun on a fresh API35 AVD: 72 of 73 passed (all 9 gallery / settings / icon tests including the clipboard fix); the only failure was the existing F.4 scenario `WideRendererTest.pullToRefreshUsesActualNestedScrollAndHonorsDisabledState`, where heavy jank on that AVD (Choreographer skipped 102 frames, HWUI frames of 2.3 s) kept the main thread busy during the refresh indicator animation for 60 s (Espresso AppNotIdleException); 3 isolated repeats gave 2 failures and 1 pass. The same scenario passed three full runs on the previous AVD and both remote API24 / API35 jobs; neither the scenario nor the renderer changed in this round, so it is recorded as environmental. Remote rerun (workflow run 37734947171): the API35 x86_64 job passed all 73 tests; the API24 x86 job first ran 0 tests because the CI emulator lost its adb daemon connection and the APK was never written to the device (infrastructure, no PackageManager error in the uploaded logcat), and passed all 73 tests on rerun; the Markdown and Icon Studio workflows passed.
 
+## Launcher crash fix (build 44)
+
+The maintainer installed build 43 on a Sony Xperia XQ-DQ72 (API 33) and on an AVD:
+the launcher showed the Compose UI icon, but tapping it did not open the app. The
+device log shows the plugin process dying while the Activity is constructed:
+
+```text
+java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/arch/core/executor/ArchTaskExecutor;
+    at androidx.lifecycle.LifecycleRegistry_androidKt.isMainThread(LifecycleRegistry.android.kt:23)
+    at androidx.lifecycle.LifecycleRegistry.addObserver(LifecycleRegistry.jvm.kt:172)
+    at androidx.activity.ComponentActivity.<init>(ComponentActivity.kt:265)
+    at io.github.supermonster003.autojs6.plugin.compose.ui.app.GalleryActivity.<init>(GalleryActivity.kt:66)
+```
+
+Root cause: the 36-artifact `standaloneRuntime` of build 42 contained arch
+`core-common` but not `core-runtime`, which owns `ArchTaskExecutor`. A DEX reference
+closure of the shrunk release APK (every referenced type that is neither defined in
+the APK nor provided by the platform) showed 15 more classes outside the host contract:
+`customview-poolingcontainer` (ComposeView disposal strategy), `emoji2` (Compose text)
+and `androidx.window` (WindowInfo.containerSize). The device tests passed because the
+instrumentation APK carried runtime copies of the whole shared lock in the same
+process; R8 cannot report the gap either, because compileOnly artifacts reach it as
+library classes.
+
+Fix:
+
+- `standaloneRuntime` grows to 47 artifacts: arch core-runtime,
+  customview-poolingcontainer, emoji2, lifecycle-process, window, window-core and
+  window-core-android for the missing classes, plus lifecycle-livedata-core and
+  kotlinx-serialization (bom, core, core-jvm), which the fully kept savedstate /
+  lifecycle members reference. Only appcompat (x2) stays host-only; it is excluded from
+  `debugAndroidTestRuntimeClasspath` as well and `verifySharedClasspath` checks that
+  the test APK carries neither.
+- The shared packages are fully kept by R8 (`-keep class ... { *; }`, as `kotlin.**`
+  already was) instead of `-keepnames`. The first build 44 candidate kept only names:
+  the plugin's own 73 instrumentation tests and the launch check passed, but the host
+  Compose device suites failed 7 scenarios with `RENDER_FAILED` and the host process
+  finally crashed. `dexdump` of that candidate shows Compose's
+  `EmojiCompatStatus.DefaultImpl.getFontLoadState` compiled to
+  `EmojiCompat.get(); throw null`: nothing in the plugin program ever initializes
+  `EmojiCompat` (the startup provider is removed), so R8 concluded that
+  `EmojiCompat.get()` never returns normally and replaced the rest of the method,
+  while inside the host, where parent-first loading returns the host's initialized
+  `EmojiCompat`, `get()` returns and the `throw null` runs on every text layout.
+  `-dontoptimize` does not prevent this whole-program conclusion; a full keep does,
+  at the cost of not shrinking these packages (the release gains a second DEX).
+- `verify_apk_classpath.py --shrunk` requires every class the R8 output references to
+  be defined in the APK, provided by the platform (including the OEM window extensions
+  that androidx.window loads reflectively behind guards) or part of the host contract.
+  Against the shipped build 42 it reports 15 unloadable classes; against build 44 it
+  reports 0.
+- `verify_standalone_launch.py` installs an APK on one device, starts the enabled
+  launcher alias as a launcher would, opens the first catalog entry and the settings
+  screen through the uiautomator tree, and fails on a crash, a dead or restarted
+  process or a missing screen. Against build 42 it reproduces the crash; the local
+  verification order and both CI emulator jobs run it after the instrumentation.
+
+Verification on the owned API35 x86_64 AVD `compose_f5c_api35` (emulator-5596). The
+main working tree held the maintainer's uncommitted Icon Studio changes, whose
+generated adaptive XML does not link, so the build, the tests and the signed APK were
+produced in a detached worktree of the same HEAD plus this change.
+
+| Check | Result |
+| --- | --- |
+| JVM `testDebugUnitTest` | 84 tests passed |
+| `lintDebug` | 0 errors, 9 warnings |
+| `verifySharedClasspath` | 51 components, 47 packaged, appcompat (2) host-only and absent from the test APK |
+| `verify_apk_classpath.py` debug / `--shrunk` release | passed, 0 unresolved references outside the contract |
+| `verify_standalone_launch.py` build 42 (`2f1127ce`) | fails: FATAL EXCEPTION in the plugin process |
+| `verify_standalone_launch.py` build 44 debug and signed release | gallery, "Column" entry and settings opened, process alive |
+| Plugin instrumentation | 73 of 73 passed, 0 skipped, with a test APK that no longer carries host-only components |
+| Host device suites with the build 44 renderer (isolated host `org.autojs.autojs6.compose.spike`, host master `910aec9495`, built in a short-path host worktree) | 87 scenarios: 71 passed, 15 opt-in phases skipped by assumption, 1 failed. The 10 TSX scenarios failed in the full run because the fresh AVD had no TypeScript Engine; after installing 0.6.8 temporarily all 10 passed on rerun and are counted in the 71. The remaining failure, ComposeUiLoaderTest.loaderCachesByIdentityButRechecksEnablementAndSharesParentClasses, asserts contractVersion() == 1 (host test written 2026-10-02, before F.4 raised the contract to 2): a pre-existing stale host assertion unrelated to this change; the 87 include the 13 core/plugin/compose loader scenarios that were outside the 74 of the F.5 run. The -keepnames candidate had failed 7 scenarios with RENDER_FAILED and crashed the host process in the same suite; with the full keep none recurs |
+| Signed release | `autojs6-plugin-compose-ui-v1.1.0-5d2ce3ef.apk`, 4673146 B, 13482 classes / 82466 DEX method references, SHA-256 `9856d4f57b361d7597cfcee39c9e50b5466cca644029a6081127c057e2890dd7`; +1048858 B / +21853 references over build 42, within the growth the maintainer accepted for F.5 |
+
 ## Not executed
 
 - Physical devices and the API24 x86 AVD: the gallery is Compose in the plugin
@@ -101,3 +176,5 @@ The push of build41 ran the public workflows: Markdown and Icon Studio passed, t
   `PackageManager` queries, not by screenshots of a third-party launcher.
 - The host appearance provider was read against the regular host build; the
   isolated spike host uses a different package and is reported as "host missing".
+- Build 44 was not reinstalled on the maintainer's Xperia or AVD (they are the
+  maintainer's devices); the crash and the fix were reproduced on the owned AVD only.

@@ -239,7 +239,7 @@ _2026/10/08_
 - `Dependance` Ajout de la capacité de dialogue optionnelle à compose-ui-api.aar en conservant les contrats V1 et AndroidView existants
 - `Dependance` Ajout du catalogue V2 de compose-ui-api.aar en conservant les modèles de noeuds et la sémantique des composants V1
 - `Dependance` Ajout de material-color-utilities 4.1.1 (MIT) pour la dérivation de couleur de thème partagée avec les autres plugins autonomes
-- `Dependance` Ajout de copies d'AndroidX activity, core, lifecycle, savedstate et kotlinx-coroutines aux versions verrouillées par l'hôte pour la galerie dans le processus du plugin; dans l'hôte, les copies de l'hôte restent prioritaires
+- `Dependance` Ajout de copies d'AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines et de leurs compléments aux versions verrouillées par l'hôte pour la galerie dans le processus du plugin; dans l'hôte, les copies de l'hôte restent prioritaires
 
 #### v1.0.0
 

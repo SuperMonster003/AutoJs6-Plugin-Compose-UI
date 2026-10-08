@@ -36,19 +36,28 @@
 -keep class org.autojs.plugin.compose.api.** { *; }
 
 # F.5 (roadmap D32): the AndroidX runtime that Compose needs is packaged for the plugin's own gallery and
-# settings process. Inside the host these packages resolve parent-first to the host copies, so the plugin's
-# references must keep their original class and member names; shrinking unused members stays allowed.
--keepnames class androidx.activity.** { *; }
--keepnames class androidx.annotation.** { *; }
--keepnames class androidx.arch.** { *; }
--keepnames class androidx.collection.** { *; }
--keepnames class androidx.concurrent.** { *; }
--keepnames class androidx.core.** { *; }
--keepnames class androidx.interpolator.** { *; }
--keepnames class androidx.lifecycle.** { *; }
--keepnames class androidx.profileinstaller.** { *; }
--keepnames class androidx.savedstate.** { *; }
--keepnames class androidx.startup.** { *; }
--keepnames class androidx.tracing.** { *; }
--keepnames class androidx.versionedparcelable.** { *; }
--keepnames class kotlinx.coroutines.** { *; }
+# settings process (standaloneRuntime in app/build.gradle.kts, including arch core-runtime, customview
+# poolingcontainer, emoji2 and androidx.window since build 44). Inside the host these packages resolve
+# parent-first to the host copies, so they get the same full keep as kotlin.** above: names must match, and R8
+# must not draw whole-program conclusions from the plugin's copy that the host's copy violates. With only
+# -keepnames (build 44 candidate), R8 saw that nothing in the plugin ever initializes EmojiCompat, concluded that
+# EmojiCompat.get() never returns and compiled Compose's EmojiCompatStatus into "EmojiCompat.get(); throw null";
+# inside the host, where EmojiCompat is initialized, every text layout then threw NullPointerException.
+-keep class androidx.activity.** { *; }
+-keep class androidx.annotation.** { *; }
+-keep class androidx.arch.** { *; }
+-keep class androidx.collection.** { *; }
+-keep class androidx.concurrent.** { *; }
+-keep class androidx.core.** { *; }
+-keep class androidx.customview.** { *; }
+-keep class androidx.emoji2.** { *; }
+-keep class androidx.interpolator.** { *; }
+-keep class androidx.lifecycle.** { *; }
+-keep class androidx.profileinstaller.** { *; }
+-keep class androidx.savedstate.** { *; }
+-keep class androidx.startup.** { *; }
+-keep class androidx.tracing.** { *; }
+-keep class androidx.versionedparcelable.** { *; }
+-keep class androidx.window.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-keep class kotlinx.serialization.** { *; }

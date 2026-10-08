@@ -32,7 +32,7 @@
         "기존 V1 및 AndroidView 계약을 유지하면서 compose-ui-api.aar에 선택적 대화상자 기능 추가",
         "기존 노드 모델 및 V1 구성요소 의미를 유지하며 compose-ui-api.aar V2 카탈로그 추가",
         "material-color-utilities 4.1.1 (MIT) 추가. 다른 독립 플러그인과 같은 테마 색상 유도에 사용합니다",
-        "AndroidX activity, core, lifecycle, savedstate 및 kotlinx-coroutines의 호스트 고정 버전 복사본을 추가. 플러그인 자체 프로세스의 갤러리가 사용하며 호스트 내에서는 여전히 호스트 복사본이 우선합니다"
+        "AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines 등의 호스트 고정 버전 복사본을 추가. 플러그인 자체 프로세스의 갤러리가 사용하며 호스트 내에서는 여전히 호스트 복사본이 우선합니다"
       ]
     },
     "v1.0.0": {
