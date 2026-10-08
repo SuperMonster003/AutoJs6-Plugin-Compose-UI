@@ -1,6 +1,6 @@
 {
   "date": "2026-10-08",
-  "status": "pending-maintainer-confirmation",
+  "status": "accepted-by-maintainer",
   "reviewLimits": {
     "apkBytes": 2612576,
     "methodReferences": 49194
@@ -46,7 +46,11 @@
     "methodReferences": true
   },
   "reason": "No renderer code, contract or dependency change since build33. The bundled plugin instruction and changelog documents for ten languages gained the host compose.memo requirement and the Hong Kong rendering-term fix. Removing the retired P0 keep rule only shifted one resource ID constant in DEX (48 bytes smaller in isolation).",
-  "maintainerConfirmationRequired": "The approved F.4 reference remains d4f266d2; this candidate is recorded for review and is not presented as re-approved.",
   "originalP5ObservationsChanged": false,
-  "newTimingBaseline": false
+  "newTimingBaseline": false,
+  "acceptance": {
+    "date": "2026-10-08",
+    "decision": "Accept the +1584 byte text-asset growth of build38 (2740f0ee); the original Q5 review limits are unchanged.",
+    "reviewLimitsChanged": false
+  }
 }
