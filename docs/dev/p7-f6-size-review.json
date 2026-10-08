@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-08",
+  "status": "pending-maintainer-confirmation",
+  "reviewLimits": {
+    "apkBytes": 2612576,
+    "methodReferences": 49194
+  },
+  "approvedReference": {
+    "build": 32,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-d4f266d2.apk",
+    "apkBytes": 3022148,
+    "methodReferences": 53838,
+    "record": "docs/dev/p7-wide-size-review.json"
+  },
+  "previousFinal": {
+    "build": 33,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-ffee2730.apk",
+    "apkBytes": 3022152,
+    "methodReferences": 53842
+  },
+  "candidate": {
+    "version": "1.1.0",
+    "build": 38,
+    "file": "autojs6-plugin-compose-ui-v1.1.0-2740f0ee.apk",
+    "apkBytes": 3023736,
+    "sha256": "3eddd777cfc38ac10c2514eea137442405783c4d4fe0f145e651d1ee7d977584",
+    "classDefinitions": 9031,
+    "methodReferences": 53842,
+    "dex": [
+      {
+        "file": "classes.dex",
+        "bytes": 7531296,
+        "compressedBytes": 2715218,
+        "methodReferences": 53842,
+        "classDefinitions": 9031
+      }
+    ]
+  },
+  "deltaFromPreviousFinal": {
+    "apkBytes": 1584,
+    "methodReferences": 0,
+    "classDefinitions": 0
+  },
+  "exceeds": {
+    "apkBytes": true,
+    "methodReferences": true
+  },
+  "reason": "No renderer code, contract or dependency change since build33. The bundled plugin instruction and changelog documents for ten languages gained the host compose.memo requirement and the Hong Kong rendering-term fix. Removing the retired P0 keep rule only shifted one resource ID constant in DEX (48 bytes smaller in isolation).",
+  "maintainerConfirmationRequired": "The approved F.4 reference remains d4f266d2; this candidate is recorded for review and is not presented as re-approved.",
+  "originalP5ObservationsChanged": false,
+  "newTimingBaseline": false
+}

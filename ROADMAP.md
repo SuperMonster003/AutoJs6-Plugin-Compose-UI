@@ -256,7 +256,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
-| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 - F.4 已完成本地实现与门禁; F.5 未排期, F.6 按性能证据决定 |
+| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 - F.4 与 F.6 已完成本地实现与门禁 (F.6 经 2026-10-08 补测证据决定实施); F.5 未排期, 需维护者排期并修订 D8 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
 
@@ -514,8 +514,8 @@ P6.4 证据 (2026-10-04): 插件build26签名APK `autojs6-plugin-compose-ui-v1.0
 - [x] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
 - [x] (宿主 / 插件) F.3 `compose.dialog(nodeOrRender, options)`: 任意脚本弹出 Material 3 Dialog / ModalBottomSheet, 返回 Promise 或会话.
 - [x] (插件 / 宿主 / 文档) F.4 宽集组件, 契约 `CONTRACT_VERSION = 2` (只追加).
-- [ ] (插件) F.5 组件画廊 Activity (若排期, 需同时遵循独立设置页与图标规范).
-- [ ] (宿主) F.6 细粒度更新与脚本侧依赖裁剪 (按 P5.3 数据决定).
+- [ ] (插件) F.5 组件画廊 Activity (若排期, 需同时遵循独立设置页与图标规范). 2026-10-08 复核: 画廊需要启动器入口与独立界面, 须先由维护者排期并修订 D8, 启动器图标还依赖 Q6 正式图稿; 排期前不实施.
+- [x] (宿主) F.6 细粒度更新与脚本侧依赖裁剪 (按 P5.3 数据决定).
 
 F.1 证据 (2026-10-04): `docs/dev/p7-tsx-evidence.md`. 宿主 5319 支持真实组件工厂引用 / 别名及 `compose:Name`, 有界中立 Fragment 保留根 / 插槽 / 跨脚本身份限制, XML 混域在替换页面前拒绝. 声明 4.31.0 的 29 项 JSX 映射由冻结目录生成, Ace 1.23.0 与 TypeScript Engine 0.6.4 使用实际配套声明; Engine 保留公开 2.1.3 tarball 锁, 明示本地补充来源. 宿主相关 JVM 173 + API 16, 插件 JVM 63, 目录 Python 16, Engine 相关 JVM 534 + 构建逻辑 4, Ace JVM 171 通过. API 35 x86_64 自建 AVD 上, 最终签名编译器 / 渲染器通过 6 项真实 TSX 与 5 项原有 JS 示例, 编译器 debug 声明清单另 2 项通过. 文档 152 模块 / 6548 搜索条目与 Offline Docs 同步 / 签名门禁通过. 插件 1.1.0 / 27 为本地预览, 普通工厂最低宿主 5316 不变; JSX 表达式精度与 namespace 属性补全限制已明确记录. 自建 AVD 与 5 个测试安装均已清理, 下一起点为 F.2.
 
@@ -527,6 +527,9 @@ F.3 证据 (2026-10-07): `docs/dev/p7-dialog-evidence.md`. compose.dialog 返回
 
 
 F.4 证据 (2026-10-07 - 2026-10-08): `docs/dev/p7-wide-evidence.md`. 19 类宽集组件与 6 个配套 item 节点已实现, 契约 V2 的基础目录为 55 项, 协商 AndroidView 后为 56 项. 原 209 个共享 class 中 208 个字节相同, 仅 ComposeUiContract 的版本上限改为 2, 另追加 6 个 V2 类; 匹配宿主最低 5322, 保留实际 V1 provider 兼容性. 最终插件 1.1.0/build33 的 JVM 70 项, API24/35 各完整 64 项, 宿主 JVM 224/API 29 与两设备各完整 29 场景通过. 签名包 ffee2730 为 3022152 B/53842 方法引用; 维护者于 2026-10-07 接受 d4f266d2 的 F.4 功能增长 (3022148 B/53838 引用), 最终原生输入守卫及元数据/计数对齐带来的 +4 B/+4 引用另行记录, 不改原 Q5 门槛或 236 条 P5 观测. Declarations 4.35.0, 文档 6.8.0/96 与 Offline Docs 6.8.6/build81 已完成本地来源与内容检查. Engine 0.6.7/build89 与 Ace 1.29.0/build143 的最终 JVM, 完整编译/语言服务及签名门禁均通过; 最终签名组合的9个TSX和5个原JS示例共14项通过. 各仓库按逻辑本地提交, 两台专用AVD与10个自有安装已清理, 本节完成.
+
+
+F.6 证据 (2026-10-08): `docs/dev/p7-f6-evidence.md`. P5.3 未测的 "大树挂载期间单次 state 更新" 经宿主测量工具 `list-updates` 补测 (宿主 `51b7760c49`, 专用 API35 x86_64 AVD, 插件 build36): 1000 行渲染层可见更新 722.50 / 732.29 ms (中位 / p90), 其中 JS 重建 483 ms, 句柄层 156.44 / 178.53 ms, 据此实施. 宿主 `1adc2b8639` (5323) 交付 `compose.memo(fn, deps, options?)`: 渲染期专用, 按渲染函数或外层片段作用域内的 key / 调用次序及函数字面量匹配, 依赖值与所读 state 版本均未变且节点仍在上一棵树时复用, 失败帧保留, 拒绝帧清空, 256 项依赖 / 每次渲染 5000 次上限. 同一 AVD 的 memo 行为 307.22 / 322.22 ms (渲染层 752.78 / 791.42, 句柄层 155.81 / 173.66), 构建耗时由 489.53 降至 99.94 ms; 单 AVD 决策观测, 不替代 Q5 基线. 宿主 JVM 208 + 契约 29, 设备 UI 8 项 (含 300 行 memo) 及签名 Engine 0.6.8 下 10 个 TSX (含 memo) + 5 个 JS 示例共 15 项通过. 配套: Declarations 4.36.0 `5102e03`, Ace 1.30.0/144 `6748217`, Engine 0.6.8/90 `27e6100`, 文档 6.8.0/97 `a8f7972` `b882abc`, Offline Docs 6.8.6/82 `918e881`, 各自门禁通过. 插件渲染器, 契约与最低宿主 5322 不变; build38 签名包 `2740f0ee` 为 3023736 B (较 F.4 最终包 +1584 B 文本资源) / 53842 方法引用不变, 记入 `docs/dev/p7-f6-size-review.json` 待维护者确认. 未执行: 六设备矩阵, API24, inrt memo, 宿主全量 JVM/lint, 新 Q5 基线与远端 CI.
 
 ---
 
@@ -859,6 +862,8 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 
 脚本侧按 state 依赖只重跑受影响的 render 片段 (`compose.memo(fn, deps)`), 宿主侧属性快照比较; 按 P5.3 数据决定.
 
+2026-10-08 状态: P5.3 未覆盖的大树单次更新经补测证实为主要成本, 已按本节以 `compose.memo(fn, deps, options?)` 实施 (宿主 5323), 证据见 `docs/dev/p7-f6-evidence.md`.
+
 ---
 
 ## 附录 G: 参考
@@ -1039,3 +1044,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 当前来源: 干净宿主 `6a166c38415e7299ba034cd062dcc4c51a4b543a`, 声明 4.35.0 为 `de51858b59ec88f75c56d94bcf4af600c54ff34f`; 实际 aj6dts 使用该宿主及生成器 `525bebdaa157087b1295d80cef0dae861152eda5`. TS5.1.3/6.0.3 的 F1/F2/F3/F4 25/31/22/42 负例与 P6 strict/exact, 声明体检查通过. 文档 6.8.0/96 为 `c5a9658`, 内容 `479d8f1`; Offline Docs 6.8.6/build81 为 `f1bfc004d189750949df48b3a9673418eebfc1fe`, 212 资产/12828821 B 与最终签名内容门禁通过. 并发平台提交及其已包含的 F.4 文件保留既有历史, 具体来源见证据.
 - 最终 Compose APK `autojs6-plugin-compose-ui-v1.1.0-ffee2730.apk` 为 3022152 B, 9031 类/53842 DEX 方法引用, SHA-256 `3ece8a8885b0a2b9ab7edf2e1eeaf5aeeeebc3b6a0b3f4936b868da5ae0ab755`. Q5 于 2026-10-07 批准的候选为 d4f266d2 (3022148 B/53838 引用); 最终 +4 B/+4 引用和审批参照同时记录在 `docs/dev/p7-wide-size-review.json`, 不冒称维护者重新确认了新精确值. 原复核线和 236 条 P5 观测不变, 未重新定义性能基线.
 - 配套已完成: Engine 0.6.7/build89 提交 `527d892`, Ace 1.29.0/build143 提交 `5b1b0e9`; Engine JVM534/构建逻辑4/full Worker/C8/配额, Ace JVM171/完整浏览器语言服务以及各自签名门禁通过. 最终签名 Engine + renderer 的9个真实TSX和5个原JS示例共14项通过. 插件为本条所在build33提交, 各插件计数一致. 两台专用AVD与10个自有安装经身份和路径核对后已清理. 下一起点保留原F.5条件项与F.6性能判断, 本轮不增加或拆分小节. 原宿主和原 Ace 没有被本次工作编辑或暂存; 已有外部提交变化, 不沿用原宿主早先的脏工作区描述. 本轮未执行宿主全量 JVM/lint, 新六设备矩阵, inrt F.4, 新计时/内存基线或远端 CI, 也没有本轮 Git 推送/npm 发布/官方索引登记/公开 Release.
+
+### 2026-10-08: 已勾选项复核与 P7 F.6 细粒度更新
+
+- 复核已勾选条目: 公开仓库首次远端 CI (8d2528c) 的两个模拟器作业因 emulator-runner 逐行执行 script 而把续行符当作 Gradle 任务名失败, 改为单行命令 (3e30f25), 同一命令在专用 API35 AVD 上完整 64 项 instrumentation 通过并生成覆盖率. 移除已无消费方的 P0 spike keep 规则 (9f4b2ce, release 资源名集合不变). 路线图身份表, D7 / D29 注释, AGENTS 结构 / 图标 / CI 描述与当前契约 V2, 宿主 5322, 平台 1.9.0, Icon Studio 及源码公开状态对齐 (821df26). 香港繁体 V2 提示误用台湾 "轉譯器", 改为 "渲染器" (efa0198).
+- F.5: 组件画廊需要启动器入口与独立界面, 与固定决策 D8 冲突, 且启动器图标依赖 Q6 正式图稿; 仍为未排期条件项, 需维护者排期并修订 D8 后实施, 本轮不实施.
+- F.6: 按条目条件先补测 P5.3 缺失的大树单次更新数据, 证实整树重建为主要成本后实施 compose.memo 并完成宿主 / 声明 / Ace / Engine / 文档 / 离线文档全链路本地配套, 详见上方 F.6 证据与 `docs/dev/p7-f6-evidence.md`. 插件仅更新说明文案与路线图, 渲染器和最低宿主不变.
+- 宿主 Compose 工作仍在独立 worktree 的 `spike/compose-ui-p0` 分支 (本轮新增 51b7760c49, 1adc2b8639, 9fe6dde65f), 未合入宿主 master. 本地插件 master 领先 origin; 本轮未推送, 未发布 npm, 未登记官方索引, 未公开 Release. 专用 AVD 与自有安装在会话结束时清理.
