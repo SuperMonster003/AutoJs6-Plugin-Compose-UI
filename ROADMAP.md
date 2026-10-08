@@ -18,7 +18,7 @@
 
 ## 1. 固定决策
 
-以下决策 D1-D8 已由维护者于 2026-10-02 分两轮确认, 后续阶段不再重新讨论; D9-D31 为据此派生的技术决策, 进入对应阶段前可推翻 (推翻点见附录 D), 之后视同固定.
+以下决策 D1-D8 已由维护者于 2026-10-02 分两轮确认, 后续阶段不再重新讨论; D9-D32 为据此派生的技术决策, 进入对应阶段前可推翻 (推翻点见附录 D), 之后视同固定.
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
@@ -29,7 +29,7 @@
 | D5 | 组件范围: 核心集 | 1.0.0 实现附录 A.5 的核心集 (30 项: 布局 7, 容器 / 顶栏 4, 文本 / 图标 / 图片 3, Button 家族 5 + IconButton, 选择与输入 6, 进度 2, 对话框与提示 2); 导航 / Tabs / 底部弹层 / 菜单 / 日期时间选择 / Pager / Grid / Chips 等宽集排 1.1 (附录 F.4) |
 | D6 | TSX 排 1.1 | 1.0.0 只提供函数式元素工厂; TSX 工厂 (经 TypeScript Engine 插件现有 classic TSX 契约, 输出 Compose 节点而非 XML) 为 1.1 阶段 (附录 F.1), 1.0.0 的节点协议为其预留 `compose.createElement(type, props, ...children)` 接点 |
 | D7 | 仅本地提交 | 与 3-Shell Terminal / 3-Setup Installer 当前策略一致: 本仓库与宿主改动均仅本地 Conventional Commits, 不推送 GitHub, 不登记官方索引, 不发 Release, 直至维护者明确恢复; 宿主 `PluginInstallWizardCatalog` 条目先落地. 2026-10-04 修订: 维护者授权公开本插件源码仓库并以 noreply 邮箱推送 (会话记录 "源码公开与图稿同步"), 取代源码推送约束; 宿主改动, 官方索引登记与 APK Release 仍待各自明确授权与准入 |
-| D8 | 无独立界面 | 插件只有 Wake Activity, INFO 服务与渲染器入口, 没有启动器图标, 设置页与组件画廊 (画廊见附录 F.5); 示例脚本随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史由插件中心展示 |
+| D8 | 独立界面仅限画廊与设置 (2026-10-08 修订) | 原决策为无独立界面; 维护者于 2026-10-08 排期 F.5 后修订: 插件有启动器入口, 组件画廊与设置页 (附录 F.5, D32), 它们在插件自身进程运行, 只展示预览与示例脚本, 复制到剪贴板或交给宿主运行, 不执行脚本; 宿主内的渲染器入口, Wake Activity 与 INFO 服务不变; 示例脚本仍随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史仍由插件中心展示 |
 | D9 | 契约模块不依赖 Compose | 宿主新增 `plugin-api/compose-ui-api` (宿主编译并打包, 因此不得依赖任何 Compose 类): 装载面接口 (`ComposeUiRendererFactory` / `ComposeUiRenderer` / `ComposeUiHostEnvironment` / `ComposeUiEventSink`), 数据模型 (`UiNode` / `UiPatch` / `UiEvent` / `UiCommand` / `UiValue` / `ModifierOp` / `ThemeSpec`), 组件目录 (`ComponentCatalog`: 组件名, 属性类型, 插槽, 事件, 作用域限制), 常量 (`ComposeUiIds` / `ComposeUiCapabilityKeys` / `ComposeUiErrorCodes` / `ComposeUiLimits`); 插件以 `compileOnly` 消费该 AAR 的副本 (运行时类由宿主提供), 单元测试 `testImplementation` |
 | D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 的 debug / release 插件加载已验证; 2026-10-02 维护者选择 Q1(b), 升级宿主共享 AndroidX, 正式保持 parent-first, 不启用附录 E.3 退路. 原生搜索路径使用 `<apk>!/lib/<当前进程 ABI>`, 不能仅按设备首选 ABI 选择; P1.1 起 V1 契约由宿主打包; P1.2 正式装载器与会话已使用 V1, 负版本探针实现已退役, 未使用的旧定义仅保留于未改动的锁定 AAR |
 | D11 | ComposeView 上下文 | 宿主提供 `ComposeHostContext : ContextWrapper`: base 为宿主 Activity 或 floaty 服务上下文 (窗口, 系统服务, 主题属性), `getResources()` / `getAssets()` 委托插件包资源 (以宿主当前 `Configuration` 经 `createConfigurationContext` 对齐密度 / 夜间 / 语言), 使 material3 内部字符串 (`LocalContext.current.resources.getString(插件 R id)`) 与无障碍文案可解析; `getClassLoader()` 返回 D10 的插件加载器. P0.2 最小计数器证据确认保留宿主 `getTheme()` 即可, 不把插件资源主题覆盖到 Activity 上; RawWindow 在 attach 前显式设置宿主 LifecycleOwner 与 SavedStateRegistryOwner, 关闭时推进 DESTROYED 并 dispose. 扩展组件与 IME / 夜间配色仍需 P2 / P5 回归 |
@@ -53,6 +53,7 @@
 | D29 | 契约与最低宿主版本 | V1 `CONTRACT_VERSION = 1`, `MIN_SUPPORTED = 1`; P1.3 将 `REQUIRED_HOST_VERSION_CODE` 确认为 5316 (AutoJs6 6.8.0), 对应集成装载器 / 会话核心 / 插件中心注册的构建. 同步 Manifest, 公共文案, JVM / 设备断言与锁定 AAR, 只更新部署元数据, 不变更 V1 wire 语义. 原 5308 为建仓占位值, 保留于历史证据中. F.4 起插件声明 `CONTRACT_VERSION = 2` 并要求匹配宿主 5322; 宿主同时接受 V1 / V2 插件, V1 常量与 5316 保留 |
 | D30 | 打包应用 (inrt) | 打包的脚本应用使用 `compose` 时需目标设备已安装并启用本插件 (与 epub / mail 等插件模块一致); P5.2 验证 inrt 构建中的装载路径与错误提示, 文档写明 |
 | D31 | 示例与守卫 | 插件 `assets/examples/*.js` (计数器, 表单, 列表, 悬浮 HUD, 主题) 由 `assets/examples/index.json` 列出, P4.1 同步到宿主 `app/src/main/assets-app/sample/` 的对应分类; 示例必须能在兼容矩阵上运行, 作为 P5 回归用例 |
+| D32 | 独立进程运行时 | 画廊与设置页需要 Compose 自身依赖的 AndroidX 运行时 (activity / core / lifecycle / savedstate / startup / tracing / kotlinx-coroutines 等 36 项, `app/build.gradle.kts` 的 `standaloneRuntime`), 以宿主共享依赖锁的精确版本随插件打包并用 constraints 钉死; 宿主内 parent-first 装载使这些副本被宿主类遮蔽, R8 `-keepnames` 保持名称一致; 其余共享构件 (appcompat / emoji2 / window / serialization 等) 继续排除. 独立界面不得引用 `compose-ui-api` 契约类 (插件进程没有它们) |
 
 由 D2 / D9 / D10 派生的硬约束:
 
@@ -256,7 +257,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P4 | 示例, 无障碍与选择器, 守卫测试 | 1.0.0 | 已完成 (2026-10-03, P4.1 - P4.3) |
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
-| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件 | 1.1.0 | F.1 - F.4 与 F.6 已完成本地实现与门禁 (F.6 经 2026-10-08 补测证据决定实施); F.5 未排期, 需维护者排期并修订 D8 |
+| P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
 
@@ -514,7 +515,7 @@ P6.4 证据 (2026-10-04): 插件build26签名APK `autojs6-plugin-compose-ui-v1.0
 - [x] (宿主 / 插件) F.2 与旧 ui 混合: XML `<compose>` 容器 (`ui.registerWidget` 同机制) 与 Compose `AndroidView` 节点 (以 `ui.inflate` 结果或 View 工厂作为 `view` 属性, 主线程创建).
 - [x] (宿主 / 插件) F.3 `compose.dialog(nodeOrRender, options)`: 任意脚本弹出 Material 3 Dialog / ModalBottomSheet, 返回 Promise 或会话.
 - [x] (插件 / 宿主 / 文档) F.4 宽集组件, 契约 `CONTRACT_VERSION = 2` (只追加).
-- [ ] (插件) F.5 组件画廊 Activity (若排期, 需同时遵循独立设置页与图标规范). 2026-10-08 复核: 画廊需要启动器入口与独立界面, 须先由维护者排期并修订 D8, 启动器图标还依赖 Q6 正式图稿; 排期前不实施.
+- [x] (插件) F.5 组件画廊 Activity (遵循独立设置页与图标规范). 2026-10-08 复核曾因 D8 与 Q6 搁置; 同日维护者明确排期并接受包体积增量, D8 修订为允许画廊与设置页, 启动器图标暂用 Q6 占位图稿生成, 正式图稿到位后只替换图稿. 证据见下方 F.5 证据与 `docs/dev/p7-f5-evidence.md`.
 - [x] (宿主) F.6 细粒度更新与脚本侧依赖裁剪 (按 P5.3 数据决定).
 
 F.1 证据 (2026-10-04): `docs/dev/p7-tsx-evidence.md`. 宿主 5319 支持真实组件工厂引用 / 别名及 `compose:Name`, 有界中立 Fragment 保留根 / 插槽 / 跨脚本身份限制, XML 混域在替换页面前拒绝. 声明 4.31.0 的 29 项 JSX 映射由冻结目录生成, Ace 1.23.0 与 TypeScript Engine 0.6.4 使用实际配套声明; Engine 保留公开 2.1.3 tarball 锁, 明示本地补充来源. 宿主相关 JVM 173 + API 16, 插件 JVM 63, 目录 Python 16, Engine 相关 JVM 534 + 构建逻辑 4, Ace JVM 171 通过. API 35 x86_64 自建 AVD 上, 最终签名编译器 / 渲染器通过 6 项真实 TSX 与 5 项原有 JS 示例, 编译器 debug 声明清单另 2 项通过. 文档 152 模块 / 6548 搜索条目与 Offline Docs 同步 / 签名门禁通过. 插件 1.1.0 / 27 为本地预览, 普通工厂最低宿主 5316 不变; JSX 表达式精度与 namespace 属性补全限制已明确记录. 自建 AVD 与 5 个测试安装均已清理, 下一起点为 F.2.
@@ -528,6 +529,8 @@ F.3 证据 (2026-10-07): `docs/dev/p7-dialog-evidence.md`. compose.dialog 返回
 
 F.4 证据 (2026-10-07 - 2026-10-08): `docs/dev/p7-wide-evidence.md`. 19 类宽集组件与 6 个配套 item 节点已实现, 契约 V2 的基础目录为 55 项, 协商 AndroidView 后为 56 项. 原 209 个共享 class 中 208 个字节相同, 仅 ComposeUiContract 的版本上限改为 2, 另追加 6 个 V2 类; 匹配宿主最低 5322, 保留实际 V1 provider 兼容性. 最终插件 1.1.0/build33 的 JVM 70 项, API24/35 各完整 64 项, 宿主 JVM 224/API 29 与两设备各完整 29 场景通过. 签名包 ffee2730 为 3022152 B/53842 方法引用; 维护者于 2026-10-07 接受 d4f266d2 的 F.4 功能增长 (3022148 B/53838 引用), 最终原生输入守卫及元数据/计数对齐带来的 +4 B/+4 引用另行记录, 不改原 Q5 门槛或 236 条 P5 观测. Declarations 4.35.0, 文档 6.8.0/96 与 Offline Docs 6.8.6/build81 已完成本地来源与内容检查. Engine 0.6.7/build89 与 Ace 1.29.0/build143 的最终 JVM, 完整编译/语言服务及签名门禁均通过; 最终签名组合的9个TSX和5个原JS示例共14项通过. 各仓库按逻辑本地提交, 两台专用AVD与10个自有安装已清理, 本节完成.
 
+
+F.5 证据 (2026-10-08): `docs/dev/p7-f5-evidence.md`. 画廊 (`app.GalleryActivity`, 启动器 alias 目标) 以 9 个分类展示 56 条示例 (55 个节点组件与仅命令的 Snackbar), 每条有 Material 3 实时预览与生成的 `"ui";` 脚本, 可复制到剪贴板或经宿主公开的 `RunIntentActivity` 交给已安装的 AutoJs6 运行, 画廊自身不执行脚本. 设置页按独立设置规范提供语言 / 夜间模式 / 主题色 / 启动器图标与关于分组, 前三项默认经 `AutoJs6HostSettingsContract` Provider 跟随 AutoJs6, 宿主缺失时回退系统; 选择器先改草稿, 确定才保存. 启动器图标为四个固定 alias (自适应亮 / 暗 / 自动与透明), 默认自动, 包更新后归一化; Icon Studio recipe 改为 `launcher: true` 且底色 #FAFAFA / #212121. D32 打包 36 项宿主锁定版本的 AndroidX 运行时副本并附加 material-color-utilities 4.1.1, 宿主内仍 parent-first 使用宿主类; 渲染器, 契约 V2 与最低宿主 5322 不变. JVM 84 项通过; lint 0 错误 / 10 警告 (Icon Studio 生成的同内容图标与 localeConfig 的 API 级别提示, 与其他独立插件相同); `verifySharedClasspath` 51 项中 36 项打包; `verify_apk_classpath.py` 对 debug 与签名包通过. 专用 API35 x86_64 AVD: 插件 完整 73 项 instrumentation 通过 (含新增 GalleryDeviceTest 3 / SettingsDeviceTest 4 / LauncherIconDeviceTest 2 项), 另在同一 AVD 安装常规包宿主 `org.autojs.autojs6` (6.8.0 / 5325 debug) 后复跑画廊与设置 7 项通过 (运行 Intent 可解析, 外观 Provider 可读); 隔离宿主 `org.autojs.autojs6.compose.spike` (master `b2404d3ae9`, 5325) 的 compose 设备包 74 项中 61 项通过, 13 项为需显式参数的性能 / 旧 provider / 打包应用 / 包变更 / 权限负例阶段按假设跳过; 首轮 5 个示例场景因宿主工作树的示例资产在合并检出时被 autocrlf 转为 CRLF 而字节不等, 经 `sync_examples.py` 回写 LF 并在宿主 `.gitattributes` 钉死 `eol=lf` (宿主 `de11353cc0`) 后通过, 2 个无障碍场景在启用隔离宿主的 AccessibilityServiceUsher 后通过; TSX 10 项与 F.2 / F.3 / F.4 / F.6 场景均使用 build40 渲染器. 签名包 `autojs6-plugin-compose-ui-v1.1.0-70369027.apk` 为 3624284 B, 10473 类 / 60613 DEX 方法引用, SHA-256 `9f686d5824a2618eea58c44ca0ee0b38ca6a9f844d85034153088e148e5397e3`, 较 build38 +600548 B / +6771 方法引用, 记入 `docs/dev/p7-f5-size-review.json`; 维护者于 2026-10-08 预先接受该增量, 原 Q5 复核线不变且仍被超出. 未执行: 真机与 API24 本地 instrumentation (远端 CI 的 API24 作业覆盖同一套测试), 第三方启动器截图, 六设备矩阵, 宿主全量 JVM / lint.
 
 F.6 证据 (2026-10-08): `docs/dev/p7-f6-evidence.md`. P5.3 未测的 "大树挂载期间单次 state 更新" 经宿主测量工具 `list-updates` 补测 (宿主 `51b7760c49`, 专用 API35 x86_64 AVD, 插件 build36): 1000 行渲染层可见更新 722.50 / 732.29 ms (中位 / p90), 其中 JS 重建 483 ms, 句柄层 156.44 / 178.53 ms, 据此实施. 宿主 `1adc2b8639` (5323) 交付 `compose.memo(fn, deps, options?)`: 渲染期专用, 按渲染函数或外层片段作用域内的 key / 调用次序及函数字面量匹配, 依赖值与所读 state 版本均未变且节点仍在上一棵树时复用, 失败帧保留, 拒绝帧清空, 256 项依赖 / 每次渲染 5000 次上限. 同一 AVD 的 memo 行为 307.22 / 322.22 ms (渲染层 752.78 / 791.42, 句柄层 155.81 / 173.66), 构建耗时由 489.53 降至 99.94 ms; 单 AVD 决策观测, 不替代 Q5 基线. 宿主 JVM 208 + 契约 29, 设备 UI 8 项 (含 300 行 memo) 及签名 Engine 0.6.8 下 10 个 TSX (含 memo) + 5 个 JS 示例共 15 项通过. 配套: Declarations 4.36.0 `5102e03`, Ace 1.30.0/144 `6748217`, Engine 0.6.8/90 `27e6100`, 文档 6.8.0/97 `a8f7972` `b882abc`, Offline Docs 6.8.6/82 `918e881`, 各自门禁通过. 插件渲染器, 契约与最低宿主 5322 不变; build38 签名包 `2740f0ee` 为 3023736 B (较 F.4 最终包 +1584 B 文本资源) / 53842 方法引用不变, 记入 `docs/dev/p7-f6-size-review.json`, 维护者于 2026-10-08 接受该增量, 原 Q5 复核线不变. 未执行: 六设备矩阵, API24, inrt memo, 宿主全量 JVM/lint, 新 Q5 基线与远端 CI.
 
@@ -802,6 +805,8 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 
 维护者提供两张黑白透明 PNG (亮色模式用深色图案, 暗色模式用浅色图案) 以替换 P0.1 的临时图标; 无 launcher 入口, 只需基础 `mipmap*/ic_launcher.png` 系列.
 
+2026-10-08 补充: F.5 排期后启动器需要四个 alias 的自适应图标 (`ic_launcher_system*`, `ic_launcher_monochrome`), 由 Icon Studio 从同一图稿生成, recipe 底色 #FAFAFA / #212121; 正式图稿到位后只替换 recipe 图稿并重新生成, 资源形式不再变化.
+
 ### Q7 (P7 前): 1.1.0 顺序
 
 **已拍板 (2026-10-03)**: 按既定建议顺序 F.1 TSX -> F.2 与旧 ui 混合 -> F.3 `compose.dialog` -> F.4 宽集 -> F.5 画廊 -> F.6 细粒度更新推进; 1.0.0 gate 在先, F.6 是否需要仍以性能证据为依据.
@@ -857,6 +862,8 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 ### F.5 组件画廊
 
 插件内 Compose Activity 展示核心集与示例代码 (复制到剪贴板 / 发送给宿主运行); 若排期需遵循独立设置页与四 alias 图标规范.
+
+2026-10-08 状态: 维护者排期并修订 D8 后已实施; 画廊 56 条示例, 设置页与四 alias 启动器图标随 1.1.0 / build40 交付, 独立进程运行时见 D32, 证据见 `docs/dev/p7-f5-evidence.md`.
 
 ### F.6 细粒度更新
 
@@ -1051,3 +1058,12 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - F.5: 组件画廊需要启动器入口与独立界面, 与固定决策 D8 冲突, 且启动器图标依赖 Q6 正式图稿; 仍为未排期条件项, 需维护者排期并修订 D8 后实施, 本轮不实施.
 - F.6: 按条目条件先补测 P5.3 缺失的大树单次更新数据, 证实整树重建为主要成本后实施 compose.memo 并完成宿主 / 声明 / Ace / Engine / 文档 / 离线文档全链路本地配套, 详见上方 F.6 证据与 `docs/dev/p7-f6-evidence.md`. 插件仅更新说明文案与路线图, 渲染器和最低宿主不变.
 - 宿主 Compose 工作仍在独立 worktree 的 `spike/compose-ui-p0` 分支 (本轮新增 51b7760c49, 1adc2b8639, 9fe6dde65f), 未合入宿主 master. 本地插件 master 领先 origin; 本轮未推送, 未发布 npm, 未登记官方索引, 未公开 Release. 专用 AVD 与自有安装在会话结束时清理.
+
+
+### 2026-10-08: P7 F.5 组件画廊, 分支合并与推送
+
+- 维护者答复 2026-10-08 复核中的四个待决点: 明确做组件画廊 (修订 D8), 接受插件包体积增量, 允许推送插件仓库, 合并并删除旧分支. 宿主 `spike/compose-ui-p0` 已合入宿主 master (`8186010ea3`, README 日期回填 `4bec8bf589`, 5323) 并删除分支与 worktree; 隔离 Ace `compose-ui-f2` 已合入 Ace master (`7125e44`, 1.30.0/146) 并删除. 宿主与 Ace 本轮只合并, 未推送.
+- F.5 按原条目实施, 未增加, 分拆或丢弃路线图小节: 画廊 + 设置页 + 四 alias 启动器图标, 新增 D32 独立进程运行时 (36 项宿主锁定 AndroidX 副本随插件打包, 宿主内 parent-first 遮蔽) 与 material-color-utilities 4.1.1. 渲染器, 契约 V2, 最低宿主 5322 与 INFO / Wake 不变; AGENTS 第 1 / 2 / 4 / 5.2 / 6 / 10 / 12 / 13 / 15 节同步修订.
+- 验证: JVM 84 项通过, lint 0 错误 / 10 警告 (Icon Studio 生成的同内容图标与 localeConfig 的 API 级别提示, 与其他独立插件相同); 专用 API35 x86_64 AVD `compose_f5_api35` 上插件 完整 73 项 instrumentation 通过 (含新增 GalleryDeviceTest 3 / SettingsDeviceTest 4 / LauncherIconDeviceTest 2 项), 另在同一 AVD 安装常规包宿主 `org.autojs.autojs6` (6.8.0 / 5325 debug) 后复跑画廊与设置 7 项通过 (运行 Intent 可解析, 外观 Provider 可读), 隔离宿主 `org.autojs.autojs6.compose.spike` (master `b2404d3ae9`, 5325) 的 compose 设备包 74 项中 61 项通过, 13 项为需显式参数的性能 / 旧 provider / 打包应用 / 包变更 / 权限负例阶段按假设跳过; 首轮 5 个示例场景因宿主工作树的示例资产在合并检出时被 autocrlf 转为 CRLF 而字节不等, 经 `sync_examples.py` 回写 LF 并在宿主 `.gitattributes` 钉死 `eol=lf` (宿主 `de11353cc0`) 后通过, 2 个无障碍场景在启用隔离宿主的 AccessibilityServiceUsher 后通过; TSX 10 项与 F.2 / F.3 / F.4 / F.6 场景均使用 build40 渲染器. 签名包 `autojs6-plugin-compose-ui-v1.1.0-70369027.apk` 为 3624284 B, 10473 类 / 60613 DEX 方法引用, SHA-256 `9f686d5824a2618eea58c44ca0ee0b38ca6a9f844d85034153088e148e5397e3`, 较 build38 +600548 B / +6771 方法引用, 维护者预先接受, Q5 复核线不变. Icon Studio 20 项资源与 10 语言 36 份生成文档校验通过.
+- 图标判断: recipe 底色由透明改为 #FAFAFA / #212121, 使亮 / 暗 alias 与系统应用信息图标有可区分的底色 (与其他独立插件一致); 图案仍为 Q6 占位, 正式图稿到位后只替换图稿并重新生成. 宿主侧未改代码, 画廊运行入口复用既有公开 `RunIntentActivity`.
+- 未执行: 真机, API24 本地 instrumentation, 第三方启动器截图, 六设备矩阵, 宿主全量 JVM / lint, 新 Q5 基线; 远端 CI 结果以推送后的工作流为准. 专用 AVD 与自有安装在会话结束时清理.
