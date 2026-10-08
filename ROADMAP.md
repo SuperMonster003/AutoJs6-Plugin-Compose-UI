@@ -28,7 +28,7 @@
 | D4 | 1.0.0 承载面 | `"ui";` 模式 Activity 内容 (`compose.mount`) 与悬浮窗 (`compose.floaty`); "与旧 ui 混合" (XML 内 `<compose>` 容器, Compose 内 `AndroidView`) 与 "独立对话框 API" (`compose.dialog`) 排 1.1 (附录 F.2 / F.3) |
 | D5 | 组件范围: 核心集 | 1.0.0 实现附录 A.5 的核心集 (30 项: 布局 7, 容器 / 顶栏 4, 文本 / 图标 / 图片 3, Button 家族 5 + IconButton, 选择与输入 6, 进度 2, 对话框与提示 2); 导航 / Tabs / 底部弹层 / 菜单 / 日期时间选择 / Pager / Grid / Chips 等宽集排 1.1 (附录 F.4) |
 | D6 | TSX 排 1.1 | 1.0.0 只提供函数式元素工厂; TSX 工厂 (经 TypeScript Engine 插件现有 classic TSX 契约, 输出 Compose 节点而非 XML) 为 1.1 阶段 (附录 F.1), 1.0.0 的节点协议为其预留 `compose.createElement(type, props, ...children)` 接点 |
-| D7 | 仅本地提交 | 与 3-Shell Terminal / 3-Setup Installer 当前策略一致: 本仓库与宿主改动均仅本地 Conventional Commits, 不推送 GitHub, 不登记官方索引, 不发 Release, 直至维护者明确恢复; 宿主 `PluginInstallWizardCatalog` 条目先落地 |
+| D7 | 仅本地提交 | 与 3-Shell Terminal / 3-Setup Installer 当前策略一致: 本仓库与宿主改动均仅本地 Conventional Commits, 不推送 GitHub, 不登记官方索引, 不发 Release, 直至维护者明确恢复; 宿主 `PluginInstallWizardCatalog` 条目先落地. 2026-10-04 修订: 维护者授权公开本插件源码仓库并以 noreply 邮箱推送 (会话记录 "源码公开与图稿同步"), 取代源码推送约束; 宿主改动, 官方索引登记与 APK Release 仍待各自明确授权与准入 |
 | D8 | 无独立界面 | 插件只有 Wake Activity, INFO 服务与渲染器入口, 没有启动器图标, 设置页与组件画廊 (画廊见附录 F.5); 示例脚本随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史由插件中心展示 |
 | D9 | 契约模块不依赖 Compose | 宿主新增 `plugin-api/compose-ui-api` (宿主编译并打包, 因此不得依赖任何 Compose 类): 装载面接口 (`ComposeUiRendererFactory` / `ComposeUiRenderer` / `ComposeUiHostEnvironment` / `ComposeUiEventSink`), 数据模型 (`UiNode` / `UiPatch` / `UiEvent` / `UiCommand` / `UiValue` / `ModifierOp` / `ThemeSpec`), 组件目录 (`ComponentCatalog`: 组件名, 属性类型, 插槽, 事件, 作用域限制), 常量 (`ComposeUiIds` / `ComposeUiCapabilityKeys` / `ComposeUiErrorCodes` / `ComposeUiLimits`); 插件以 `compileOnly` 消费该 AAR 的副本 (运行时类由宿主提供), 单元测试 `testImplementation` |
 | D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 的 debug / release 插件加载已验证; 2026-10-02 维护者选择 Q1(b), 升级宿主共享 AndroidX, 正式保持 parent-first, 不启用附录 E.3 退路. 原生搜索路径使用 `<apk>!/lib/<当前进程 ABI>`, 不能仅按设备首选 ABI 选择; P1.1 起 V1 契约由宿主打包; P1.2 正式装载器与会话已使用 V1, 负版本探针实现已退役, 未使用的旧定义仅保留于未改动的锁定 AAR |
@@ -50,7 +50,7 @@
 | D26 | 宿主共享依赖的版本纪律 | 2026-10-02 Q1(b) 定稿: 宿主 app / inrt 的 debug / release 共用 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0, 由宿主版本目录单点声明; 插件编译依赖不能高于宿主, `locks/host-shared-deps.lock` 锁定 51 项解析版本. AndroidX / coroutines / serialization 共享项为插件 `compileOnly`, Kotlin stdlib 2.4.0 为 INFO 独立进程保留打包副本, 宿主内仍 parent-first 且 R8 必须保持 ABI. 宿主 `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath, 插件 `verifySharedClasspath` 守卫编译与排除集合; 任一版本变化时同步两仓库锁与正式最低宿主版本. 依赖解析一致不等于 minified 宿主 ABI 已通过, P1 需补正式契约 / keep 规则 / 装载器并回填最低版本 |
 | D27 | 图片与大对象 | `Image` 的 `src` 接受 `ImageWrapper` (`images.read` 等), 文件路径, 以及宿主 `R.drawable` 名称; 进程内直接传递 `Bitmap` 引用 (`UiValue.BitmapRef`), 不编码; 位图所有权归脚本 (`recycle` 由脚本决定), 渲染器只持弱引用并在节点移除时放手; URL 图片不在 1.0.0 |
 | D28 | 兼容矩阵 | API 24 AVD x86, API 28 Sony G8441 (arm64), API 31 Sony XQ-AT72, API 33 Redmi 22120RN86C, API 35 Xiaomi 23046RP50C (HyperOS), API 37 AVD (16 KB 页); 每台设备记录宿主 build 与插件 build; HyperOS 上悬浮窗只在桌面之上活动且需 `requestFocus` (既有记录), 作为 P3.4 验收的已知条件 |
-| D29 | 契约与最低宿主版本 | V1 `CONTRACT_VERSION = 1`, `MIN_SUPPORTED = 1`; P1.3 将 `REQUIRED_HOST_VERSION_CODE` 确认为 5316 (AutoJs6 6.8.0), 对应集成装载器 / 会话核心 / 插件中心注册的构建. 同步 Manifest, 公共文案, JVM / 设备断言与锁定 AAR, 只更新部署元数据, 不变更 V1 wire 语义. 原 5308 为建仓占位值, 保留于历史证据中 |
+| D29 | 契约与最低宿主版本 | V1 `CONTRACT_VERSION = 1`, `MIN_SUPPORTED = 1`; P1.3 将 `REQUIRED_HOST_VERSION_CODE` 确认为 5316 (AutoJs6 6.8.0), 对应集成装载器 / 会话核心 / 插件中心注册的构建. 同步 Manifest, 公共文案, JVM / 设备断言与锁定 AAR, 只更新部署元数据, 不变更 V1 wire 语义. 原 5308 为建仓占位值, 保留于历史证据中. F.4 起插件声明 `CONTRACT_VERSION = 2` 并要求匹配宿主 5322; 宿主同时接受 V1 / V2 插件, V1 常量与 5316 保留 |
 | D30 | 打包应用 (inrt) | 打包的脚本应用使用 `compose` 时需目标设备已安装并启用本插件 (与 epub / mail 等插件模块一致); P5.2 验证 inrt 构建中的装载路径与错误提示, 文档写明 |
 | D31 | 示例与守卫 | 插件 `assets/examples/*.js` (计数器, 表单, 列表, 悬浮 HUD, 主题) 由 `assets/examples/index.json` 列出, P4.1 同步到宿主 `app/src/main/assets-app/sample/` 的对应分类; 示例必须能在兼容矩阵上运行, 作为 P5 回归用例 |
 
@@ -159,6 +159,8 @@ ComposeView  <- ScriptExecuteActivity.setContentView  |  JsRawWindow / JsResizab
 
 ### 4.2 插件包结构 (`app/src/main/java/io/github/supermonster003/autojs6/plugin/compose/ui/`)
 
+以下为建仓时的目标架构草案; 实际文件布局 (例如组件按 `AdvancedComponents` / `Wide*` 拆分, `dialog/` 与 `interop/` 扩展入口) 以 `AGENTS.md` 第 4 节与源码为准.
+
 ```text
 ComposeUiPlugin.kt                      身份常量 (与 D1 / 4.4 对齐)
 ComposeUiPluginInfoService.kt           IPluginInfoProvider (org.autojs.plugin.INFO, category compose-ui)
@@ -233,9 +235,9 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | INFO 服务 | `ComposeUiPluginInfoService`, action `org.autojs.plugin.INFO`, category `compose-ui` |
 | 渲染器入口 meta-data | `org.autojs.plugin.compose.RENDERER_FACTORY` = `io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl` |
 | 宿主契约包 | `org.autojs.plugin.compose.api` (`plugin-api/compose-ui-api`) |
-| 契约版本 / 最低宿主 | `CONTRACT_VERSION = 1`; `REQUIRED_HOST_VERSION_CODE` 在 P1.3 回填 |
+| 契约版本 / 最低宿主 | 当前 `CONTRACT_VERSION = 2` (P1.1 冻结 V1, F.4 只追加 V2), 最低宿主 5322 (6.8.0); V1 历史最低宿主 5316 (P1.3 回填) 保留在冻结常量中 |
 | 脚本全局对象 | `compose` (别名 `$compose`), 错误类 `ComposeError` |
-| 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.8.3 |
+| 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.9.0 (建仓起点 1.8.3) |
 | Compose | BOM `2026.09.00`; 编译器插件版本 = `gradle.kotlin.version` |
 | 发布文件名 | `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk` (单 APK, D22) |
 | 向导条目 | `entry(official("compose.ui"), "Compose UI", UI)` |
@@ -273,7 +275,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 - [x] (插件) `.readme/` + `.changelog/` 10 语言 JSON 与模板, `.python/generate_markdown.py` (+ `.bat`, `--check`), 根 `README.md` 为简体中文; `LICENSE` MPL-2.0; `THIRD_PARTY_NOTICES.md` (Compose / AndroidX Apache-2.0, 宿主 AAR MPL-2.0); `libs/README.md` + `locks/host-api-aars.lock`. 证据: 提交 9879baa + 657f021; `generate_markdown.py` 生成 36 个产物且 `--check` 通过; `HostApiAarLockTest` 4 项通过 (锁 / 文件 / `THIRD_PARTY_NOTICES.md` / `libs/README.md` 摘要一致).
 - [x] (插件) `AGENTS.md`: 参考规范裁剪版, 写明本仓库事实: 进程内渲染, 无原生库 / 无 ABI 拆分理由, 无独立界面, D7 推送策略, D26 共享依赖锁, 验证顺序. 证据: 提交 9879baa + 657f021 (原生库事实修正: 第 1, 2, 5.3, 7, 9, 13 节, "无原生库" 改为 "无插件自有原生代码").
 - [x] (插件) JVM 守卫: `ManifestContractTest` (权限, meta-data, Wake, INFO 契约, 无 launcher), `ComposeUiPluginRuntimeInfoTest` (PluginInfo 纯数据映射, `supportedAbis` 显式空数组, 身份常量对齐 `common.json` / Gradle), `StringResourceParityTest`, `ApplicationTextPunctuationTest`, `HostApiAarLockTest`. 证据: 提交 6cc0d52 + 657f021; `:app:testDebugUnitTest` 19 项全部通过 (E1).
-- [x] (插件) `.github/workflows/build.yml` (JVM 测试, debug / release 装配, lint, androidTest 装配; API 24 x86 与 API 35 x86_64 模拟器契约测试) 与 `markdown.yml`; 未推送期间只做本地语法与路径校验. 证据: 提交 6cc0d52; 工作流已落盘, 未推送 (D7), 仅本地语法与路径校验; 本地等效命令 `testDebugUnitTest assembleDebugAndroidTest lintDebug assembleRelease` 通过, lint 0 问题. 额外 (E3): `ComposeUiPluginContractTest` 5 项在 Xiaomi Pad 23046RP50C (HyperOS, API 35, arm64-v8a) 与 Sony G8441 (API 28, arm64-v8a) 上全部通过 (含 `System.loadLibrary("androidx.graphics.path")`), 测试后无残留安装. 未执行: API 24 x86 / API 35 x86_64 / 16 KB 页 AVD 的模拟器矩阵 (留给 CI 与 P0.2).
+- [x] (插件) `.github/workflows/build.yml` (JVM 测试, debug / release 装配, lint, androidTest 装配; API 24 x86 与 API 35 x86_64 模拟器契约测试) 与 `markdown.yml`; 未推送期间只做本地语法与路径校验. 证据: 提交 6cc0d52; 工作流已落盘, 未推送 (D7), 仅本地语法与路径校验; 本地等效命令 `testDebugUnitTest assembleDebugAndroidTest lintDebug assembleRelease` 通过, lint 0 问题. 额外 (E3): `ComposeUiPluginContractTest` 5 项在 Xiaomi Pad 23046RP50C (HyperOS, API 35, arm64-v8a) 与 Sony G8441 (API 28, arm64-v8a) 上全部通过 (含 `System.loadLibrary("androidx.graphics.path")`), 测试后无残留安装. 未执行: API 24 x86 / API 35 x86_64 / 16 KB 页 AVD 的模拟器矩阵 (留给 CI 与 P0.2). 2026-10-08 复核: 源码公开后首个远端运行 (8d2528c) 的构建作业通过, 两个模拟器作业因 emulator-runner 逐行执行 `script`, 把续行符 `\` 当作 Gradle 任务名而在测试开始前失败; 提交 3e30f25 改为单行命令, 同一命令在专用 API 35 x86_64 google_apis AVD 上完整 64 项 instrumentation 通过并生成覆盖率 (指令 81%, 分支 61%). 远端重跑待下次推送.
 - [x] (插件) `git init`, 按 "身份与构建骨架 / 契约与激活 / 资源与文档 / 测试与 CI" 拆分初始提交, 每笔提交前 `VERSION_BUILD = 提交数 + 1`, 最终 `VERSION_BUILD == git rev-list --count HEAD` 且工作区干净. 证据: 6 笔提交 e7efcea (身份与构建骨架), aeb0af8 (契约与激活), 9879baa (资源与文档), 6cc0d52 (测试与 CI), 657f021 (graphics-path 原生库修正), 本提交 (路线图证据); 最终 `VERSION_BUILD=6 == git rev-list --count HEAD`, 工作区干净.
 
 ### P0.2 进程内装载 spike
