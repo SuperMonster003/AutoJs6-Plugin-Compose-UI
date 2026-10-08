@@ -108,8 +108,32 @@ require(sharedDeps.isNotEmpty() && sharedDeps.keys.none { it.startsWith("android
 val sharedFingerprint = MessageDigest.getInstance("SHA-256")
     .digest(sharedDeps.toSortedMap().entries.joinToString("") { "${it.key}=${it.value}\n" }.toByteArray(Charsets.UTF_8))
     .joinToString("") { "%02x".format(it) }
+// F.5 (roadmap D32): the component gallery and settings screens run in the plugin's own process, where no
+// host class loader exists. The shared artifacts that Jetpack Compose itself needs at run time are therefore
+// packaged as well; inside the host they are shadowed by parent-first loading and keep their names (R8
+// -keepnames), so the renderer still binds to the host copies. Everything else in the lock stays compile-only.
+val standaloneRuntime = setOf(
+    "androidx.activity:activity", "androidx.activity:activity-ktx",
+    "androidx.annotation:annotation", "androidx.annotation:annotation-experimental", "androidx.annotation:annotation-jvm",
+    "androidx.arch.core:core-common",
+    "androidx.collection:collection", "androidx.collection:collection-jvm", "androidx.collection:collection-ktx",
+    "androidx.concurrent:concurrent-futures",
+    "androidx.core:core", "androidx.core:core-ktx", "androidx.core:core-viewtree",
+    "androidx.interpolator:interpolator",
+    "androidx.lifecycle:lifecycle-common", "androidx.lifecycle:lifecycle-common-jvm",
+    "androidx.lifecycle:lifecycle-runtime", "androidx.lifecycle:lifecycle-runtime-android",
+    "androidx.lifecycle:lifecycle-runtime-ktx", "androidx.lifecycle:lifecycle-runtime-ktx-android",
+    "androidx.lifecycle:lifecycle-viewmodel", "androidx.lifecycle:lifecycle-viewmodel-android", "androidx.lifecycle:lifecycle-viewmodel-ktx",
+    "androidx.lifecycle:lifecycle-viewmodel-savedstate", "androidx.lifecycle:lifecycle-viewmodel-savedstate-android",
+    "androidx.profileinstaller:profileinstaller",
+    "androidx.savedstate:savedstate", "androidx.savedstate:savedstate-android", "androidx.savedstate:savedstate-ktx",
+    "androidx.startup:startup-runtime", "androidx.tracing:tracing", "androidx.versionedparcelable:versionedparcelable",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-android", "org.jetbrains.kotlinx:kotlinx-coroutines-bom",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core", "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm",
+)
+require(standaloneRuntime.all { it in sharedDeps }) { "standaloneRuntime must be a subset of locks/host-shared-deps.lock" }
 configurations.matching { it.name in setOf("debugRuntimeClasspath", "releaseRuntimeClasspath") }.configureEach {
-    sharedDeps.keys.filterNot { it.startsWith("org.jetbrains.kotlin:") }.forEach { coordinate ->
+    sharedDeps.keys.filterNot { it.startsWith("org.jetbrains.kotlin:") || it in standaloneRuntime }.forEach { coordinate ->
         exclude(group = coordinate.substringBefore(':'), module = coordinate.substringAfter(':'))
     }
 }
@@ -318,6 +342,10 @@ androidComponents {
 }
 
 dependencies {
+    constraints {
+        // The standalone runtime must land at exactly the locked host versions, whatever Compose asks for (roadmap D32).
+        standaloneRuntime.forEach { coordinate -> implementation("$coordinate:${sharedDeps.getValue(coordinate)}") }
+    }
     // PluginInfo, IPluginInfoProvider and the shared plugin constants (host module plugin-api/common-plugin-api).
     implementation(files(hostApiAars[0]))
     compileOnly(files(hostApiAars[1]))
@@ -327,6 +355,8 @@ dependencies {
         if (coordinate.startsWith("org.jetbrains.kotlin:")) {
             implementation("$coordinate:$version")
         } else {
+            // Standalone runtime members are not declared directly: Compose pulls them transitively and
+            // verifySharedClasspath checks that exactly the standaloneRuntime set lands at the locked versions.
             compileOnly("$coordinate:$version")
             testImplementation("$coordinate:$version")
             androidTestImplementation("$coordinate:$version")
@@ -345,6 +375,8 @@ dependencies {
     implementation(libs.compose.material.icons.core)
     // Material3 already supplies 1.8.2 at runtime. V2's controlled drawer uses its public BackHandler.
     implementation(libs.activity.compose)
+    // F.5 settings accent: the fixed HCT tone rule shared by the standalone plugins (MIT port of Material Color Utilities).
+    implementation(libs.material.color.utilities)
     debugImplementation(libs.compose.ui.tooling)
 
     testImplementation(libs.junit)
@@ -367,10 +399,18 @@ tasks {
                     .mapNotNull { it.moduleVersion }.associate { "${it.group}:${it.name}" to it.version }
                 sharedDeps.forEach { (id, version) ->
                     check(compile[id] == version) { "$variant $id compiled against ${compile[id]}, expected host $version" }
-                    if (!id.startsWith("org.jetbrains.kotlin:")) check(id !in runtime) { "$variant bundles host component $id" }
+                    if (id.startsWith("org.jetbrains.kotlin:") || id in standaloneRuntime) {
+                        check(runtime[id] == version) { "$variant packages $id ${runtime[id]}, expected the locked host version $version" }
+                    } else {
+                        check(id !in runtime) { "$variant bundles host component $id" }
+                    }
+                }
+                val packagedShared = runtime.keys.filter { it in sharedDeps && !it.startsWith("org.jetbrains.kotlin:") }.toSet()
+                check(packagedShared == standaloneRuntime) {
+                    "$variant packaged shared set drifted: unexpected ${packagedShared - standaloneRuntime}, missing ${standaloneRuntime - packagedShared}"
                 }
             }
-            println("Shared classpath verified: ${sharedDeps.size} components, SHA-256 $sharedFingerprint")
+            println("Shared classpath verified: ${sharedDeps.size} components (${standaloneRuntime.size} packaged for the standalone process), SHA-256 $sharedFingerprint")
         }
     }
     withType(JavaCompile::class.java) {

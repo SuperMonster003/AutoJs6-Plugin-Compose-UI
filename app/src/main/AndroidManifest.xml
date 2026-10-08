@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
+
+    <!-- F.5: the gallery reads host appearance through the official settings Provider and hands scripts to the host. -->
+    <queries>
+        <package android:name="org.autojs.autojs6" />
+    </queries>
 
     <application
         android:allowBackup="false"
@@ -9,7 +15,9 @@
         android:fullBackupContent="false"
         android:icon="@mipmap/ic_icon_studio_application"
         android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
+        android:theme="@style/Theme.ComposeUi"
         android:roundIcon="@mipmap/ic_icon_studio_application">
 
         <meta-data
@@ -54,6 +62,85 @@
                 <category android:name="compose-ui" />
             </intent-filter>
         </service>
+
+        <!--
+            F.5 component gallery (roadmap D8 as revised on 2026-10-08): the plugin's own screens run in this
+            process. The launcher entry is one of four fixed aliases that persist the user's icon choice as
+            component enabled state (icon specification section 1); only the automatic alias is enabled by default.
+        -->
+        <activity
+            android:name=".app.GalleryActivity"
+            android:configChanges="uiMode|locale|layoutDirection"
+            android:exported="false" />
+        <activity-alias
+            android:name=".launcher.AdaptiveLightIconAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_system_light"
+            android:roundIcon="@mipmap/ic_launcher_system_light"
+            android:targetActivity=".app.GalleryActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".launcher.AdaptiveDarkIconAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_system"
+            android:roundIcon="@mipmap/ic_launcher_system"
+            android:targetActivity=".app.GalleryActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".launcher.AdaptiveAutoIconAlias"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher_system_auto"
+            android:roundIcon="@mipmap/ic_launcher_system_auto"
+            android:targetActivity=".app.GalleryActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".launcher.TransparentIconAlias"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher"
+            android:targetActivity=".app.GalleryActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity
+            android:name=".app.SettingsActivity"
+            android:configChanges="uiMode|locale|layoutDirection"
+            android:exported="false" />
+        <receiver
+            android:name=".app.LauncherIconUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+            The packaged AndroidX runtime (roadmap D32) would merge the androidx.startup provider with the emoji,
+            process-lifecycle and profile initializers. None is needed by the gallery, and the plugin keeps
+            declaring no content provider at all.
+        -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
 
     </application>
 

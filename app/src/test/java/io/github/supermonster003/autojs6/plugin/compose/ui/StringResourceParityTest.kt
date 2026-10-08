@@ -62,6 +62,24 @@ class StringResourceParityTest {
     }
 
     @Test
+    fun `the locale configuration lists exactly the ten shipped languages`() {
+        val document = parse(resourceRoot.resolve("xml/locales_config.xml"))
+        val locales = document.elements("locale").map { it.getAttributeNS("http://schemas.android.com/apk/res/android", "name") }
+        assertEquals(listOf("zh-Hans", "zh-Hant-HK", "zh-Hant-TW", "en", "fr", "es", "ja", "ko", "ru", "ar"), locales)
+    }
+
+    @Test
+    fun `the launcher icon aliases have their own generated resources`() {
+        listOf("mipmap/ic_launcher_system.png", "mipmap/ic_launcher_system_light.png", "mipmap/ic_launcher_system_foreground.png",
+            "mipmap/ic_launcher_system_light_foreground.png", "mipmap/ic_launcher_monochrome.png",
+            "mipmap-anydpi-v26/ic_launcher_system.xml", "mipmap-anydpi-v26/ic_launcher_system_light.xml",
+            "mipmap-anydpi-v26/ic_launcher_system_auto.xml", "mipmap-notnight-anydpi-v26/ic_launcher_system_auto.xml",
+            "mipmap/ic_launcher_system_auto.xml", "mipmap-notnight/ic_launcher_system_auto.xml").forEach {
+            assertTrue("missing $it (run .python/generate_icon_studio.py)", Files.isRegularFile(resourceRoot.resolve(it)))
+        }
+    }
+
+    @Test
     fun `the transparent launcher icon exists for day and night without adaptive overrides`() {
         listOf("mipmap", "mipmap-night").forEach { directory ->
             assertTrue("missing $directory/ic_launcher.png (run .python/generate_launcher_icons.py)", Files.isRegularFile(resourceRoot.resolve("$directory/ic_launcher.png")))

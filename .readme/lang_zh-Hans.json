@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "本文档支持以下语言",
   "h3_introduction": "简介",
   "p_introduction_what": "Compose UI 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `\"ui\";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.",
-  "p_introduction_how": "插件不包含任何独立界面, 也不在启动器中显示入口. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在宿主进程内加载渲染器. 界面树, 状态与事件在脚本侧描述, 渲染器只负责把补丁应用到 Compose 组合并把用户事件回传给脚本.",
+  "p_introduction_how": "插件内置组件画廊, 可从启动器打开浏览全部组件的预览与示例脚本; 脚本界面的渲染仍在宿主进程中进行. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在自身进程内实例化渲染器工厂.",
   "h3_status": "当前状态",
   "p_status": "1.1.0 本地开发预览: 需要匹配的 AutoJs6 宿主构建, 并安装和启用本插件. 本地配套提供 UI 页面, 悬浮窗, 五个示例, API 参考与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标图案仍为临时占位, 等待维护者提供正式源图.",
   "h3_features": "功能特性",
@@ -24,12 +24,13 @@
     "TSX 支持 `<compose.Column>`, `<compose:Text>`, 节点工厂引用, Fragment, 插槽及响应式回调; 同一棵树不能混用 Compose 与旧 XML 节点",
     "XML `<compose>` 容器与 compose.attach 可在 UI 页面或旧悬浮窗内嵌入独立 Compose 会话; compose.AndroidView 可承载现有 Android View 或同步工厂返回的 View",
     "compose.dialog 返回可更新和关闭的会话, 支持普通对话框与模态底部弹层, 可在 UI 或普通脚本中使用",
-    "Material 3 扩展组件: 导航栏与抽屉, 标签页, 底部弹层与菜单, 日期与时间选择器, 分页与网格, 芯片, 徽标, 分段按钮, 悬浮按钮, 搜索栏, 提示与下拉刷新"
+    "Material 3 扩展组件: 导航栏与抽屉, 标签页, 底部弹层与菜单, 日期与时间选择器, 分页与网格, 芯片, 徽标, 分段按钮, 悬浮按钮, 搜索栏, 提示与下拉刷新",
+    "组件画廊: 启动器入口展示全部 55 个组件的 Material 3 预览与可运行示例脚本, 可复制或发送到 AutoJs6; 设置页的语言, 夜间模式与主题色默认跟随 AutoJs6, 并提供四种启动器图标"
   ],
   "h3_usage": "使用方式",
   "usage_steps": [
     "安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
-    "安装本插件 APK (无需打开, 插件没有启动器入口)",
+    "安装本插件 APK; 从启动器打开 Compose UI 可查看组件画廊与设置",
     "在 AutoJs6 的插件中心确认 Compose UI 已被识别并处于启用状态",
     "在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`"
   ],
@@ -59,7 +60,7 @@
   ],
   "h3_faq": "常见问题",
   "faq_items": [
-    "为什么安装后找不到插件图标? 插件没有独立界面, 也不会在启动器显示, 请在 AutoJs6 的插件中心查看",
+    "画廊里的示例如何运行? 点击 \"在 AutoJs6 中运行\" 会把脚本交给已安装的 AutoJs6 执行; 画廊自身只展示预览与代码, 不执行脚本",
     "为什么找不到 `compose`? 全局对象由匹配的本地宿主构建提供, 单独安装插件 APK 不会添加该入口",
     "是否需要卸载其它界面插件? 不需要, Compose UI 与现有 `ui` 模块及其它插件互不影响",
     "插件变化时会怎样? 更新, 卸载或停用插件会关闭活动会话并报告对应错误; 兼容且启用的插件允许重新挂载",
@@ -72,7 +73,7 @@
   "p_security_intro": "插件不申请任何 Android 运行时权限, 也不访问网络, 存储或传感器.",
   "security_points": [
     "组件保护: Wake Activity 与 INFO 服务均受 `org.autojs.permission.PLUGIN` 签名权限保护, 只有 AutoJs6 宿主可以访问",
-    "无后台行为: 插件没有常驻服务, 广播接收器或定时任务, 不被宿主加载时不消耗资源",
+    "后台行为: 插件没有常驻服务与定时任务, 仅在自身被更新时接收一次系统广播以校正启动器图标组件; 不被宿主加载且未打开画廊时不消耗资源",
     "数据边界: 插件不读写脚本数据与用户文件, 界面状态只存在于宿主进程内存中",
     "备份策略: 已禁用应用备份与设备迁移, 插件本身不持有任何需要迁移的数据"
   ],

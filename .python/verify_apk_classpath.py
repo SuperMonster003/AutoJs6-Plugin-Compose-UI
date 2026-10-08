@@ -38,14 +38,20 @@ def verify(apk: Path) -> None:
         "Lkotlin/coroutines/CoroutineContext$Element;",
         "Lkotlin/jvm/functions/Function1;",
         "Lio/github/supermonster003/autojs6/plugin/compose/ui/renderer/ComposeUiRendererFactoryImpl;",
+        # F.5 (roadmap D32): the standalone gallery process needs Compose's AndroidX runtime; the host shadows
+        # these parent-first, so they must keep their original names (checked here through their descriptors).
+        "Landroidx/activity/ComponentActivity;",
+        "Landroidx/lifecycle/LifecycleOwner;",
+        "Landroidx/savedstate/SavedStateRegistryOwner;",
+        "Lkotlinx/coroutines/CoroutineScope;",
+        "Lio/github/supermonster003/autojs6/plugin/compose/ui/app/GalleryActivity;",
     }
     missing = required - classes
     forbidden = {name for name in classes if name.startswith("Lorg/autojs/plugin/compose/api/")}
-    for package in ("activity", "appcompat", "core", "lifecycle", "savedstate"):
-        forbidden.update(name for name in classes if name.startswith(f"Landroidx/{package}/")
-                         and not name.startswith(f"Landroidx/{package}/compose/")
-                         and not name.startswith(f"Landroidx/{package}/runtime/compose/"))
-    forbidden.update(name for name in classes if name.startswith("Lkotlinx/coroutines/"))
+    # Host-only components stay out: View-system AppCompat, window metrics, emoji and serialization.
+    for package in ("appcompat", "window", "emoji2"):
+        forbidden.update(name for name in classes if name.startswith(f"Landroidx/{package}/"))
+    forbidden.update(name for name in classes if name.startswith("Lkotlinx/serialization/"))
     if missing or forbidden:
         raise ValueError(f"Classpath boundary violated: missing={sorted(missing)}, bundled_host_classes={sorted(forbidden)}")
     print(f"APK_CLASSPATH_OK {apk.name}: bytes={apk.stat().st_size} classes={len(classes)} method_refs={method_refs}")

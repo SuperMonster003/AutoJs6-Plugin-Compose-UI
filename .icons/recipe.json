@@ -6,7 +6,7 @@
   "packages": [
     "io.github.supermonster003.autojs6.plugin.compose.ui"
   ],
-  "launcher": false,
+  "launcher": true,
   "params": {
     "sources": {
       "day": "af962a3bd5da529d07cd68f6df4cdd36456627445b8c1f9c1cba521454df176f",
@@ -38,8 +38,8 @@
       "invert": false
     },
     "backgrounds": {
-      "day": "transparent",
-      "night": "transparent"
+      "day": "#fafafa",
+      "night": "#212121"
     }
   },
   "baseline": {
@@ -91,6 +91,21 @@
     "app/src/main/res/raw/keep_plugin_center_icon.xml": {
       "role": "keep-rule"
     },
+    "app/src/main/res/mipmap/ic_launcher_monochrome.png": {
+      "role": "mono"
+    },
+    "app/src/main/res/mipmap/ic_launcher_system.png": {
+      "role": "legacy-night"
+    },
+    "app/src/main/res/mipmap/ic_launcher_system_foreground.png": {
+      "role": "adaptive-night"
+    },
+    "app/src/main/res/mipmap/ic_launcher_system_light.png": {
+      "role": "legacy-day"
+    },
+    "app/src/main/res/mipmap/ic_launcher_system_light_foreground.png": {
+      "role": "adaptive-day"
+    },
     "app/src/main/res/values/icon_studio_backgrounds.xml": {
       "role": "background-color",
       "theme": "day"
@@ -133,8 +148,8 @@
   ],
   "legacyGenerator": ".python/generate_launcher_icons.py",
   "backgroundDefaults": {
-    "day": "transparent",
-    "night": "transparent"
+    "day": "#fafafa",
+    "night": "#212121"
   },
   "systemIcon": true,
   "originalSources": {},

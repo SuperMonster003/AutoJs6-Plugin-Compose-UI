@@ -28,7 +28,10 @@ class ManifestContractTest {
     @Test
     fun `the plugin permission is the only permission and nothing is queried`() {
         assertEquals(listOf(ComposeUiPlugin.PLUGIN_PERMISSION), manifest.children("uses-permission").map { it.androidAttribute("name") })
-        assertTrue("the renderer runs in the host process, the plugin never resolves other packages", manifest.children("queries").isEmpty())
+        // F.5: the gallery reads host appearance through the official settings Provider and hands scripts to the host.
+        val queries = manifest.child("queries")
+        assertEquals(listOf("org.autojs.autojs6"), queries.children("package").map { it.androidAttribute("name") })
+        assertTrue("no intent or provider queries beyond the host package", queries.children("intent").isEmpty() && queries.children("provider").isEmpty())
         assertTrue("no uses-sdk override: minSdk comes from version.properties", manifest.children("uses-sdk").isEmpty())
         assertTrue("no feature or library requirements", manifest.children("uses-feature").isEmpty())
     }
@@ -41,7 +44,8 @@ class ManifestContractTest {
         assertEquals("@string/app_name", application.androidAttribute("label"))
         assertEquals("@mipmap/ic_icon_studio_application", application.androidAttribute("icon"))
         assertEquals("true", application.androidAttribute("supportsRtl"))
-        assertNull("no application theme: the plugin has no screens of its own (roadmap D8)", application.androidAttributeOrNull("theme"))
+        assertEquals("the standalone screens use the plugin's own window theme (F.5)", "@style/Theme.ComposeUi", application.androidAttribute("theme"))
+        assertEquals("@xml/locales_config", application.androidAttribute("localeConfig"))
         assertNull("no Application subclass before a renderer needs one", application.androidAttributeOrNull("name"))
 
         val metaData = application.children("meta-data").associate { it.androidAttribute("name") to it.androidAttribute("value") }
@@ -57,10 +61,14 @@ class ManifestContractTest {
     }
 
     @Test
-    fun `the wake activity follows the activation contract and is the only activity`() {
+    fun `the wake activity follows the activation contract beside the gallery screens`() {
         val activities = application.children("activity")
-        assertEquals(listOf(".WakeActivity"), activities.map { it.androidAttribute("name") })
-        val wake = activities.single()
+        assertEquals(listOf(".WakeActivity", ".app.GalleryActivity", ".app.SettingsActivity"), activities.map { it.androidAttribute("name") })
+        activities.drop(1).forEach { screen ->
+            assertEquals("${screen.androidAttribute("name")} is reached through the launcher alias or the gallery only", "false", screen.androidAttribute("exported"))
+            assertEquals("appearance changes redraw in place", "uiMode|locale|layoutDirection", screen.androidAttribute("configChanges"))
+        }
+        val wake = activities.first()
         assertEquals("true", wake.androidAttribute("exported"))
         assertEquals("true", wake.androidAttribute("excludeFromRecents"))
         assertEquals("true", wake.androidAttribute("finishOnTaskLaunch"))
@@ -72,15 +80,44 @@ class ManifestContractTest {
     }
 
     @Test
-    fun `no launcher entry, alias, receiver or provider exists`() {
-        // Roadmap D8: no standalone UI; the plugin must not appear in the app drawer.
+    fun `the launcher entry is one of four fixed icon aliases of the gallery and only auto is enabled`() {
+        // Roadmap D8 as revised on 2026-10-08 (F.5) and the icon specification: the user's icon choice is persisted as
+        // component enabled state, so the aliases are stable and only the automatic one is enabled by default.
         val launcherFilters = application.children("activity").flatMap { it.children("intent-filter") }.filter { filter ->
             filter.children("category").any { it.androidAttribute("name") == "android.intent.category.LAUNCHER" }
         }
-        assertTrue(launcherFilters.isEmpty())
-        assertTrue(application.children("activity-alias").isEmpty())
-        assertTrue(application.children("receiver").isEmpty())
-        assertTrue(application.children("provider").isEmpty())
+        assertTrue("no plain activity carries the launcher filter", launcherFilters.isEmpty())
+        val aliases = application.children("activity-alias")
+        assertEquals(
+            listOf(".launcher.AdaptiveLightIconAlias", ".launcher.AdaptiveDarkIconAlias", ".launcher.AdaptiveAutoIconAlias", ".launcher.TransparentIconAlias"),
+            aliases.map { it.androidAttribute("name") },
+        )
+        aliases.forEach { alias ->
+            assertEquals(".app.GalleryActivity", alias.androidAttribute("targetActivity"))
+            assertEquals("true", alias.androidAttribute("exported"))
+            assertEquals(alias.androidAttribute("icon"), alias.androidAttribute("roundIcon"))
+            val filter = alias.child("intent-filter")
+            assertEquals(listOf("android.intent.action.MAIN"), filter.children("action").map { it.androidAttribute("name") })
+            assertEquals(listOf("android.intent.category.LAUNCHER"), filter.children("category").map { it.androidAttribute("name") })
+        }
+        assertEquals(
+            mapOf(
+                ".launcher.AdaptiveLightIconAlias" to "@mipmap/ic_launcher_system_light",
+                ".launcher.AdaptiveDarkIconAlias" to "@mipmap/ic_launcher_system",
+                ".launcher.AdaptiveAutoIconAlias" to "@mipmap/ic_launcher_system_auto",
+                ".launcher.TransparentIconAlias" to "@mipmap/ic_launcher",
+            ),
+            aliases.associate { it.androidAttribute("name") to it.androidAttribute("icon") },
+        )
+        assertEquals(listOf(".launcher.AdaptiveAutoIconAlias"), aliases.filter { it.androidAttribute("enabled") == "true" }.map { it.androidAttribute("name") })
+        val receivers = application.children("receiver")
+        assertEquals(listOf(".app.LauncherIconUpdateReceiver"), receivers.map { it.androidAttribute("name") })
+        assertEquals("false", receivers.single().androidAttribute("exported"))
+        assertEquals(listOf("android.intent.action.MY_PACKAGE_REPLACED"), receivers.single().child("intent-filter").children("action").map { it.androidAttribute("name") })
+        // The packaged AndroidX runtime would merge androidx.startup; the plugin keeps declaring no provider.
+        val providers = application.children("provider")
+        assertEquals(listOf("androidx.startup.InitializationProvider"), providers.map { it.androidAttribute("name") })
+        assertEquals("remove", providers.single().getAttributeNS("http://schemas.android.com/tools", "node"))
     }
 
     @Test
@@ -102,13 +139,16 @@ class ManifestContractTest {
 
     @Test
     fun `only activation and discovery are exported and both require the plugin permission`() {
-        val components = listOf("activity", "activity-alias", "service", "receiver", "provider").flatMap { application.children(it) }
+        val components = listOf("activity", "activity-alias", "service", "receiver").flatMap { application.children(it) }
         val exported = components.filter { it.androidAttribute("exported") == "true" }
         assertEquals(
             mapOf(".WakeActivity" to ComposeUiPlugin.PLUGIN_PERMISSION, ".ComposeUiPluginInfoService" to ComposeUiPlugin.PLUGIN_PERMISSION),
-            exported.associate { it.androidAttribute("name") to it.androidAttributeOrNull("permission") },
+            exported.filterNot { it.tagName == "activity-alias" }.associate { it.androidAttribute("name") to it.androidAttributeOrNull("permission") },
         )
-        assertEquals("every declared component is exported on purpose", components.size, exported.size)
+        // The four launcher aliases are exported without a permission, as every launcher entry must be.
+        assertEquals(4, exported.count { it.tagName == "activity-alias" })
+        assertEquals("every other component is private to the plugin", components.size - exported.size,
+            components.count { it.androidAttribute("exported") == "false" })
     }
 
     private fun Element.children(tag: String): List<Element> {

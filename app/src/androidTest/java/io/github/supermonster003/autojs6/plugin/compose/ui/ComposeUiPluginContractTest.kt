@@ -66,12 +66,22 @@ class ComposeUiPluginContractTest {
     }
 
     @Test
-    fun noLauncherEntryExists() {
-        // Roadmap D8: the plugin has no standalone UI and must not appear in the app drawer.
+    fun exactlyOneLauncherAliasIsEnabledAndTargetsTheGallery() {
+        // Roadmap D8 as revised for F.5: the component gallery is the single launcher entry; the icon choice is
+        // persisted as the enabled state of four fixed aliases, and only the automatic alias is enabled by default.
         val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(packageName)
         @Suppress("DEPRECATION")
         val matches = context.packageManager.queryIntentActivities(launcherIntent, 0)
-        assertTrue("No launcher activity is expected", matches.isEmpty())
+        assertEquals("exactly one enabled launcher alias is expected, found ${matches.map { it.activityInfo.name }}", 1, matches.size)
+        val entry = matches.single().activityInfo
+        assertTrue("the launcher entry is one of the fixed aliases: ${entry.name}", entry.name.startsWith("$packageName.launcher."))
+        assertEquals("$packageName.app.GalleryActivity", entry.targetActivity)
+        val aliases = listOf("AdaptiveLightIconAlias", "AdaptiveDarkIconAlias", "AdaptiveAutoIconAlias", "TransparentIconAlias")
+        val icons = aliases.associateWith { alias ->
+            context.packageManager.getActivityInfo(ComponentName(packageName, "$packageName.launcher.$alias"), PackageManager.MATCH_DISABLED_COMPONENTS).icon
+        }
+        assertEquals("every alias keeps its own icon resource", aliases.size, icons.values.toSet().size)
+        assertTrue("alias icons are real resources", icons.values.all { it != 0 })
     }
 
     @Test
@@ -130,12 +140,12 @@ class ComposeUiPluginContractTest {
     }
 
     @Test
-    fun noExportedContentProviderIsRegistered() {
-        // AndroidX libraries merge the non-exported androidx.startup InitializationProvider; the plugin itself
-        // declares no provider, so nothing outside the package may reach one.
+    fun noContentProviderIsRegistered() {
+        // The packaged AndroidX runtime (roadmap D32) would merge the androidx.startup InitializationProvider;
+        // the manifest removes it, so the installed package declares no provider at all.
         val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_PROVIDERS)
-        val exported = packageInfo.providers.orEmpty().filter { it.exported }
-        assertTrue("no exported content provider is expected, found ${exported.map { it.name }}", exported.isEmpty())
+        val providers = packageInfo.providers.orEmpty()
+        assertTrue("no content provider is expected, found ${providers.map { it.name }}", providers.isEmpty())
     }
 
     private fun assertCapabilities(capabilities: Bundle) {
