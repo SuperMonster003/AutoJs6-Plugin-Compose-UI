@@ -44,7 +44,7 @@ This document is available in the following languages:
 
 Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports both `"ui";` activity content and floating windows from non-UI scripts.
 
-The plugin ships no standalone screens and adds no launcher entry. The host discovers it through the INFO service, reads its version and compatibility data, then loads the renderer inside the host process according to the contract (`org.autojs.plugin.compose.api`). The UI tree, state, and events live on the script side; the renderer only applies patches to the Compose composition and forwards user events back to the script.
+The plugin ships a component gallery that opens from the launcher and shows previews and example scripts of every component; script interfaces are still rendered inside the host process. The host discovers the plugin through the INFO service, reads its version and compatibility information, and instantiates the renderer factory in its own process according to the contract (`org.autojs.plugin.compose.api`).
 
 ******
 
@@ -75,6 +75,7 @@ Capabilities of the current development preview:
 - XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory
 - compose.dialog returns an updatable, closable session for dialogs and modal bottom sheets in UI or ordinary scripts
 - Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
+- Component gallery: the launcher entry shows Material 3 previews and runnable example scripts of all 55 components, which can be copied or sent to AutoJs6; the settings page follows the AutoJs6 language, dark mode and theme color by default and offers four launcher icons
 
 ******
 
@@ -83,7 +84,7 @@ Capabilities of the current development preview:
 ******
 
 1. Install a matching local AutoJs6 build with the compose script entry (minimum 6.8.0 / 5322)
-2. Install this plugin APK (there is nothing to open, the plugin has no launcher entry)
+2. Install the plugin APK; open Compose UI from the launcher to browse the component gallery and settings
 3. Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled
 4. Use `compose` or `$compose` in scripts; mount activity content with `compose.mount`, or grant the host overlay permission and use `compose.floaty`
 
@@ -154,7 +155,7 @@ Runtime requirements and limits of the plugin:
 
 ******
 
-- Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
+- How do gallery examples run? "Run in AutoJs6" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
@@ -172,7 +173,7 @@ Runtime requirements and limits of the plugin:
 The plugin requests no Android runtime permissions and never touches the network, storage, or sensors.
 
 - Component protection: both the Wake Activity and the INFO service are guarded by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them
-- No background activity: the plugin has no resident services, broadcast receivers, or scheduled jobs, and consumes no resources while the host is not loading it
+- Background behavior: no resident service or scheduled task; the plugin receives one system broadcast when it is updated to normalize its launcher icon components, and consumes no resources while neither loaded by the host nor opened
 - Data boundary: the plugin never reads or writes script data or user files; UI state exists only in the host process memory
 - Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating
 
@@ -223,16 +224,22 @@ _2026/10/08_
 - `Hint` 1.1.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images
 - `Hint` This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
 - `Hint` compose.memo is provided by AutoJs6 6.8.0 / 5323 to reuse render fragments whose dependencies are unchanged; this plugin needs no update, and companion TSX support requires TypeScript Engine 0.6.8
+- `Hint` The gallery and settings run in the plugin process and change neither in-host rendering nor the minimum host version; running example scripts requires AutoJs6 with this plugin installed and enabled
 - `Feature` TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
 - `Feature` XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory
 - `Feature` compose.dialog returns an updatable, closable session for dialogs and modal bottom sheets in UI or ordinary scripts
 - `Feature` Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
+- `Feature` Component gallery: open it from the launcher to browse Material 3 previews and example scripts of all 55 components, copy them to the clipboard or send them to the installed AutoJs6
+- `Feature` Settings page: language, dark mode and theme color follow AutoJs6 by default and can be set separately; the launcher icon offers adaptive (light / dark / automatic) and transparent background choices
 - `Improvement` Android App info icons share Icon Studio artwork and light/dark backgrounds while preserving transparent Plugin Center artwork and existing launcher choices
 - `Improvement` View factories run on the main thread before rendering. Invalid replacements preserve the current content; a View cannot belong to two nodes or be taken from another parent. Borrowed Views retain their listeners and caller-owned resources
 - `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
+- `Improvement` The Plugin Center icon and the system app info icon use the #FAFAFA light / #212121 dark backgrounds shared with the other standalone plugins
 - `Dependency` Update compose-ui-api.aar with the optional AndroidView interop extension while preserving frozen V1
 - `Dependency` Add the optional dialog capability to compose-ui-api.aar while preserving existing V1 and AndroidView contracts
 - `Dependency` Add the compose-ui-api.aar V2 component catalog while preserving existing node models and V1 component semantics
+- `Dependency` Added material-color-utilities 4.1.1 (MIT) for the theme color derivation shared with the other standalone plugins
+- `Dependency` Added host-locked copies of AndroidX activity, core, lifecycle, savedstate and kotlinx-coroutines for the gallery in the plugin process; inside the host the host copies still take precedence
 
 #### v1.0.0
 

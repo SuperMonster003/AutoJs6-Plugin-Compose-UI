@@ -5,7 +5,7 @@ Vista previa local de desarrollo 1.1.0: requiere una compilación AutoJs6 corres
 ### Uso
 
 1. Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo 6.8.0 / 5322)
-2. Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)
+2. Instale el APK del complemento; abra Compose UI desde el lanzador para ver la galería de componentes y los ajustes
 3. Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado
 4. Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`
 
@@ -24,7 +24,7 @@ Vista previa local de desarrollo 1.1.0: requiere una compilación AutoJs6 corres
 
 ### Preguntas frecuentes
 
-- Por que no aparece el icono del plugin tras instalarlo? El plugin no tiene interfaz propia ni entrada en el lanzador; busquelo en el centro de plugins de AutoJs6
+- Como se ejecutan los ejemplos de la galería? "Ejecutar en AutoJs6" entrega el script al AutoJs6 instalado; la galería solo muestra vistas previas y código y nunca ejecuta scripts
 - Por qué falta `compose`? El objeto global lo proporciona la compilación local compatible del host; instalar solo el APK del plugin no lo añade
 - Hay que desinstalar otros plugins de interfaz? No, Compose UI no interfiere con el modulo `ui` existente ni con otros plugins
 - Qué ocurre si cambia el complemento? Actualizarlo, desinstalarlo o desactivarlo cierra las sesiones activas e informa del error correspondiente; un complemento compatible y activado permite volver a montar
@@ -36,7 +36,7 @@ Vista previa local de desarrollo 1.1.0: requiere una compilación AutoJs6 corres
 ### Permisos y seguridad
 
 - Proteccion de componentes: tanto la Wake Activity como el servicio INFO estan protegidos por el permiso de firma `org.autojs.permission.PLUGIN`, de modo que solo el host AutoJs6 puede acceder a ellos
-- Sin actividad en segundo plano: el plugin no tiene servicios residentes, receptores de difusion ni tareas programadas, y no consume recursos mientras el host no lo carga
+- Comportamiento en segundo plano: sin servicio residente ni tareas programadas; el complemento recibe una difusión del sistema al actualizarse para normalizar los componentes del icono del lanzador y no consume recursos mientras el host no lo carga ni está abierto
 - Limite de datos: el plugin nunca lee ni escribe datos de scripts ni archivos del usuario; el estado de la interfaz solo existe en la memoria del proceso del host
 - Politica de copias de seguridad: la copia de seguridad de la aplicacion y la transferencia entre dispositivos estan deshabilitadas, y el plugin no guarda datos que migrar
 

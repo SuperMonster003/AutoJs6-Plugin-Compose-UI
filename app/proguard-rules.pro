@@ -34,3 +34,21 @@
 # contract types are provided by the host at run time and must keep their names on the plugin side as well.
 -keep class org.autojs.plugin.common.api.** { *; }
 -keep class org.autojs.plugin.compose.api.** { *; }
+
+# F.5 (roadmap D32): the AndroidX runtime that Compose needs is packaged for the plugin's own gallery and
+# settings process. Inside the host these packages resolve parent-first to the host copies, so the plugin's
+# references must keep their original class and member names; shrinking unused members stays allowed.
+-keepnames class androidx.activity.** { *; }
+-keepnames class androidx.annotation.** { *; }
+-keepnames class androidx.arch.** { *; }
+-keepnames class androidx.collection.** { *; }
+-keepnames class androidx.concurrent.** { *; }
+-keepnames class androidx.core.** { *; }
+-keepnames class androidx.interpolator.** { *; }
+-keepnames class androidx.lifecycle.** { *; }
+-keepnames class androidx.profileinstaller.** { *; }
+-keepnames class androidx.savedstate.** { *; }
+-keepnames class androidx.startup.** { *; }
+-keepnames class androidx.tracing.** { *; }
+-keepnames class androidx.versionedparcelable.** { *; }
+-keepnames class kotlinx.coroutines.** { *; }

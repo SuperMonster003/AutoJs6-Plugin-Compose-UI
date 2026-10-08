@@ -44,7 +44,7 @@ Este documento esta disponible en los siguientes idiomas:
 
 Compose UI es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `"ui";` y ventanas flotantes desde scripts no UI.
 
-El plugin no incluye pantallas independientes ni agrega una entrada en el lanzador. El host lo descubre mediante el servicio INFO, lee su version y sus datos de compatibilidad y luego carga el renderizador dentro del proceso del host segun el contrato (`org.autojs.plugin.compose.api`). El arbol de interfaz, el estado y los eventos viven en el lado del script; el renderizador solo aplica parches a la composicion de Compose y devuelve los eventos del usuario al script.
+El complemento incluye una galería de componentes que se abre desde el lanzador y muestra vistas previas y scripts de ejemplo de cada componente; las interfaces de los scripts se siguen renderizando en el proceso del host. El host descubre el complemento mediante el servicio INFO, lee su versión y compatibilidad y crea la fábrica del renderizador en su propio proceso según el contrato (`org.autojs.plugin.compose.api`).
 
 ******
 
@@ -75,6 +75,7 @@ Funciones de la vista previa de desarrollo actual:
 - Los contenedores XML `<compose>` y compose.attach integran sesiones Compose independientes en páginas UI o ventanas flotantes existentes; compose.AndroidView muestra una View Android existente o devuelta por una fábrica síncrona
 - compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales
 - Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
+- Galería de componentes: la entrada del lanzador muestra vistas previas Material 3 y scripts de ejemplo ejecutables de los 55 componentes, que se pueden copiar o enviar a AutoJs6; la página de ajustes sigue por defecto el idioma, el modo oscuro y el color de tema de AutoJs6 y ofrece cuatro iconos de lanzador
 
 ******
 
@@ -83,7 +84,7 @@ Funciones de la vista previa de desarrollo actual:
 ******
 
 1. Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo 6.8.0 / 5322)
-2. Instale el APK de este plugin (no hay nada que abrir, el plugin no tiene entrada en el lanzador)
+2. Instale el APK del complemento; abra Compose UI desde el lanzador para ver la galería de componentes y los ajustes
 3. Confirme en el centro de plugins de AutoJs6 que Compose UI se reconoce y esta habilitado
 4. Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`
 
@@ -154,7 +155,7 @@ Requisitos de ejecucion y limites del plugin:
 
 ******
 
-- Por que no aparece el icono del plugin tras instalarlo? El plugin no tiene interfaz propia ni entrada en el lanzador; busquelo en el centro de plugins de AutoJs6
+- Como se ejecutan los ejemplos de la galería? "Ejecutar en AutoJs6" entrega el script al AutoJs6 instalado; la galería solo muestra vistas previas y código y nunca ejecuta scripts
 - Por qué falta `compose`? El objeto global lo proporciona la compilación local compatible del host; instalar solo el APK del plugin no lo añade
 - Hay que desinstalar otros plugins de interfaz? No, Compose UI no interfiere con el modulo `ui` existente ni con otros plugins
 - Qué ocurre si cambia el complemento? Actualizarlo, desinstalarlo o desactivarlo cierra las sesiones activas e informa del error correspondiente; un complemento compatible y activado permite volver a montar
@@ -172,7 +173,7 @@ Requisitos de ejecucion y limites del plugin:
 El plugin no solicita ningun permiso de tiempo de ejecucion de Android y nunca accede a la red, al almacenamiento ni a los sensores.
 
 - Proteccion de componentes: tanto la Wake Activity como el servicio INFO estan protegidos por el permiso de firma `org.autojs.permission.PLUGIN`, de modo que solo el host AutoJs6 puede acceder a ellos
-- Sin actividad en segundo plano: el plugin no tiene servicios residentes, receptores de difusion ni tareas programadas, y no consume recursos mientras el host no lo carga
+- Comportamiento en segundo plano: sin servicio residente ni tareas programadas; el complemento recibe una difusión del sistema al actualizarse para normalizar los componentes del icono del lanzador y no consume recursos mientras el host no lo carga ni está abierto
 - Limite de datos: el plugin nunca lee ni escribe datos de scripts ni archivos del usuario; el estado de la interfaz solo existe en la memoria del proceso del host
 - Politica de copias de seguridad: la copia de seguridad de la aplicacion y la transferencia entre dispositivos estan deshabilitadas, y el plugin no guarda datos que migrar
 
@@ -223,16 +224,22 @@ _2026/10/08_
 - `Aviso` Vista previa local de desarrollo 1.1.0: requiere una compilación AutoJs6 correspondiente y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. El icono sigue siendo provisional hasta recibir las imágenes definitivas del mantenedor
 - `Aviso` Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
 - `Aviso` compose.memo lo proporciona AutoJs6 6.8.0 / 5323 para reutilizar fragmentos de render cuyas dependencias no cambian; este complemento no necesita actualizarse y TSX requiere TypeScript Engine 0.6.8
+- `Aviso` La galería y los ajustes se ejecutan en el proceso del complemento y no cambian el renderizado dentro del host ni la versión mínima del host; ejecutar los ejemplos requiere AutoJs6 con este complemento instalado y habilitado
 - `Novedad` TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes
 - `Novedad` Los contenedores XML `<compose>` y compose.attach integran sesiones Compose independientes en páginas UI o ventanas flotantes existentes; compose.AndroidView muestra una View Android existente o devuelta por una fábrica síncrona
 - `Novedad` compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales
 - `Novedad` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
+- `Novedad` Galería de componentes: ábrala desde el lanzador para ver vistas previas Material 3 y scripts de ejemplo de los 55 componentes, copiarlos al portapapeles o enviarlos al AutoJs6 instalado
+- `Novedad` Página de ajustes: el idioma, el modo oscuro y el color de tema siguen AutoJs6 por defecto y pueden fijarse por separado; el icono del lanzador ofrece opciones adaptativas (claro / oscuro / automático) y de fondo transparente
 - `Mejora` Los iconos de información de la aplicación de Android comparten las imágenes y los fondos claros y oscuros de Icon Studio, conservando las imágenes transparentes del centro de plugins y las opciones del lanzador
 - `Mejora` Las fábricas de View se ejecutan en el hilo principal antes del renderizado. Un reemplazo inválido conserva el contenido actual; una View no puede pertenecer a dos nodos ni tomarse de otro padre. Conserva sus listeners y los recursos siguen bajo control del llamador
 - `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
+- `Mejora` El icono del centro de complementos y el icono de información de la aplicación usan los fondos #FAFAFA claro / #212121 oscuro compartidos con los demás complementos independientes
 - `Dependencia` Actualizar compose-ui-api.aar con la extensión opcional AndroidView conservando V1
 - `Dependencia` Añadir la capacidad opcional de diálogo a compose-ui-api.aar conservando los contratos V1 y AndroidView existentes
 - `Dependencia` Añadir el catálogo V2 de compose-ui-api.aar conservando los modelos de nodos y la semántica de componentes V1
+- `Dependencia` Añadido material-color-utilities 4.1.1 (MIT) para la derivación del color de tema compartida con los demás complementos independientes
+- `Dependencia` Añadidas copias de AndroidX activity, core, lifecycle, savedstate y kotlinx-coroutines en las versiones fijadas por el host para la galería en el proceso del complemento; dentro del host siguen prevaleciendo las copias del host
 
 #### v1.0.0
 

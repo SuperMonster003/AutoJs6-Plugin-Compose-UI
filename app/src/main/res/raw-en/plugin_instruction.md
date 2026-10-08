@@ -5,7 +5,7 @@ Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare int
 ### Usage
 
 1. Install a matching local AutoJs6 build with the compose script entry (minimum 6.8.0 / 5322)
-2. Install this plugin APK (there is nothing to open, the plugin has no launcher entry)
+2. Install the plugin APK; open Compose UI from the launcher to browse the component gallery and settings
 3. Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled
 4. Use `compose` or `$compose` in scripts; mount activity content with `compose.mount`, or grant the host overlay permission and use `compose.floaty`
 
@@ -24,7 +24,7 @@ Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare int
 
 ### FAQ
 
-- Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center
+- How do gallery examples run? "Run in AutoJs6" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
@@ -36,7 +36,7 @@ Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare int
 ### Permissions and Security
 
 - Component protection: both the Wake Activity and the INFO service are guarded by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them
-- No background activity: the plugin has no resident services, broadcast receivers, or scheduled jobs, and consumes no resources while the host is not loading it
+- Background behavior: no resident service or scheduled task; the plugin receives one system broadcast when it is updated to normalize its launcher icon components, and consumes no resources while neither loaded by the host nor opened
 - Data boundary: the plugin never reads or writes script data or user files; UI state exists only in the host process memory
 - Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating
 

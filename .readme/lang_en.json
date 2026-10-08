@@ -6,7 +6,7 @@
   "p_languages_all_supported_for_readme": "This document is available in the following languages",
   "h3_introduction": "Introduction",
   "p_introduction_what": "Compose UI is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports both `\"ui\";` activity content and floating windows from non-UI scripts.",
-  "p_introduction_how": "The plugin ships no standalone screens and adds no launcher entry. The host discovers it through the INFO service, reads its version and compatibility data, then loads the renderer inside the host process according to the contract (`org.autojs.plugin.compose.api`). The UI tree, state, and events live on the script side; the renderer only applies patches to the Compose composition and forwards user events back to the script.",
+  "p_introduction_how": "The plugin ships a component gallery that opens from the launcher and shows previews and example scripts of every component; script interfaces are still rendered inside the host process. The host discovers the plugin through the INFO service, reads its version and compatibility information, and instantiates the renderer factory in its own process according to the contract (`org.autojs.plugin.compose.api`).",
   "h3_status": "Status",
   "p_status": "1.1.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images.",
   "h3_features": "Features",
@@ -24,12 +24,13 @@
     "TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes",
     "XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory",
     "compose.dialog returns an updatable, closable session for dialogs and modal bottom sheets in UI or ordinary scripts",
-    "Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh"
+    "Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh",
+    "Component gallery: the launcher entry shows Material 3 previews and runnable example scripts of all 55 components, which can be copied or sent to AutoJs6; the settings page follows the AutoJs6 language, dark mode and theme color by default and offers four launcher icons"
   ],
   "h3_usage": "Usage",
   "usage_steps": [
     "Install a matching local AutoJs6 build with the compose script entry (minimum {{ required_host_version_name }} / {{ required_host_version_code }})",
-    "Install this plugin APK (there is nothing to open, the plugin has no launcher entry)",
+    "Install the plugin APK; open Compose UI from the launcher to browse the component gallery and settings",
     "Confirm in the AutoJs6 plugin center that Compose UI is recognized and enabled",
     "Use `compose` or `$compose` in scripts; mount activity content with `compose.mount`, or grant the host overlay permission and use `compose.floaty`"
   ],
@@ -59,7 +60,7 @@
   ],
   "h3_faq": "FAQ",
   "faq_items": [
-    "Why is there no plugin icon after installing? The plugin has no standalone UI and no launcher entry; look it up in the AutoJs6 plugin center",
+    "How do gallery examples run? \"Run in AutoJs6\" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts",
     "Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it",
     "Do other UI plugins need to be uninstalled? No, Compose UI does not interfere with the existing `ui` module or other plugins",
     "What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount",
@@ -72,7 +73,7 @@
   "p_security_intro": "The plugin requests no Android runtime permissions and never touches the network, storage, or sensors.",
   "security_points": [
     "Component protection: both the Wake Activity and the INFO service are guarded by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them",
-    "No background activity: the plugin has no resident services, broadcast receivers, or scheduled jobs, and consumes no resources while the host is not loading it",
+    "Background behavior: no resident service or scheduled task; the plugin receives one system broadcast when it is updated to normalize its launcher icon components, and consumes no resources while neither loaded by the host nor opened",
     "Data boundary: the plugin never reads or writes script data or user files; UI state exists only in the host process memory",
     "Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating"
   ],

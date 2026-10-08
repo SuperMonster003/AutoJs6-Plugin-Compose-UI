@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F.5: the plugin's own gallery and settings screens. Compose draws every surface; the platform theme only
+         supplies a window background matching the standalone palette and keeps the system action bar away. -->
+    <style name="Theme.ComposeUi" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/standalone_background</item>
+    </style>
+</resources>

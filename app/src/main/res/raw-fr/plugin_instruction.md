@@ -5,7 +5,7 @@ Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et
 ### Utilisation
 
 1. Installez une compilation locale compatible d'AutoJs6 contenant l'entrée compose (minimum 6.8.0 / 5322)
-2. Installez l'APK de ce plugin (rien a ouvrir, le plugin n'a pas d'entree dans le lanceur)
+2. Installez l'APK du plugin; ouvrez Compose UI depuis le lanceur pour parcourir la galerie de composants et les paramètres
 3. Verifiez dans le centre de plugins d'AutoJs6 que Compose UI est reconnu et active
 4. Utilisez `compose` ou `$compose` dans les scripts; montez les activités avec `compose.mount`, ou accordez la permission de superposition à l'hôte et utilisez `compose.floaty`
 
@@ -24,7 +24,7 @@ Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et
 
 ### FAQ
 
-- Pourquoi aucune icone de plugin n'apparait apres l'installation ? Le plugin n'a ni interface autonome ni entree dans le lanceur ; consultez le centre de plugins d'AutoJs6
+- Comment exécuter les exemples de la galerie? "Exécuter dans AutoJs6" transmet le script à l'AutoJs6 installé; la galerie n'affiche que des aperçus et du code et n'exécute jamais de script
 - Pourquoi `compose` est-il absent? L'objet global est fourni par la compilation locale compatible de l'hôte; installer uniquement l'APK du plugin ne l'ajoute pas
 - Faut-il desinstaller d'autres plugins d'interface ? Non, Compose UI n'interfere ni avec le module `ui` existant ni avec les autres plugins
 - Que se passe-t-il si le plugin change? Sa mise à jour, désinstallation ou désactivation ferme les sessions actives et signale l'erreur correspondante; un plugin compatible et activé permet un nouveau montage
@@ -36,7 +36,7 @@ Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et
 ### Permissions et securite
 
 - Protection des composants : la Wake Activity et le service INFO sont tous deux proteges par la permission de signature `org.autojs.permission.PLUGIN`, si bien que seul l'hote AutoJs6 peut les atteindre
-- Aucune activite en arriere-plan : le plugin n'a ni service resident, ni recepteur de diffusion, ni tache planifiee, et ne consomme aucune ressource tant que l'hote ne le charge pas
+- Comportement en arrière-plan: aucun service résident ni tâche planifiée; le plugin reçoit une diffusion système lors de sa mise à jour pour normaliser les composants de son icône de lanceur et ne consomme aucune ressource tant que l'hôte ne le charge pas et qu'il n'est pas ouvert
 - Frontiere des donnees : le plugin ne lit ni n'ecrit les donnees des scripts ou les fichiers de l'utilisateur ; l'etat de l'interface n'existe que dans la memoire du processus de l'hote
 - Politique de sauvegarde : la sauvegarde de l'application et le transfert entre appareils sont desactives, et le plugin ne detient aucune donnee a migrer
 
