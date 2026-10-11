@@ -20,8 +20,12 @@ from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageOps
 
-VERSION = "1.3.0"
-SUPPORTED_VERSIONS = {"1.0.0", "1.1.0", "1.2.0", VERSION}
+VERSION = "1.3.1"
+SUPPORTED_VERSIONS = {"1.0.0", "1.1.0", "1.2.0", "1.3.0", VERSION}
+FIXED_BACKGROUND_COLORS = {
+    "day": "ic_icon_studio_background_day",
+    "night": "ic_icon_studio_background_night",
+}
 APPLICATION_MANIFEST = "app/src/main/AndroidManifest.xml"
 APPLICATION_ICON = "ic_icon_studio_application"
 APPLICATION_OUTPUTS = {
@@ -507,6 +511,7 @@ def generated_files(recipe: dict, loader, *, strict=True) -> dict[str, bytes]:
         "params", {}
     ).get("backgrounds")
     result = {}
+    fixed_backgrounds = set()
     for path, descriptor in recipe["outputs"].items():
         if not path.startswith("app/src/") or "/res/" not in path:
             raise ValueError("生成目标必须是项目资源文件")
@@ -536,21 +541,31 @@ def generated_files(recipe: dict, loader, *, strict=True) -> dict[str, bytes]:
             ).encode()
         elif role == "adaptive-background":
             original = loader(descriptor["original"])
-            if not background_changed:
+            background = ET.fromstring(original).find("background")
+            if background is None:
+                raise ValueError("自适应图标缺少背景图层")
+            reference = background.get("{http://schemas.android.com/apk/res/android}drawable", "")
+            # Drawable attributes require a resource reference, including when an
+            # older renderer already saved an invalid literal as its input snapshot.
+            if not background_changed and not reference.startswith("#"):
                 result[path] = original
             else:
                 theme = descriptor.get("theme")
-                value = backgrounds(recipe).get(theme) if theme else None
-                value = (
-                    "@android:color/transparent"
-                    if value == "transparent"
-                    else value or "@color/ic_plugin_center_background"
+                reference = "@color/" + (
+                    FIXED_BACKGROUND_COLORS[theme]
+                    if theme else "ic_plugin_center_background"
                 )
-                result[path] = re.sub(
-                    rb'(<background\b[^>]*android:drawable=")[^"]*(")',
-                    lambda m, value=value: m[1] + value.encode() + m[2],
+                result[path], replacements = re.subn(
+                    rb'(<background\b[^>]*\bandroid:drawable\s*=\s*)([\"\'])(.*?)\2',
+                    lambda m: m[1] + m[2] + reference.encode() + m[2],
                     original,
+                    flags=re.DOTALL,
                 )
+                if replacements != 1:
+                    raise ValueError("无法定位自适应图标的背景资源引用")
+            for mode, name in FIXED_BACKGROUND_COLORS.items():
+                if reference == "@color/" + name:
+                    fixed_backgrounds.add(mode)
         elif descriptor.get("original") and (
             role in {"keep", "keep-rule"}
             or (unchanged and not (background_changed and role.startswith("legacy-")))
@@ -566,6 +581,25 @@ def generated_files(recipe: dict, loader, *, strict=True) -> dict[str, bytes]:
             if target != image.size:
                 image = image.resize(target, Image.Resampling.LANCZOS)
             result[path] = encode_png(image)
+    if fixed_backgrounds:
+        default_colors = next(
+            (path for path, descriptor in recipe["outputs"].items()
+             if descriptor["role"] == "background-color" and descriptor["theme"] == "day"),
+            None,
+        )
+        if default_colors is None:
+            raise ValueError("缺少固定启动器背景色的资源输出")
+        # Define fixed colors only in values/, so system night mode cannot change
+        # the background of a light/dark launcher alias chosen by the user.
+        extra = ""
+        for mode, name in FIXED_BACKGROUND_COLORS.items():
+            if mode in fixed_backgrounds:
+                color = backgrounds(recipe)[mode]
+                value = "#00000000" if color == "transparent" else color.upper()
+                extra += f'    <color name="{name}">{value}</color>\n'
+        result[default_colors] = result[default_colors].replace(
+            b"</resources>", extra.encode() + b"</resources>"
+        )
     return result
 
 

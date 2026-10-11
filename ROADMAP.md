@@ -1081,3 +1081,12 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 远端 CI (推送 `50b0c02`, build45): Markdown 通过; JVM / APK 作业与 API24 x86 作业 (73 项 + 启动检查) 通过; API35 x86_64 作业 73 项中 10 项失败, 与 build41 首轮相同的窗口焦点 / 弹窗 / IME 簇 (WideRendererTest 搜索 / 抽屉 / 底部弹层 / 下拉菜单 / 工具提示, TextField IME, Dialog 焦点 x2, Advanced Scaffold, 以及画廊剪贴板), 该簇在 build42 / build43 的远端复跑与本地两台 AVD 上均通过, 记为 CI 模拟器的环境性波动; 随后的启动检查把屏幕上残留的 ANR 对话框按钮 "Close app" 当成了首个条目. 修正 (build46, 仅脚本与文档): 启动检查只考虑 `package` 为插件包名的节点, 超时信息仍列出全部可见标签以便看出系统对话框; 重建的 API35 AVD 上签名包 `5d2ce3ef` 的启动检查通过.
 - 远端 CI (推送 `81c7388`, build46, 工作流运行 37768208379): Markdown 通过; Build integrity 三个作业全部通过, API24 x86 与 API35 x86_64 作业各 73 项 instrumentation 通过且启动检查 `STANDALONE_LAUNCH_OK` (画廊 / Column 条目 / 设置页). 本次 F.5 补正至此在插件自身进程 (两种 API 级别的模拟器, 本地与远端), 宿主进程 (隔离宿主设备套件) 与静态引用闭包三个层面都有证据.
 - 未执行: 真机复测 (维护者的 Xperia 与 AVD 未被占用; 请以 build44 / build45 包重新安装验证), API24 本地 instrumentation (远端 API24 作业覆盖), 第三方启动器截图, 六设备矩阵, 宿主全量 JVM / lint; 自有 AVD 与两个独立 worktree 在会话结束时清理.
+
+
+### 2026-10-08 Icon Studio background resource linking fix
+
+- 维护者报告在 Icon Studio 应用图标调整后, 四个 `ic_launcher_system*` 自适应 XML 的背景写成 `#212121` / `#fafafa`, 导致 aapt2 拒绝资源链接. 根因为 Icon Studio 1.3.0 的固定亮 / 暗背景输出把颜色字面量写入只接受资源引用的 `android:drawable`.
+- Icon Studio 1.3.1 与本仓库的便携内核已同步修复: 固定亮 / 暗背景引用独立的 `@color/ic_icon_studio_background_day` / `night`, 仅在默认 values 定义以避免被系统夜间模式覆盖; 自动模式继续使用独立的默认 / notnight XML. 内核兼容旧配方, 对既有错误字面量快照也会修复, 合法且未改动的引用保持原样. 本项目四个 XML 与颜色资源由保存配方重新生成.
+- 维护者的图标参数和 14 个 PNG 在修复前后逐字节核对一致, Manifest 也未改变. 本次只改变背景的资源引用方式, 未改动图案或几何. 10 语言 changelog 与生成文档已同步.
+- 验证: 工作区 v1.1.0 / build47 的 assembleDebug, assembleRelease, 84 项 JVM 测试, lintDebug / lintRelease (均 0 错误), verifySharedClasspath 全部通过; debug 与 shrunk release 的 APK 类路径检查通过. release 为 4670014 B / 13482 类 / 82466 方法引用, 方法引用与 F.5 已验收记录相同. 图标重现检查 24 项, Markdown 10 语言 / 36 项通过. Icon Studio 72 项 Python 测试与 13 项浏览器测试通过, 其中新增固定亮暗 / 自动模式, 自定义与透明背景, 单双引号 XML, 旧字面量恢复及便携生成回归.
+- 本轮不涉及 Manifest, 渲染器, 契约, 类加载边界或依赖集合, 未另行执行设备安装与 instrumentation. 维护者先前的未提交图稿修改仍保留在工作区; 按 AGENTS 第 3.3 节暂不自动提交这些工作区文件.

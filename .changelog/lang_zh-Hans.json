@@ -33,6 +33,9 @@
         "附加 compose-ui-api.aar V2 组件目录, 保留已有节点模型和 V1 组件语义",
         "附加 material-color-utilities 版本 4.1.1 (MIT), 用于设置页与其他独立插件一致的主题色派生",
         "附加 AndroidX activity, core, lifecycle, savedstate, emoji2, window 与 kotlinx-coroutines 等的宿主锁定版本副本, 供插件自身进程的画廊使用; 宿主内仍优先使用宿主副本"
+      ],
+      "fix": [
+        "修复使用 Icon Studio 调整启动器图标背景后无法构建的问题"
       ]
     },
     "v1.0.0": {

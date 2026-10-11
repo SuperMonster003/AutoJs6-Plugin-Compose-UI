@@ -231,6 +231,7 @@ _2026/10/08_
 - `Novedad` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
 - `Novedad` Galería de componentes: ábrala desde el lanzador para ver vistas previas Material 3 y scripts de ejemplo de los 55 componentes, copiarlos al portapapeles o enviarlos al AutoJs6 instalado
 - `Novedad` Página de ajustes: el idioma, el modo oscuro y el color de tema siguen AutoJs6 por defecto y pueden fijarse por separado; el icono del lanzador ofrece opciones adaptativas (claro / oscuro / automático) y de fondo transparente
+- `Correccion` Corregido el fallo de compilación tras ajustar el fondo de los iconos del lanzador en Icon Studio
 - `Mejora` Los iconos de información de la aplicación de Android comparten las imágenes y los fondos claros y oscuros de Icon Studio, conservando las imágenes transparentes del centro de plugins y las opciones del lanzador
 - `Mejora` Las fábricas de View se ejecutan en el hilo principal antes del renderizado. Un reemplazo inválido conserva el contenido actual; una View no puede pertenecer a dos nodos ni tomarse de otro padre. Conserva sus listeners y los recursos siguen bajo control del llamador
 - `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones

@@ -231,6 +231,7 @@ _2026/10/08_
 - `Feature` Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
 - `Feature` Component gallery: open it from the launcher to browse Material 3 previews and example scripts of all 55 components, copy them to the clipboard or send them to the installed AutoJs6
 - `Feature` Settings page: language, dark mode and theme color follow AutoJs6 by default and can be set separately; the launcher icon offers adaptive (light / dark / automatic) and transparent background choices
+- `Fix` Fixed build failures after adjusting launcher icon backgrounds in Icon Studio
 - `Improvement` Android App info icons share Icon Studio artwork and light/dark backgrounds while preserving transparent Plugin Center artwork and existing launcher choices
 - `Improvement` View factories run on the main thread before rendering. Invalid replacements preserve the current content; a View cannot belong to two nodes or be taken from another parent. Borrowed Views retain their listeners and caller-owned resources
 - `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions

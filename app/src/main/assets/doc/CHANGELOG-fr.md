@@ -18,6 +18,7 @@
 * `Nouveaute` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
 * `Nouveaute` Galerie de composants: ouvrez-la depuis le lanceur pour parcourir les aperçus Material 3 et les scripts d'exemple des 55 composants, les copier dans le presse-papiers ou les envoyer à l'AutoJs6 installé
 * `Nouveaute` Page des paramètres: la langue, le mode sombre et la couleur de thème suivent AutoJs6 par défaut et se règlent séparément; l'icône de lanceur propose des variantes adaptatives (claire / sombre / automatique) et à fond transparent
+* `Correction` Correction de l'échec de compilation après modification du fond des icônes du lanceur dans Icon Studio
 * `Amelioration` Les icônes des informations d'application Android utilisent les illustrations et les fonds clairs et sombres d'Icon Studio, en conservant les images transparentes du centre de plugins et les choix du lanceur
 * `Amelioration` Les fabriques de View tournent sur le thread principal avant le rendu. Un remplacement invalide conserve le contenu courant; une View ne peut appartenir à deux noeuds ni être prise à un autre parent. Ses écouteurs et les ressources du code appelant sont préservés
 * `Amelioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes

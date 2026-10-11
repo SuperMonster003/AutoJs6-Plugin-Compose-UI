@@ -33,6 +33,9 @@
         "Ajout du catalogue V2 de compose-ui-api.aar en conservant les modèles de noeuds et la sémantique des composants V1",
         "Ajout de material-color-utilities 4.1.1 (MIT) pour la dérivation de couleur de thème partagée avec les autres plugins autonomes",
         "Ajout de copies d'AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines et de leurs compléments aux versions verrouillées par l'hôte pour la galerie dans le processus du plugin; dans l'hôte, les copies de l'hôte restent prioritaires"
+      ],
+      "fix": [
+        "Correction de l'échec de compilation après modification du fond des icônes du lanceur dans Icon Studio"
       ]
     },
     "v1.0.0": {
