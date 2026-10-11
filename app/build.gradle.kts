@@ -255,6 +255,8 @@ android {
         versionCode = versions.appVersionCode
         versionName = versions.appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Answers ANR / crash dialogs that other processes leave on a busy emulator before each test; see the class.
+        testInstrumentationRunnerArguments["listener"] = "$globalApplicationId.ForeignErrorDialogGuard"
         buildConfigField("String", "SHARED_DEPS_FINGERPRINT", "\"$sharedFingerprint\"")
 
         resValue("string", "plugin_author", "SuperMonster003")
