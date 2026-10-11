@@ -115,7 +115,9 @@ jobs:
             # After the suite, the debug APK alone is installed and opened from its launcher alias: the
             # instrumented process also carries the test APK, so only a real launch proves that the plugin's own
             # process has every class the gallery and settings screens need.
-            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace; status=$?; python3 .python/verify_standalone_launch.py --apk app/build/outputs/apk/debug/*.apk --uninstall || status=1; mkdir -p app/build/reports/androidTests; adb logcat -d > app/build/reports/androidTests/logcat.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows.txt || true; exit $status
+            # The device log and window state are saved right after the suite, before the launch check clears the log;
+            # a system error dialog that held focus during the suite shows up there and in the per-test logcat.
+            ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace; status=$?; mkdir -p app/build/reports/androidTests; adb logcat -d -b main -b system -b crash -b events > app/build/reports/androidTests/logcat-suite.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows-suite.txt || true; python3 .python/verify_standalone_launch.py --apk app/build/outputs/apk/debug/*.apk --uninstall || status=1; adb logcat -d > app/build/reports/androidTests/logcat-launch.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows-launch.txt || true; exit $status
 
       - name: Upload instrumentation and coverage reports
         if: always()
@@ -125,5 +127,6 @@ jobs:
           path: |
             app/build/reports/androidTests/
             app/build/reports/coverage/androidTest/
+            app/build/outputs/androidTest-results/connected/
           if-no-files-found: ignore
           retention-days: 7
