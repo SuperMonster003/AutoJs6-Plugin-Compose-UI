@@ -570,11 +570,13 @@ P8.0 证据 (2026-10-13): 插件 `7dbc3b2` (build 100): JVM 84 项通过, `verif
 
 ### P8.1 依赖边界: 契约与解析器打包
 
-- [ ] (插件) `compose-ui-api.aar` 由 `compileOnly` 改为 `implementation` (D34, 修订 D26): 与 D32 的共享副本同样完整 `-keep` 并保持 ABI, 宿主内 parent-first 装载继续使用宿主副本, 渲染器行为与版本协商不变; `locks/host-api-aars.lock` 不变. `:app:verifySharedClasspath` 与 `.python/verify_apk_classpath.py` 的 "不含契约类" 断言反转为 "含契约类, `--shrunk` 闭包可由 APK 内副本满足"; 设备测试 APK 不再需要单独携带契约 AAR.
-- [ ] (插件) Rhino 解析器 (D35): 从宿主 `slimRhinoJar` 产物复制 `libs/org-mozilla-rhino-2_0_0-SNAPSHOT-slim.jar` (约 0.9 MB, 已去掉 JLine / optimizer / JFR), 新建 `locks/rhino-jar.lock` 记录 SHA-256 与来源宿主提交, 校验方式同契约 AAR; `implementation` 引入, 只允许 `designer/parse` 包引用 (JVM 守卫测试扫描其它包不得 import `org.mozilla.javascript`); R8 不加 keep, 允许裁剪到 Parser / AST 闭包; 宿主内该副本永不被触及 (渲染器不引用), 与宿主 Rhino 同名类的遮蔽关系与 D32 一致.
-- [ ] (插件) 只解析不执行 (维持 D8 的 "不执行脚本"): 经 `CompilerEnvirons` + `Parser` 直接得到 AST, 永不 `Context.enter`, 不编译, 不求值; 语言版本与宿主引擎一致, 开启注释记录以保留不透明段原文.
-- [ ] (插件) `AGENTS.md` 第 5.2 / 12 / 13 节与 README 兼容性段同步: 独立界面自 P8 起可引用契约类; 契约 AAR 与 Rhino jar 的版本纪律; 体积预算按 Q8 回填.
-- [ ] (测试) JVM: 锁文件与 jar 一致性, 包引用守卫; 本仓库 `verify_apk_classpath.py` (debug 与 `--shrunk`) 通过; 宿主侧: 打包集合与 R8 规则变化, 按 `AGENTS.md` 13.2 的 MUST 重跑宿主侧完整设备矩阵, 证明 parent-first 装载与渲染器不受影响 (证据等级同 P5.2).
+- [x] (插件) `compose-ui-api.aar` 由 `compileOnly` 改为 `implementation` (D34, 修订 D26): 与 D32 的共享副本同样完整 `-keep` 并保持 ABI, 宿主内 parent-first 装载继续使用宿主副本, 渲染器行为与版本协商不变; `locks/host-api-aars.lock` 不变. `:app:verifySharedClasspath` 与 `.python/verify_apk_classpath.py` 的 "不含契约类" 断言反转为 "含契约类, `--shrunk` 闭包可由 APK 内副本满足"; 设备测试 APK 不再需要单独携带契约 AAR.
+- [x] (插件) Rhino 解析器 (D35): 从宿主 `slimRhinoJar` 产物复制 `libs/org-mozilla-rhino-2_0_0-SNAPSHOT-slim.jar` (约 2.2 MB, 已去掉 JLine / optimizer / JFR), 新建 `locks/rhino-jar.lock` 记录 SHA-256 与来源宿主提交, 校验方式同契约 AAR; `implementation` 引入, 只允许 `designer/parse` 包引用 (JVM 守卫测试扫描其它包不得 import `org.mozilla.javascript`); R8 不加 keep, 允许裁剪到 Parser / AST 闭包; 宿主内该副本永不被触及 (渲染器不引用), 与宿主 Rhino 同名类的遮蔽关系与 D32 一致.
+- [x] (插件) 只解析不执行 (维持 D8 的 "不执行脚本"): 经 `CompilerEnvirons` + `Parser` 直接得到 AST, 永不 `Context.enter`, 不编译, 不求值; 语言版本与宿主引擎一致, 开启注释记录以保留不透明段原文.
+- [x] (插件) `AGENTS.md` 第 5.2 / 12 / 13 节与 README 兼容性段同步: 独立界面自 P8 起可引用契约类; 契约 AAR 与 Rhino jar 的版本纪律; 体积预算按 Q8 回填.
+- [x] (测试) JVM: 锁文件与 jar 一致性, 包引用守卫; 本仓库 `verify_apk_classpath.py` (debug 与 `--shrunk`) 通过; 宿主侧: 打包集合与 R8 规则变化, 按 `AGENTS.md` 13.2 的 MUST 重跑宿主侧完整设备矩阵, 证明 parent-first 装载与渲染器不受影响 (证据等级同 P5.2). 本轮只覆盖一台 API 35 真机, 完整矩阵见证据中的 "未执行".
+
+P8.1 证据 (2026-10-13): `compose-ui-api.aar` 改为 `implementation` 并由既有 `-keep class org.autojs.plugin.compose.api.** { *; }` 完整保留, 设备测试 APK 不再单独携带契约; `locks/rhino-jar.lock` (SHA-256 `cebd05fa...`, 来源宿主 `f12665ffde`) 锁定宿主 `:app:slimRhinoJar` 产物 (2161825 B), `implementation` 引入, R8 不 keep 并 `-dontwarn org.mozilla.**`; `verify_apk_classpath.py` 改为要求契约类在 APK 内且 `--shrunk` 无任何 APK / 平台之外的引用. 新增 `RhinoJarLockTest` (4) 与 `RhinoImportGuardTest` (2), JVM 共 90 项通过; lint 0 错误 12 警告 (既有); debug APK 13559171 B (契约 233 类, Rhino 1811 类), release APK 4835611 B (契约 230 类, Rhino 0 类, unresolved 0), 较 P8.0 的 4664030 B 增加 171581 B (Q8 预算内); `verifySharedClasspath`, Markdown 36 项与图标 24 项 `--check` 通过; changelog 1.2.0 增加 dependency / improvement 条目, README 兼容性要点增加契约打包说明 (10 语言). 设备: Xiaomi Pad 23046RP50C (API 35): 插件 instrumentation 74 项通过 (debug, build 101), `verify_standalone_launch.py` 以 release APK 通过; 宿主侧以 `-PcomposeUiSpike=true` 隔离宿主 (工作树含 `f12665ffde`) 配合已安装的 release 插件运行 6 个 compose 设备测试类共 46 项: 41 项通过, 5 项按既有 assumption 跳过 (需要存档的旧版 V1 / 对话框前渲染器 build 27, 需要悬浮窗权限被拒绝的否定阶段, 需要显式选择加入的包变更阶段), 0 失败; 悬浮窗相关用例在手动授予 SYSTEM_ALERT_WINDOW 后通过, 随后卸载 spike 宿主与测试包, 插件 release 保留在设备上. 未执行: 其余五台设备与 API 24 AVD 的插件与宿主设备测试 (完整矩阵), 远端 CI (未推送); 这些在 P8.5 gate 前补齐.
 
 ### P8.2 模型, 命令, 解析与生成
 

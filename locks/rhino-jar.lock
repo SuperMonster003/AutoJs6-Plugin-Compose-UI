@@ -1,0 +1,7 @@
+# Slim Rhino parser jar staged for the 3-Block Compose designer (roadmap P8.1 / D35). Produced by the host task
+#   :app:slimRhinoJar (the host's own org-mozilla-rhino-2_0_0-SNAPSHOT.jar without JLine, the optimizer and JFR) at host
+#   commit f12665ffde4205d444a11f517b4ce1fa747f2724 on 2026-10-13; only designer/parse may reference it and it is never executed. See libs/README.md.
+format=1
+rhino.file=org-mozilla-rhino-2_0_0-SNAPSHOT-slim.jar
+rhino.sha256=cebd05fabce9aa78faefd202bfab30521a2bd5b227786cf0619e34eada2d505e
+rhino.source=f12665ffde4205d444a11f517b4ce1fa747f2724

@@ -148,6 +148,7 @@ Exigences d'execution et limites du plugin:
 - cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
 - Cette version utilise le contrat 3-Block Compose V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
 - compose.memo est fourni par AutoJs6 6.8.0 / 5323 pour réutiliser les fragments de render dont les dépendances n'ont pas changé; ce plugin n'a pas besoin de mise à jour et TSX nécessite TypeScript Engine 0.6.8
+- Depuis 1.2.0 les classes du contrat (org.autojs.plugin.compose.api) sont empaquetées avec le plugin pour son processus autonome; dans AutoJs6 l'hôte fournit les mêmes classes et la copie du plugin est masquée
 
 ******
 
@@ -226,6 +227,8 @@ _2026/10/13_
 - `Amelioration` Le titre de l'application, l'ID du plugin (three-block-compose), les noms de paquet et de composants, les artefacts de publication, la documentation et le dépôt GitHub (AutoJs6-Plugin-Three-Block-Compose) suivent le renommage; l'API de script compose, la version du contrat et le comportement de rendu restent inchangés
 - `Amelioration` Les icônes du lanceur, du centre de plugins et des informations d'application du système utilisent désormais les images définitives du mainteneur, les glyphes clair et sombre partageant une même forme
 - `Amelioration` Les exemples fournis et la catégorie d'exemples de l'hôte sont renommés 3-Block Compose
+- `Amelioration` L'AAR du contrat compose-ui-api est désormais empaqueté avec le plugin et conservé intact (auparavant en compilation seule) pour le processus propre du plugin; dans AutoJs6 les classes de contrat identiques de l'hôte restent prioritaires, le rendu et la version du contrat ne changent pas
+- `Dependance` Ajout du jar allégé de l'analyseur Rhino (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, la même compilation que l'hôte AutoJs6), utilisé uniquement par le futur concepteur visuel pour analyser les scripts, jamais pour les exécuter; les compilations release ne conservent que les classes d'analyse référencées
 
 #### v1.1.0
 

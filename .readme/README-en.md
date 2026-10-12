@@ -148,6 +148,7 @@ Runtime requirements and limits of the plugin:
 - cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
 - This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
 - compose.memo is provided by AutoJs6 6.8.0 / 5323 to reuse render fragments whose dependencies are unchanged; this plugin needs no update, and companion TSX support requires TypeScript Engine 0.6.8
+- Since 1.2.0 the contract classes (org.autojs.plugin.compose.api) are packaged with the plugin for its standalone process; inside AutoJs6 the host supplies the same classes and the plugin copy is shadowed
 
 ******
 
@@ -226,6 +227,8 @@ _2026/10/13_
 - `Improvement` The app title, plugin ID (three-block-compose), package and component names, release artifacts, documentation and the GitHub repository (AutoJs6-Plugin-Three-Block-Compose) follow the rename; the compose script API, the contract version and the rendering behavior are unchanged
 - `Improvement` The launcher, plugin center and system App info icons now use the maintainer's final artwork, with the light and dark glyphs sharing one shape
 - `Improvement` The bundled examples and the host example category are renamed to 3-Block Compose
+- `Improvement` The compose-ui-api contract AAR is now packaged with the plugin and kept intact (previously compile-only) for the plugin's own process; inside AutoJs6 the host's identical contract classes still take precedence, so rendering behavior and the contract version are unchanged
+- `Dependency` Add the slim Rhino parser jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, the same build as the AutoJs6 host), used only by the upcoming visual designer to parse scripts, never to run them; release builds keep only the referenced parser classes
 
 #### v1.1.0
 

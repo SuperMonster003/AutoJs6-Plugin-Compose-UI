@@ -100,8 +100,39 @@ fun lockedAars(lockFile: File, ids: List<String>, directory: String): List<File>
 val hostApiIds = listOf("common-plugin-api", "compose-ui-api")
 val hostApiAars = lockedAars(rootProject.file("locks/host-api-aars.lock"), hostApiIds, "libs")
 
-// D26: these classes are supplied by the production host. Keep Kotlin in the APK for INFO/Wake,
-// which execute outside the host, while parent-first loading shares the host's Kotlin in rendering.
+// P8.1 (roadmap D35): the slim Rhino jar derived by the host's slimRhinoJar task (no JLine / optimizer / JFR),
+// locked by SHA-256 like the contract AARs. Only the designer's parser package may reference
+// org.mozilla.javascript (RhinoImportGuardTest); R8 keeps nothing of it, so the release APK carries only the
+// Parser / AST closure that the designer actually reaches. Inside the host the renderer never touches it.
+fun lockedJar(lockFile: File, id: String, directory: String): File {
+    require(lockFile.isFile) { "Missing jar lock: ${lockFile.relativeTo(rootProject.projectDir)}" }
+    val lock = lockFile.loadUniqueLock()
+    val expectedKeys = setOf("format", "$id.file", "$id.sha256", "$id.source")
+    require(lock.stringPropertyNames() == expectedKeys) {
+        "${lockFile.name} must contain exactly these keys: ${expectedKeys.sorted()}"
+    }
+    require(lock.requiredValue("format") == "1") { "Unsupported lock format in ${lockFile.name}" }
+    val fileName = lock.requiredValue("$id.file")
+    val expectedSha256 = lock.requiredValue("$id.sha256").lowercase()
+    require(fileName == File(fileName).name && fileName.endsWith("-slim.jar")) { "Invalid $id.file in ${lockFile.name}" }
+    require(sha256Pattern.matches(expectedSha256)) { "Replace $id.sha256 in ${lockFile.name} with the audited jar SHA-256" }
+    require(Regex("[0-9a-f]{7,40}").matches(lock.requiredValue("$id.source"))) {
+        "$id.source in ${lockFile.name} must be the host commit that produced the jar"
+    }
+    val artifact = rootProject.file("$directory/$fileName")
+    require(artifact.isFile) { "Missing locked jar: ${artifact.relativeTo(rootProject.projectDir)}" }
+    val actualSha256 = artifact.sha256()
+    require(actualSha256 == expectedSha256) { "SHA-256 mismatch for $fileName: expected $expectedSha256, actual $actualSha256" }
+    return artifact
+}
+val rhinoJar = lockedJar(rootProject.file("locks/rhino-jar.lock"), "rhino", "libs")
+
+// D26 (revised 2026-10-13, roadmap P8.1 / D34): common-plugin-api and compose-ui-api are both packaged. Inside
+// the host, parent-first loading resolves every org.autojs.plugin.** class to the host copy, so the renderer
+// still binds to the host's contract; the packaged copy (fully kept by R8, see proguard-rules.pro) only serves
+// the plugin's own process, where the designer renders DesignDocuments through the real renderer. Keep Kotlin
+// in the APK for INFO/Wake, which execute outside the host, while parent-first loading shares the host's Kotlin
+// in rendering.
 val sharedDeps = rootProject.file("locks/host-shared-deps.lock").loadUniqueLock()
     .entries.associate { it.key.toString() to it.value.toString() }
 require(sharedDeps.isNotEmpty() && sharedDeps.keys.none { it.startsWith("androidx.compose:") || it.startsWith("androidx.compose.") })
@@ -120,8 +151,8 @@ val sharedFingerprint = MessageDigest.getInstance("SHA-256")
 // (proguard-rules.pro), because R8 must not specialize the plugin's copy on facts the host's copy violates;
 // the fully kept savedstate / lifecycle members reference LiveData and kotlinx.serialization, so those are
 // packaged too. Only appcompat (referenced by nothing in the plugin) stays compile-only;
-// .python/verify_apk_classpath.py --shrunk proves that the release APK references no class outside the APK,
-// the platform and the host contract.
+// .python/verify_apk_classpath.py --shrunk proves that the release APK references no class outside the APK
+// and the platform (since P8.1 the contract classes are inside the APK as well).
 val standaloneRuntime = setOf(
     "androidx.activity:activity", "androidx.activity:activity-ktx",
     "androidx.annotation:annotation", "androidx.annotation:annotation-experimental", "androidx.annotation:annotation-jvm",
@@ -149,8 +180,8 @@ val standaloneRuntime = setOf(
 require(standaloneRuntime.all { it in sharedDeps }) { "standaloneRuntime must be a subset of locks/host-shared-deps.lock" }
 val hostOnlyShared = sharedDeps.keys.filterNot { it.startsWith("org.jetbrains.kotlin:") || it in standaloneRuntime }
 // The device test APK is excluded as well: the instrumentation must see the same class universe as the plugin
-// process (plus the contract AAR and the test libraries), otherwise a missing runtime class stays hidden until
-// a user opens the gallery from the launcher.
+// process (plus the test libraries), otherwise a missing runtime class stays hidden until a user opens the
+// gallery from the launcher.
 configurations.matching { it.name in setOf("debugRuntimeClasspath", "releaseRuntimeClasspath", "debugAndroidTestRuntimeClasspath") }.configureEach {
     hostOnlyShared.forEach { coordinate ->
         exclude(group = coordinate.substringBefore(':'), module = coordinate.substringAfter(':'))
@@ -369,9 +400,12 @@ dependencies {
     }
     // PluginInfo, IPluginInfoProvider and the shared plugin constants (host module plugin-api/common-plugin-api).
     implementation(files(hostApiAars[0]))
-    compileOnly(files(hostApiAars[1]))
-    testImplementation(files(hostApiAars[1]))
-    androidTestImplementation(files(hostApiAars[1]))
+    // The compose-ui-api contract (models, catalog, loading interfaces): packaged since P8.1 for the plugin's own
+    // process and shadowed parent-first inside the host (see the D26 note above). JVM and device tests get it
+    // through the application classpath; the device test APK must not carry a second copy.
+    implementation(files(hostApiAars[1]))
+    // The designer's script parser (P8.1 / D35): parse only, never Context.enter.
+    implementation(files(rhinoJar))
     sharedDeps.forEach { (coordinate, version) ->
         if (coordinate.startsWith("org.jetbrains.kotlin:")) {
             implementation("$coordinate:$version")

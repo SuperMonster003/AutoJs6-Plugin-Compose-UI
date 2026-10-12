@@ -13,6 +13,8 @@
 * `优化` 应用标题, 插件 ID (three-block-compose), 包名与组件名, 发布产物, 文档及 GitHub 仓库 (AutoJs6-Plugin-Three-Block-Compose) 随更名同步更新; 脚本 API compose, 契约版本与渲染行为不变
 * `优化` 启动器, 插件中心与系统应用信息图标改用维护者提供的正式图稿, 亮暗两套图案共用同一形状
 * `优化` 随包示例与宿主示例分类改为 3-Block Compose
+* `优化` 契约 AAR compose-ui-api 改为随插件打包并完整保留 (此前只在编译期引用), 供插件自身进程使用; 在 AutoJs6 内仍优先使用宿主提供的同名契约类, 渲染行为与契约版本不变
+* `依赖` 附加 Rhino 解析器精简 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 与 AutoJs6 宿主同一构建), 仅供后续的可视化设计器解析脚本, 不执行脚本; release 包只保留被引用的解析类
 
 # v1.1.0
 

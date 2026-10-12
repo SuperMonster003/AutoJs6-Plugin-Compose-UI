@@ -30,10 +30,18 @@
 -keep class * implements org.autojs.plugin.compose.api.loading.ComposeUiRendererFactory { *; }
 -keep class * implements org.autojs.plugin.compose.api.loading.ComposeUiRenderer { *; }
 
-# Host contract AARs: parcelables and AIDL stubs are resolved reflectively across processes; the 3-Block Compose
-# contract types are provided by the host at run time and must keep their names on the plugin side as well.
+# Host contract AARs: parcelables and AIDL stubs are resolved reflectively across processes. Since P8.1 the
+# 3-Block Compose contract is packaged as well: inside the host it resolves parent-first to the host copy, so the
+# plugin copy must keep every name and member (the same reasoning as the AndroidX runtime below); in the plugin's
+# own process it is the only copy and backs the designer's real-renderer preview.
 -keep class org.autojs.plugin.common.api.** { *; }
 -keep class org.autojs.plugin.compose.api.** { *; }
+
+# Rhino (P8.1 / D35): the slim parser jar is referenced only by the designer's parser package and never inside the
+# host, so nothing is kept; R8 retains the reachable Parser / AST closure and drops the interpreter. The slim jar
+# still declares JVM-only entry points (javax.script, java.lang.reflect proxies) that Android lacks.
+-dontwarn org.mozilla.javascript.**
+-dontwarn org.mozilla.classfile.**
 
 # F.5 (roadmap D32): the AndroidX runtime that Compose needs is packaged for the plugin's own gallery and
 # settings process (standaloneRuntime in app/build.gradle.kts, including arch core-runtime, customview

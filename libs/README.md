@@ -81,3 +81,15 @@ together with the reviewed V1 snapshot; the module name, the
 discovers the plugin by `PLUGIN_PACKAGE_NAME`, so the renamed plugin needs a host
 build that contains this commit; `REQUIRED_HOST_VERSION` stays 5322 because an
 older host never evaluates it for the new package.
+
+## Rhino parser jar (`libs/`, lock `../locks/rhino-jar.lock`, roadmap P8.1)
+
+`org-mozilla-rhino-2_0_0-SNAPSHOT-slim.jar` is the output of the host task `:app:slimRhinoJar`
+at host commit `f12665ffde4205d444a11f517b4ce1fa747f2724`: the host's own Rhino 2.0.0-SNAPSHOT build without JLine, the optimizer and
+the JFR components, exactly what the host packages and runs. SHA-256 `cebd05fabce9aa78faefd202bfab30521a2bd5b227786cf0619e34eada2d505e`. It is MPL 2.0.
+The plugin consumes it with `implementation`; only the designer's `designer/parse` package may
+import `org.mozilla.javascript` (`RhinoImportGuardTest`), the parser is used through
+`CompilerEnvirons` + `Parser` only and never enters a Rhino `Context`, and R8 keeps nothing of
+it, so a release APK carries only the Parser / AST closure the designer reaches. Inside the host
+the renderer never references it; the identically named host classes would win parent-first
+anyway. Re-stage it only from the host commit recorded in the lock.

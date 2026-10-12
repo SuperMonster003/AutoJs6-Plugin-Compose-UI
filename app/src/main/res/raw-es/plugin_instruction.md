@@ -21,6 +21,7 @@ Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que co
 - cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
 - Esta versión usa el contrato 3-Block Compose V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
 - compose.memo lo proporciona AutoJs6 6.8.0 / 5323 para reutilizar fragmentos de render cuyas dependencias no cambian; este complemento no necesita actualizarse y TSX requiere TypeScript Engine 0.6.8
+- Desde 1.2.0 las clases del contrato (org.autojs.plugin.compose.api) se empaquetan con el complemento para su proceso independiente; dentro de AutoJs6 el host proporciona las mismas clases y la copia del complemento queda oculta
 
 ### Preguntas frecuentes
 

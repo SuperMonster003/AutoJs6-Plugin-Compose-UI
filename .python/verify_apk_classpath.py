@@ -1,11 +1,12 @@
 """Audit DEX class definitions and references at the host/plugin boundary (not mere string references).
 
-Definitions (every APK): the Kotlin runtime, the renderer factory, the standalone AndroidX runtime and the
-gallery are defined; host contract classes and the host-only component (appcompat) are not bundled.
+Definitions (every APK): the Kotlin runtime, the renderer factory, the standalone AndroidX runtime, the
+gallery and (since roadmap P8.1) the host contract classes are defined; the host-only component (appcompat)
+is not bundled.
 
-References (--shrunk, R8 outputs only): every class the APK references is defined in the APK, provided by
-the Android platform, or part of the host contract that only the in-host renderer touches. The plugin's own
-gallery and settings process has nothing else to load from, and the device tests cannot prove this on their
+References (--shrunk, R8 outputs only): every class the APK references is defined in the APK or provided by
+the Android platform. Since P8.1 the contract is no longer an external allowance: the plugin's own process
+(gallery, settings, designer) has nothing else to load from, and the device tests cannot prove this on their
 own: build 42 passed them yet crashed from the launcher on androidx.arch.core.executor.ArchTaskExecutor,
 which the instrumentation APK had supplied. Unshrunk debug APKs keep unreachable code and are not checked
 this way.
@@ -43,9 +44,15 @@ REQUIRED = {
     "Lkotlinx/coroutines/CoroutineScope;",
     "Lkotlinx/serialization/KSerializer;",
     "Lio/github/supermonster003/autojs6/plugin/three/block/compose/app/GalleryActivity;",
+    # P8.1 (roadmap D34): the contract is packaged for the plugin's own process and shadowed parent-first inside
+    # the host; R8 keeps it whole, so the frozen models and the V2 catalog must be present under their names.
+    "Lorg/autojs/plugin/compose/api/ComposeUiContract;",
+    "Lorg/autojs/plugin/compose/api/model/UiNode;",
+    "Lorg/autojs/plugin/compose/api/v2/ComposeUiV2;",
+    "Lorg/autojs/plugin/compose/api/loading/ComposeUiRendererFactory;",
 }
 # The only host-only component stays out: View-system AppCompat, which nothing in the plugin references.
-FORBIDDEN_PREFIXES = ("Landroidx/appcompat/", CONTRACT_PREFIX)
+FORBIDDEN_PREFIXES = ("Landroidx/appcompat/",)
 FORBIDDEN_CLASSES: set[str] = set()
 
 
@@ -84,13 +91,14 @@ def verify(apk: Path, shrunk: bool) -> None:
         raise ValueError(f"Classpath boundary violated: missing={sorted(missing)}, bundled_host_classes={sorted(forbidden)}")
     unresolved = sorted(
         name for name in referenced
-        if name not in classes and not name.startswith(DEVICE_PREFIXES) and not name.startswith(CONTRACT_PREFIX)
+        if name not in classes and not name.startswith(DEVICE_PREFIXES)
     )
     contract = sum(1 for name in referenced if name.startswith(CONTRACT_PREFIX))
+    contract_defined = sum(1 for name in classes if name.startswith(CONTRACT_PREFIX))
     if shrunk and unresolved:
         raise ValueError(f"{apk.name} references {len(unresolved)} classes that the plugin process cannot load: {unresolved}")
-    detail = f" unresolved_outside_contract={len(unresolved)}" if shrunk else ""
-    print(f"APK_CLASSPATH_OK {apk.name}: bytes={apk.stat().st_size} classes={len(classes)} method_refs={method_refs} contract_refs={contract}{detail}")
+    detail = f" unresolved={len(unresolved)}" if shrunk else ""
+    print(f"APK_CLASSPATH_OK {apk.name}: bytes={apk.stat().st_size} classes={len(classes)} method_refs={method_refs} contract_refs={contract} contract_classes={contract_defined}{detail}")
 
 
 if __name__ == "__main__":

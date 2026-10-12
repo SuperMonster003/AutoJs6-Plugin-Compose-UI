@@ -13,6 +13,8 @@
 * `Improvement` The app title, plugin ID (three-block-compose), package and component names, release artifacts, documentation and the GitHub repository (AutoJs6-Plugin-Three-Block-Compose) follow the rename; the compose script API, the contract version and the rendering behavior are unchanged
 * `Improvement` The launcher, plugin center and system App info icons now use the maintainer's final artwork, with the light and dark glyphs sharing one shape
 * `Improvement` The bundled examples and the host example category are renamed to 3-Block Compose
+* `Improvement` The compose-ui-api contract AAR is now packaged with the plugin and kept intact (previously compile-only) for the plugin's own process; inside AutoJs6 the host's identical contract classes still take precedence, so rendering behavior and the contract version are unchanged
+* `Dependency` Add the slim Rhino parser jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, the same build as the AutoJs6 host), used only by the upcoming visual designer to parse scripts, never to run them; release builds keep only the referenced parser classes
 
 # v1.1.0
 

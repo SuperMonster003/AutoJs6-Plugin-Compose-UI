@@ -148,6 +148,7 @@ Requisitos de ejecucion y limites del plugin:
 - cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
 - Esta versión usa el contrato 3-Block Compose V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
 - compose.memo lo proporciona AutoJs6 6.8.0 / 5323 para reutilizar fragmentos de render cuyas dependencias no cambian; este complemento no necesita actualizarse y TSX requiere TypeScript Engine 0.6.8
+- Desde 1.2.0 las clases del contrato (org.autojs.plugin.compose.api) se empaquetan con el complemento para su proceso independiente; dentro de AutoJs6 el host proporciona las mismas clases y la copia del complemento queda oculta
 
 ******
 
@@ -226,6 +227,8 @@ _2026/10/13_
 - `Mejora` El título de la aplicación, el ID del complemento (three-block-compose), los nombres de paquete y componentes, los artefactos de publicación, la documentación y el repositorio de GitHub (AutoJs6-Plugin-Three-Block-Compose) se actualizan con el cambio de nombre; la API de script compose, la versión del contrato y el comportamiento de renderizado no cambian
 - `Mejora` Los iconos del lanzador, del centro de complementos y de la información de la aplicación del sistema usan ahora las imágenes definitivas del mantenedor, con los glifos claro y oscuro compartiendo una misma forma
 - `Mejora` Los ejemplos incluidos y la categoría de ejemplos del host pasan a llamarse 3-Block Compose
+- `Mejora` El AAR del contrato compose-ui-api ahora se empaqueta con el complemento y se conserva íntegro (antes solo en compilación) para el proceso propio del complemento; dentro de AutoJs6 las clases de contrato idénticas del host siguen teniendo prioridad, por lo que el comportamiento de renderizado y la versión del contrato no cambian
+- `Dependencia` Se añade el jar reducido del analizador Rhino (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, la misma compilación que el host AutoJs6), usado solo por el futuro diseñador visual para analizar scripts, nunca para ejecutarlos; las compilaciones release conservan solo las clases del analizador referenciadas
 
 #### v1.1.0
 

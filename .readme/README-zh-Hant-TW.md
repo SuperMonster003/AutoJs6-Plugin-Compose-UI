@@ -148,6 +148,7 @@ worker = threads.start(() => {
 - cancelable=false 同時禁止返回鍵, 點擊外部和下滑關閉; 主動關閉與指令碼結束仍會清理彈窗, 保留現有頁面和其他工作階段
 - 此版本使用 3-Block Compose 契約 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用舊 V1 轉譯器的原有元件, 擴充元件需要 V2 轉譯器
 - compose.memo 由 AutoJs6 6.8.0 / 5323 提供, 可在 render 中重用依賴未變化的片段; 此外掛無需更新, TSX 配套需要 TypeScript Engine 0.6.8
+- 契約類別 (org.autojs.plugin.compose.api) 自 1.2.0 起隨外掛打包供獨立處理程序使用; 在 AutoJs6 內仍由宿主提供同名類別, 外掛副本不生效
 
 ******
 
@@ -226,6 +227,8 @@ _2026/10/13_
 - `最佳化` 應用程式標題, 外掛 ID (three-block-compose), 套件名稱與元件名稱, 發行產物, 文件及 GitHub 儲存庫 (AutoJs6-Plugin-Three-Block-Compose) 隨更名同步更新; 指令碼 API compose, 契約版本與轉譯行為不變
 - `最佳化` 啟動器, 外掛中心與系統應用程式資訊圖示改用維護者提供的正式圖稿, 亮暗兩套圖案共用同一形狀
 - `最佳化` 隨套件範例與宿主範例分類改為 3-Block Compose
+- `最佳化` 契約 AAR compose-ui-api 改為隨外掛打包並完整保留 (先前只在編譯期引用), 供外掛自身處理程序使用; 在 AutoJs6 內仍優先使用宿主提供的同名契約類別, 轉譯行為與契約版本不變
+- `相依` 附加 Rhino 解析器精簡 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 與 AutoJs6 宿主同一建置), 僅供後續的視覺化設計器解析指令碼, 不執行指令碼; release 套件只保留被引用的解析類別
 
 #### v1.1.0
 

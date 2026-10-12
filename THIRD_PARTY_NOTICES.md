@@ -113,3 +113,11 @@ Only `ComposeUiIds.PLUGIN_PACKAGE_NAME`
 reviewed V1 snapshot; the module, package, class names, engine, contract
 version 2 and the shared dependency lock are unchanged. The F.4 digest above is
 the prior artifact.
+
+## Rhino parser jar (roadmap P8.1)
+
+`org-mozilla-rhino-2_0_0-SNAPSHOT-slim.jar` (Mozilla Rhino, https://github.com/mozilla/rhino,
+MPL 2.0; the host's own 2.0.0-SNAPSHOT build reduced by the host task `:app:slimRhinoJar`, host
+commit `f12665ffde4205d444a11f517b4ce1fa747f2724`). SHA-256: `cebd05fabce9aa78faefd202bfab30521a2bd5b227786cf0619e34eada2d505e`. Packaged with `implementation`, used only
+to parse scripts for the visual designer, never to execute them; release builds keep only the
+referenced parser classes.

@@ -21,6 +21,7 @@
 - cancelable=false 同时禁止返回键, 点击外部和下滑关闭; 主动关闭与脚本退出仍会清理弹窗, 保留已有页面和其他会话
 - 本构建使用 3-Block Compose 契约 V2, 需要配套 AutoJs6 6.8.0 / 5322; TSX 配套需要 TypeScript Engine 0.6.7. 新宿主仍可使用旧 V1 渲染器的原有组件, 宽集组件需要 V2 渲染器
 - compose.memo 由 AutoJs6 6.8.0 / 5323 提供, 可在 render 中复用依赖未变化的片段; 本插件无需更新, TSX 配套需要 TypeScript Engine 0.6.8
+- 契约类 (org.autojs.plugin.compose.api) 自 1.2.0 起随插件打包供独立进程使用; 在 AutoJs6 内仍由宿主提供同名类, 插件副本不生效
 
 ### 常见问题
 
