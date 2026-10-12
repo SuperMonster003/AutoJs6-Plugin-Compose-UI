@@ -274,7 +274,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
-| P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名为 3-Block Compose (修订 D1), P8.1 起未开始 |
+| P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界与 P8.2 模型 / 解析 / 生成, P8.3 起未开始 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4.
 
@@ -580,11 +580,13 @@ P8.1 证据 (2026-10-13): `compose-ui-api.aar` 改为 `implementation` 并由既
 
 ### P8.2 模型, 命令, 解析与生成
 
-- [ ] (插件) `designer/model`: 不可变 `DesignDocument` (承载 `mount` / `floaty` / `dialog` 与各自 options, 根节点, `compose.state` 声明表, 前后不透明代码段), `DesignNode` (`type`, `key`, `props`: 字面量 `UiValue` / 不透明表达式 / state 绑定三态, `modifiers: List<ModifierEntry>` 有序链, `children`, `slots`, `handlers`: 事件名 -> 处理函数源码); 一切编辑经 `EditCommand` (插入 / 删除 / 移动 / 改属性 / 改 modifier / 绑定 state / 改处理函数 / 改承载选项) 进入撤销 / 重做栈 (D40), 连续修改同一属性可合并为一步, 每个命令有逆命令.
-- [ ] (插件) 校验由契约目录驱动 (D36): `ComponentCatalog` V2 的 `PropSpec` 类型 / 枚举 / 必填 / 默认值, `childrenPolicy`, `allowedParents`, `scope` 与 `modifiers` 列表决定可放置性与属性表单; 上限引用 `ComposeUiLimits` (节点数, 深度, 列表项); 违反项在大纲与抽屉标红但不阻止保存, 导出时汇总提示.
-- [ ] (插件) `designer/parse` (D35): 识别 `"ui";` 指令, `compose.mount | floaty | dialog(nodeOrRender, options)` (render 为 `function () { return <tree>; }` 或箭头函数, 直接传节点亦可), `let / const / var x = compose.state(init)`, 节点工厂 `compose.X({props}, child, ...)` / `compose.X({props}, [children])` / `compose.X(child, ...)`, 字符串子节点, 快捷属性与 `compose.modifier().a().b()` 链, `key`, 事件属性的函数表达式 (源码原样保留), `state.value` 读写与处理函数内对 state 的赋值 (识别为绑定). 其余顶层语句按源码范围原样保留为不透明段, 属性值中无法映射为字面量的表达式保留为不透明表达式; 结构上无法映射 (条件 / 循环生成子节点, 非 compose 工厂调用作为节点等) 时抛 `DesignerParseError(line, column, reason)` 并拒绝打开, 不静默丢弃.
-- [ ] (插件) `designer/codegen`: 由模型生成脚本, 风格与画廊 `GalleryNode.render` 一致 (4 空格缩进, 单引号, 子节点换行), 不透明段与处理函数源码原样写回; 往返稳定性为硬要求: `parse(codegen(doc)) == doc`, 且 `codegen(parse(script))` 对设计器生成的脚本幂等.
-- [ ] (测试) JVM: 56 条画廊示例与 `assets/examples/` 5 个示例全部解析成功并往返; 错误定位用例 (每类拒绝原因至少 1 条); 命令栈不变量 (撤销后模型逐字段相等, 合并命令只占一步); 目录驱动校验与 `GalleryCatalogTest` 共用真实目录.
+- [x] (插件) `designer/model`: 不可变 `DesignDocument` (承载 `mount` / `floaty` / `dialog` 与各自 options, 根节点, `compose.state` 声明表, 前后不透明代码段), `DesignNode` (`type`, `key`, `props`: 字面量 `UiValue` / 不透明表达式 / state 绑定三态, `modifiers: List<ModifierEntry>` 有序链, `children`, `slots`, `handlers`: 事件名 -> 处理函数源码); 一切编辑经 `EditCommand` (插入 / 删除 / 移动 / 改属性 / 改 modifier / 绑定 state / 改处理函数 / 改承载选项) 进入撤销 / 重做栈 (D40), 连续修改同一属性可合并为一步, 每个命令有逆命令.
+- [x] (插件) 校验由契约目录驱动 (D36): `ComponentCatalog` V2 的 `PropSpec` 类型 / 枚举 / 必填 / 默认值, `childrenPolicy`, `allowedParents`, `scope` 与 `modifiers` 列表决定可放置性与属性表单; 上限引用 `ComposeUiLimits` (节点数, 深度, 列表项); 违反项在大纲与抽屉标红但不阻止保存, 导出时汇总提示.
+- [x] (插件) `designer/parse` (D35): 识别 `"ui";` 指令, `compose.mount | floaty | dialog(nodeOrRender, options)` (render 为 `function () { return <tree>; }` 或箭头函数, 直接传节点亦可), `let / const / var x = compose.state(init)`, 节点工厂 `compose.X({props}, child, ...)` / `compose.X({props}, [children])` / `compose.X(child, ...)`, 字符串子节点, 快捷属性与 `compose.modifier().a().b()` 链, `key`, 事件属性的函数表达式 (源码原样保留), `state.value` 读写与处理函数内对 state 的赋值 (识别为绑定). 其余顶层语句按源码范围原样保留为不透明段, 属性值中无法映射为字面量的表达式保留为不透明表达式; 结构上无法映射 (条件 / 循环生成子节点, 非 compose 工厂调用作为节点等) 时抛 `DesignerParseError(line, column, reason)` 并拒绝打开, 不静默丢弃.
+- [x] (插件) `designer/codegen`: 由模型生成脚本, 风格与画廊 `GalleryNode.render` 一致 (4 空格缩进, 单引号, 子节点换行), 不透明段与处理函数源码原样写回; 往返稳定性为硬要求: `parse(codegen(doc)) == doc`, 且 `codegen(parse(script))` 对设计器生成的脚本幂等.
+- [x] (测试) JVM: 56 条画廊示例与 `assets/examples/` 5 个示例全部解析成功并往返; 错误定位用例 (每类拒绝原因至少 1 条); 命令栈不变量 (撤销后模型逐字段相等, 合并命令只占一步); 目录驱动校验与 `GalleryCatalogTest` 共用真实目录.
+
+P8.2 证据 (2026-10-13): 包 `designer/model` (DesignModel.kt: JsLiteral / PropValue 三态 / HandlerSource / ModifierEntry / NodeEntry 有序条目 / DesignChild / DesignNode / MountDecl / Segment / DesignDocument, 节点 id 文档内唯一; EditCommand.kt: ReplaceNode / SetEntries / SetProp / SetKey / SetSlot / SetHandler / SetModifiers / InsertChild / RemoveChild / RemoveNode / MoveChild / SetHost / SetRenderPrelude / SetStates 与 EditHistory 的合并 / seal / undo / redo; DesignValidator.kt: JsValueConverter 按宿主 ComposeScriptValues 的顺序转换字面量, 校验器按 `ComposeUiV2.interopCatalog` 检查属性 / 别名 / 快捷属性 / 插槽 / 事件 / 修饰链签名与作用域 / 子节点策略 / V2 父子规则 / 重复 key / 契约上限, 命名颜色与图片为警告), `designer/parse` (ScriptReader.kt: Rhino `CompilerEnvirons` + `Parser` + `ErrorCollector`, ideMode, ES6; 识别顶层 state 声明与唯一挂载, 其余按源码范围不透明保留; 渲染前置语句从行首切片后统一去缩进), `designer/codegen` (ScriptWriter.kt). JVM 新增 4 个测试类 28 项, 全仓 116 项通过; 56 条画廊脚本中绝大多数首次生成即为不动点, 5 个示例 (含节点句柄写法, 悬浮窗选项表达式, 渲染前置循环) 均往返相等. release APK 4839799 B (设计器尚未被任何入口引用, R8 裁掉了设计器与 Rhino 类, release 内各 0 个; P8.3 接入界面后再记录实际增量), lint 0 错误. 设计器界面 (P8.3) 尚未开始, 本小节不涉及设备验证.
 
 ### P8.3 设计器界面 (插件进程)
 
