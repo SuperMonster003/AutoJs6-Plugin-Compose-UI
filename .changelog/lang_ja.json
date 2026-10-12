@@ -5,6 +5,18 @@
   "changelog_label_improvement": "改善",
   "changelog_label_dependency": "依存関係",
   "$data": {
+    "v1.2.0": {
+      "released_date": "2026/10/13",
+      "hint": [
+        "プラグイン名を Compose UI から 3-Block Compose に変更しました: アプリケーション ID は io.github.supermonster003.autojs6.plugin.compose.ui から io.github.supermonster003.autojs6.plugin.three.block.compose になります. Android は新しいアプリとして扱い, 旧パッケージは併存できます. 設定と権限は引き継がれないため, 新パッケージをプラグインセンターで再度有効化し, 権限を付与してください",
+        "新しいプラグイン識別情報を含む AutoJs6 6.8.0 ホストビルド (ホストのコミット f12665ffde 以降) が必要です. それ以前のホストは旧パッケージ名でプラグインを検出するため, このバージョンを認識しません"
+      ],
+      "improvement": [
+        "アプリ名, プラグイン ID (three-block-compose), パッケージ名とコンポーネント名, リリース成果物, ドキュメント, GitHub リポジトリ (AutoJs6-Plugin-Three-Block-Compose) を名称変更に合わせて更新しました. スクリプト API の compose, コントラクトのバージョン, 描画の動作は変わりません",
+        "ランチャー, プラグインセンター, システムのアプリ情報のアイコンをメンテナー提供の正式な図案に変更しました. ライトとダークの図案は同じ形状を共有します",
+        "同梱サンプルとホスト側のサンプル分類を 3-Block Compose に変更しました"
+      ]
+    },
     "v1.1.0": {
       "released_date": "2026/10/08",
       "hint": [

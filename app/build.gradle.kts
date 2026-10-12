@@ -20,7 +20,7 @@ plugins {
     id("jacoco")
 }
 
-val globalApplicationId = "io.github.supermonster003.autojs6.plugin.compose.ui"
+val globalApplicationId = "io.github.supermonster003.autojs6.plugin.three.block.compose"
 val buildTypeDebug = "debug"
 val buildTypeRelease = "release"
 val composeUiCoverage = providers.gradleProperty("composeUiCoverage").map(String::toBoolean).getOrElse(false)
@@ -261,7 +261,7 @@ android {
 
         resValue("string", "plugin_author", "SuperMonster003")
         resValue("string", "plugin_engine", "compose")
-        resValue("string", "plugin_id", "compose-ui")
+        resValue("string", "plugin_id", "three-block-compose")
         resValue("string", "plugin_variant", "default")
         resValue("string", "plugin_version_date", utils.getDateString("MMM d, yyyy", "GMT+08:00"))
     }
@@ -448,7 +448,7 @@ tasks {
 
     register("appendDigestToReleasedFiles") {
         group = "distribution"
-        description = "Builds and verifies the single signed release APK of Compose UI, then appends its CRC32 digest"
+        description = "Builds and verifies the single signed release APK of 3-Block Compose, then appends its CRC32 digest"
         dependsOn("assembleRelease")
 
         doLast {
@@ -497,7 +497,7 @@ tasks.register<JacocoReport>("reportComposeUiDeviceCoverage") {
     classDirectories.from(zipTree(layout.buildDirectory.file(
         "intermediates/compile_app_classes_jar/debug/bundleDebugClassesToCompileJar/classes.jar",
     )).matching {
-        include("io/github/supermonster003/autojs6/plugin/compose/ui/**")
+        include("io/github/supermonster003/autojs6/plugin/three/block/compose/**")
         exclude("**/BuildConfig.class")
     })
     sourceDirectories.from("src/main/java")

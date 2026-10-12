@@ -3,17 +3,17 @@
 <div align="center">
   <p>
     <picture>
-      <source srcset="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/res/mipmap-night/ic_launcher.png?raw=true" media="(prefers-color-scheme: dark)" />
-      <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-compose-ui-ic-launcher" border="0" width="128" />
+      <source srcset="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/app/src/main/res/mipmap-night/ic_launcher.png?raw=true" media="(prefers-color-scheme: dark)" />
+      <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-three-block-compose-ic-launcher" border="0" width="128" />
     </picture>
   </p>
 
   <p>Плагин, который приносит интерфейсы Jetpack Compose и Material 3 в скрипты AutoJs6</p>
 
   <p>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-Compose-UI?label=Release"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-Compose-UI?color=A24232&label=Issues"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-Compose-UI?color=534BAE&label=License"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose?label=Release"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose?color=A24232&label=Issues"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose?color=534BAE&label=License"/></a>
   </p>
 </div>
 
@@ -25,16 +25,16 @@
 
 Этот документ доступен на следующих языках:
 
-- [简体中文 [zh-Hans]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hans.md)
-- [繁體中文 (香港) [zh-Hant-HK]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hant-HK.md)
-- [繁體中文 (台灣) [zh-Hant-TW]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hant-TW.md)
-- [English [en]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-en.md)
-- [Français [fr]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-fr.md)
-- [Español [es]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-es.md)
-- [日本語 [ja]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ja.md)
-- [한국어 [ko]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ko.md)
+- [简体中文 [zh-Hans]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-zh-Hans.md)
+- [繁體中文 (香港) [zh-Hant-HK]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-zh-Hant-HK.md)
+- [繁體中文 (台灣) [zh-Hant-TW]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-zh-Hant-TW.md)
+- [English [en]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-en.md)
+- [Français [fr]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-fr.md)
+- [Español [es]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-es.md)
+- [日本語 [ja]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-ja.md)
+- [한국어 [ko]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-ko.md)
 - Русский [ru] # текущий
-- [العربية [ar]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ar.md)
+- [العربية [ar]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-ar.md)
 
 ******
 
@@ -42,7 +42,7 @@
 
 ******
 
-Compose UI - плагин отрисовки интерфейса для AutoJs6. Сценарии объявляют интерфейсы через `compose` / `$compose` хоста, а плагин отрисовывает их внутри его процесса с Jetpack Compose и Material 3. Предварительная версия поддерживает активности `"ui";` и плавающие окна сценариев без UI.
+3-Block Compose - плагин отрисовки интерфейса для AutoJs6. Сценарии объявляют интерфейсы через `compose` / `$compose` хоста, а плагин отрисовывает их внутри его процесса с Jetpack Compose и Material 3. Предварительная версия поддерживает активности `"ui";` и плавающие окна сценариев без UI.
 
 В плагин встроена галерея компонентов: её можно открыть из лаунчера и просмотреть превью и примеры скриптов для каждого компонента; интерфейсы скриптов по-прежнему отрисовываются в процессе хоста. Хост обнаруживает плагин через службу INFO, читает версию и сведения о совместимости и создаёт фабрику рендерера в своём процессе по контракту (`org.autojs.plugin.compose.api`).
 
@@ -52,7 +52,7 @@ Compose UI - плагин отрисовки интерфейса для AutoJs6
 
 ******
 
-Локальная предварительная версия 1.1.0: требуется соответствующая сборка AutoJs6 и установленный включенный плагин. Для локальной интеграции доступны страницы UI, плавающие окна, пять примеров, справочник API и объявления TypeScript. Проверенная область совместимости и производительности записана в дорожной карте. Плагин не включен в официальный индекс и не выпущен официально. Изображение значка временное, окончательные исходные изображения ожидаются от сопровождающего.
+Локальная предварительная версия 1.2.0: требуется сборка AutoJs6, содержащая новую идентичность 3-Block Compose (коммит хоста f12665ffde или новее), и установленный включенный плагин. Для локальной интеграции доступны страницы UI, плавающие окна, пять примеров, справочник API и объявления TypeScript. Проверенная область совместимости и производительности записана в дорожной карте. Плагин не включен в официальный индекс и не выпущен официально. Значки теперь используют окончательные изображения от сопровождающего.
 
 ******
 
@@ -70,7 +70,7 @@ Compose UI - плагин отрисовки интерфейса для AutoJs6
 - Один APK содержит arm64-v8a / armeabi-v7a / x86_64 / x86 без собственного нативного кода плагина; включена вспомогательная библиотека AndroidX graphics-path, сохраняются требования совместимости Android, хоста и плагина
 - Нативное редактирование сохраняет выделение и композицию IME, поддерживает фокус и явные правки, отклоняет поздние правки поверх более нового ввода; переключатели и ползунки управляются скриптом
 - Защита интеграции: проверки сообщают о недоступности отсутствующего или несовместимого плагина, ошибки используют `ComposeError`, а закрытие сессии или остановка сценария освобождает ее окна и обратные вызовы
-- Пять исполняемых примеров: счетчик, проверка формы, список из 1000 элементов со стабильными ключами, плавающий HUD без режима UI и темы, с требованиями и индексом, синхронизированные с категорией примеров Compose UI соответствующего хоста
+- Пять исполняемых примеров: счетчик, проверка формы, список из 1000 элементов со стабильными ключами, плавающий HUD без режима UI и темы, с требованиями и индексом, синхронизированные с категорией примеров 3-Block Compose соответствующего хоста
 - TSX поддерживает `<compose.Column>`, `<compose:Text>`, ссылки на фабрики узлов, фрагменты, слоты и реактивные обработчики; одно дерево не может смешивать Compose и прежние XML-узлы
 - XML-контейнеры `<compose>` и compose.attach встраивают независимые сеансы Compose в UI-страницы или прежние плавающие окна; compose.AndroidView отображает готовый Android View либо результат синхронной фабрики
 - compose.dialog возвращает обновляемый и закрываемый сеанс для диалогов и модальных нижних панелей в UI и обычных скриптах
@@ -84,8 +84,8 @@ Compose UI - плагин отрисовки интерфейса для AutoJs6
 ******
 
 1. Установите соответствующую локальную сборку AutoJs6 с точкой входа compose (минимум 6.8.0 / 5322)
-2. Установите APK плагина; откройте Compose UI из лаунчера, чтобы просмотреть галерею компонентов и настройки
-3. Убедитесь в центре плагинов AutoJs6, что Compose UI распознан и включён
+2. Установите APK плагина; откройте 3-Block Compose из лаунчера, чтобы просмотреть галерею компонентов и настройки
+3. Убедитесь в центре плагинов AutoJs6, что 3-Block Compose распознан и включён
 4. Используйте `compose` или `$compose` в сценариях; монтируйте активности через `compose.mount`, либо разрешите хосту наложения и используйте `compose.floaty`
 
 ******
@@ -128,7 +128,7 @@ worker = threads.start(() => {
 });
 ```
 
-Пять исполняемых скриптов перечислены в assets/examples/index.json и синхронизированы с категорией Compose UI соответствующего хоста. Заголовки описывают режим и разрешения. Сведения об узлах, модификаторах, темах, сеансах и окнах находятся в соответствующем локальном справочнике API и объявлениях TypeScript/редактора; сайт может еще не содержать эти локальные изменения.
+Пять исполняемых скриптов перечислены в assets/examples/index.json и синхронизированы с категорией 3-Block Compose соответствующего хоста. Заголовки описывают режим и разрешения. Сведения об узлах, модификаторах, темах, сеансах и окнах находятся в соответствующем локальном справочнике API и объявлениях TypeScript/редактора; сайт может еще не содержать эти локальные изменения.
 
 ******
 
@@ -143,10 +143,10 @@ worker = threads.start(() => {
 - Архитектура процессора: arm64-v8a / armeabi-v7a / x86_64 / x86 (все четыре встроены в единый APK, выбирать сборку по архитектуре не нужно)
 - Версия Compose: поставляется вместе с плагином (BOM 2026.09.00), не зависит от среды Compose хоста
 - Версия контракта: 2; хост и плагин согласовывают версию контракта и при несовпадении отказывают в загрузке с понятной ошибкой
-- Упакованным приложениям также требуется отдельно установленный совместимый плагин Compose UI, с собственными настройками включения/авторизации приложения; проверяется встроенный runtime AutoJs6, а не versionCode самого приложения
+- Упакованным приложениям также требуется отдельно установленный совместимый плагин 3-Block Compose, с собственными настройками включения/авторизации приложения; проверяется встроенный runtime AutoJs6, а не versionCode самого приложения
 - Фабрики View выполняются в главном потоке до отрисовки. Недопустимая замена сохраняет текущее содержимое; View не может принадлежать двум узлам или забираться у другого родителя. Его обработчики и ресурсы остаются под управлением вызывающего кода
 - cancelable=false запрещает закрытие кнопкой назад, нажатием снаружи и смахиванием; явное закрытие и выход из скрипта освобождают диалог, сохраняя страницы и другие сеансы
-- Эта сборка использует контракт Compose UI V2 и требует AutoJs6 6.8.0 / 5322; для TSX нужен TypeScript Engine 0.6.7. Новые хосты поддерживают существующие компоненты старых рендереров V1; расширенным компонентам нужен V2
+- Эта сборка использует контракт 3-Block Compose V2 и требует AutoJs6 6.8.0 / 5322; для TSX нужен TypeScript Engine 0.6.7. Новые хосты поддерживают существующие компоненты старых рендереров V1; расширенным компонентам нужен V2
 - compose.memo предоставляется AutoJs6 6.8.0 / 5323 и повторно использует фрагменты render с неизменными зависимостями; этот плагин обновлять не нужно, для TSX нужен TypeScript Engine 0.6.8
 
 ******
@@ -157,7 +157,7 @@ worker = threads.start(() => {
 
 - Как запускаются примеры из галереи? "Запустить в AutoJs6" передаёт скрипт установленному AutoJs6; сама галерея только показывает превью и код и не выполняет скрипты
 - Почему нет `compose`? Глобальный объект предоставляет соответствующая локальная сборка хоста; установка только APK плагина его не добавляет
-- Нужно ли удалять другие плагины интерфейса? Нет, Compose UI не мешает существующему модулю `ui` и другим плагинам
+- Нужно ли удалять другие плагины интерфейса? Нет, 3-Block Compose не мешает существующему модулю `ui` и другим плагинам
 - Что происходит при изменении плагина? Обновление, удаление или отключение закрывает активные сеансы и сообщает соответствующую ошибку; совместимый включенный плагин допускает новое монтирование
 - Что требуется для плавающих окон? Разрешите хосту наложения и вызовите `window.requestFocus()` перед вводом текста. Если HyperOS не показывает окно, вернитесь на рабочий стол. Отсутствие разрешения возвращает PERMISSION_REQUIRED без автоматического открытия запроса
 - Можно ли использовать TSX или любые функции Compose? TSX поддерживает документированные фабрики Compose с совместимым хостом и TypeScript Engine. Произвольные функции Kotlin Composable и пользовательские компоненты TSX не поддерживаются
@@ -188,12 +188,12 @@ worker = threads.start(() => {
 Идентификаторы, доступные хосту:
 
 ```text
-application id: io.github.supermonster003.autojs6.plugin.compose.ui
-plugin id: compose-ui
+application id: io.github.supermonster003.autojs6.plugin.three.block.compose
+plugin id: three-block-compose
 engine: compose
 variant: default
 info action: org.autojs.plugin.INFO
-info category: compose-ui
+info category: three-block-compose
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 2)
 minimum host build: 5322 (6.8.0)
@@ -209,13 +209,23 @@ minimum host build: 5322 (6.8.0)
 
 Этапы, проектные решения и критерии приёмки ведутся в единой дорожной карте:
 
-- [ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/ROADMAP.md)
+- [ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/ROADMAP.md)
 
 ******
 
 ### История версий
 
 ******
+
+#### v1.2.0
+
+_2026/10/13_
+
+- `Подсказка` Плагин переименован из Compose UI в 3-Block Compose: идентификатор приложения меняется с io.github.supermonster003.autojs6.plugin.compose.ui на io.github.supermonster003.autojs6.plugin.three.block.compose. Android считает его новым приложением, старый пакет может оставаться установленным, настройки и разрешения не переносятся, а новый пакет нужно заново включить и авторизовать в центре плагинов
+- `Подсказка` Требуется сборка AutoJs6 6.8.0, содержащая новую идентичность плагина (коммит хоста f12665ffde или новее); более ранние хосты ищут плагин по старому имени пакета и не распознают эту версию
+- `Улучшение` Название приложения, идентификатор плагина (three-block-compose), имена пакета и компонентов, артефакты выпуска, документация и репозиторий GitHub (AutoJs6-Plugin-Three-Block-Compose) обновлены вместе с переименованием; скриптовый API compose, версия контракта и поведение отрисовки не изменились
+- `Улучшение` Значки лаунчера, центра плагинов и системной информации о приложении теперь используют окончательные изображения от сопровождающего, светлый и темный варианты имеют одну форму
+- `Улучшение` Встроенные примеры и категория примеров хоста переименованы в 3-Block Compose
 
 #### v1.1.0
 
@@ -270,7 +280,7 @@ _2026/10/03_
 
 ##### Подробную историю версий смотрите в
 
-* [CHANGELOG.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/assets/doc/CHANGELOG-ru.md)
+* [CHANGELOG.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/app/src/main/assets/doc/CHANGELOG-ru.md)
 
 ******
 
@@ -338,7 +348,7 @@ README, описание для центра плагинов и журнал и
 
 ******
 
-Проект распространяется по лицензии [Mozilla Public License 2.0](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/LICENSE). Сведения о лицензиях сторонних компонентов приведены в [THIRD_PARTY_NOTICES.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/THIRD_PARTY_NOTICES.md).
+Проект распространяется по лицензии [Mozilla Public License 2.0](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/LICENSE). Сведения о лицензиях сторонних компонентов приведены в [THIRD_PARTY_NOTICES.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/THIRD_PARTY_NOTICES.md).
 
 ******
 
@@ -350,4 +360,4 @@ README, описание для центра плагинов и журнал и
 - Документация AutoJs6: https://docs.autojs6.com
 - Документация модуля compose: https://docs.autojs6.com/#/compose
 - Jetpack Compose: https://developer.android.com/compose
-- Уведомления о сторонних компонентах: https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/THIRD_PARTY_NOTICES.md
+- Уведомления о сторонних компонентах: https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/THIRD_PARTY_NOTICES.md

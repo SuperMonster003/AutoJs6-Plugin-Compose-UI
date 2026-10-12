@@ -4,6 +4,16 @@
 
 ******
 
+# v1.2.0
+
+###### 2026/10/13
+
+* `안내` 플러그인 이름이 Compose UI 에서 3-Block Compose 로 바뀌었습니다: 애플리케이션 ID 가 io.github.supermonster003.autojs6.plugin.compose.ui 에서 io.github.supermonster003.autojs6.plugin.three.block.compose 로 변경됩니다. Android 는 이를 새 앱으로 취급하며 이전 패키지는 함께 남겨 둘 수 있습니다. 설정과 권한은 이전되지 않으므로 새 패키지를 플러그인 센터에서 다시 활성화하고 권한을 부여해야 합니다
+* `안내` 새 플러그인 식별 정보를 포함한 AutoJs6 6.8.0 호스트 빌드 (호스트 커밋 f12665ffde 이후) 가 필요합니다. 그 이전 호스트는 이전 패키지 이름으로 플러그인을 찾으므로 이 버전을 인식하지 못합니다
+* `개선` 앱 제목, 플러그인 ID (three-block-compose), 패키지 및 구성 요소 이름, 배포 산출물, 문서, GitHub 저장소 (AutoJs6-Plugin-Three-Block-Compose) 가 이름 변경에 맞춰 갱신되었습니다. 스크립트 API compose, 계약 버전, 렌더링 동작은 그대로입니다
+* `개선` 런처, 플러그인 센터, 시스템 앱 정보 아이콘이 관리자가 제공한 정식 그림으로 바뀌었으며 밝은 그림과 어두운 그림은 같은 모양을 공유합니다
+* `개선` 번들 예제와 호스트 예제 분류가 3-Block Compose 로 바뀌었습니다
+
 # v1.1.0
 
 ###### 2026/10/08

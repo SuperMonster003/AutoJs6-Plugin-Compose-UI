@@ -3,17 +3,17 @@
 <div align="center">
   <p>
     <picture>
-      <source srcset="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/res/mipmap-night/ic_launcher.png?raw=true" media="(prefers-color-scheme: dark)" />
-      <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-compose-ui-ic-launcher" border="0" width="128" />
+      <source srcset="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/app/src/main/res/mipmap-night/ic_launcher.png?raw=true" media="(prefers-color-scheme: dark)" />
+      <img src="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/app/src/main/res/mipmap/ic_launcher.png?raw=true" alt="autojs6-plugin-three-block-compose-ic-launcher" border="0" width="128" />
     </picture>
   </p>
 
   <p>إضافة تجلب واجهات Jetpack Compose و Material 3 إلى سكربتات AutoJs6</p>
 
   <p>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-Compose-UI?label=Release"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-Compose-UI?color=A24232&label=Issues"/></a>
-    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-Compose-UI?color=534BAE&label=License"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/releases"><img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose?label=Release"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/issues"><img alt="GitHub closed issues" src="https://img.shields.io/github/issues/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose?color=A24232&label=Issues"/></a>
+    <a href="https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose?color=534BAE&label=License"/></a>
   </p>
 </div>
 
@@ -25,15 +25,15 @@
 
 هذا المستند متاح باللغات التالية:
 
-- [简体中文 [zh-Hans]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hans.md)
-- [繁體中文 (香港) [zh-Hant-HK]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hant-HK.md)
-- [繁體中文 (台灣) [zh-Hant-TW]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-zh-Hant-TW.md)
-- [English [en]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-en.md)
-- [Français [fr]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-fr.md)
-- [Español [es]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-es.md)
-- [日本語 [ja]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ja.md)
-- [한국어 [ko]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ko.md)
-- [Русский [ru]](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/.readme/README-ru.md)
+- [简体中文 [zh-Hans]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-zh-Hans.md)
+- [繁體中文 (香港) [zh-Hant-HK]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-zh-Hant-HK.md)
+- [繁體中文 (台灣) [zh-Hant-TW]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-zh-Hant-TW.md)
+- [English [en]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-en.md)
+- [Français [fr]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-fr.md)
+- [Español [es]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-es.md)
+- [日本語 [ja]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-ja.md)
+- [한국어 [ko]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-ko.md)
+- [Русский [ru]](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/.readme/README-ru.md)
 - العربية [ar] # الحالية
 
 ******
@@ -42,7 +42,7 @@
 
 ******
 
-Compose UI هي إضافة لعرض الواجهات في AutoJs6. تعلن النصوص عن الواجهات عبر `compose` / `$compose` التي يوفرها المضيف, وتعرضها الإضافة داخل عمليته باستخدام Jetpack Compose وMaterial 3. تدعم المعاينة محتوى أنشطة `"ui";` والنوافذ العائمة للنصوص غير UI.
+3-Block Compose هي إضافة لعرض الواجهات في AutoJs6. تعلن النصوص عن الواجهات عبر `compose` / `$compose` التي يوفرها المضيف, وتعرضها الإضافة داخل عمليته باستخدام Jetpack Compose وMaterial 3. تدعم المعاينة محتوى أنشطة `"ui";` والنوافذ العائمة للنصوص غير UI.
 
 يتضمن المكون الإضافي معرض مكونات يفتح من المشغل ويعرض معاينات وسكربتات أمثلة لكل مكون; ولا تزال واجهات السكربتات تعرض داخل عملية المضيف. يكتشف المضيف المكون الإضافي عبر خدمة INFO ويقرأ إصداره ومعلومات توافقه, ثم ينشئ مصنع العارض داخل عمليته وفق العقد (`org.autojs.plugin.compose.api`).
 
@@ -52,7 +52,7 @@ Compose UI هي إضافة لعرض الواجهات في AutoJs6. تعلن ال
 
 ******
 
-معاينة تطوير محلية 1.1.0: تتطلب بناء AutoJs6 مطابقا وإضافة مثبتة ومفعلة. تتوفر صفحات UI والنوافذ العائمة وخمسة أمثلة ومرجع API وتعريفات TypeScript لهذا التكامل المحلي. يسجل مخطط الطريق نطاق التوافق والأداء الذي تم التحقق منه. لم تدرج الإضافة في الفهرس الرسمي ولم تنشر كإصدار رسمي. الرسم الحالي للأيقونة مؤقت بانتظار صور المصدر النهائية من المشرف.
+معاينة تطوير محلية 1.2.0: تتطلب بناء AutoJs6 يحتوي على هوية 3-Block Compose الجديدة (إيداع المضيف f12665ffde أو أحدث) وإضافة مثبتة ومفعلة. تتوفر صفحات UI والنوافذ العائمة وخمسة أمثلة ومرجع API وتعريفات TypeScript لهذا التكامل المحلي. يسجل مخطط الطريق نطاق التوافق والأداء الذي تم التحقق منه. لم تدرج الإضافة في الفهرس الرسمي ولم تنشر كإصدار رسمي. تستخدم الأيقونات الآن الرسوم النهائية من المشرف.
 
 ******
 
@@ -70,7 +70,7 @@ Compose UI هي إضافة لعرض الواجهات في AutoJs6. تعلن ال
 - يتضمن APK واحد arm64-v8a / armeabi-v7a / x86_64 / x86 دون شيفرة أصلية خاصة بالإضافة; تتضمن الحزمة مكتبة AndroidX graphics-path المساعدة وتظل شروط توافق Android والمضيف والإضافة مطلوبة
 - يحافظ تحرير النص الأصلي على التحديد وتركيب IME ويدعم التركيز والتعديلات الصريحة ويرفض التعديلات المتأخرة التي ستستبدل إدخالا أحدث; يتحكم البرنامج النصي بحالة المفاتيح وشرائط التمرير
 - حماية التكامل: تشير الفحوص إلى عدم التوفر عند غياب الإضافة أو عدم توافقها, وتستخدم الأخطاء `ComposeError`, ويحرر إغلاق الجلسة أو إيقاف النص نوافذها واستدعاءاتها الراجعة
-- خمسة أمثلة قابلة للتشغيل للعداد والتحقق من النموذج وقائمة من 1000 عنصر بمفاتيح ثابتة وHUD عائم خارج وضع UI والسمات, مع المتطلبات والفهرس ومزامنتها مع فئة أمثلة Compose UI في المضيف المطابق
+- خمسة أمثلة قابلة للتشغيل للعداد والتحقق من النموذج وقائمة من 1000 عنصر بمفاتيح ثابتة وHUD عائم خارج وضع UI والسمات, مع المتطلبات والفهرس ومزامنتها مع فئة أمثلة 3-Block Compose في المضيف المطابق
 - يدعم TSX الصيغ `<compose.Column>` و `<compose:Text>` ومراجع مصانع العقد و Fragment والخانات والاستدعاءات التفاعلية. لا يمكن خلط عقد Compose وعقد XML القديمة في شجرة واحدة
 - تدمج حاويات XML `<compose>` و compose.attach جلسات Compose مستقلة في صفحات UI أو النوافذ العائمة الحالية. يعرض compose.AndroidView عنصرا جاهزا من Android View أو عنصرا تعيده دالة إنشاء متزامنة
 - تعيد compose.dialog جلسة قابلة للتحديث والإغلاق للحوارات واللوحات السفلية المشروطة في نصوص UI والنصوص العادية
@@ -84,8 +84,8 @@ Compose UI هي إضافة لعرض الواجهات في AutoJs6. تعلن ال
 ******
 
 1. ثبت بناء محليا مطابقا من AutoJs6 يتضمن نقطة دخول نصوص compose (الحد الأدنى 6.8.0 / 5322)
-2. ثبت ملف APK للمكون الإضافي; افتح Compose UI من المشغل لتصفح معرض المكونات والإعدادات
-3. تأكد في مركز الإضافات في AutoJs6 من أن Compose UI معروفة ومفعلة
+2. ثبت ملف APK للمكون الإضافي; افتح 3-Block Compose من المشغل لتصفح معرض المكونات والإعدادات
+3. تأكد في مركز الإضافات في AutoJs6 من أن 3-Block Compose معروفة ومفعلة
 4. استخدم `compose` أو `$compose` في النصوص; ركب الأنشطة عبر `compose.mount`, أو امنح المضيف إذن العرض فوق التطبيقات واستخدم `compose.floaty`
 
 ******
@@ -128,7 +128,7 @@ worker = threads.start(() => {
 });
 ```
 
-تسرد assets/examples/index.json خمسة برامج نصية قابلة للتشغيل وتزامنها مع فئة Compose UI في المضيف المطابق. تشرح مقدمة كل مثال الوضع والأذونات. استخدم مرجع API المحلي وتعريفات TypeScript/المحرر المرافقة لتفاصيل العقد والمعدلات والسمات والجلسات والنوافذ; قد لا يتضمن الموقع هذه التغييرات المحلية بعد.
+تسرد assets/examples/index.json خمسة برامج نصية قابلة للتشغيل وتزامنها مع فئة 3-Block Compose في المضيف المطابق. تشرح مقدمة كل مثال الوضع والأذونات. استخدم مرجع API المحلي وتعريفات TypeScript/المحرر المرافقة لتفاصيل العقد والمعدلات والسمات والجلسات والنوافذ; قد لا يتضمن الموقع هذه التغييرات المحلية بعد.
 
 ******
 
@@ -143,10 +143,10 @@ worker = threads.start(() => {
 - معمارية المعالج: arm64-v8a / armeabi-v7a / x86_64 / x86 (الأربع جميعها مدمجة في حزمة APK الواحدة, دون اختيار حسب المعمارية)
 - إصدار Compose: مضمن مع الإضافة (BOM 2026.09.00), مستقل عن بيئة Compose في المضيف
 - إصدار العقد: 2; يتفاوض المضيف والإضافة على إصدار العقد ويرفضان التحميل مع خطأ واضح عند عدم التطابق
-- تتطلب التطبيقات المجمعة أيضا تثبيت إضافة Compose UI متوافقة بشكل منفصل مع إعدادات تفعيل/تفويض تخص التطبيق; يفحص التوافق وقت تشغيل AutoJs6 المضمن وليس versionCode الخاص بالتطبيق
+- تتطلب التطبيقات المجمعة أيضا تثبيت إضافة 3-Block Compose متوافقة بشكل منفصل مع إعدادات تفعيل/تفويض تخص التطبيق; يفحص التوافق وقت تشغيل AutoJs6 المضمن وليس versionCode الخاص بالتطبيق
 - تعمل دوال إنشاء View على الخيط الرئيسي قبل العرض. تحافظ البدائل غير الصالحة على المحتوى الحالي. لا يمكن أن ينتمي View إلى عقدتين أو ينتزع من أب آخر. يحتفظ بالمستمعين وتظل الموارد مسؤولية جهة الاستدعاء
 - يمنع cancelable=false الإغلاق بالرجوع أو النقر خارج النافذة أو السحب لأسفل; يظل الإغلاق الصريح وانتهاء النص ينظفان الحوار مع الاحتفاظ بالصفحات والجلسات الأخرى
-- يستخدم هذا الإصدار عقد Compose UI V2 ويتطلب AutoJs6 6.8.0 / 5322; ويتطلب TSX الإصدار TypeScript Engine 0.6.7. يدعم المضيف الجديد مكونات محركات V1 القديمة; وتتطلب المكونات الموسعة محرك V2
+- يستخدم هذا الإصدار عقد 3-Block Compose V2 ويتطلب AutoJs6 6.8.0 / 5322; ويتطلب TSX الإصدار TypeScript Engine 0.6.7. يدعم المضيف الجديد مكونات محركات V1 القديمة; وتتطلب المكونات الموسعة محرك V2
 - يوفر AutoJs6 6.8.0 / 5323 الدالة compose.memo لإعادة استخدام أجزاء render التي لم تتغير اعتمادياتها; لا يحتاج هذا المكون الإضافي إلى تحديث, ويتطلب TSX الإصدار TypeScript Engine 0.6.8
 
 ******
@@ -157,7 +157,7 @@ worker = threads.start(() => {
 
 - كيف تعمل أمثلة المعرض? يسلم "تشغيل في AutoJs6" السكربت إلى AutoJs6 المثبت; أما المعرض نفسه فيعرض المعاينات والكود فقط ولا ينفذ السكربتات
 - لماذا لا يوجد `compose`? يوفر البناء المحلي المطابق للمضيف هذا الكائن العام; تثبيت APK الإضافة وحده لا يضيفه
-- هل يلزم إلغاء تثبيت إضافات الواجهة الأخرى? لا, فإضافة Compose UI لا تتعارض مع وحدة `ui` الحالية ولا مع الإضافات الأخرى
+- هل يلزم إلغاء تثبيت إضافات الواجهة الأخرى? لا, فإضافة 3-Block Compose لا تتعارض مع وحدة `ui` الحالية ولا مع الإضافات الأخرى
 - ماذا يحدث عند تغيير الإضافة? يؤدي تحديثها أو إزالتها أو تعطيلها إلى إغلاق الجلسات النشطة والإبلاغ عن الخطأ المقابل; تسمح الإضافة المتوافقة والمفعلة بتركيب جديد
 - ماذا تتطلب النوافذ العائمة? امنح المضيف إذن العرض فوق التطبيقات واستدع `window.requestFocus()` قبل إدخال النص. إذا لم يعرض HyperOS النافذة, عد إلى سطح المكتب. يعيد غياب الإذن PERMISSION_REQUIRED دون فتح طلب ترخيص تلقائي
 - هل يمكن استخدام TSX أو أي دالة Compose? يمكن استخدام مصانع عقد Compose الموثقة مع المضيف و TypeScript Engine المطابقين. لا يدعم دوال Kotlin Composable العشوائية أو مكونات TSX المخصصة
@@ -188,12 +188,12 @@ worker = threads.start(() => {
 المعرفات المكشوفة للمضيف:
 
 ```text
-application id: io.github.supermonster003.autojs6.plugin.compose.ui
-plugin id: compose-ui
+application id: io.github.supermonster003.autojs6.plugin.three.block.compose
+plugin id: three-block-compose
 engine: compose
 variant: default
 info action: org.autojs.plugin.INFO
-info category: compose-ui
+info category: three-block-compose
 renderer factory meta-data: org.autojs.plugin.compose.RENDERER_FACTORY
 contract package: org.autojs.plugin.compose.api (version 2)
 minimum host build: 5322 (6.8.0)
@@ -209,13 +209,23 @@ minimum host build: 5322 (6.8.0)
 
 تسجل المراحل وقرارات التصميم ومعايير القبول في خارطة طريق واحدة:
 
-- [ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/ROADMAP.md)
+- [ROADMAP.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/ROADMAP.md)
 
 ******
 
 ### سجل الإصدارات
 
 ******
+
+#### v1.2.0
+
+_2026/10/13_
+
+- `تلميح` تمت إعادة تسمية الإضافة من Compose UI إلى 3-Block Compose: يتغير معرف التطبيق من io.github.supermonster003.autojs6.plugin.compose.ui إلى io.github.supermonster003.autojs6.plugin.three.block.compose. يعامله Android كتطبيق جديد, ويمكن إبقاء الحزمة القديمة مثبتة, ولا يتم نقل الإعدادات والأذونات, ويجب تفعيل الحزمة الجديدة والتصريح لها مجددا في مركز الإضافات
+- `تلميح` يتطلب بناء AutoJs6 6.8.0 يحتوي على هوية الإضافة الجديدة (إيداع المضيف f12665ffde أو أحدث); المضيفات الأقدم تكتشف الإضافة باسم الحزمة القديم ولا تتعرف على هذا الإصدار
+- `تحسين` تم تحديث عنوان التطبيق ومعرف الإضافة (three-block-compose) وأسماء الحزمة والمكونات ومخرجات الإصدار والوثائق ومستودع GitHub (AutoJs6-Plugin-Three-Block-Compose) مع إعادة التسمية; تبقى واجهة البرمجة النصية compose وإصدار العقد وسلوك العرض دون تغيير
+- `تحسين` تستخدم أيقونات المشغل ومركز الإضافات ومعلومات التطبيق في النظام الآن الرسوم النهائية من المشرف, ويتشارك الرسمان الفاتح والداكن الشكل نفسه
+- `تحسين` تمت إعادة تسمية الأمثلة المرفقة وفئة أمثلة المضيف إلى 3-Block Compose
 
 #### v1.1.0
 
@@ -270,7 +280,7 @@ _2026/10/03_
 
 ##### لمزيد من سجل الإصدارات, راجع
 
-* [CHANGELOG.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/app/src/main/assets/doc/CHANGELOG-ar.md)
+* [CHANGELOG.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/app/src/main/assets/doc/CHANGELOG-ar.md)
 
 ******
 
@@ -338,7 +348,7 @@ app/src/main/res/raw-*/plugin_instruction.md
 
 ******
 
-يصدر هذا المشروع بموجب [Mozilla Public License 2.0](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/LICENSE). ترد معلومات تراخيص مكونات الأطراف الثالثة في [THIRD_PARTY_NOTICES.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/THIRD_PARTY_NOTICES.md).
+يصدر هذا المشروع بموجب [Mozilla Public License 2.0](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/LICENSE). ترد معلومات تراخيص مكونات الأطراف الثالثة في [THIRD_PARTY_NOTICES.md](https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/THIRD_PARTY_NOTICES.md).
 
 ******
 
@@ -350,4 +360,4 @@ app/src/main/res/raw-*/plugin_instruction.md
 - وثائق AutoJs6: https://docs.autojs6.com
 - وثائق وحدة compose: https://docs.autojs6.com/#/compose
 - Jetpack Compose: https://developer.android.com/compose
-- إشعارات الأطراف الثالثة: https://github.com/SuperMonster003/AutoJs6-Plugin-Compose-UI/blob/master/THIRD_PARTY_NOTICES.md
+- إشعارات الأطراف الثالثة: https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose/blob/master/THIRD_PARTY_NOTICES.md

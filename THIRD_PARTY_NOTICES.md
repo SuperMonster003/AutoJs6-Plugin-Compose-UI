@@ -1,6 +1,6 @@
 # Third-party notices
 
-Compose UI (`AutoJs6-Plugin-Compose-UI`) is licensed under the Mozilla Public License 2.0 (see `LICENSE`).
+3-Block Compose (`AutoJs6-Plugin-Three-Block-Compose`) is licensed under the Mozilla Public License 2.0 (see `LICENSE`).
 The components below are distributed with the plugin or used to build it; each keeps its own license,
 reproduced in full in the distribution of the respective project.
 
@@ -40,13 +40,13 @@ plugin class loader). All artifacts are resolved from Google Maven through the C
 | Component | Coordinates | Version (BOM 2026.09.00) | License | Purpose |
 | --- | --- | --- | --- | --- |
 | Compose Runtime | `androidx.compose.runtime:runtime` | 1.12.1 | Apache License 2.0 | Composition, state and snapshot system |
-| Compose UI | `androidx.compose.ui:ui` | 1.12.1 | Apache License 2.0 | Layout nodes, input, `ComposeView` |
+| 3-Block Compose | `androidx.compose.ui:ui` | 1.12.1 | Apache License 2.0 | Layout nodes, input, `ComposeView` |
 | Compose Foundation | `androidx.compose.foundation:foundation` | 1.12.1 | Apache License 2.0 | Layouts, lazy lists, gestures |
 | Compose Animation | `androidx.compose.animation:animation` | 1.12.1 | Apache License 2.0 | Animated visibility and transitions |
 | Compose Material 3 | `androidx.compose.material3:material3` | 1.4.0 | Apache License 2.0 | Material 3 components and theming |
 | Compose Material Icons Core | `androidx.compose.material:material-icons-core` | 1.7.8 | Apache License 2.0 | Core Material icon set |
 | AndroidX Graphics Path | `androidx.graphics:graphics-path` | 1.0.1 | Apache License 2.0 | Native path iteration helper of Compose `ui-graphics` on API 24 to 33; the only native library in the APK (`libandroidx.graphics.path.so` for arm64-v8a / armeabi-v7a / x86_64 / x86, about 10 KB each, 16 KB page-aligned, verified by `appendDigestToReleasedFiles`) |
-| Compose UI Tooling (debug builds only) | `androidx.compose.ui:ui-tooling` | 1.12.1 | Apache License 2.0 | Layout inspector support in debug APKs; not in release |
+| 3-Block Compose Tooling (debug builds only) | `androidx.compose.ui:ui-tooling` | 1.12.1 | Apache License 2.0 | Layout inspector support in debug APKs; not in release |
 | Kotlin standard library | `org.jetbrains.kotlin:kotlin-stdlib` | 2.4.0 (host shared lock) | Apache License 2.0 | INFO process runtime; parent-first in the host |
 | Material Color Utilities (Kotlin port) | `com.materialkolor:material-color-utilities` | 4.1.1 | MIT License (https://github.com/jordond/materialkolor) | F.5 settings accent: the same HCT tone rule as the other standalone AutoJs6 plugins; the JVM test checks its output against Material Components 1.13.0 |
 | Poko annotations | `dev.drewhamilton.poko:poko-annotations` | 0.21.1 (transitive) | Apache License 2.0 | Annotation-only dependency of the color utilities port |
@@ -99,3 +99,17 @@ loading and optional extension class files are byte-identical; only
 ComposeUiContract changes its maximum supported version to 2. The V1 minimum
 is still 1, and its frozen catalog remains 30 entries. See
 `docs/dev/p7-wide-aar-compatibility.json` for the complete class comparison.
+
+## 2026-10-13 rename artifact (3-Block Compose)
+
+The current compose-ui-api.aar is the host release module at host commit
+`f12665ffde` (`refactor(plugin): track the renamed 3-Block Compose plugin`),
+assembled with `:plugin-api:compose-ui-api:assembleRelease` on the host master
+branch. SHA-256: `557b7efc8fd7d17c2032f0a6e0ccb5f64b42d0a2f3dceabacd06c9ce89b352a6`.
+It is MPL 2.0, consumed as `compileOnly` by the plugin and packaged by the host.
+Only `ComposeUiIds.PLUGIN_PACKAGE_NAME`
+(`io.github.supermonster003.autojs6.plugin.three.block.compose`) and
+`ComposeUiIds.PLUGIN_ID` (`three-block-compose`) change together with the
+reviewed V1 snapshot; the module, package, class names, engine, contract
+version 2 and the shared dependency lock are unchanged. The F.4 digest above is
+the prior artifact.

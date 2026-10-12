@@ -37,7 +37,7 @@
     <string name="gallery_category_text">텍스트, 아이콘 및 이미지</string>
     <string name="gallery_copied">스크립트를 클립보드에 복사했습니다</string>
     <string name="gallery_copy">스크립트 복사</string>
-    <string name="gallery_note">스크립트는 AutoJs6에서 실행됩니다. Compose UI %1$s을(를) 설치하고 활성화해야 하며 호스트는 빌드 %2$d 이상이어야 합니다.</string>
+    <string name="gallery_note">스크립트는 AutoJs6에서 실행됩니다. 3-Block Compose %1$s을(를) 설치하고 활성화해야 하며 호스트는 빌드 %2$d 이상이어야 합니다.</string>
     <string name="gallery_run">AutoJs6에서 실행</string>
     <string name="gallery_run_failed">AutoJs6에서 스크립트를 시작할 수 없습니다</string>
     <string name="gallery_run_missing_host">AutoJs6이 설치되어 있지 않습니다</string>

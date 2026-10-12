@@ -4,6 +4,16 @@
 
 ******
 
+# v1.2.0
+
+###### 2026/10/13
+
+* `Indication` Le plugin est renommé de Compose UI en 3-Block Compose: l'ID d'application passe de io.github.supermonster003.autojs6.plugin.compose.ui à io.github.supermonster003.autojs6.plugin.three.block.compose. Android le considère comme une nouvelle application, l'ancien paquet peut rester installé, les réglages et autorisations ne sont pas migrés, et le nouveau paquet doit être réactivé et réautorisé dans le centre de plugins
+* `Indication` Nécessite une compilation AutoJs6 6.8.0 contenant la nouvelle identité du plugin (commit hôte f12665ffde ou ultérieur); les hôtes antérieurs recherchent le plugin par l'ancien nom de paquet et ne reconnaissent pas cette version
+* `Amelioration` Le titre de l'application, l'ID du plugin (three-block-compose), les noms de paquet et de composants, les artefacts de publication, la documentation et le dépôt GitHub (AutoJs6-Plugin-Three-Block-Compose) suivent le renommage; l'API de script compose, la version du contrat et le comportement de rendu restent inchangés
+* `Amelioration` Les icônes du lanceur, du centre de plugins et des informations d'application du système utilisent désormais les images définitives du mainteneur, les glyphes clair et sombre partageant une même forme
+* `Amelioration` Les exemples fournis et la catégorie d'exemples de l'hôte sont renommés 3-Block Compose
+
 # v1.1.0
 
 ###### 2026/10/08

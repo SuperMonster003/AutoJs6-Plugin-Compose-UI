@@ -22,14 +22,14 @@
 
 | 编号 | 决策 | 含义 |
 | --- | --- | --- |
-| D1 | 命名 | 仓库 `AutoJs6-Plugin-Compose-UI`; `rootProject.name=autojs6-plugin-compose-ui`; 显示名 `Compose UI` (英文, 不可翻译); `applicationId` / namespace / Kotlin 包 `io.github.supermonster003.autojs6.plugin.compose.ui`; 插件 ID `compose-ui`, engine `compose`, variant `default`; 脚本全局对象 `compose` (别名 `$compose`); 文档页 `api/compose.md`, 声明 `aj6-int-compose.d.ts`. 不并入 Three 系列 |
+| D1 | 命名 | 仓库 `AutoJs6-Plugin-Compose-UI`; `rootProject.name=autojs6-plugin-compose-ui`; 显示名 `Compose UI` (英文, 不可翻译); `applicationId` / namespace / Kotlin 包 `io.github.supermonster003.autojs6.plugin.compose.ui`; 插件 ID `compose-ui`, engine `compose`, variant `default`; 脚本全局对象 `compose` (别名 `$compose`); 文档页 `api/compose.md`, 声明 `aj6-int-compose.d.ts`. 不并入 Three 系列. 2026-10-13 修订 (Q9, 维护者拍板): 并入 Three 系列, 仓库 `AutoJs6-Plugin-Three-Block-Compose`, `rootProject.name=autojs6-plugin-three-block-compose`, 显示名 `3-Block Compose` (产品与设计器同名), 包 `io.github.supermonster003.autojs6.plugin.three.block.compose`, 插件 ID / INFO category `three-block-compose`; engine `compose`, 脚本对象, 契约模块 / 包 / 类名, 文档页与声明文件名不变; 版本 1.1.0 -> 1.2.0 与 P8 同版本; 宿主只改契约 `ComposeUiIds` 的两个身份常量 (`f12665ffde`). 改名做法与保留清单见 `AGENTS.md` 第 2 节 |
 | D2 | 进程内渲染 | 插件 APK 内预编译的 Kotlin Compose 渲染器装入宿主进程, `ComposeView` 直接嵌入 `ScriptExecuteActivity` 与 floaty 窗口; 协议层 (节点 / 补丁 / 事件) 与传输无关, 进程外插件 Activity 只作为退路 (附录 E.2), 不在 1.0.0 实现 |
 | D3 | API 范式: 两者都做 | 节点句柄 (`compose.Text({...})` 返回可长期持有的 `ComposeNode`, 直接改属性与增删子节点) 是底层协议对象; `compose.state` + `compose.mount(render)` 的声明式 render 层是上层糖, 两层共用同一条补丁管线, 1.0.0 同时交付 (附录 A.2 / A.3) |
 | D4 | 1.0.0 承载面 | `"ui";` 模式 Activity 内容 (`compose.mount`) 与悬浮窗 (`compose.floaty`); "与旧 ui 混合" (XML 内 `<compose>` 容器, Compose 内 `AndroidView`) 与 "独立对话框 API" (`compose.dialog`) 排 1.1 (附录 F.2 / F.3) |
 | D5 | 组件范围: 核心集 | 1.0.0 实现附录 A.5 的核心集 (30 项: 布局 7, 容器 / 顶栏 4, 文本 / 图标 / 图片 3, Button 家族 5 + IconButton, 选择与输入 6, 进度 2, 对话框与提示 2); 导航 / Tabs / 底部弹层 / 菜单 / 日期时间选择 / Pager / Grid / Chips 等宽集排 1.1 (附录 F.4) |
 | D6 | TSX 排 1.1 | 1.0.0 只提供函数式元素工厂; TSX 工厂 (经 TypeScript Engine 插件现有 classic TSX 契约, 输出 Compose 节点而非 XML) 为 1.1 阶段 (附录 F.1), 1.0.0 的节点协议为其预留 `compose.createElement(type, props, ...children)` 接点 |
 | D7 | 仅本地提交 | 与 3-Shell Terminal / 3-Setup Installer 当前策略一致: 本仓库与宿主改动均仅本地 Conventional Commits, 不推送 GitHub, 不登记官方索引, 不发 Release, 直至维护者明确恢复; 宿主 `PluginInstallWizardCatalog` 条目先落地. 2026-10-04 修订: 维护者授权公开本插件源码仓库并以 noreply 邮箱推送 (会话记录 "源码公开与图稿同步"), 取代源码推送约束; 宿主改动, 官方索引登记与 APK Release 仍待各自明确授权与准入 |
-| D8 | 独立界面仅限画廊与设置 (2026-10-08 修订) | 原决策为无独立界面; 维护者于 2026-10-08 排期 F.5 后修订: 插件有启动器入口, 组件画廊与设置页 (附录 F.5, D32), 它们在插件自身进程运行, 只展示预览与示例脚本, 复制到剪贴板或交给宿主运行, 不执行脚本; 宿主内的渲染器入口, Wake Activity 与 INFO 服务不变; 示例脚本仍随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史仍由插件中心展示 |
+| D8 | 独立界面仅限画廊与设置 (2026-10-08 修订) | 原决策为无独立界面; 维护者于 2026-10-08 排期 F.5 后修订: 插件有启动器入口, 组件画廊与设置页 (附录 F.5, D32), 它们在插件自身进程运行, 只展示预览与示例脚本, 复制到剪贴板或交给宿主运行, 不执行脚本; 宿主内的渲染器入口, Wake Activity 与 INFO 服务不变; 示例脚本仍随插件 `assets/examples/` 提供并同步到宿主示例目录; 发行历史仍由插件中心展示. 2026-10-13 修订 (P8, D38): 独立界面扩展为设计器首页 + 画廊 + 设置; 设计器以 Rhino `Parser` 解析脚本但仍不执行脚本 (永不进入 Rhino `Context`), 启动器 alias, 宿主内渲染器入口, Wake Activity 与 INFO 服务不变 |
 | D9 | 契约模块不依赖 Compose | 宿主新增 `plugin-api/compose-ui-api` (宿主编译并打包, 因此不得依赖任何 Compose 类): 装载面接口 (`ComposeUiRendererFactory` / `ComposeUiRenderer` / `ComposeUiHostEnvironment` / `ComposeUiEventSink`), 数据模型 (`UiNode` / `UiPatch` / `UiEvent` / `UiCommand` / `UiValue` / `ModifierOp` / `ThemeSpec`), 组件目录 (`ComponentCatalog`: 组件名, 属性类型, 插槽, 事件, 作用域限制), 常量 (`ComposeUiIds` / `ComposeUiCapabilityKeys` / `ComposeUiErrorCodes` / `ComposeUiLimits`); 插件以 `compileOnly` 消费该 AAR 的副本 (运行时类由宿主提供), 单元测试 `testImplementation` |
 | D10 | 装载方式: 宿主 classloader 为父 | 宿主为插件 APK 自建 `PathClassLoader(apkPath, nativeLibraryDir, parent = 宿主 classLoader)`: 契约类型, Kotlin stdlib, kotlinx.coroutines 与宿主已有的 AndroidX (core / appcompat / activity / lifecycle / savedstate 等) 全部 parent-first 共享, 因而 `ComposeView` 能直接找到宿主 Activity 设置的 `ViewTreeLifecycleOwner` / `ViewTreeSavedStateRegistryOwner`; Compose 本体 (runtime / ui / foundation / material3 / animation / icons-core) 只在插件 APK, 由该加载器提供. 资源经 `createPackageContext(pkg, 0)` 单独取得. 不复用 `plugins.load` 的 `createPackageContext(CONTEXT_INCLUDE_CODE)` 隔离加载器 (它以 boot classloader 为父, 契约类型无法 cast, AndroidX 会重复加载). 入口类名由插件 Manifest meta-data `org.autojs.plugin.compose.RENDERER_FACTORY` 声明, 宿主经 `Class.forName(name, true, loader)` 实例化并 cast 为契约接口. 门禁: 插件中心已启用 + `PluginTrustManager.isAuthorized` + `requiresHostVersion` + 契约版本区间. P0.2 的 debug / release 插件加载已验证; 2026-10-02 维护者选择 Q1(b), 升级宿主共享 AndroidX, 正式保持 parent-first, 不启用附录 E.3 退路. 原生搜索路径使用 `<apk>!/lib/<当前进程 ABI>`, 不能仅按设备首选 ABI 选择; P1.1 起 V1 契约由宿主打包; P1.2 正式装载器与会话已使用 V1, 负版本探针实现已退役, 未使用的旧定义仅保留于未改动的锁定 AAR |
 | D11 | ComposeView 上下文 | 宿主提供 `ComposeHostContext : ContextWrapper`: base 为宿主 Activity 或 floaty 服务上下文 (窗口, 系统服务, 主题属性), `getResources()` / `getAssets()` 委托插件包资源 (以宿主当前 `Configuration` 经 `createConfigurationContext` 对齐密度 / 夜间 / 语言), 使 material3 内部字符串 (`LocalContext.current.resources.getString(插件 R id)`) 与无障碍文案可解析; `getClassLoader()` 返回 D10 的插件加载器. P0.2 最小计数器证据确认保留宿主 `getTheme()` 即可, 不把插件资源主题覆盖到 Activity 上; RawWindow 在 attach 前显式设置宿主 LifecycleOwner 与 SavedStateRegistryOwner, 关闭时推进 DESTROYED 并 dispose. 扩展组件与 IME / 夜间配色仍需 P2 / P5 回归 |
@@ -47,13 +47,21 @@
 | D23 | 插件中心与宿主注册 | INFO 服务 (action `org.autojs.plugin.INFO`, category `compose-ui`, 实现 `IPluginInfoProvider`), Wake Activity, meta-data `requiresHostVersion` 与 `org.autojs.plugin.compose.RENDERER_FACTORY`; 没有 Binder 能力服务 (与 ImGui 同形), 因此不进 `SERVICE_ACTION_BY_ENGINE`, 由 INFO 通用发现列出; 默认启用遵循 `PluginDefaultEnabledPolicy` 现状 (不新增例外); 宿主向导 `entry(official("compose.ui"), "Compose UI", UI)` 与 ImGui 同组 |
 | D24 | 宿主退化 | 宿主只保留契约模块, 装载器, 会话核心与脚本 API; 插件缺失 / 禁用 / 未授权 / 不兼容时 `compose.mount` / `compose.floaty` 抛 D18 的对应错误, 宿主不内置任何 Compose 渲染实现, 也不回退到 XML 布局 |
 | D25 | Compose 依赖与编译器 | 插件 `platform("androidx.compose:compose-bom:2026.09.00")` + `runtime` / `ui` / `foundation` / `material3` / `animation` / `material-icons-core` (extended 图标集见 Q2), `debugImplementation ui-tooling`; Compose 编译器插件 `org.jetbrains.kotlin.plugin.compose` 在根 `build.gradle.kts` 以 `version System.getProperty("gradle.kotlin.version") apply false` 声明 (与平台插件选定的 Kotlin 同版本), 不硬编码; 若 AGP 9 内置 Kotlin 不接受该编译器插件, 经构建验证后在插件仓库声明 `org.jetbrains.kotlin.android` 并在 `AGENTS.md` 注明理由 (规范 5.2 的例外条款) |
-| D26 | 宿主共享依赖的版本纪律 | 2026-10-02 Q1(b) 定稿: 宿主 app / inrt 的 debug / release 共用 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0, 由宿主版本目录单点声明; 插件编译依赖不能高于宿主, `locks/host-shared-deps.lock` 锁定 51 项解析版本. AndroidX / coroutines / serialization 共享项为插件 `compileOnly`, Kotlin stdlib 2.4.0 为 INFO 独立进程保留打包副本, 宿主内仍 parent-first 且 R8 必须保持 ABI. 宿主 `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath, 插件 `verifySharedClasspath` 守卫编译与排除集合; 任一版本变化时同步两仓库锁与正式最低宿主版本. 依赖解析一致不等于 minified 宿主 ABI 已通过, P1 需补正式契约 / keep 规则 / 装载器并回填最低版本 |
+| D26 | 宿主共享依赖的版本纪律 | 2026-10-02 Q1(b) 定稿: 宿主 app / inrt 的 debug / release 共用 lifecycle 2.9.4, savedstate 1.3.2, emoji2 1.4.0, window 1.5.0, 由宿主版本目录单点声明; 插件编译依赖不能高于宿主, `locks/host-shared-deps.lock` 锁定 51 项解析版本. AndroidX / coroutines / serialization 共享项为插件 `compileOnly`, Kotlin stdlib 2.4.0 为 INFO 独立进程保留打包副本, 宿主内仍 parent-first 且 R8 必须保持 ABI. 宿主 `ComposeUiSharedClasspathTest` 与 `verifyComposeUiSharedClasspath` 守卫四个 runtime classpath, 插件 `verifySharedClasspath` 守卫编译与排除集合; 任一版本变化时同步两仓库锁与正式最低宿主版本. 依赖解析一致不等于 minified 宿主 ABI 已通过, P1 需补正式契约 / keep 规则 / 装载器并回填最低版本. 2026-10-13 修订 (P8.1, D34): `compose-ui-api` 由 `compileOnly` 改为随插件打包并与 D32 的共享副本一样完整 keep, 宿主内仍 parent-first 遮蔽, 版本协商不变; `verify_apk_classpath.py` 的 "不含契约类" 断言反转为 "含契约类且 `--shrunk` 闭包可由 APK 内副本满足" |
 | D27 | 图片与大对象 | `Image` 的 `src` 接受 `ImageWrapper` (`images.read` 等), 文件路径, 以及宿主 `R.drawable` 名称; 进程内直接传递 `Bitmap` 引用 (`UiValue.BitmapRef`), 不编码; 位图所有权归脚本 (`recycle` 由脚本决定), 渲染器只持弱引用并在节点移除时放手; URL 图片不在 1.0.0 |
 | D28 | 兼容矩阵 | API 24 AVD x86, API 28 Sony G8441 (arm64), API 31 Sony XQ-AT72, API 33 Redmi 22120RN86C, API 35 Xiaomi 23046RP50C (HyperOS), API 37 AVD (16 KB 页); 每台设备记录宿主 build 与插件 build; HyperOS 上悬浮窗只在桌面之上活动且需 `requestFocus` (既有记录), 作为 P3.4 验收的已知条件 |
 | D29 | 契约与最低宿主版本 | V1 `CONTRACT_VERSION = 1`, `MIN_SUPPORTED = 1`; P1.3 将 `REQUIRED_HOST_VERSION_CODE` 确认为 5316 (AutoJs6 6.8.0), 对应集成装载器 / 会话核心 / 插件中心注册的构建. 同步 Manifest, 公共文案, JVM / 设备断言与锁定 AAR, 只更新部署元数据, 不变更 V1 wire 语义. 原 5308 为建仓占位值, 保留于历史证据中. F.4 起插件声明 `CONTRACT_VERSION = 2` 并要求匹配宿主 5322; 宿主同时接受 V1 / V2 插件, V1 常量与 5316 保留 |
 | D30 | 打包应用 (inrt) | 打包的脚本应用使用 `compose` 时需目标设备已安装并启用本插件 (与 epub / mail 等插件模块一致); P5.2 验证 inrt 构建中的装载路径与错误提示, 文档写明 |
 | D31 | 示例与守卫 | 插件 `assets/examples/*.js` (计数器, 表单, 列表, 悬浮 HUD, 主题) 由 `assets/examples/index.json` 列出, P4.1 同步到宿主 `app/src/main/assets-app/sample/` 的对应分类; 示例必须能在兼容矩阵上运行, 作为 P5 回归用例 |
-| D32 | 独立进程运行时 | 画廊与设置页在插件自身进程运行, 插件 APK 在运行时引用的全部共享构件 (activity / core / lifecycle / savedstate / startup / tracing / kotlinx-coroutines, 以及 2026-10-08 修订补入的 arch core-runtime / customview-poolingcontainer / emoji2 / lifecycle-process / window 与完整 keep 后被保留成员引用的 lifecycle-livedata-core / kotlinx-serialization, 共 47 项, `app/build.gradle.kts` 的 `standaloneRuntime`) 以宿主共享依赖锁的精确版本随插件打包并用 constraints 钉死; 宿主内 parent-first 装载使这些副本被宿主类遮蔽, R8 对这些包与 `kotlin.**` 一样完整 `-keep` (2026-10-08 由 `-keepnames` 改为 `-keep`: 只保留名称时 R8 仍按插件程序的整程序事实推断, 例如认定插件从不初始化的 `EmojiCompat.get()` 永不返回而把 Compose 文本布局编译成 `throw null`, 在宿主内崩溃); 只有无人引用的 appcompat 2 项继续排除. 守卫: `verify_apk_classpath.py --shrunk` 要求发布包引用的每个类都在 APK, 平台或契约中; 设备测试 APK 不携带宿主独有构件; `verify_standalone_launch.py` 在设备上从启动器 alias 真实启动画廊. 修订原因: build42 的 36 项集合漏掉上述 4 组构件, 画廊从启动器打开即崩溃 (`NoClassDefFoundError: ArchTaskExecutor`), 而当时的设备测试被测试 APK 携带的宿主副本掩盖. 独立界面不得引用 `compose-ui-api` 契约类 (插件进程没有它们) |
+| D32 | 独立进程运行时 | 画廊与设置页在插件自身进程运行, 插件 APK 在运行时引用的全部共享构件 (activity / core / lifecycle / savedstate / startup / tracing / kotlinx-coroutines, 以及 2026-10-08 修订补入的 arch core-runtime / customview-poolingcontainer / emoji2 / lifecycle-process / window 与完整 keep 后被保留成员引用的 lifecycle-livedata-core / kotlinx-serialization, 共 47 项, `app/build.gradle.kts` 的 `standaloneRuntime`) 以宿主共享依赖锁的精确版本随插件打包并用 constraints 钉死; 宿主内 parent-first 装载使这些副本被宿主类遮蔽, R8 对这些包与 `kotlin.**` 一样完整 `-keep` (2026-10-08 由 `-keepnames` 改为 `-keep`: 只保留名称时 R8 仍按插件程序的整程序事实推断, 例如认定插件从不初始化的 `EmojiCompat.get()` 永不返回而把 Compose 文本布局编译成 `throw null`, 在宿主内崩溃); 只有无人引用的 appcompat 2 项继续排除. 守卫: `verify_apk_classpath.py --shrunk` 要求发布包引用的每个类都在 APK, 平台或契约中; 设备测试 APK 不携带宿主独有构件; `verify_standalone_launch.py` 在设备上从启动器 alias 真实启动画廊. 修订原因: build42 的 36 项集合漏掉上述 4 组构件, 画廊从启动器打开即崩溃 (`NoClassDefFoundError: ArchTaskExecutor`), 而当时的设备测试被测试 APK 携带的宿主副本掩盖. 独立界面不得引用 `compose-ui-api` 契约类 (插件进程没有它们). 2026-10-13 修订 (P8.1): 打包集合追加契约 AAR `compose-ui-api` (完整 keep) 与宿主 Rhino slim jar (仅 `designer/parse` 引用, 允许 R8 裁剪到 Parser / AST 闭包), 独立界面自 P8 起可引用契约类; `verify_standalone_launch.py` 改为启动设计器首页, 再进入画廊与设置页 |
+| D33 | 设计器归属 (2026-10-13) | 可视化设计器做在本插件的独立应用内, 在插件自身进程运行 (P8); 宿主只增加可选的反向打开入口 (P8.4, 由维护者并行协调); 脚本 API, 契约版本与宿主内渲染路径不变 |
+| D34 | 设计期预览 (2026-10-13) | 用真实渲染器所见即所得: `compose-ui-api` 随插件打包并完整 keep (修订 D26 / D32), 设计器把文档派生为 `RenderFrame` 复用 `RenderNode` / `ModifierMapper` / `ThemeMapper`; 不另写简化预览 |
+| D35 | 工程与往返 (2026-10-13) | 脚本文件即工程, 不另存 JSON; 以宿主 Rhino slim jar (SHA-256 锁定) 的 `Parser` 解析完整 AST 回树, 只解析不执行; 可识别子集见 P8.2, 其余按源码范围不透明保留; 无法映射即拒绝并定位, 不静默丢弃; 首版只导出 JavaScript, TSX 留后续版本 |
+| D36 | 交互形态与范围 (2026-10-13) | 大纲树 + 预览画布 + 组件面板 + 属性抽屉; 拖拽在大纲内重排 / 换父, 画布长按拖动并高亮合法落点; 全部 55 个组件由契约目录驱动, 弹层类以展开开关或占位呈现; modifier 链完整可视化编辑 (增删, 排序, 参数, 作用域过滤) |
+| D37 | 逻辑生成范围 (2026-10-13) | 事件生成处理函数桩; 受控组件可绑定 `compose.state` 变量并自动生成声明与赋值; 处理函数源码可在属性抽屉内直接编辑 (纯文本, 保存时语法检查); 其它逻辑在宿主编辑器编写并以不透明段保留 |
+| D38 | 独立应用导航 (2026-10-13, 修订 D8) | 启动器进入设计器首页 (工程列表), 画廊与设置降为次级页; 四个 alias 与图标不变; `verify_standalone_launch.py` 与设备测试随之调整 |
+| D39 | 存储与宿主衔接 (2026-10-13) | 工程存插件私有目录, 以系统文件选择器导入导出, `FileProvider` 对外授权; 去向: 发送运行, 在宿主编辑器打开, 导入宿主脚本目录, 复制剪贴板 (均复用宿主既有 `external.open` 入口, 宿主无需改动); 反向打开: 宿主以 content Uri + 写授权启动设计器, 设计器保存时直接写回, 宿主编辑器返回时重载 |
+| D40 | 可靠性 (2026-10-13) | 全部编辑走命令模式, 支持多步撤销 / 重做; 草稿自动保存在私有目录, 进程被杀可恢复; 只有显式保存才写脚本文件 (含反向打开的宿主文件) |
 
 由 D2 / D9 / D10 派生的硬约束:
 
@@ -187,6 +195,14 @@ renderer/
     TextFieldEditState.kt               原生编辑态 + editSeq 仲裁
   a11y/
     SemanticsSupport.kt                 testTag / contentDescription / testTagsAsResourceId
+app/                                    F.5 独立界面 (插件进程): StandaloneActivity / GalleryActivity / SettingsActivity
+designer/                               P8 可视化设计器 (插件进程, 1.2.0)
+  model/                                DesignDocument / DesignNode / ModifierEntry, 不可变模型与 EditCommand 撤销重做栈
+  parse/                                Rhino Parser -> AST -> DesignDocument (只解析不执行), DesignerParseError 定位; 唯一允许引用 org.mozilla 的包
+  codegen/                              DesignDocument -> 脚本文本 (风格同 GalleryNode.render), 往返稳定
+  preview/                              DesignDocument -> RenderFrame 适配, 设计期命令 / 事件 / 文本控制器本地实现
+  ui/                                   DesignerHomeActivity (工程列表), DesignerActivity (画布 / 大纲 / 面板 / 抽屉)
+  storage/                              私有目录工程与草稿, SAF 导入导出, FileProvider, 宿主去向 (运行 / 编辑 / 导入 / 剪贴板)
 src/main/assets/examples/               index.json + *.js (D31)
 src/test/                               JVM: ManifestContractTest, PluginInfo, 资源守卫, ModifierMapper / ValueMapper / NodeStore 纯逻辑
 src/androidTest/                        渲染器 instrumentation (需宿主 compose-ui-api 类在测试 APK 中可用: 以 androidTestImplementation 引入 AAR)
@@ -228,20 +244,20 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 
 | 项目 | 值 |
 | --- | --- |
-| 仓库与目录名 | `AutoJs6-Plugin-Compose-UI` |
-| `rootProject.name` | `autojs6-plugin-compose-ui` |
-| 应用标题 (不可翻译) | `Compose UI` |
-| `applicationId` / namespace / Kotlin 包 | `io.github.supermonster003.autojs6.plugin.compose.ui` |
-| 插件 ID / engine / variant | `compose-ui` / `compose` / `default` |
-| INFO 服务 | `ComposeUiPluginInfoService`, action `org.autojs.plugin.INFO`, category `compose-ui` |
-| 渲染器入口 meta-data | `org.autojs.plugin.compose.RENDERER_FACTORY` = `io.github.supermonster003.autojs6.plugin.compose.ui.renderer.ComposeUiRendererFactoryImpl` |
+| 仓库与目录名 | `AutoJs6-Plugin-Three-Block-Compose` (2026-10-13 前为 `AutoJs6-Plugin-Compose-UI`) |
+| `rootProject.name` | `autojs6-plugin-three-block-compose` |
+| 应用标题 (不可翻译) | `3-Block Compose` (2026-10-13 前为 `Compose UI`) |
+| `applicationId` / namespace / Kotlin 包 | `io.github.supermonster003.autojs6.plugin.three.block.compose` |
+| 插件 ID / engine / variant | `three-block-compose` / `compose` / `default` |
+| INFO 服务 | `ThreeBlockComposeInfoService`, action `org.autojs.plugin.INFO`, category `three-block-compose` |
+| 渲染器入口 meta-data | `org.autojs.plugin.compose.RENDERER_FACTORY` = `io.github.supermonster003.autojs6.plugin.three.block.compose.renderer.ComposeUiRendererFactoryImpl` |
 | 宿主契约包 | `org.autojs.plugin.compose.api` (`plugin-api/compose-ui-api`) |
 | 契约版本 / 最低宿主 | 当前 `CONTRACT_VERSION = 2` (P1.1 冻结 V1, F.4 只追加 V2), 最低宿主 5322 (6.8.0); V1 历史最低宿主 5316 (P1.3 回填) 保留在冻结常量中 |
 | 脚本全局对象 | `compose` (别名 `$compose`), 错误类 `ComposeError` |
 | 平台版本插件 | `io.github.supermonster003.autojs6-platform-versions` 1.9.0 (建仓起点 1.8.3) |
 | Compose | BOM `2026.09.00`; 编译器插件版本 = `gradle.kotlin.version` |
-| 发布文件名 | `autojs6-plugin-compose-ui-v{VERSION_NAME}-{CRC32}.apk` (单 APK, D22) |
-| 向导条目 | `entry(official("compose.ui"), "Compose UI", UI)` |
+| 发布文件名 | `autojs6-plugin-three-block-compose-v{VERSION_NAME}-{CRC32}.apk` (单 APK, D22) |
+| 向导条目 | `entry(official("three.block.compose"), "Three Block Compose", UI)` |
 | 文档 / 声明 | `api/compose.md` + 类型页; `aj6-int-compose.d.ts` |
 
 ---
@@ -258,8 +274,9 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
+| P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名为 3-Block Compose (修订 D1), P8.1 起未开始 |
 
-依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate.
+依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4.
 
 ---
 
@@ -535,6 +552,58 @@ F.5 证据 (2026-10-08): `docs/dev/p7-f5-evidence.md`. 画廊 (`app.GalleryActiv
 F.5 补正 (2026-10-08, build44): 维护者在 Xperia XQ-DQ72 (API 33) 与自有 AVD 上发现启动器图标可见但点击无法进入. 设备 logcat 为 `NoClassDefFoundError: androidx.arch.core.executor.ArchTaskExecutor` (`LifecycleRegistry.addObserver` <- `ComponentActivity.<init>` <- `GalleryActivity`): build42 的 36 项集合只收录 arch `core-common`, 未收录 `core-runtime`; 对收缩后的发布包做引用闭包分析, 除契约类外还缺 `customview-poolingcontainer` (ComposeView 释放策略), `emoji2` (Compose 文本) 与 `androidx.window` (WindowInfo.containerSize). 设备测试没有发现, 是因为测试 APK 携带整份共享锁的运行时副本, 与画廊同进程而掩盖了缺口. 修正: `standaloneRuntime` 扩为 47 项 (补入 core-runtime / poolingcontainer / emoji2 / lifecycle-process / window x3, 以及完整 keep 后被保留的 savedstate / lifecycle 成员引用的 lifecycle-livedata-core / kotlinx-serialization x3; 共享锁 49 项非 Kotlin 构件只剩无人引用的 appcompat x2 不打包); 首个候选包只对新增包 `-keepnames`, 在隔离宿主的设备套件中 7 项 RENDER_FAILED 并最终进程崩溃: R8 由 "插件程序从不初始化 EmojiCompat" 推断 `EmojiCompat.get()` 永不正常返回, 把 Compose `EmojiCompatStatus.getFontLoadState` 编译成 `EmojiCompat.get(); throw null`, 宿主内 (EmojiCompat 已初始化) 每次文本布局都抛 NullPointerException; 因此共享包改为与 `kotlin.**` 一样完整 `-keep`, 代价是这些包不再裁剪; `debugAndroidTestRuntimeClasspath` 同样排除 6 项宿主独有构件且 `verifySharedClasspath` 守卫; `verify_apk_classpath.py --shrunk` 要求发布包引用的每个类都在 APK, 平台或契约中 (旧包在此检查下报 15 个不可加载的类); 新增 `verify_standalone_launch.py` 在设备上安装 APK, 从已启用 alias 启动画廊, 经无障碍树打开首个条目与设置页并确认进程存活 (旧包在该检查下复现崩溃), 本地验证顺序与 CI 两个模拟器作业在 instrumentation 后执行. 验证 (自有 API35 x86_64 AVD `compose_f5c_api35`, 维护者 Icon Studio 的未提交改动在主工作树中, 构建与测试在独立 worktree 进行): JVM 84 项通过, lint 0 错误 / 9 警告, `verifySharedClasspath` 51 项中 47 项打包 / appcompat 2 项不入测试 APK, `verify_apk_classpath.py` debug 与 `--shrunk` release 通过 (未解析引用 0), debug 与签名 release 的启动检查均通过 (画廊 / Column 条目 / 设置页), 插件 instrumentation 73 项全部通过 (0 失败 / 0 跳过; 测试 APK 已不携带宿主独有构件); 隔离宿主 `org.autojs.autojs6.compose.spike` (宿主 master `910aec9495`, 独立 worktree 构建) 的 compose 设备包 87 项中 71 项通过, 15 项按假设跳过 (需显式参数的性能 / 旧 provider / 打包应用 / 包变更 / 权限负例阶段, 小米 IME 与旧宿主 V2 门禁), 1 项失败. 10 项 TSX 场景在完整运行中因新建 AVD 未安装 TypeScript Engine 而失败, 临时安装 0.6.8 后复跑 10 项全部通过 (计入 71 项); 唯一失败 ComposeUiLoaderTest.loaderCachesByIdentityButRechecksEnablementAndSharesParentClasses 断言 contractVersion() 等于 1 (宿主测试 2026-10-02 写入, 早于 F.4 把契约提升为 2), 属宿主侧既有过期断言, 与本次改动无关; 本轮 87 项比 F.5 当日的 74 项多出 core/plugin/compose 装载套件 13 项. 首个仅 -keepnames 的候选包在同一套件 7 项 RENDER_FAILED 并最终宿主进程崩溃, 完整 keep 后不再出现. 签名包 `autojs6-plugin-compose-ui-v1.1.0-5d2ce3ef.apk` 为 4673146 B, 13482 类 / 82466 DEX 方法引用, SHA-256 `9856d4f57b361d7597cfcee39c9e50b5466cca644029a6081127c057e2890dd7`, 较 build42 +1048858 B / +21853 方法引用, 仍在维护者预先接受的 F.5 增量之内, 记入 `docs/dev/p7-f5-size-review.json`.
 
 F.6 证据 (2026-10-08): `docs/dev/p7-f6-evidence.md`. P5.3 未测的 "大树挂载期间单次 state 更新" 经宿主测量工具 `list-updates` 补测 (宿主 `51b7760c49`, 专用 API35 x86_64 AVD, 插件 build36): 1000 行渲染层可见更新 722.50 / 732.29 ms (中位 / p90), 其中 JS 重建 483 ms, 句柄层 156.44 / 178.53 ms, 据此实施. 宿主 `1adc2b8639` (5323) 交付 `compose.memo(fn, deps, options?)`: 渲染期专用, 按渲染函数或外层片段作用域内的 key / 调用次序及函数字面量匹配, 依赖值与所读 state 版本均未变且节点仍在上一棵树时复用, 失败帧保留, 拒绝帧清空, 256 项依赖 / 每次渲染 5000 次上限. 同一 AVD 的 memo 行为 307.22 / 322.22 ms (渲染层 752.78 / 791.42, 句柄层 155.81 / 173.66), 构建耗时由 489.53 降至 99.94 ms; 单 AVD 决策观测, 不替代 Q5 基线. 宿主 JVM 208 + 契约 29, 设备 UI 8 项 (含 300 行 memo) 及签名 Engine 0.6.8 下 10 个 TSX (含 memo) + 5 个 JS 示例共 15 项通过. 配套: Declarations 4.36.0 `5102e03`, Ace 1.30.0/144 `6748217`, Engine 0.6.8/90 `27e6100`, 文档 6.8.0/97 `a8f7972` `b882abc`, Offline Docs 6.8.6/82 `918e881`, 各自门禁通过. 插件渲染器, 契约与最低宿主 5322 不变; build38 签名包 `2740f0ee` 为 3023736 B (较 F.4 最终包 +1584 B 文本资源) / 53842 方法引用不变, 记入 `docs/dev/p7-f6-size-review.json`, 维护者于 2026-10-08 接受该增量, 原 Q5 复核线不变. 未执行: 六设备矩阵, API24, inrt memo, 宿主全量 JVM/lint, 新 Q5 基线与远端 CI.
+
+---
+
+## P8: 可视化设计器 (1.2.0)
+
+目标: 插件独立应用从 "活的文档" 变为创作工具: 在插件自身进程内, 用真实渲染器所见即所得地编辑 compose 脚本的界面树, 以脚本文件为工程, 经 Rhino `Parser` 解析回树, 产物交给宿主运行, 编辑或导入. 脚本 API, 契约版本与宿主内渲染路径不变.
+
+需求由维护者于 2026-10-13 分四轮拍板, 结论写入 D33 - D40 并修订 D8 / D26 / D32; Q8 - Q11 已于同日拍板 (见附录 D). 本阶段依赖 P7 全部完成 (1.1.0 本地 gate); 建议顺序 P8.1 -> P8.2 -> P8.3 -> P8.4 -> P8.5, 其中 P8.2 的解析 / 生成与 P8.3 的界面可在 P8.1 完成后并行; P8.4 的 (宿主) 条目由维护者并行协调, 不阻塞其它条目.
+
+### P8.0 改名为 3-Block Compose (2026-10-13)
+
+- [x] (插件 / 宿主) 维护者在 Q9 拍板: 产品与设计器同名 `3-Block Compose`, 仓库 `AutoJs6-Plugin-Three-Block-Compose`, 并入 Three 系列 (修订 D1, 身份表见 4.4 与 `AGENTS.md` 第 2 节). 按 `AUTOJS6_PLUGIN_THREE_SERIES_RENAME_AGENTS.md` 执行: 包目录 `git mv`, 身份类 `ThreeBlockComposePlugin` / `ThreeBlockComposeInfoService` / `ThreeBlockComposeRuntimeInfo` / `ThreeBlockComposePluginInfo` 及测试改名, 有序字符串替换 (122 个文件), 版本 1.2.0 / build 100, 10 语言 changelog 1.2.0 条目与 README 状态文案, 维护者正式图稿 (2048 x 2048) 经 Icon Studio 重新生成 24 项资源. 宿主 `f12665ffde`: 契约 `ComposeUiIds.PLUGIN_PACKAGE_NAME` / `PLUGIN_ID` 与快照, 向导条目, 11 语言错误字符串, 控制台前缀与会话警告, 示例分类 `sample/3-Block Compose`, 相关 JVM / 设备测试, zh-Hans 6.8.0 changelog; 契约 AAR 重生并换锁 (`557b7efc...`). 保留不改的机制名称与历史记录见 `AGENTS.md` 第 2 节 "改名记录".
+- 后续 (本小节外): GitHub 仓库改名与 origin, 本地目录改名, 官方索引 catalog-icons 图稿登记换到新包, 四个文档仓库中的产品名; 证据与结果写在本小节下方.
+
+### P8.1 依赖边界: 契约与解析器打包
+
+- [ ] (插件) `compose-ui-api.aar` 由 `compileOnly` 改为 `implementation` (D34, 修订 D26): 与 D32 的共享副本同样完整 `-keep` 并保持 ABI, 宿主内 parent-first 装载继续使用宿主副本, 渲染器行为与版本协商不变; `locks/host-api-aars.lock` 不变. `:app:verifySharedClasspath` 与 `.python/verify_apk_classpath.py` 的 "不含契约类" 断言反转为 "含契约类, `--shrunk` 闭包可由 APK 内副本满足"; 设备测试 APK 不再需要单独携带契约 AAR.
+- [ ] (插件) Rhino 解析器 (D35): 从宿主 `slimRhinoJar` 产物复制 `libs/org-mozilla-rhino-2_0_0-SNAPSHOT-slim.jar` (约 0.9 MB, 已去掉 JLine / optimizer / JFR), 新建 `locks/rhino-jar.lock` 记录 SHA-256 与来源宿主提交, 校验方式同契约 AAR; `implementation` 引入, 只允许 `designer/parse` 包引用 (JVM 守卫测试扫描其它包不得 import `org.mozilla.javascript`); R8 不加 keep, 允许裁剪到 Parser / AST 闭包; 宿主内该副本永不被触及 (渲染器不引用), 与宿主 Rhino 同名类的遮蔽关系与 D32 一致.
+- [ ] (插件) 只解析不执行 (维持 D8 的 "不执行脚本"): 经 `CompilerEnvirons` + `Parser` 直接得到 AST, 永不 `Context.enter`, 不编译, 不求值; 语言版本与宿主引擎一致, 开启注释记录以保留不透明段原文.
+- [ ] (插件) `AGENTS.md` 第 5.2 / 12 / 13 节与 README 兼容性段同步: 独立界面自 P8 起可引用契约类; 契约 AAR 与 Rhino jar 的版本纪律; 体积预算按 Q8 回填.
+- [ ] (测试) JVM: 锁文件与 jar 一致性, 包引用守卫; 本仓库 `verify_apk_classpath.py` (debug 与 `--shrunk`) 通过; 宿主侧: 打包集合与 R8 规则变化, 按 `AGENTS.md` 13.2 的 MUST 重跑宿主侧完整设备矩阵, 证明 parent-first 装载与渲染器不受影响 (证据等级同 P5.2).
+
+### P8.2 模型, 命令, 解析与生成
+
+- [ ] (插件) `designer/model`: 不可变 `DesignDocument` (承载 `mount` / `floaty` / `dialog` 与各自 options, 根节点, `compose.state` 声明表, 前后不透明代码段), `DesignNode` (`type`, `key`, `props`: 字面量 `UiValue` / 不透明表达式 / state 绑定三态, `modifiers: List<ModifierEntry>` 有序链, `children`, `slots`, `handlers`: 事件名 -> 处理函数源码); 一切编辑经 `EditCommand` (插入 / 删除 / 移动 / 改属性 / 改 modifier / 绑定 state / 改处理函数 / 改承载选项) 进入撤销 / 重做栈 (D40), 连续修改同一属性可合并为一步, 每个命令有逆命令.
+- [ ] (插件) 校验由契约目录驱动 (D36): `ComponentCatalog` V2 的 `PropSpec` 类型 / 枚举 / 必填 / 默认值, `childrenPolicy`, `allowedParents`, `scope` 与 `modifiers` 列表决定可放置性与属性表单; 上限引用 `ComposeUiLimits` (节点数, 深度, 列表项); 违反项在大纲与抽屉标红但不阻止保存, 导出时汇总提示.
+- [ ] (插件) `designer/parse` (D35): 识别 `"ui";` 指令, `compose.mount | floaty | dialog(nodeOrRender, options)` (render 为 `function () { return <tree>; }` 或箭头函数, 直接传节点亦可), `let / const / var x = compose.state(init)`, 节点工厂 `compose.X({props}, child, ...)` / `compose.X({props}, [children])` / `compose.X(child, ...)`, 字符串子节点, 快捷属性与 `compose.modifier().a().b()` 链, `key`, 事件属性的函数表达式 (源码原样保留), `state.value` 读写与处理函数内对 state 的赋值 (识别为绑定). 其余顶层语句按源码范围原样保留为不透明段, 属性值中无法映射为字面量的表达式保留为不透明表达式; 结构上无法映射 (条件 / 循环生成子节点, 非 compose 工厂调用作为节点等) 时抛 `DesignerParseError(line, column, reason)` 并拒绝打开, 不静默丢弃.
+- [ ] (插件) `designer/codegen`: 由模型生成脚本, 风格与画廊 `GalleryNode.render` 一致 (4 空格缩进, 单引号, 子节点换行), 不透明段与处理函数源码原样写回; 往返稳定性为硬要求: `parse(codegen(doc)) == doc`, 且 `codegen(parse(script))` 对设计器生成的脚本幂等.
+- [ ] (测试) JVM: 56 条画廊示例与 `assets/examples/` 5 个示例全部解析成功并往返; 错误定位用例 (每类拒绝原因至少 1 条); 命令栈不变量 (撤销后模型逐字段相等, 合并命令只占一步); 目录驱动校验与 `GalleryCatalogTest` 共用真实目录.
+
+### P8.3 设计器界面 (插件进程)
+
+- [ ] (插件) 导航 (D38, 修订 D8): 四个启动器 alias 的目标改为 `DesignerHomeActivity` (工程列表: 新建 / 最近 / 私有目录工程 / 从文件导入), 画廊与设置从首页顶部栏进入; `verify_standalone_launch.py` 改为启动首页, 再进入画廊首条目与设置页; `GalleryDeviceTest` / `LauncherIconDeviceTest` 相应调整.
+- [ ] (插件) `DesignerActivity` 四区 (D36): 预览画布 (真渲染器: `designer/preview` 把 `DesignDocument` 派生为 `RenderFrame`, 复用 `RenderNode` / `ModifierMapper` / `ThemeMapper`; 命令注册表, Snackbar 与文本控制器为设计期本地实现, 事件只用于选中, 不回调脚本); 大纲树 (多级折叠, 拖拽重排与换父, 与画布选中同步); 组件面板 (底部弹层, 按画廊 9 个分类列出 55 个组件, 目录驱动); 属性抽屉 (目录驱动表单: 文本 / 数字 / 布尔 / 颜色选择 / dp / sp / 枚举 / 图标名 / 形状 / 文本样式各自编辑器; 不透明表达式以代码框显示并可改回字面量; state 绑定下拉 (D37); 事件列表与处理函数多行源码编辑 (D37, 纯文本, 保存时经 Rhino `Parser` 做语法检查); modifier 链有序列表: 增删, 拖动排序, 逐项参数编辑, 作用域项按父容器过滤).
+- [ ] (插件) 画布交互: 选中高亮 (overlay 边框与名称标签), 点击选中, 长按拖动至落点 (以 `onGloballyPositioned` 记录各节点边界, 落点按 `childrenPolicy` / `allowedParents` / `scope` 判定并高亮合法容器与插入位置); 画布缩放, 亮 / 暗与主题色预览跟随设置页; 弹层类组件 (AlertDialog / ModalBottomSheet / DropdownMenu / DatePicker / TimePicker / Tooltip / Snackbar) 以 "展开" 开关或占位卡片呈现, 不弹真实窗口.
+- [ ] (插件) 承载选项编辑: `mount` options, `floaty` (x / y / raw / 可触摸 / 焦点等, 与附录 A.6 一致), `dialog` (alert / bottomSheet, cancelable, theme); 撤销 / 重做与草稿自动保存 (D40): 草稿按工程存私有目录 `drafts/`, 编辑停顿与 `onStop` 时写入, 进程被杀后重开可恢复; 显式保存才写脚本文件.
+- [ ] (插件) 字符串 10 语言, 半角标点 (第 10 节); 设计器页面名按 Q9; 无障碍: 大纲, 面板与抽屉控件有 contentDescription / testTag.
+- [ ] (测试) instrumentation (API 24 x86 与 API 35 x86_64 AVD, 至少一台真机): 新建工程 -> 拖入 Column / Text / Button -> 改属性与 modifier -> 预览更新 -> 保存 -> 重开往返一致; 56 条画廊示例逐一导入并渲染; 大纲拖拽换父; 撤销 / 重做; 杀进程后草稿恢复; `verify_standalone_launch.py` 覆盖首页 / 画廊 / 设置.
+
+### P8.4 工程存储与宿主衔接
+
+- [ ] (插件) 存储 (D39): 工程即脚本文件, 存 `filesDir/designer/projects/*.js`, 草稿存 `drafts/`; SAF 导入 (`ACTION_OPEN_DOCUMENT`, 复制到私有目录并记录来源 Uri) 与导出 (`ACTION_CREATE_DOCUMENT`); `FileProvider` (authority `${applicationId}.designer`) 暴露 `projects/`, 按需授予读或读写.
+- [ ] (插件) 四个去向 (D39, 宿主无需改动): 发送运行 (`RunIntentActivity` + `script` extra, 复用 `ScriptLauncher`); 在宿主编辑器打开 (`EditIntentActivity` + content Uri + `FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_PERSISTABLE_URI_PERMISSION`, 宿主已接受 content Uri 并取持久权限); 导入宿主脚本目录 (`ImportIntentActivity` + content Uri, 显示名以 `.js` 结尾); 复制到剪贴板. 宿主未安装或入口不可解析时沿用画廊的提示.
+- [ ] (插件) 反向打开 (D39): `DesignerActivity` 注册 exported intent-filter (`ACTION_EDIT` / `ACTION_VIEW`, scheme `content` / `file`, mimeType `application/x-javascript` / `text/javascript` / `text/plain`), 打开时解析 Uri 内容; 保存时直接写回该 Uri (content: `openOutputStream`, 需写授权; 无写授权则降级为 "另存到私有目录" 并提示); 顺带使系统文件管理器可用设计器打开 `.js`.
+- [ ] (宿主) 编辑器菜单 "在 Compose UI 设计器中打开" (维护者并行协调, 不阻塞本阶段其它条目, Q10): 先保存当前文件, 经宿主 `FileProvider` 生成 content Uri 并授予读写, `setPackage` 指向插件后以 `ACTION_EDIT` 启动; 插件未安装或 INFO 版本低于 1.2.0 时隐藏或提示; 返回 `onResume` 时以 `lastModified` / 内容哈希检测变化并复用 `EditorView` 既有重载路径; 宿主 `.changelog` 10 语言; 最低宿主版本不变 (可选能力).
+- [ ] (测试) instrumentation: `FileProvider` 授权与四个去向在宿主已安装时可解析 (同 `GalleryDeviceTest` 写法), 反向打开 content Uri 的解析与写回; 宿主侧 (条目落地后): 反向打开 -> 设计器写回 -> 宿主重载的设备证据.
+
+### P8.5 文档, README, changelog 与 1.2.0 本地 gate
+
+- [ ] (文档) README 10 语言: 简介 / 功能特性 / 使用方式增加设计器 (入口, 工程, 四个去向, 反向打开); `AutoJs6-Documentation` 的设计器页面按 Q11; 离线文档同步; `aj6-int-compose.d.ts` 与 Ace 声明无变化 (脚本 API 未改).
+- [ ] (插件) `.changelog` 1.2.0 (10 语言, 通俗, 半角标点); 版本名 1.2.0; 体积增量与 Q8 预算对照写入证据; 图标与 alias 不变.
+- [ ] (发布) 本地 gate: `AGENTS.md` 第 14 节全部步骤 + P8.1 要求的宿主侧完整设备矩阵 + 设计器 instrumentation; 远端步骤遵守 D7; 证据 `docs/dev/p8-designer-evidence.md`.
 
 ---
 
@@ -814,6 +883,28 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 **已拍板 (2026-10-03)**: 按既定建议顺序 F.1 TSX -> F.2 与旧 ui 混合 -> F.3 `compose.dialog` -> F.4 宽集 -> F.5 画廊 -> F.6 细粒度更新推进; 1.0.0 gate 在先, F.6 是否需要仍以性能证据为依据.
 
 F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6 细粒度更新的先后.
+
+---
+
+### Q8 (P8.1 前): 体积预算
+
+**已拍板 (2026-10-13)**: 体积是考量因素但上限无需过严; 增量不足 10 MiB 时不作为阻断条件, 实测增量仍写入 P8.5 证据, 明显异常时先排查 keep 规则.
+
+原建议: 契约 AAR (约 230 class) 与 Rhino slim jar (release 经 R8 裁剪到 Parser / AST 闭包) 进入插件 APK, release APK 增量上限 1.0 MB.
+
+### Q9 (P8.3 前): 设计器页面名
+
+**已拍板 (2026-10-13)**: 插件改名为 `Three-Block Compose` 系列成员, 产品与设计器同名 `3-Block Compose` (不翻译, 即 `app_name`); 设计器首页标题沿用 `app_name`, 不另设可翻译的 "设计器" 产品名. 应用图标采用维护者提供的 `three-block-compose-ic-launcher-light.png` / `-dark.png`. 改名已作为 P8.0 完成.
+
+原建议: 页面标题可翻译 (zh-Hans "设计器", en "Designer"), 工程列表页标题沿用 `app_name`.
+
+### Q10 (P8.4 前): 宿主反向入口的时机与判定
+
+**已拍板 (2026-10-13)**: 按建议实施. 以插件 INFO 的版本 >= 1.2.0 判定可用 (不新增契约常量, 契约版本仍为 2); 时机可晚于插件 1.2.0 发布, 插件侧四个去向不依赖它; (宿主) 条目仍由维护者并行协调.
+
+### Q11 (P8.5 前): 文档页归属
+
+**已拍板 (2026-10-13)**: 按建议实施, `AutoJs6-Documentation` 新增独立指南页 (设计器使用, 工程与往返规则, 可识别的脚本子集), `api/compose.md` 只加一处链接; 离线文档同步.
 
 ---
 

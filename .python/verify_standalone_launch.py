@@ -16,11 +16,11 @@ import time
 import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 
-PACKAGE = "io.github.supermonster003.autojs6.plugin.compose.ui"
+PACKAGE = "io.github.supermonster003.autojs6.plugin.three.block.compose"
 DEFAULT_ALIAS = f"{PACKAGE}/.launcher.AdaptiveAutoIconAlias"
 GALLERY = f"{PACKAGE}/.launcher."
 SETTINGS = f"{PACKAGE}/.app.SettingsActivity"
-UI_DUMP = "/data/local/tmp/compose-ui-standalone-launch.xml"
+UI_DUMP = "/data/local/tmp/three-block-compose-standalone-launch.xml"
 
 
 class Adb:

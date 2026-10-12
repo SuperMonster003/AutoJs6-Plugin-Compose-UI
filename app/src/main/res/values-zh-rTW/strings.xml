@@ -37,7 +37,7 @@
     <string name="gallery_category_text">文字, 圖示與圖片</string>
     <string name="gallery_copied">已將指令碼複製到剪貼簿</string>
     <string name="gallery_copy">複製指令碼</string>
-    <string name="gallery_note">指令碼在 AutoJs6 中執行, 需要安裝並啟用 Compose UI %1$s, 宿主版本不低於 %2$d.</string>
+    <string name="gallery_note">指令碼在 AutoJs6 中執行, 需要安裝並啟用 3-Block Compose %1$s, 宿主版本不低於 %2$d.</string>
     <string name="gallery_run">在 AutoJs6 中執行</string>
     <string name="gallery_run_failed">無法啟動 AutoJs6 執行指令碼</string>
     <string name="gallery_run_missing_host">未安裝 AutoJs6</string>

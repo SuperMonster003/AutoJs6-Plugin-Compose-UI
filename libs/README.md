@@ -65,3 +65,19 @@ loading and optional extension class files are byte-identical; only
 ComposeUiContract changes its maximum supported version to 2. The V1 minimum
 is still 1, and its frozen catalog remains 30 entries. See
 `docs/dev/p7-wide-aar-compatibility.json` for the complete class comparison.
+
+## 2026-10-13 rename artifact (3-Block Compose)
+
+The current compose-ui-api.aar is the host release module at host commit
+`f12665ffde` (`refactor(plugin): track the renamed 3-Block Compose plugin`),
+assembled with `:plugin-api:compose-ui-api:assembleRelease` on the host master
+branch. SHA-256: `557b7efc8fd7d17c2032f0a6e0ccb5f64b42d0a2f3dceabacd06c9ce89b352a6`.
+Only `ComposeUiIds.PLUGIN_PACKAGE_NAME`
+(`io.github.supermonster003.autojs6.plugin.three.block.compose`) and
+`ComposeUiIds.PLUGIN_ID` (`three-block-compose`, also the INFO category) change
+together with the reviewed V1 snapshot; the module name, the
+`org.autojs.plugin.compose.api` package, every class name, `ENGINE`,
+`CONTRACT_VERSION = 2` and the shared dependency lock are unchanged. The host
+discovers the plugin by `PLUGIN_PACKAGE_NAME`, so the renamed plugin needs a host
+build that contains this commit; `REQUIRED_HOST_VERSION` stays 5322 because an
+older host never evaluates it for the new package.

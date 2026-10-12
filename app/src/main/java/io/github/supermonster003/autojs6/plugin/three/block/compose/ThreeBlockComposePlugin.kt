@@ -1,0 +1,44 @@
+package io.github.supermonster003.autojs6.plugin.three.block.compose
+
+import org.autojs.plugin.compose.api.ComposeUiContract
+import org.autojs.plugin.compose.api.ComposeUiIds
+import org.autojs.plugin.compose.api.v2.ComposeUiV2
+
+/**
+ * Identity constants shared by the manifest, the INFO service, the documentation and the tests.
+ * They must stay identical to the host-side registration (roadmap D1 / D23 and section 4.4); the
+ * JVM manifest contract test fails when the manifest drifts from them.
+ *
+ * The values reference the host contract AAR. These const values are inlined so the INFO
+ * service remains independent of the host-provided API classes in its own process.
+ */
+object ThreeBlockComposePlugin {
+
+    const val PACKAGE_NAME = ComposeUiIds.PLUGIN_PACKAGE_NAME
+    const val HOST_PACKAGE_NAME = ComposeUiIds.HOST_PACKAGE_NAME
+
+    const val ID = ComposeUiIds.PLUGIN_ID
+    const val ENGINE = ComposeUiIds.ENGINE
+    const val VARIANT = ComposeUiIds.VARIANT
+    const val AUTHOR = "SuperMonster003"
+
+    /** Discovery contract of [ThreeBlockComposeInfoService]; there is no Binder capability service (roadmap D23). */
+    const val INFO_ACTION = ComposeUiContract.INFO_ACTION
+    const val INFO_CATEGORY = ComposeUiContract.INFO_CATEGORY
+
+    /** Signature permission guarding every exported component (manifest `android:permission`). */
+    const val PLUGIN_PERMISSION = ComposeUiContract.PLUGIN_PERMISSION
+
+    /** Application meta-data naming the renderer factory the host instantiates in process (roadmap D10). */
+    const val META_RENDERER_FACTORY = ComposeUiContract.META_RENDERER_FACTORY
+    const val RENDERER_FACTORY_CLASS_NAME = "$PACKAGE_NAME.renderer.ComposeUiRendererFactoryImpl"
+
+    /** Application meta-data and capability key carrying the minimum host build. */
+    const val META_REQUIRES_HOST_VERSION = ComposeUiContract.META_REQUIRES_HOST_VERSION
+
+    /** Contract version this plugin targets (roadmap D29 / appendix B.6). */
+    const val CONTRACT_VERSION = ComposeUiContract.CONTRACT_VERSION
+
+    /** Minimum AutoJs6 build containing the additive V2 catalog and negotiation (F.4). */
+    const val REQUIRED_HOST_VERSION = ComposeUiV2.REQUIRED_HOST_VERSION_CODE
+}

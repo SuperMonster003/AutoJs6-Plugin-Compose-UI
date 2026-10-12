@@ -37,7 +37,7 @@
     <string name="gallery_category_text">テキスト, アイコンと画像</string>
     <string name="gallery_copied">スクリプトをクリップボードにコピーしました</string>
     <string name="gallery_copy">スクリプトをコピー</string>
-    <string name="gallery_note">スクリプトは AutoJs6 で実行されます. Compose UI %1$s をインストールして有効にし, ホストはビルド %2$d 以降が必要です.</string>
+    <string name="gallery_note">スクリプトは AutoJs6 で実行されます. 3-Block Compose %1$s をインストールして有効にし, ホストはビルド %2$d 以降が必要です.</string>
     <string name="gallery_run">AutoJs6 で実行</string>
     <string name="gallery_run_failed">AutoJs6 でスクリプトを起動できませんでした</string>
     <string name="gallery_run_missing_host">AutoJs6 がインストールされていません</string>

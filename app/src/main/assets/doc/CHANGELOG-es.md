@@ -4,6 +4,16 @@
 
 ******
 
+# v1.2.0
+
+###### 2026/10/13
+
+* `Aviso` El complemento pasa de llamarse Compose UI a 3-Block Compose: el ID de aplicación cambia de io.github.supermonster003.autojs6.plugin.compose.ui a io.github.supermonster003.autojs6.plugin.three.block.compose. Android lo trata como una aplicación nueva, el paquete anterior puede seguir instalado, los ajustes y autorizaciones no se migran, y el nuevo paquete debe activarse y autorizarse de nuevo en el centro de complementos
+* `Aviso` Requiere una compilación de AutoJs6 6.8.0 que contenga la nueva identidad del complemento (commit del host f12665ffde o posterior); los hosts anteriores buscan el complemento por el nombre de paquete antiguo y no reconocen esta versión
+* `Mejora` El título de la aplicación, el ID del complemento (three-block-compose), los nombres de paquete y componentes, los artefactos de publicación, la documentación y el repositorio de GitHub (AutoJs6-Plugin-Three-Block-Compose) se actualizan con el cambio de nombre; la API de script compose, la versión del contrato y el comportamiento de renderizado no cambian
+* `Mejora` Los iconos del lanzador, del centro de complementos y de la información de la aplicación del sistema usan ahora las imágenes definitivas del mantenedor, con los glifos claro y oscuro compartiendo una misma forma
+* `Mejora` Los ejemplos incluidos y la categoría de ejemplos del host pasan a llamarse 3-Block Compose
+
 # v1.1.0
 
 ###### 2026/10/08

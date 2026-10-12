@@ -4,6 +4,16 @@
 
 ******
 
+# v1.2.0
+
+###### 2026/10/13
+
+* `提示` 插件由 Compose UI 更名為 3-Block Compose: 應用 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改為 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 會將其視為新應用, 舊套件可以保留並存, 設定與授權不會自動遷移, 新套件需要在插件中心重新啟用和授權
+* `提示` 需要包含新插件身份的 AutoJs6 6.8.0 宿主構建 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名發現插件, 不會識別本版本
+* `優化` 應用標題, 插件 ID (three-block-compose), 套件名與組件名, 發佈產物, 文件及 GitHub 倉庫 (AutoJs6-Plugin-Three-Block-Compose) 隨更名同步更新; 腳本 API compose, 契約版本與渲染行為不變
+* `優化` 啟動器, 插件中心與系統應用資訊圖示改用維護者提供的正式圖稿, 亮暗兩套圖案共用同一形狀
+* `優化` 隨套件示例與宿主示例分類改為 3-Block Compose
+
 # v1.1.0
 
 ###### 2026/10/08

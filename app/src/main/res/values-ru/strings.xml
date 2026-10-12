@@ -37,7 +37,7 @@
     <string name="gallery_category_text">Текст, значки и изображения</string>
     <string name="gallery_copied">Скрипт скопирован в буфер обмена</string>
     <string name="gallery_copy">Копировать скрипт</string>
-    <string name="gallery_note">Скрипты выполняются в AutoJs6: установите и включите Compose UI %1$s, хост должен быть сборки %2$d или новее.</string>
+    <string name="gallery_note">Скрипты выполняются в AutoJs6: установите и включите 3-Block Compose %1$s, хост должен быть сборки %2$d или новее.</string>
     <string name="gallery_run">Запустить в AutoJs6</string>
     <string name="gallery_run_failed">AutoJs6 не смог запустить скрипт</string>
     <string name="gallery_run_missing_host">AutoJs6 не установлен</string>

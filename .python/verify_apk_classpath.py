@@ -29,7 +29,7 @@ REQUIRED = {
     "Lkotlin/coroutines/CoroutineContext;",
     "Lkotlin/coroutines/CoroutineContext$Element;",
     "Lkotlin/jvm/functions/Function1;",
-    "Lio/github/supermonster003/autojs6/plugin/compose/ui/renderer/ComposeUiRendererFactoryImpl;",
+    "Lio/github/supermonster003/autojs6/plugin/three/block/compose/renderer/ComposeUiRendererFactoryImpl;",
     # F.5 (roadmap D32): the standalone gallery process needs Compose's AndroidX runtime; the host shadows
     # these parent-first, so they must keep their original names (checked here through their descriptors).
     "Landroidx/activity/ComponentActivity;",
@@ -42,7 +42,7 @@ REQUIRED = {
     "Landroidx/window/layout/WindowMetricsCalculator;",
     "Lkotlinx/coroutines/CoroutineScope;",
     "Lkotlinx/serialization/KSerializer;",
-    "Lio/github/supermonster003/autojs6/plugin/compose/ui/app/GalleryActivity;",
+    "Lio/github/supermonster003/autojs6/plugin/three/block/compose/app/GalleryActivity;",
 }
 # The only host-only component stays out: View-system AppCompat, which nothing in the plugin references.
 FORBIDDEN_PREFIXES = ("Landroidx/appcompat/", CONTRACT_PREFIX)

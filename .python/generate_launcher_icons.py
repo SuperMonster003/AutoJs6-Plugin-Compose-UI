@@ -1,4 +1,4 @@
-"""Generate the transparent launcher icons of Compose UI from the black-and-white source glyph.
+"""Generate the transparent launcher icons of 3-Block Compose from the black-and-white source glyph.
 
 The plugin has no launcher entry (roadmap D8), so only the basic `mipmap/ic_launcher.png` series is
 produced: the day glyph for light surfaces and the night glyph the README picture element switches to.
@@ -18,7 +18,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "app/src/main/res"
 # Temporary glyph (roadmap Q6): replaced by the maintainer's two source PNGs before the 1.0.0 gate.
-SOURCE = ROOT / ".python/icons/compose-ui-ic-launcher-light.png"
+SOURCE = ROOT / ".python/icons/three-block-compose-ic-launcher-light.png"
 SIZE = 432
 SCALE = 4
 UI_GLYPH = 0.66

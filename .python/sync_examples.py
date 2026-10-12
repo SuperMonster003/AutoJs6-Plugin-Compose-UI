@@ -16,7 +16,7 @@ def sync(host: Path, check: bool) -> list[str]:
     source = Path(__file__).resolve().parents[1] / "app/src/main/assets/examples"
     manifest = source / "index.json"
     data = json.loads(manifest.read_text(encoding="utf-8"))
-    if data.get("schemaVersion") != 1 or data.get("hostSamplePath") != "sample/Compose UI":
+    if data.get("schemaVersion") != 1 or data.get("hostSamplePath") != "sample/3-Block Compose":
         raise ValueError("Unsupported example manifest or host sample path")
     entries = data["examples"]
     names = [entry["file"] for entry in entries]

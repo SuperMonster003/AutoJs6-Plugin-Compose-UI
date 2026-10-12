@@ -37,7 +37,7 @@
     <string name="gallery_category_text">文字, 圖示與圖片</string>
     <string name="gallery_copied">已將腳本複製到剪貼板</string>
     <string name="gallery_copy">複製腳本</string>
-    <string name="gallery_note">腳本在 AutoJs6 中運行, 需要安裝並啟用 Compose UI %1$s, 宿主版本不低於 %2$d.</string>
+    <string name="gallery_note">腳本在 AutoJs6 中運行, 需要安裝並啟用 3-Block Compose %1$s, 宿主版本不低於 %2$d.</string>
     <string name="gallery_run">在 AutoJs6 中運行</string>
     <string name="gallery_run_failed">無法啟動 AutoJs6 運行腳本</string>
     <string name="gallery_run_missing_host">未安裝 AutoJs6</string>

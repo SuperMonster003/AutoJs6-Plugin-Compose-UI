@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-    <!-- Package visibility for the discovery queries of ComposeUiPluginContractTest on API 30+. -->
+    <!-- Package visibility for the discovery queries of ThreeBlockComposeContractTest on API 30+. -->
     <queries>
-        <package android:name="io.github.supermonster003.autojs6.plugin.compose.ui" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.three.block.compose" />
     </queries>
     <application>
         <!-- Test code shares the target APK's Kotlin in instrumentation, not in a standalone test-app process. -->

@@ -37,7 +37,7 @@
     <string name="gallery_category_text">Text, icons and images</string>
     <string name="gallery_copied">Script copied to the clipboard</string>
     <string name="gallery_copy">Copy script</string>
-    <string name="gallery_note">Scripts run in AutoJs6 with Compose UI %1$s installed and enabled; the host must be build %2$d or later.</string>
+    <string name="gallery_note">Scripts run in AutoJs6 with 3-Block Compose %1$s installed and enabled; the host must be build %2$d or later.</string>
     <string name="gallery_run">Run in AutoJs6</string>
     <string name="gallery_run_failed">AutoJs6 could not start the script</string>
     <string name="gallery_run_missing_host">AutoJs6 is not installed</string>

@@ -37,7 +37,7 @@
     <string name="gallery_category_text">Texto, iconos e imágenes</string>
     <string name="gallery_copied">Script copiado al portapapeles</string>
     <string name="gallery_copy">Copiar script</string>
-    <string name="gallery_note">Los scripts se ejecutan en AutoJs6 con Compose UI %1$s instalado y habilitado; el host debe ser la compilación %2$d o posterior.</string>
+    <string name="gallery_note">Los scripts se ejecutan en AutoJs6 con 3-Block Compose %1$s instalado y habilitado; el host debe ser la compilación %2$d o posterior.</string>
     <string name="gallery_run">Ejecutar en AutoJs6</string>
     <string name="gallery_run_failed">AutoJs6 no pudo iniciar el script</string>
     <string name="gallery_run_missing_host">AutoJs6 no está instalado</string>
