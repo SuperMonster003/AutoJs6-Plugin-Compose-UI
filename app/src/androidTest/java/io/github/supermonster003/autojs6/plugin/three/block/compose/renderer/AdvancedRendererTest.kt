@@ -140,6 +140,27 @@ class AdvancedRendererTest {
         assertTrue(events.none { it.type == E.ERROR })
     }
 
+    @Test fun aSiblingInsertedBeforeANodeLeavesThatNodesStateInPlace() {
+        create()
+        val entries = (0 until 30).map { index ->
+            UiNode(index + 10, C.TEXT, props = mapOf(P.TEXT to UiValue.Str("entry $index")), modifier = listOf(tag("entry-$index"), dimension(M.HEIGHT, 40.0)))
+        }
+        fun tree(inserted: Boolean): UiTree {
+            val list = UiNode(3, C.LAZY_COLUMN, modifier = listOf(tag("kept-list"), dimension(M.WIDTH, 200.0), dimension(M.HEIGHT, 120.0)),
+                children = entries.map { it.nodeId })
+            val root = UiNode(1, C.COLUMN, children = if (inserted) listOf(2, 3) else listOf(3))
+            return UiTree(1, listOf(root, list) + entries + if (inserted) listOf(text(2, "inserted")) else emptyList())
+        }
+        patch(UiPatch.SetRoot(tree(inserted = false)))
+        rule.onNodeWithTag("kept-list").performScrollToIndex(20)
+        rule.onNodeWithTag("entry-20").assertIsDisplayed()
+        // The list moves to the second place of its parent; its composition, and so its scroll position, moves with it.
+        patch(UiPatch.SetRoot(tree(inserted = true)))
+        rule.onNodeWithTag("text-2").assertIsDisplayed()
+        rule.onNodeWithTag("entry-20").assertIsDisplayed()
+        rule.onAllNodesWithTag("entry-0").assertCountEquals(0)
+    }
+
     @Test fun lazyScrollUsesAcceptedItemsWhenGrowthOrShrinkAndCommandShareOneMainTurn() {
         create()
         fun items(count: Int): UiTree {

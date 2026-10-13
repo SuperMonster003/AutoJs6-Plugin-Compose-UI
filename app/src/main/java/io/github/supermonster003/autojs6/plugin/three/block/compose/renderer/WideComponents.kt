@@ -61,7 +61,7 @@ internal fun WideComponents(
         Unit
     }
     val content: @Composable () -> Unit = {
-        (node.slots[S.CONTENT]?.let(::listOf) ?: node.children).forEach { renderChild(it) }
+        (node.slots[S.CONTENT]?.let(::listOf) ?: node.children).forEach { key(it) { renderChild(it) } }
     }
     val enabled = ModifierMapper.interactionEnabled(node)
     val selected = node.wideBoolean(V.SELECTED)
@@ -98,8 +98,10 @@ internal fun WideComponents(
         C.TAB_ROW -> {
             val tabs: @Composable () -> Unit = {
                 node.children.forEachIndexed { index, id ->
-                    CompositionLocalProvider(LocalWideParent provides WideParent(selectedTab = index == node.wideInt(V.SELECTED_INDEX))) {
-                        renderChild(id)
+                    key(id) {
+                        CompositionLocalProvider(LocalWideParent provides WideParent(selectedTab = index == node.wideInt(V.SELECTED_INDEX))) {
+                            renderChild(id)
+                        }
                     }
                 }
             }
@@ -118,7 +120,7 @@ internal fun WideComponents(
         C.DROPDOWN_MENU -> Box(modifier) {
             renderChild(node.slots.getValue(VS.ANCHOR))
             DropdownMenu(expanded = node.wideBoolean(P.OPEN), onDismissRequest = { publish(E.DISMISS_REQUEST, Bundle()) }) {
-                node.children.forEach { renderChild(it) }
+                node.children.forEach { key(it) { renderChild(it) } }
             }
         }
         C.DROPDOWN_MENU_ITEM -> DropdownMenuItem(text = { renderChild(node.slots.getValue(S.TEXT)) },
@@ -151,11 +153,11 @@ internal fun WideComponents(
         C.SEGMENTED_BUTTON -> {
             if (node.wideEnum(V.MODE, "single") == "multi") MultiChoiceSegmentedButtonRow(modifier) {
                 node.children.forEachIndexed { index, id ->
-                    CompositionLocalProvider(LocalWideParent provides WideParent(multiSegments = this, index = index, count = node.children.size)) { renderChild(id) }
+                    key(id) { CompositionLocalProvider(LocalWideParent provides WideParent(multiSegments = this, index = index, count = node.children.size)) { renderChild(id) } }
                 }
             } else SingleChoiceSegmentedButtonRow(modifier) {
                 node.children.forEachIndexed { index, id ->
-                    CompositionLocalProvider(LocalWideParent provides WideParent(singleSegments = this, index = index, count = node.children.size)) { renderChild(id) }
+                    key(id) { CompositionLocalProvider(LocalWideParent provides WideParent(singleSegments = this, index = index, count = node.children.size)) { renderChild(id) } }
                 }
             }
         }

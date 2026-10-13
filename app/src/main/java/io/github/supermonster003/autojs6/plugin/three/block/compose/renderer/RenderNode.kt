@@ -35,7 +35,12 @@ import org.autojs.plugin.compose.api.model.UiValue
 
 internal data class RenderFrame(val rootId: Int, val nodes: Map<Int, UiNode>, val generation: Long)
 
-/** All handlers use the same frame generation, including callbacks retained by Compose. */
+/**
+ * All handlers use the same frame generation, including callbacks retained by Compose. Callers that render a
+ * list of children wrap each call in `key(childId)`: the `key` inside only tells nodes apart at one call
+ * position, so without it a sibling inserted or removed earlier in the list would shift every later child to
+ * another position and rebuild its composition, dropping its remembered state (scroll position, focus).
+ */
 @Composable
 internal fun RenderNode(
     frame: RenderFrame,
@@ -59,18 +64,18 @@ internal fun RenderNode(
             // Design-time hook (roadmap P8.3): the designer's canvas records node bounds; absent in the host.
             val modifier = LocalNodeDecorator.current?.invoke(id, mapped) ?: mapped
             val children = node.slots[S.CONTENT]?.let(::listOf) ?: node.children
-            val content: @Composable () -> Unit = { children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, extension = extension) } }
+            val content: @Composable () -> Unit = { children.forEach { key(it) { RenderNode(frame, it, commands, fields, snackbar, emit, extension = extension) } } }
             val onClick = { ModifierMapper.clickCallback(node)?.let { publish(E.CLICK, it, Bundle()) }; Unit }
             val enabled = ModifierMapper.interactionEnabled(node)
             when (RendererCatalog.dispatch[node.type]) {
                 RenderKind.COLUMN -> Column(modifier, verticalArrangement = verticalArrangement(node), horizontalAlignment = horizontalAlignment(node.enum(P.ALIGNMENT, "start"))) {
-                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, columnScope = this, extension = extension) }
+                    children.forEach { key(it) { RenderNode(frame, it, commands, fields, snackbar, emit, columnScope = this, extension = extension) } }
                 }
                 RenderKind.ROW -> Row(modifier, horizontalArrangement = horizontalArrangement(node), verticalAlignment = verticalAlignment(node.enum(P.ALIGNMENT, "top"))) {
-                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, rowScope = this, extension = extension) }
+                    children.forEach { key(it) { RenderNode(frame, it, commands, fields, snackbar, emit, rowScope = this, extension = extension) } }
                 }
                 RenderKind.BOX -> Box(modifier, contentAlignment = boxAlignment(node.enum(P.ALIGNMENT, "topStart"))) {
-                    children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, boxScope = this, extension = extension) }
+                    children.forEach { key(it) { RenderNode(frame, it, commands, fields, snackbar, emit, boxScope = this, extension = extension) } }
                 }
                 RenderKind.SPACER -> Spacer(modifier)
                 RenderKind.SURFACE -> {
