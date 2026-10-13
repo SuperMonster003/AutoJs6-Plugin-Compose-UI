@@ -5,7 +5,7 @@
 ### 사용 방법
 
 1. compose 스크립트 API가 포함된 호환 로컬 AutoJs6 빌드를 설치합니다 (최소 6.8.0 / 5322)
-2. 플러그인 APK를 설치하고 런처에서 3-Block Compose를 열면 구성요소 갤러리와 설정을 볼 수 있습니다
+2. 플러그인 APK를 설치하고 런처에서 3-Block Compose를 열면 디자이너 홈으로 들어갑니다. 여기서 스크립트 프로젝트를 만들거나 상단 바에서 구성요소 갤러리와 설정을 열 수 있습니다
 3. AutoJs6 플러그인 센터에서 3-Block Compose가 인식되고 활성화되었는지 확인합니다
 4. 스크립트에서 `compose` 또는 `$compose`를 사용합니다. Activity 콘텐츠는 `compose.mount`, 플로팅 창은 호스트에 오버레이 권한을 부여한 뒤 `compose.floaty`를 사용합니다
 

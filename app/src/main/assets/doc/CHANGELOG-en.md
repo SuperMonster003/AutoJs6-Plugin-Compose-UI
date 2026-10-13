@@ -10,11 +10,12 @@
 
 * `Hint` The plugin is renamed from Compose UI to 3-Block Compose: the application ID changes from io.github.supermonster003.autojs6.plugin.compose.ui to io.github.supermonster003.autojs6.plugin.three.block.compose. Android treats it as a new app, the old package can stay installed alongside, settings and authorizations are not migrated, and the new package must be enabled and authorized again in the plugin center
 * `Hint` Requires an AutoJs6 6.8.0 host build that contains the new plugin identity (host commit f12665ffde or later); earlier hosts discover the plugin by the old package name and do not recognize this version
+* `Feature` Visual designer: the launcher opens the designer home, where script projects in private storage are created, imported or opened; the editor offers a real-renderer preview canvas, an outline tree, a component palette and a property drawer, with tap to select, long-press drag to reparent, reordering in the outline, undo / redo, automatic draft saving and recovery, host option editing, a contract-catalog validation report, and copying the script or sending it to AutoJs6; the component gallery and settings now open from the designer home
 * `Improvement` The app title, plugin ID (three-block-compose), package and component names, release artifacts, documentation and the GitHub repository (AutoJs6-Plugin-Three-Block-Compose) follow the rename; the compose script API, the contract version and the rendering behavior are unchanged
 * `Improvement` The launcher, plugin center and system App info icons now use the maintainer's final artwork, with the light and dark glyphs sharing one shape
 * `Improvement` The bundled examples and the host example category are renamed to 3-Block Compose
 * `Improvement` The compose-ui-api contract AAR is now packaged with the plugin and kept intact (previously compile-only) for the plugin's own process; inside AutoJs6 the host's identical contract classes still take precedence, so rendering behavior and the contract version are unchanged
-* `Dependency` Add the slim Rhino parser jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, the same build as the AutoJs6 host), used only by the upcoming visual designer to parse scripts, never to run them; release builds keep only the referenced parser classes
+* `Dependency` Add the slim Rhino parser jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, the same build as the AutoJs6 host), used only by the visual designer to parse scripts, never to run them; release builds keep only the referenced parser classes
 
 # v1.1.0
 

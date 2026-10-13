@@ -6,12 +6,13 @@
   "p_languages_all_supported_for_readme": "This document is available in the following languages",
   "h3_introduction": "Introduction",
   "p_introduction_what": "3-Block Compose is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports both `\"ui\";` activity content and floating windows from non-UI scripts.",
-  "p_introduction_how": "The plugin ships a component gallery that opens from the launcher and shows previews and example scripts of every component; script interfaces are still rendered inside the host process. The host discovers the plugin through the INFO service, reads its version and compatibility information, and instantiates the renderer factory in its own process according to the contract (`org.autojs.plugin.compose.api`).",
+  "p_introduction_how": "The plugin ships a visual designer and a component gallery: opening it from the launcher lands on the designer home, where script projects are created or imported and edited on the real renderer, while the gallery shows previews and example scripts of every component; script interfaces are still rendered inside the host process. The host discovers the plugin through the INFO service, reads its version and compatibility information, and instantiates the renderer factory in its own process according to the contract (`org.autojs.plugin.compose.api`).",
   "h3_status": "Status",
   "p_status": "1.2.0 local development preview: use an AutoJs6 host build that contains the 3-Block Compose identity (host commit f12665ffde or later) and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. The icons now use the maintainer's final artwork.",
   "h3_features": "Features",
   "p_features_intro": "Capabilities of the current development preview",
   "features": [
+    "Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6",
     "Declarative UI: `compose.state` + `compose.mount(render)` re-render on state changes, while long-lived node handles (`compose.Text({...})` and friends) allow direct property and child updates",
     "Material 3 core: 29 node factories for layouts, text, icons, images, buttons, inputs, selection controls, lazy lists, dialogs and progress; Snackbar is a session command, not a compose.Snackbar factory",
     "Chained modifiers: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` keeps operation order, and scoped operations are validated on the host side",
@@ -30,7 +31,7 @@
   "h3_usage": "Usage",
   "usage_steps": [
     "Install a matching local AutoJs6 build with the compose script entry (minimum {{ required_host_version_name }} / {{ required_host_version_code }})",
-    "Install the plugin APK; open 3-Block Compose from the launcher to browse the component gallery and settings",
+    "Install the plugin APK; open 3-Block Compose from the launcher to reach the designer home, create a script project, or open the component gallery and settings from the top bar",
     "Confirm in the AutoJs6 plugin center that 3-Block Compose is recognized and enabled",
     "Use `compose` or `$compose` in scripts; mount activity content with `compose.mount`, or grant the host overlay permission and use `compose.floaty`"
   ],

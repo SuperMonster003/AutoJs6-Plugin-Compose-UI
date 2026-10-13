@@ -6,12 +6,13 @@
   "p_languages_all_supported_for_readme": "本文档支持以下语言",
   "h3_introduction": "简介",
   "p_introduction_what": "3-Block Compose 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `\"ui\";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.",
-  "p_introduction_how": "插件内置组件画廊, 可从启动器打开浏览全部组件的预览与示例脚本; 脚本界面的渲染仍在宿主进程中进行. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在自身进程内实例化渲染器工厂.",
+  "p_introduction_how": "插件内置可视化设计器与组件画廊: 从启动器打开即进入设计器首页, 可新建或导入脚本工程并在真实渲染器上编辑界面, 画廊则展示全部组件的预览与示例脚本; 脚本界面的渲染仍在宿主进程中进行. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在自身进程内实例化渲染器工厂.",
   "h3_status": "当前状态",
   "p_status": "1.2.0 本地开发预览: 需要包含 3-Block Compose 新身份的 AutoJs6 宿主构建 (宿主提交 f12665ffde 之后), 并安装和启用本插件. 本地配套提供 UI 页面, 悬浮窗, 五个示例, API 参考与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标已采用维护者提供的正式图稿.",
   "h3_features": "功能特性",
   "p_features_intro": "当前开发预览的核心能力",
   "features": [
+    "可视化设计器: 脚本文件即工程, 真实渲染器所见即所得地预览界面树, 大纲 / 组件面板 / 属性抽屉覆盖全部 55 个组件, 支持撤销重做与草稿恢复; 导出的脚本可复制或直接发送到 AutoJs6 运行",
     "声明式界面: `compose.state` + `compose.mount(render)` 按状态变化自动重绘, 同时提供可长期持有的节点句柄 (`compose.Text({...})` 等) 直接修改属性与子节点",
     "Material 3 核心集: 29 个节点工厂覆盖布局, 文本, 图标, 图片, 按钮, 输入, 选择控件, 惰性列表, 对话框与进度; Snackbar 是会话命令, 不是 compose.Snackbar 工厂",
     "链式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作顺序, 作用域操作在宿主侧校验",
@@ -30,7 +31,7 @@
   "h3_usage": "使用方式",
   "usage_steps": [
     "安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
-    "安装本插件 APK; 从启动器打开 3-Block Compose 可查看组件画廊与设置",
+    "安装本插件 APK; 从启动器打开 3-Block Compose 进入设计器首页, 可新建脚本工程, 或从顶部栏打开组件画廊与设置",
     "在 AutoJs6 的插件中心确认 3-Block Compose 已被识别并处于启用状态",
     "在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`"
   ],

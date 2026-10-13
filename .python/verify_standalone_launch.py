@@ -1,10 +1,12 @@
-"""Open the gallery from its launcher alias in the plugin's own process and walk its screens over adb.
+"""Open the designer home from its launcher alias in the plugin's own process and walk its screens over adb.
 
 The instrumentation suites run inside an instrumented process that also carries the test APK, so they
-cannot prove that the plugin APK alone has every class the gallery and settings screens need (build 42 passed
-them and still crashed from the launcher). This check installs the given APK on one device, starts the enabled
-launcher alias exactly as a launcher would, opens the first catalog entry (composing its preview) and the
-settings screen through the accessibility tree, and fails on any crash, dead process or missing screen.
+cannot prove that the plugin APK alone has every class the standalone screens need (build 42 passed them and
+still crashed from the launcher). This check installs the given APK on one device, starts the enabled launcher
+alias exactly as a launcher would, opens the gallery and its first catalog entry (composing its preview), the
+settings screen, and a new designer project whose template the Rhino parser and the real renderer must turn
+into a visible preview (roadmap P8.3: the R8 release build keeps only the parser closure it references), all
+through the accessibility tree; it deletes the project again and fails on any crash, dead process or missing screen.
 
 usage: verify_standalone_launch.py --apk <apk> [--serial <serial>] [--uninstall] [--strings <values/strings.xml>]
 """
@@ -20,6 +22,10 @@ PACKAGE = "io.github.supermonster003.autojs6.plugin.three.block.compose"
 DEFAULT_ALIAS = f"{PACKAGE}/.launcher.AdaptiveAutoIconAlias"
 GALLERY = f"{PACKAGE}/.launcher."
 SETTINGS = f"{PACKAGE}/.app.SettingsActivity"
+GALLERY_ACTIVITY = f"{PACKAGE}/.app.GalleryActivity"
+DESIGNER_ACTIVITY = f"{PACKAGE}/.designer.ui.DesignerActivity"
+# The starter script of a new project puts this text on the canvas (ProjectStore.template()).
+TEMPLATE_TEXT = "Hello"
 UI_DUMP = "/data/local/tmp/three-block-compose-standalone-launch.xml"
 
 
@@ -58,7 +64,8 @@ def wait_for(description: str, predicate, timeout: float = 30.0, interval: float
     deadline = time.monotonic() + timeout
     while True:
         value = predicate()
-        if value:
+        # An ElementTree element without children is falsy, so test for a result explicitly.
+        if value is not None and value is not False:
             return value
         if time.monotonic() > deadline:
             raise SystemExit(f"timed out waiting for {description}")
@@ -151,12 +158,21 @@ def main() -> None:
     adb = Adb(args.serial)
     settings_label = resource_string(args.strings, "settings_title")
     copy_label = resource_string(args.strings, "gallery_copy")
+    gallery_label = resource_string(args.strings, "designer_open_gallery")
+    labels = {
+        "new": resource_string(args.strings, "designer_new_project"),
+        "create": resource_string(args.strings, "designer_create"),
+        "delete": resource_string(args.strings, "designer_delete_project"),
+    }
 
     api = adb.shell("getprop ro.build.version.sdk").strip()
     install = adb.run("install", "-r", "-t", str(args.apk), check=False, timeout=600)
     if "Success" not in install:
         raise SystemExit(f"install failed:\n{install}")
     adb.shell(f"am force-stop {PACKAGE}", check=False)
+    # A real device left idle during earlier steps may have switched its screen off: taps then go nowhere.
+    adb.shell("input keyevent KEYCODE_WAKEUP", check=False)
+    adb.shell("wm dismiss-keyguard", check=False)
     adb.run("logcat", "-c", check=False)
 
     resolved = adb.shell(f"cmd package resolve-activity --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER {PACKAGE}", check=False)
@@ -166,7 +182,7 @@ def main() -> None:
         raise SystemExit(f"am start did not succeed for {component}:\n{start}")
 
     try:
-        gallery_component, pid, entry_label = walk(adb, settings_label, copy_label)
+        gallery_component, pid, entry_label = walk(adb, settings_label, copy_label, gallery_label, labels)
         crashes = crash_lines(adb)
     except SystemExit as failure:
         crashes = crash_lines(adb)
@@ -179,15 +195,19 @@ def main() -> None:
             adb.run("uninstall", PACKAGE, check=False)
     if crashes:
         raise SystemExit("the plugin process crashed:\n" + "\n".join(crashes))
-    print(f"STANDALONE_LAUNCH_OK api={api} component={gallery_component} pid={pid} entry={entry_label} settings=opened apk={args.apk.name}")
+    print(f"STANDALONE_LAUNCH_OK api={api} component={gallery_component} pid={pid} entry={entry_label} settings=opened designer=opened apk={args.apk.name}")
 
 
-def walk(adb: Adb, settings_label: str, copy_label: str) -> tuple[str, int, str]:
-    gallery_component, pid = wait_for("the gallery to be the top Activity", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
+def walk(adb: Adb, settings_label: str, copy_label: str, gallery_label: str, labels: dict[str, str]) -> tuple[str, int, str]:
+    # Roadmap P8.3 / D38: the launcher alias opens the designer home; the gallery and the settings screen hang off it.
+    home_component, pid = wait_for("the designer home to be the top Activity", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
     time.sleep(3.0)
     if "No such" in adb.shell(f"ls -d /proc/{pid}", check=False):
-        raise SystemExit(f"the gallery process {pid} died after start")
+        raise SystemExit(f"the designer process {pid} died after start")
 
+    gallery_action, _ = find_node(adb, "the gallery action", lambda n: (n.get("content-desc") or "").strip() == gallery_label, clickable=True)
+    tap(adb, gallery_action)
+    wait_for("the gallery screen", lambda: (lambda t: t if t and expand(t[0]) == expand(GALLERY_ACTIVITY) else None)(top_activity(adb)))
     # First catalog entry: the first text that sits inside a clickable row (category headers and the title do not).
     entry, label = find_node(adb, "a catalog entry", lambda n: (n.get("text") or "").strip() != "", clickable=True)
     entry_label = label.get("text").strip()
@@ -198,17 +218,64 @@ def walk(adb: Adb, settings_label: str, copy_label: str) -> tuple[str, int, str]
     find_node(adb, f"the detail screen of {entry_label} with its script or copy button",
               lambda n: (n.get("text") or "").strip() == copy_label or script_call in (n.get("text") or ""))
     adb.shell("input keyevent KEYCODE_BACK")
+    wait_for("the gallery list after leaving the entry", lambda: (lambda t: t if t and expand(t[0]) == expand(GALLERY_ACTIVITY) else None)(top_activity(adb)))
+    time.sleep(1.0)
+    adb.shell("input keyevent KEYCODE_BACK")
+    wait_for("the designer home after leaving the gallery", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
     settings_action, _ = find_node(adb, "the settings action", lambda n: (n.get("content-desc") or "").strip() == settings_label, clickable=True)
     tap(adb, settings_action)
     wait_for("the settings screen", lambda: (lambda t: t if t and expand(t[0]) == expand(SETTINGS) else None)(top_activity(adb)))
     time.sleep(1.0)
     adb.shell("input keyevent KEYCODE_BACK")
-    wait_for("the gallery after leaving settings", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
+    wait_for("the designer home after leaving settings", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
+
+    open_and_delete_project(adb, labels)
 
     after = top_activity(adb)
     if not after or after[1] != pid:
-        raise SystemExit(f"the gallery process changed from {pid} to {after}: it was restarted")
-    return gallery_component, pid, entry_label
+        raise SystemExit(f"the designer process changed from {pid} to {after}: it was restarted")
+    return home_component, pid, entry_label
+
+
+def open_and_delete_project(adb: Adb, labels: dict[str, str]) -> None:
+    """Create a project from the home, let the editor parse and render its template, then delete it again."""
+    project = f"standalone-check-{int(time.time())}"
+    new_action, _ = find_node(adb, "the new project action", lambda n: (n.get("content-desc") or "").strip() == labels["new"], clickable=True)
+    tap(adb, new_action)
+    name_field, _ = find_node(adb, "the project name field", lambda n: n.get("class") == "android.widget.EditText")
+    tap(adb, name_field)
+    time.sleep(0.5)
+    adb.shell(f"input text {project}")
+    create, _ = find_node(adb, "the create button", lambda n: (n.get("text") or "").strip() == labels["create"], clickable=True)
+    tap(adb, create)
+    wait_for("the designer editor", lambda: (lambda t: t if t and expand(t[0]) == expand(DESIGNER_ACTIVITY) else None)(top_activity(adb)))
+    # The template's Text must come out of the parser and the real renderer inside the release build.
+    find_node(adb, "the template text on the design canvas", lambda n: (n.get("text") or "").strip() == TEMPLATE_TEXT)
+    time.sleep(1.0)
+    adb.shell("input keyevent KEYCODE_BACK")
+    wait_for("the designer home after leaving the editor", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
+
+    file_name = f"{project}.js"
+
+    def delete_button():
+        root = ui_tree(adb)
+        parents = {child: parent for parent in root.iter() for child in parent}
+        for node in root.iter("node"):
+            if node.get("package") == PACKAGE and (node.get("text") or "").strip() == file_name:
+                row = node
+                while row is not None and row.get("clickable") != "true":
+                    row = parents.get(row)
+                if row is None:
+                    continue
+                for candidate in row.iter("node"):
+                    if (candidate.get("content-desc") or "").strip() == labels["delete"]:
+                        return candidate
+        return None
+
+    tap(adb, wait_for(f"the delete button of {file_name}", delete_button))
+    confirm, _ = find_node(adb, "the delete confirmation", lambda n: (n.get("text") or "").strip() == labels["delete"], clickable=True)
+    tap(adb, confirm)
+    wait_for(f"{file_name} to leave the project list", lambda: all((n.get("text") or "").strip() != file_name for n in ui_tree(adb).iter("node")))
 
 
 if __name__ == "__main__":

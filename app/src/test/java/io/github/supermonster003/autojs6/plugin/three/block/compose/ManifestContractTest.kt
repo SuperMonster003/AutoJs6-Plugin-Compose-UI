@@ -63,10 +63,10 @@ class ManifestContractTest {
     @Test
     fun `the wake activity follows the activation contract beside the gallery screens`() {
         val activities = application.children("activity")
-        assertEquals(listOf(".WakeActivity", ".app.GalleryActivity", ".app.SettingsActivity"), activities.map { it.androidAttribute("name") })
+        assertEquals(listOf(".WakeActivity", ".designer.ui.DesignerHomeActivity", ".designer.ui.DesignerActivity", ".app.GalleryActivity", ".app.SettingsActivity"), activities.map { it.androidAttribute("name") })
         activities.drop(1).forEach { screen ->
             assertEquals("${screen.androidAttribute("name")} is reached through the launcher alias or the gallery only", "false", screen.androidAttribute("exported"))
-            assertEquals("appearance changes redraw in place", "uiMode|locale|layoutDirection", screen.androidAttribute("configChanges"))
+            assertTrue("appearance changes redraw in place: ${screen.androidAttribute("configChanges")}", screen.androidAttribute("configChanges").startsWith("uiMode|locale|layoutDirection"))
         }
         val wake = activities.first()
         assertEquals("true", wake.androidAttribute("exported"))
@@ -93,7 +93,7 @@ class ManifestContractTest {
             aliases.map { it.androidAttribute("name") },
         )
         aliases.forEach { alias ->
-            assertEquals(".app.GalleryActivity", alias.androidAttribute("targetActivity"))
+            assertEquals(".designer.ui.DesignerHomeActivity", alias.androidAttribute("targetActivity"))
             assertEquals("true", alias.androidAttribute("exported"))
             assertEquals(alias.androidAttribute("icon"), alias.androidAttribute("roundIcon"))
             val filter = alias.child("intent-filter")

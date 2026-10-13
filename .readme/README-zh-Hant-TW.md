@@ -44,7 +44,7 @@
 
 3-Block Compose 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `"ui";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.
 
-外掛內建元件展示, 可從啟動器開啟瀏覽全部元件的預覽與範例指令碼; 指令碼介面的轉譯仍在宿主處理程序中進行. 宿主透過 INFO 服務發現外掛並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在自身處理程序內實例化轉譯器工廠.
+外掛內建視覺化設計器與元件展示: 從啟動器開啟即進入設計器首頁, 可新增或匯入指令碼專案並在真實轉譯器上編輯介面, 元件展示則呈現全部元件的預覽與範例指令碼; 指令碼介面的轉譯仍在宿主處理程序中進行. 宿主透過 INFO 服務發現外掛並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在自身處理程序內實例化轉譯器工廠.
 
 ******
 
@@ -62,6 +62,7 @@
 
 目前開發預覽的核心能力:
 
+- 視覺化設計器: 指令碼檔案即專案, 真實轉譯器所見即所得地預覽介面樹, 大綱 / 元件面板 / 屬性抽屜涵蓋全部 55 個元件, 支援復原重做與草稿還原; 匯出的指令碼可複製或直接傳送到 AutoJs6 執行
 - 宣告式介面: `compose.state` + `compose.mount(render)` 依狀態變化自動重繪, 同時提供可長期持有的節點控制代碼 (`compose.Text({...})` 等) 直接修改屬性與子節點
 - Material 3 核心集: 29 個節點工廠涵蓋版面配置, 文字, 圖示, 圖片, 按鈕, 輸入, 選擇控制項, 惰性清單, 對話方塊與進度; Snackbar 是工作階段命令, 不是 compose.Snackbar 工廠
 - 鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 範圍限定操作在宿主端驗證
@@ -84,7 +85,7 @@
 ******
 
 1. 安裝包含 compose 指令碼入口的相符本機 AutoJs6 建置 (最低 6.8.0 / 5322)
-2. 安裝此外掛 APK; 從啟動器開啟 3-Block Compose 可檢視元件展示與設定
+2. 安裝此外掛 APK; 從啟動器開啟 3-Block Compose 進入設計器首頁, 可新增指令碼專案, 或從頂部列開啟元件展示與設定
 3. 在 AutoJs6 的外掛程式中心確認 3-Block Compose 已被識別並處於啟用狀態
 4. 在指令碼中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮視窗權限再使用 `compose.floaty`
 
@@ -224,11 +225,12 @@ _2026/10/13_
 
 - `提示` 外掛由 Compose UI 更名為 3-Block Compose: 應用程式 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改為 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 會將其視為新應用程式, 舊套件可以保留並存, 設定與授權不會自動遷移, 新套件需要在外掛中心重新啟用和授權
 - `提示` 需要包含新外掛身分的 AutoJs6 6.8.0 宿主建置 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名稱發現外掛, 不會識別本版本
+- `新增` 視覺化設計器: 從啟動器進入設計器首頁, 可新增 / 匯入 / 開啟私有目錄中的指令碼專案; 編輯頁提供真實轉譯器預覽畫布, 大綱樹, 元件面板與屬性抽屜, 支援點選與長按拖曳換父, 大綱內重排, 復原 / 重做, 草稿自動儲存與還原, 承載選項編輯, 契約目錄驗證報告, 以及複製指令碼或傳送到 AutoJs6 執行; 元件展示與設定改從設計器首頁進入
 - `最佳化` 應用程式標題, 外掛 ID (three-block-compose), 套件名稱與元件名稱, 發行產物, 文件及 GitHub 儲存庫 (AutoJs6-Plugin-Three-Block-Compose) 隨更名同步更新; 指令碼 API compose, 契約版本與轉譯行為不變
 - `最佳化` 啟動器, 外掛中心與系統應用程式資訊圖示改用維護者提供的正式圖稿, 亮暗兩套圖案共用同一形狀
 - `最佳化` 隨套件範例與宿主範例分類改為 3-Block Compose
 - `最佳化` 契約 AAR compose-ui-api 改為隨外掛打包並完整保留 (先前只在編譯期引用), 供外掛自身處理程序使用; 在 AutoJs6 內仍優先使用宿主提供的同名契約類別, 轉譯行為與契約版本不變
-- `相依` 附加 Rhino 解析器精簡 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 與 AutoJs6 宿主同一建置), 僅供後續的視覺化設計器解析指令碼, 不執行指令碼; release 套件只保留被引用的解析類別
+- `相依` 附加 Rhino 解析器精簡 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 與 AutoJs6 宿主同一建置), 僅供視覺化設計器解析指令碼, 不執行指令碼; release 套件只保留被引用的解析類別
 
 #### v1.1.0
 

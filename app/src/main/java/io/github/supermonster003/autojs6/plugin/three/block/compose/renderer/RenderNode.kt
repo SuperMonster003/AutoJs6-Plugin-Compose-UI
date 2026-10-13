@@ -55,7 +55,9 @@ internal fun RenderNode(
             if (BuildConfig.DEBUG) Text("<unknown: ${node.type}>")
         } else {
             val publish: (String, Int, Bundle) -> Unit = { type, callback, payload -> emit(frame.generation, id, type, callback, payload) }
-            val modifier = with(ModifierMapper) { Modifier.map(node, commands, rowScope, columnScope, boxScope, publish) }
+            val mapped = with(ModifierMapper) { Modifier.map(node, commands, rowScope, columnScope, boxScope, publish) }
+            // Design-time hook (roadmap P8.3): the designer's canvas records node bounds; absent in the host.
+            val modifier = LocalNodeDecorator.current?.invoke(id, mapped) ?: mapped
             val children = node.slots[S.CONTENT]?.let(::listOf) ?: node.children
             val content: @Composable () -> Unit = { children.forEach { RenderNode(frame, it, commands, fields, snackbar, emit, extension = extension) } }
             val onClick = { ModifierMapper.clickCallback(node)?.let { publish(E.CLICK, it, Bundle()) }; Unit }

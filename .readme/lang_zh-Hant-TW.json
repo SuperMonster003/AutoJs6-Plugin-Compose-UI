@@ -6,12 +6,13 @@
   "p_languages_all_supported_for_readme": "本文件支援以下語言",
   "h3_introduction": "簡介",
   "p_introduction_what": "3-Block Compose 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `\"ui\";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.",
-  "p_introduction_how": "外掛內建元件展示, 可從啟動器開啟瀏覽全部元件的預覽與範例指令碼; 指令碼介面的轉譯仍在宿主處理程序中進行. 宿主透過 INFO 服務發現外掛並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在自身處理程序內實例化轉譯器工廠.",
+  "p_introduction_how": "外掛內建視覺化設計器與元件展示: 從啟動器開啟即進入設計器首頁, 可新增或匯入指令碼專案並在真實轉譯器上編輯介面, 元件展示則呈現全部元件的預覽與範例指令碼; 指令碼介面的轉譯仍在宿主處理程序中進行. 宿主透過 INFO 服務發現外掛並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在自身處理程序內實例化轉譯器工廠.",
   "h3_status": "目前狀態",
   "p_status": "1.2.0 本機開發預覽: 需要包含 3-Block Compose 新身分的 AutoJs6 宿主建置 (宿主提交 f12665ffde 之後), 並安裝和啟用本外掛. 本機配套提供 UI 頁面, 浮動視窗, 五個範例, API 參考與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在藍圖中. 目前未登錄官方索引, 尚無官方發行版. 圖示已採用維護者提供的正式圖稿.",
   "h3_features": "功能特性",
   "p_features_intro": "目前開發預覽的核心能力",
   "features": [
+    "視覺化設計器: 指令碼檔案即專案, 真實轉譯器所見即所得地預覽介面樹, 大綱 / 元件面板 / 屬性抽屜涵蓋全部 55 個元件, 支援復原重做與草稿還原; 匯出的指令碼可複製或直接傳送到 AutoJs6 執行",
     "宣告式介面: `compose.state` + `compose.mount(render)` 依狀態變化自動重繪, 同時提供可長期持有的節點控制代碼 (`compose.Text({...})` 等) 直接修改屬性與子節點",
     "Material 3 核心集: 29 個節點工廠涵蓋版面配置, 文字, 圖示, 圖片, 按鈕, 輸入, 選擇控制項, 惰性清單, 對話方塊與進度; Snackbar 是工作階段命令, 不是 compose.Snackbar 工廠",
     "鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 範圍限定操作在宿主端驗證",
@@ -30,7 +31,7 @@
   "h3_usage": "使用方式",
   "usage_steps": [
     "安裝包含 compose 指令碼入口的相符本機 AutoJs6 建置 (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
-    "安裝此外掛 APK; 從啟動器開啟 3-Block Compose 可檢視元件展示與設定",
+    "安裝此外掛 APK; 從啟動器開啟 3-Block Compose 進入設計器首頁, 可新增指令碼專案, 或從頂部列開啟元件展示與設定",
     "在 AutoJs6 的外掛程式中心確認 3-Block Compose 已被識別並處於啟用狀態",
     "在指令碼中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮視窗權限再使用 `compose.floaty`"
   ],

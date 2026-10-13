@@ -6,12 +6,13 @@
   "p_languages_all_supported_for_readme": "Este documento esta disponible en los siguientes idiomas",
   "h3_introduction": "Introduccion",
   "p_introduction_what": "3-Block Compose es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `\"ui\";` y ventanas flotantes desde scripts no UI.",
-  "p_introduction_how": "El complemento incluye una galería de componentes que se abre desde el lanzador y muestra vistas previas y scripts de ejemplo de cada componente; las interfaces de los scripts se siguen renderizando en el proceso del host. El host descubre el complemento mediante el servicio INFO, lee su versión y compatibilidad y crea la fábrica del renderizador en su propio proceso según el contrato (`org.autojs.plugin.compose.api`).",
+  "p_introduction_how": "El complemento incluye un diseñador visual y una galería de componentes: al abrirlo desde el lanzador se llega al inicio del diseñador, donde se crean o importan proyectos de script y se editan sobre el renderizador real, mientras que la galería muestra vistas previas y scripts de ejemplo de cada componente; las interfaces de los scripts se siguen renderizando en el proceso del host. El host descubre el complemento mediante el servicio INFO, lee su versión y compatibilidad y crea la fábrica del renderizador en su propio proceso según el contrato (`org.autojs.plugin.compose.api`).",
   "h3_status": "Estado actual",
   "p_status": "Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que contenga la identidad 3-Block Compose (commit del host f12665ffde o posterior) y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. Los iconos ya usan las imágenes definitivas del mantenedor.",
   "h3_features": "Caracteristicas",
   "p_features_intro": "Funciones de la vista previa de desarrollo actual",
   "features": [
+    "Diseñador visual: el archivo de script es el proyecto, el renderizador real muestra el árbol de interfaz mientras lo editas, el esquema / la paleta de componentes / el panel de propiedades cubren los 55 componentes, con deshacer / rehacer y recuperación de borradores; el script exportado se puede copiar o enviar directamente a AutoJs6",
     "Interfaz declarativa: `compose.state` + `compose.mount(render)` vuelven a dibujar automaticamente ante cada cambio de estado, mientras que los manejadores de nodo de larga vida (`compose.Text({...})` y similares) permiten modificar directamente propiedades e hijos",
     "Núcleo Material 3: 29 fábricas de nodos para diseños, texto, iconos, imágenes, botones, entradas, selección, listas diferidas, diálogos e indicadores; Snackbar es un comando de sesión, no una fábrica compose.Snackbar",
     "Modifiers encadenados: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserva el orden de las operaciones, y las operaciones con ambito se validan en el lado del host",
@@ -30,7 +31,7 @@
   "h3_usage": "Uso",
   "usage_steps": [
     "Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo {{ required_host_version_name }} / {{ required_host_version_code }})",
-    "Instale el APK del complemento; abra 3-Block Compose desde el lanzador para ver la galería de componentes y los ajustes",
+    "Instale el APK del complemento; abra 3-Block Compose desde el lanzador para llegar al inicio del diseñador, crear un proyecto de script o abrir la galería de componentes y los ajustes desde la barra superior",
     "Confirme en el centro de plugins de AutoJs6 que 3-Block Compose se reconoce y esta habilitado",
     "Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`"
   ],

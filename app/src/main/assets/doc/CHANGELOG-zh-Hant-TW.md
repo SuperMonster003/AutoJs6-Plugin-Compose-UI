@@ -10,11 +10,12 @@
 
 * `提示` 外掛由 Compose UI 更名為 3-Block Compose: 應用程式 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改為 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 會將其視為新應用程式, 舊套件可以保留並存, 設定與授權不會自動遷移, 新套件需要在外掛中心重新啟用和授權
 * `提示` 需要包含新外掛身分的 AutoJs6 6.8.0 宿主建置 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名稱發現外掛, 不會識別本版本
+* `新增` 視覺化設計器: 從啟動器進入設計器首頁, 可新增 / 匯入 / 開啟私有目錄中的指令碼專案; 編輯頁提供真實轉譯器預覽畫布, 大綱樹, 元件面板與屬性抽屜, 支援點選與長按拖曳換父, 大綱內重排, 復原 / 重做, 草稿自動儲存與還原, 承載選項編輯, 契約目錄驗證報告, 以及複製指令碼或傳送到 AutoJs6 執行; 元件展示與設定改從設計器首頁進入
 * `最佳化` 應用程式標題, 外掛 ID (three-block-compose), 套件名稱與元件名稱, 發行產物, 文件及 GitHub 儲存庫 (AutoJs6-Plugin-Three-Block-Compose) 隨更名同步更新; 指令碼 API compose, 契約版本與轉譯行為不變
 * `最佳化` 啟動器, 外掛中心與系統應用程式資訊圖示改用維護者提供的正式圖稿, 亮暗兩套圖案共用同一形狀
 * `最佳化` 隨套件範例與宿主範例分類改為 3-Block Compose
 * `最佳化` 契約 AAR compose-ui-api 改為隨外掛打包並完整保留 (先前只在編譯期引用), 供外掛自身處理程序使用; 在 AutoJs6 內仍優先使用宿主提供的同名契約類別, 轉譯行為與契約版本不變
-* `相依` 附加 Rhino 解析器精簡 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 與 AutoJs6 宿主同一建置), 僅供後續的視覺化設計器解析指令碼, 不執行指令碼; release 套件只保留被引用的解析類別
+* `相依` 附加 Rhino 解析器精簡 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 與 AutoJs6 宿主同一建置), 僅供視覺化設計器解析指令碼, 不執行指令碼; release 套件只保留被引用的解析類別
 
 # v1.1.0
 

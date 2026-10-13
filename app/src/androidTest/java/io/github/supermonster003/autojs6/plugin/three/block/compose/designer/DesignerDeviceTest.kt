@@ -1,0 +1,165 @@
+package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
+
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
+import androidx.test.core.app.ActivityScenario
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryCatalog
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.DesignerActivity
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+
+/**
+ * Roadmap P8.3 device coverage: a new project gets components from the palette, property edits reach
+ * the real-renderer canvas, the script is saved and reopened unchanged, undo / redo and outline moves
+ * work, drafts are offered after an interrupted session, host options switch the mount kind, and every
+ * gallery example opens in the designer.
+ */
+@RunWith(AndroidJUnit4::class)
+internal class DesignerDeviceTest {
+    @get:Rule val rule = createEmptyComposeRule()
+
+    private val context = InstrumentationRegistry.getInstrumentation().targetContext
+    private val store = ProjectStore(context)
+    private val created = ArrayList<String>()
+
+    @Before fun clean() { store.list().filter { it.name.startsWith("device-test-") }.forEach { store.delete(it.name) } }
+    @After fun remove() { created.forEach { store.delete(it) } }
+
+    private fun project(stem: String, script: String = store.template()): String {
+        val project = store.create("device-test-$stem", script)
+        created += project.name
+        return project.name
+    }
+
+    private fun launch(name: String): ActivityScenario<DesignerActivity> = ActivityScenario.launch(DesignerActivity.intent(context, name))
+
+    @Test
+    fun paletteInsertsPropertyEditsRenderAndSaveRoundTrips() {
+        val name = project("palette")
+        launch(name).use {
+            rule.onNodeWithTag("designer-canvas-content").assertIsDisplayed()
+            rule.onNodeWithTag("designer-outline").assertIsDisplayed()
+            rule.onNodeWithTag("designer-add").performClick()
+            rule.onNodeWithTag("designer-palette").performScrollToNode(hasTestTag("designer-palette-Button"))
+            rule.onNodeWithTag("designer-palette-Button").performClick()
+            rule.waitForIdle()
+            // The Column root keeps its Text and gains the Button with its shorthand label: four outline rows.
+            rule.onAllNodesWithTag("designer-outline-3").fetchSemanticsNodes().let { assertEquals(1, it.size) }
+            rule.onNodeWithTag("designer-tab-inspector").performClick()
+            rule.onNodeWithTag("designer-key").performTextClearance()
+            rule.onNodeWithTag("designer-key").performTextInput("primary")
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        val saved = store.read(name)
+        assertTrue(saved, saved.contains("compose.Button({key: 'primary'},\n            'Button')"))
+        assertTrue(saved, saved.contains("compose.Text({key: 'title', text: 'Hello', style: 'headlineSmall'})"))
+        assertFalse(store.draftFile(name).exists())
+        launch(name).use {
+            rule.onNodeWithTag("designer-outline").assertIsDisplayed()
+            rule.onNodeWithTag("designer-outline-3").assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun undoRedoAndOutlineMovesEditTheTree() {
+        val name = project("moves", "compose.mount(compose.Column({padding: 16},\n    compose.Text({key: 'a', text: 'A'}),\n    compose.Text({key: 'b', text: 'B'})));\n")
+        launch(name).use {
+            rule.onNodeWithTag("designer-outline-3").performClick()
+            rule.onNodeWithTag("designer-move-up").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-undo").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-redo").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        val saved = store.read(name)
+        assertTrue(saved, saved.indexOf("key: 'b'") < saved.indexOf("key: 'a'"))
+        launch(name).use {
+            rule.onNodeWithTag("designer-outline-2").performClick()
+            rule.onNodeWithTag("designer-delete-node").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        assertFalse(store.read(name).contains("key: 'b'"))
+    }
+
+    @Test
+    fun draftIsOfferedAndRestoredAfterAnInterruptedSession() {
+        val name = project("draft")
+        store.writeDraft(name, "compose.mount(compose.Column({padding: 16},\n    compose.Text({key: 'draft', text: 'Draft'})));\n")
+        launch(name).use {
+            rule.onNodeWithTag("designer-draft-restore").assertIsDisplayed()
+            rule.onNodeWithTag("designer-draft-restore").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-outline-2").assertIsDisplayed()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        assertTrue(store.read(name).contains("key: 'draft'"))
+        store.writeDraft(name, "compose.mount(compose.Text({text: 'other'}));\n")
+        launch(name).use {
+            rule.onNodeWithTag("designer-draft-discard").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-outline-1").assertIsDisplayed()
+        }
+        assertFalse(store.draftFile(name).exists())
+    }
+
+    @Test
+    fun hostOptionsSwitchTheMountKind() {
+        val name = project("host")
+        launch(name).use {
+            rule.onNodeWithTag("designer-menu").performClick()
+            rule.onNodeWithTag("designer-menu-host").performClick()
+            rule.onNodeWithTag("designer-host-floaty").performClick()
+            rule.onNodeWithTag("designer-host-apply").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        assertTrue(store.read(name).contains("compose.floaty(function () {"))
+    }
+
+    @Test
+    fun everyGalleryExampleOpensInTheDesigner() {
+        GalleryCatalog.entries.forEach { entry ->
+            val name = project("gallery-" + entry.component.lowercase(), entry.script())
+            launch(name).use {
+                rule.onNodeWithTag("designer-canvas-content").assertIsDisplayed()
+                rule.onNodeWithTag("designer-outline-1").assertIsDisplayed()
+                rule.onAllNodesWithTag("designer-parse-error").fetchSemanticsNodes().let { assertEquals(entry.component, 0, it.size) }
+            }
+            store.delete(name)
+            created -= name
+        }
+    }
+
+    @Test
+    fun unparseableScriptsShowThePosition() {
+        val name = project("broken", "let page = compose.Column({});\ncompose.mount(page);\n")
+        launch(name).use {
+            rule.onNodeWithTag("designer-parse-error").assertIsDisplayed()
+        }
+    }
+}

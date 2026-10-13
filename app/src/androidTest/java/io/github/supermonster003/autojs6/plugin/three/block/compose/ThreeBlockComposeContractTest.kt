@@ -75,7 +75,7 @@ class ThreeBlockComposeContractTest {
         assertEquals("exactly one enabled launcher alias is expected, found ${matches.map { it.activityInfo.name }}", 1, matches.size)
         val entry = matches.single().activityInfo
         assertTrue("the launcher entry is one of the fixed aliases: ${entry.name}", entry.name.startsWith("$packageName.launcher."))
-        assertEquals("$packageName.app.GalleryActivity", entry.targetActivity)
+        assertEquals("$packageName.designer.ui.DesignerHomeActivity", entry.targetActivity)
         val aliases = listOf("AdaptiveLightIconAlias", "AdaptiveDarkIconAlias", "AdaptiveAutoIconAlias", "TransparentIconAlias")
         val icons = aliases.associateWith { alias ->
             context.packageManager.getActivityInfo(ComponentName(packageName, "$packageName.launcher.$alias"), PackageManager.MATCH_DISABLED_COMPONENTS).icon

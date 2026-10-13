@@ -5,7 +5,7 @@
 ### Usage
 
 1. Install a matching local AutoJs6 build with the compose script entry (minimum 6.8.0 / 5322)
-2. Install the plugin APK; open 3-Block Compose from the launcher to browse the component gallery and settings
+2. Install the plugin APK; open 3-Block Compose from the launcher to reach the designer home, create a script project, or open the component gallery and settings from the top bar
 3. Confirm in the AutoJs6 plugin center that 3-Block Compose is recognized and enabled
 4. Use `compose` or `$compose` in scripts; mount activity content with `compose.mount`, or grant the host overlay permission and use `compose.floaty`
 

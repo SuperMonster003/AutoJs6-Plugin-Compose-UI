@@ -5,7 +5,7 @@
 ### 使用方式
 
 1. 安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 6.8.0 / 5322)
-2. 安装本插件 APK; 从启动器打开 3-Block Compose 可查看组件画廊与设置
+2. 安装本插件 APK; 从启动器打开 3-Block Compose 进入设计器首页, 可新建脚本工程, 或从顶部栏打开组件画廊与设置
 3. 在 AutoJs6 的插件中心确认 3-Block Compose 已被识别并处于启用状态
 4. 在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`
 

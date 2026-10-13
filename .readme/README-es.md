@@ -44,7 +44,7 @@ Este documento esta disponible en los siguientes idiomas:
 
 3-Block Compose es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `"ui";` y ventanas flotantes desde scripts no UI.
 
-El complemento incluye una galería de componentes que se abre desde el lanzador y muestra vistas previas y scripts de ejemplo de cada componente; las interfaces de los scripts se siguen renderizando en el proceso del host. El host descubre el complemento mediante el servicio INFO, lee su versión y compatibilidad y crea la fábrica del renderizador en su propio proceso según el contrato (`org.autojs.plugin.compose.api`).
+El complemento incluye un diseñador visual y una galería de componentes: al abrirlo desde el lanzador se llega al inicio del diseñador, donde se crean o importan proyectos de script y se editan sobre el renderizador real, mientras que la galería muestra vistas previas y scripts de ejemplo de cada componente; las interfaces de los scripts se siguen renderizando en el proceso del host. El host descubre el complemento mediante el servicio INFO, lee su versión y compatibilidad y crea la fábrica del renderizador en su propio proceso según el contrato (`org.autojs.plugin.compose.api`).
 
 ******
 
@@ -62,6 +62,7 @@ Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que co
 
 Funciones de la vista previa de desarrollo actual:
 
+- Diseñador visual: el archivo de script es el proyecto, el renderizador real muestra el árbol de interfaz mientras lo editas, el esquema / la paleta de componentes / el panel de propiedades cubren los 55 componentes, con deshacer / rehacer y recuperación de borradores; el script exportado se puede copiar o enviar directamente a AutoJs6
 - Interfaz declarativa: `compose.state` + `compose.mount(render)` vuelven a dibujar automaticamente ante cada cambio de estado, mientras que los manejadores de nodo de larga vida (`compose.Text({...})` y similares) permiten modificar directamente propiedades e hijos
 - Núcleo Material 3: 29 fábricas de nodos para diseños, texto, iconos, imágenes, botones, entradas, selección, listas diferidas, diálogos e indicadores; Snackbar es un comando de sesión, no una fábrica compose.Snackbar
 - Modifiers encadenados: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserva el orden de las operaciones, y las operaciones con ambito se validan en el lado del host
@@ -84,7 +85,7 @@ Funciones de la vista previa de desarrollo actual:
 ******
 
 1. Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo 6.8.0 / 5322)
-2. Instale el APK del complemento; abra 3-Block Compose desde el lanzador para ver la galería de componentes y los ajustes
+2. Instale el APK del complemento; abra 3-Block Compose desde el lanzador para llegar al inicio del diseñador, crear un proyecto de script o abrir la galería de componentes y los ajustes desde la barra superior
 3. Confirme en el centro de plugins de AutoJs6 que 3-Block Compose se reconoce y esta habilitado
 4. Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`
 
@@ -224,11 +225,12 @@ _2026/10/13_
 
 - `Aviso` El complemento pasa de llamarse Compose UI a 3-Block Compose: el ID de aplicación cambia de io.github.supermonster003.autojs6.plugin.compose.ui a io.github.supermonster003.autojs6.plugin.three.block.compose. Android lo trata como una aplicación nueva, el paquete anterior puede seguir instalado, los ajustes y autorizaciones no se migran, y el nuevo paquete debe activarse y autorizarse de nuevo en el centro de complementos
 - `Aviso` Requiere una compilación de AutoJs6 6.8.0 que contenga la nueva identidad del complemento (commit del host f12665ffde o posterior); los hosts anteriores buscan el complemento por el nombre de paquete antiguo y no reconocen esta versión
+- `Novedad` Diseñador visual: el lanzador abre el inicio del diseñador, donde se crean, importan o abren proyectos de script del almacenamiento privado; el editor ofrece un lienzo de vista previa con el renderizador real, un árbol de esquema, una paleta de componentes y un panel de propiedades, con selección por toque, arrastre con pulsación larga para cambiar de padre, reordenación en el esquema, deshacer / rehacer, guardado y recuperación automáticos de borradores, edición de las opciones de presentación, informe de validación según el catálogo del contrato, y copia del script o envío a AutoJs6; la galería de componentes y los ajustes se abren ahora desde el inicio del diseñador
 - `Mejora` El título de la aplicación, el ID del complemento (three-block-compose), los nombres de paquete y componentes, los artefactos de publicación, la documentación y el repositorio de GitHub (AutoJs6-Plugin-Three-Block-Compose) se actualizan con el cambio de nombre; la API de script compose, la versión del contrato y el comportamiento de renderizado no cambian
 - `Mejora` Los iconos del lanzador, del centro de complementos y de la información de la aplicación del sistema usan ahora las imágenes definitivas del mantenedor, con los glifos claro y oscuro compartiendo una misma forma
 - `Mejora` Los ejemplos incluidos y la categoría de ejemplos del host pasan a llamarse 3-Block Compose
 - `Mejora` El AAR del contrato compose-ui-api ahora se empaqueta con el complemento y se conserva íntegro (antes solo en compilación) para el proceso propio del complemento; dentro de AutoJs6 las clases de contrato idénticas del host siguen teniendo prioridad, por lo que el comportamiento de renderizado y la versión del contrato no cambian
-- `Dependencia` Se añade el jar reducido del analizador Rhino (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, la misma compilación que el host AutoJs6), usado solo por el futuro diseñador visual para analizar scripts, nunca para ejecutarlos; las compilaciones release conservan solo las clases del analizador referenciadas
+- `Dependencia` Se añade el jar reducido del analizador Rhino (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, la misma compilación que el host AutoJs6), usado solo por el diseñador visual para analizar scripts, nunca para ejecutarlos; las compilaciones release conservan solo las clases del analizador referenciadas
 
 #### v1.1.0
 

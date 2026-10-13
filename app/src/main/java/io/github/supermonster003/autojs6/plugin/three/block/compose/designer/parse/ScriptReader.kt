@@ -55,9 +55,28 @@ class ScriptReader(private val catalog: ComponentCatalog = ComposeUiV2.interopCa
 
     fun read(source: String): DesignDocument = Session(source.replace("\r\n", "\n").replace('\r', '\n'), catalog).read()
 
+    companion object {
+        /**
+         * Syntax-checks a handler the inspector edited (parse only, never evaluated); positions are relative
+         * to the body text, whose first line is line 1.
+         */
+        fun checkHandler(params: List<String>, body: String): DesignerParseError? {
+            val source = "(function (" + params.joinToString(", ") + ") {\n" + body.replace("\r\n", "\n") + "\n});\n"
+            return try {
+                Session(source, ComposeUiV2.interopCatalog).parseOnly()
+                null
+            } catch (error: DesignerParseError) {
+                DesignerParseError((error.line - 1).coerceAtLeast(1), error.column, error.reason)
+            }
+        }
+    }
+
     private class Session(private val source: String, private val catalog: ComponentCatalog) {
         private var nextId = 1
         private val stateNames = HashSet<String>()
+
+        /** Parses for syntax only. */
+        fun parseOnly() { parseAst() }
 
         fun read(): DesignDocument {
             val root = parseAst()

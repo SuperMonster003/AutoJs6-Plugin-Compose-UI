@@ -1,0 +1,171 @@
+package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.ScriptWriter
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignDocument
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignNode
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignValidator
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Diagnostic
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditCommand
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditHistory
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeTemplates
+import org.autojs.plugin.compose.api.catalog.ComponentCatalog
+import org.autojs.plugin.compose.api.v2.ComposeUiV2
+
+/**
+ * The editing state of one open project (roadmap P8.3): the undo history, the selection, the canvas drag
+ * state and the current diagnostics. Views observe its Compose state; all mutations go through commands.
+ */
+internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCatalog = ComposeUiV2.interopCatalog) {
+    private val history = EditHistory(initial)
+    private val validator = DesignValidator(catalog)
+
+    var document: DesignDocument by mutableStateOf(initial)
+        private set
+    var selectedId: Int? by mutableStateOf(initial.root?.id)
+    var dirty: Boolean by mutableStateOf(false)
+    var revision: Long by mutableStateOf(0L)
+        private set
+    var diagnostics: List<Diagnostic> by mutableStateOf(validator.validate(initial))
+        private set
+    var draggingId: Int? by mutableStateOf(null)
+    var dropTargetId: Int? by mutableStateOf(null)
+    var previewProblems: List<String> by mutableStateOf(emptyList())
+
+    val canUndo: Boolean get() = history.canUndo
+    val canRedo: Boolean get() = history.canRedo
+    val selected: DesignNode? get() = selectedId?.let { document.node(it) }
+
+    fun execute(command: EditCommand, merge: Boolean = true): Boolean {
+        val changed = history.execute(command, merge)
+        if (changed) publish()
+        return changed
+    }
+
+    fun seal() = history.seal()
+
+    fun undo(): Boolean = history.undo().also { if (it) publish() }
+
+    fun redo(): Boolean = history.redo().also { if (it) publish() }
+
+    fun markSaved() { dirty = false }
+
+    fun script(): String = ScriptWriter.write(document)
+
+    fun replace(document: DesignDocument) {
+        history.reset(document)
+        selectedId = document.root?.id
+        dirty = false
+        publishQuiet()
+    }
+
+    private fun publish() {
+        dirty = true
+        publishQuiet()
+    }
+
+    private fun publishQuiet() {
+        document = history.document
+        revision++
+        if (selectedId != null && document.node(selectedId!!) == null) selectedId = document.root?.id
+        diagnostics = validator.validate(document)
+    }
+
+    /** Inserts a palette component below the selection, or next to it when the selection takes no children. */
+    fun insert(type: String): Boolean {
+        val template = NodeTemplates.create(type)
+        val target = selected ?: document.root ?: return false
+        if (NodeTemplates.acceptsChild(catalog, target.type, target.children.size)) {
+            val before = document.nextId
+            if (!execute(EditCommand.InsertChild(target.id, target.children.size, DesignChild.Node(template)), merge = false)) return false
+            selectedId = before
+            return true
+        }
+        val placement = document.parentOf(target.id) ?: return false
+        if (placement.slotName != null) return false
+        val before = document.nextId
+        if (!execute(EditCommand.InsertChild(placement.parentId, placement.index + 1, DesignChild.Node(template)), merge = false)) return false
+        selectedId = before
+        return true
+    }
+
+    fun deleteSelected(): Boolean {
+        val node = selected ?: return false
+        if (node.id == document.root?.id) return false
+        val placement = document.parentOf(node.id)
+        val changed = execute(EditCommand.RemoveNode(node.id), merge = false)
+        if (changed) selectedId = placement?.parentId ?: document.root?.id
+        return changed
+    }
+
+    /** Moves the selected primary child one position up or down among its siblings. */
+    fun moveSelected(delta: Int): Boolean {
+        val node = selected ?: return false
+        val placement = document.parentOf(node.id) ?: return false
+        if (placement.slotName != null) return false
+        val parent = document.node(placement.parentId) ?: return false
+        val target = placement.index + delta
+        if (target !in parent.children.indices) return false
+        return execute(EditCommand.MoveChild(parent.id, placement.index, parent.id, target), merge = false)
+    }
+
+    /** Reparents [id] as the last primary child of [containerId] when the container accepts children. */
+    fun moveInto(id: Int, containerId: Int): Boolean {
+        if (id == containerId) return false
+        val container = document.node(containerId) ?: return false
+        val node = document.node(id) ?: return false
+        if (node.descendants().any { it.id == containerId }) return false
+        val placement = document.parentOf(id) ?: return false
+        if (placement.slotName != null) return false
+        val children = if (placement.parentId == containerId) container.children.size - 1 else container.children.size
+        if (!NodeTemplates.acceptsChild(catalog, container.type, children)) return false
+        return execute(EditCommand.MoveChild(placement.parentId, placement.index, containerId, children), merge = false)
+    }
+
+    /** Moves [id] to [index] among the primary children of [parentId] (index counts after removal). */
+    fun moveTo(id: Int, parentId: Int, index: Int): Boolean {
+        if (id == parentId) return false
+        val node = document.node(id) ?: return false
+        if (node.descendants().any { it.id == parentId }) return false
+        val placement = document.parentOf(id) ?: return false
+        if (placement.slotName != null) return false
+        val parent = document.node(parentId) ?: return false
+        val count = if (placement.parentId == parentId) parent.children.size - 1 else parent.children.size
+        if (placement.parentId != parentId && !NodeTemplates.acceptsChild(catalog, parent.type, count)) return false
+        return execute(EditCommand.MoveChild(placement.parentId, placement.index, parentId, index.coerceIn(0, count)), merge = false)
+    }
+
+    fun canDropInto(id: Int, containerId: Int): Boolean {
+        if (id == containerId) return false
+        val container = document.node(containerId) ?: return false
+        val node = document.node(id) ?: return false
+        if (node.descendants().any { it.id == containerId }) return false
+        val placement = document.parentOf(id) ?: return false
+        if (placement.slotName != null) return false
+        val children = if (placement.parentId == containerId) container.children.size - 1 else container.children.size
+        return NodeTemplates.acceptsChild(catalog, container.type, children)
+    }
+
+    /** The nearest ancestor (or the node itself) of [id] that accepts a dropped node. */
+    fun dropContainerFor(dragged: Int, id: Int?): Int? {
+        var current = id
+        while (current != null) {
+            if (canDropInto(dragged, current)) return current
+            current = document.parentOf(current)?.parentId
+        }
+        return null
+    }
+
+    fun endDrag() {
+        val dragged = draggingId
+        val target = dropTargetId
+        draggingId = null
+        dropTargetId = null
+        if (dragged != null && target != null) {
+            if (moveInto(dragged, target)) selectedId = dragged
+        }
+    }
+}

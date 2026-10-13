@@ -68,6 +68,16 @@
             process. The launcher entry is one of four fixed aliases that persist the user's icon choice as
             component enabled state (icon specification section 1); only the automatic alias is enabled by default.
         -->
+        <!-- Roadmap P8.3 / D38: the designer home is the launcher target; the editor keeps its state across rotation. -->
+        <activity
+            android:name=".designer.ui.DesignerHomeActivity"
+            android:configChanges="uiMode|locale|layoutDirection"
+            android:exported="false" />
+        <activity
+            android:name=".designer.ui.DesignerActivity"
+            android:configChanges="uiMode|locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".app.GalleryActivity"
             android:configChanges="uiMode|locale|layoutDirection"
@@ -78,7 +88,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_system_light"
             android:roundIcon="@mipmap/ic_launcher_system_light"
-            android:targetActivity=".app.GalleryActivity">
+            android:targetActivity=".designer.ui.DesignerHomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -90,7 +100,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_system"
             android:roundIcon="@mipmap/ic_launcher_system"
-            android:targetActivity=".app.GalleryActivity">
+            android:targetActivity=".designer.ui.DesignerHomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -102,7 +112,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher_system_auto"
             android:roundIcon="@mipmap/ic_launcher_system_auto"
-            android:targetActivity=".app.GalleryActivity">
+            android:targetActivity=".designer.ui.DesignerHomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -114,7 +124,7 @@
             android:exported="true"
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher"
-            android:targetActivity=".app.GalleryActivity">
+            android:targetActivity=".designer.ui.DesignerHomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

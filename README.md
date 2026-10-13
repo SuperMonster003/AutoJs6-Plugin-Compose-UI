@@ -44,7 +44,7 @@
 
 3-Block Compose 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `"ui";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.
 
-插件内置组件画廊, 可从启动器打开浏览全部组件的预览与示例脚本; 脚本界面的渲染仍在宿主进程中进行. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在自身进程内实例化渲染器工厂.
+插件内置可视化设计器与组件画廊: 从启动器打开即进入设计器首页, 可新建或导入脚本工程并在真实渲染器上编辑界面, 画廊则展示全部组件的预览与示例脚本; 脚本界面的渲染仍在宿主进程中进行. 宿主通过 INFO 服务发现插件并读取版本与兼容信息, 再按契约 (`org.autojs.plugin.compose.api`) 在自身进程内实例化渲染器工厂.
 
 ******
 
@@ -62,6 +62,7 @@
 
 当前开发预览的核心能力:
 
+- 可视化设计器: 脚本文件即工程, 真实渲染器所见即所得地预览界面树, 大纲 / 组件面板 / 属性抽屉覆盖全部 55 个组件, 支持撤销重做与草稿恢复; 导出的脚本可复制或直接发送到 AutoJs6 运行
 - 声明式界面: `compose.state` + `compose.mount(render)` 按状态变化自动重绘, 同时提供可长期持有的节点句柄 (`compose.Text({...})` 等) 直接修改属性与子节点
 - Material 3 核心集: 29 个节点工厂覆盖布局, 文本, 图标, 图片, 按钮, 输入, 选择控件, 惰性列表, 对话框与进度; Snackbar 是会话命令, 不是 compose.Snackbar 工厂
 - 链式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作顺序, 作用域操作在宿主侧校验
@@ -84,7 +85,7 @@
 ******
 
 1. 安装包含 compose 脚本入口的匹配本地 AutoJs6 构建 (最低 6.8.0 / 5322)
-2. 安装本插件 APK; 从启动器打开 3-Block Compose 可查看组件画廊与设置
+2. 安装本插件 APK; 从启动器打开 3-Block Compose 进入设计器首页, 可新建脚本工程, 或从顶部栏打开组件画廊与设置
 3. 在 AutoJs6 的插件中心确认 3-Block Compose 已被识别并处于启用状态
 4. 在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`
 
@@ -224,11 +225,12 @@ _2026/10/13_
 
 - `提示` 插件由 Compose UI 更名为 3-Block Compose: 应用 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改为 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 将其视为新应用, 旧包可以保留并存, 设置与授权不会自动迁移, 新包需要在插件中心重新启用和授权
 - `提示` 需要包含新插件身份的 AutoJs6 6.8.0 宿主构建 (宿主提交 f12665ffde 之后); 更早的宿主按旧包名发现插件, 不会识别本版本
+- `新增` 可视化设计器: 从启动器进入设计器首页, 可新建 / 导入 / 打开私有目录中的脚本工程; 编辑页提供真实渲染器预览画布, 大纲树, 组件面板与属性抽屉, 支持点选与长按拖拽换父, 大纲内重排, 撤销 / 重做, 草稿自动保存与恢复, 承载选项编辑, 契约目录校验报告, 以及复制脚本或发送到 AutoJs6 运行; 组件画廊与设置改从设计器首页进入
 - `优化` 应用标题, 插件 ID (three-block-compose), 包名与组件名, 发布产物, 文档及 GitHub 仓库 (AutoJs6-Plugin-Three-Block-Compose) 随更名同步更新; 脚本 API compose, 契约版本与渲染行为不变
 - `优化` 启动器, 插件中心与系统应用信息图标改用维护者提供的正式图稿, 亮暗两套图案共用同一形状
 - `优化` 随包示例与宿主示例分类改为 3-Block Compose
 - `优化` 契约 AAR compose-ui-api 改为随插件打包并完整保留 (此前只在编译期引用), 供插件自身进程使用; 在 AutoJs6 内仍优先使用宿主提供的同名契约类, 渲染行为与契约版本不变
-- `依赖` 附加 Rhino 解析器精简 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 与 AutoJs6 宿主同一构建), 仅供后续的可视化设计器解析脚本, 不执行脚本; release 包只保留被引用的解析类
+- `依赖` 附加 Rhino 解析器精简 jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, 与 AutoJs6 宿主同一构建), 仅供可视化设计器解析脚本, 不执行脚本; release 包只保留被引用的解析类
 
 #### v1.1.0
 

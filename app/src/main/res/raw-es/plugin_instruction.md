@@ -5,7 +5,7 @@ Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que co
 ### Uso
 
 1. Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo 6.8.0 / 5322)
-2. Instale el APK del complemento; abra 3-Block Compose desde el lanzador para ver la galería de componentes y los ajustes
+2. Instale el APK del complemento; abra 3-Block Compose desde el lanzador para llegar al inicio del diseñador, crear un proyecto de script o abrir la galería de componentes y los ajustes desde la barra superior
 3. Confirme en el centro de plugins de AutoJs6 que 3-Block Compose se reconoce y esta habilitado
 4. Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`
 
