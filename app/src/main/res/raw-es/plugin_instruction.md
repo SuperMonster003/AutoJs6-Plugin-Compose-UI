@@ -1,6 +1,6 @@
 3-Block Compose es un plugin de renderizado de interfaces para AutoJs6. Los scripts declaran interfaces mediante `compose` / `$compose` del host y el plugin las renderiza dentro del proceso del host con Jetpack Compose y Material 3. La vista previa admite contenido de actividades `"ui";` y ventanas flotantes desde scripts no UI.
 
-Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que contenga la identidad 3-Block Compose (commit del host f12665ffde o posterior) y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. Los iconos ya usan las imágenes definitivas del mantenedor.
+Vista previa de desarrollo local 1.2.0: requiere una compilación del host AutoJs6 con la nueva identidad de 3-Block Compose (commit del host f12665ffde o posterior) con este complemento instalado y habilitado; la entrada de menú del editor de AutoJs6 "Abrir en el diseñador de 3-Block Compose" necesita una compilación posterior al commit del host db7e6a1734. El acompañamiento local ofrece páginas de UI, ventanas flotantes, el diseñador visual, cinco ejemplos, la referencia de API, la página de guía del diseñador y las declaraciones de TypeScript. El alcance verificado de compatibilidad y rendimiento se registra en la hoja de ruta. Aún no figura en el índice oficial; no hay versión oficial. Los iconos usan el arte final del mantenedor.
 
 ### Uso
 
@@ -23,10 +23,13 @@ Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que co
 - Esta versión usa el contrato 3-Block Compose V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
 - compose.memo lo proporciona AutoJs6 6.8.0 / 5323 para reutilizar fragmentos de render cuyas dependencias no cambian; este complemento no necesita actualizarse y TSX requiere TypeScript Engine 0.6.8
 - Desde 1.2.0 las clases del contrato (org.autojs.plugin.compose.api) se empaquetan con el complemento para su proceso independiente; dentro de AutoJs6 el host proporciona las mismas clases y la copia del complemento queda oculta
+- El diseñador se ejecuta en el proceso propio del complemento y no depende de AutoJs6; ejecutar, abrir en el editor de AutoJs6 e importar al directorio de scripts de AutoJs6 requieren AutoJs6 instalado, y la entrada de menú del editor "Abrir en el diseñador de 3-Block Compose" requiere una compilación de AutoJs6 que la incluya
 
 ### Preguntas frecuentes
 
 - Como se ejecutan los ejemplos de la galería? "Ejecutar en AutoJs6" entrega el script al AutoJs6 instalado; la galería solo muestra vistas previas y código y nunca ejecuta scripts
+- Puede el diseñador abrir cualquier script? Solo interpreta las declaraciones `compose.state` de nivel superior y la única llamada `compose.mount` / `floaty` / `dialog`; el resto de sentencias se conserva tal cual. Las formas que no puede asignar (una raíz que no es una fábrica compose, varias llamadas de montaje, una función de renderizado sin return) se rechazan con línea y columna
+- El diseñador ejecuta scripts? No. Solo los analiza con el analizador Rhino y los previsualiza con el renderizador propio del complemento; los eventos no se disparan y el state muestra su valor inicial. La ejecución corresponde a AutoJs6
 - Por qué falta `compose`? El objeto global lo proporciona la compilación local compatible del host; instalar solo el APK del plugin no lo añade
 - Hay que desinstalar otros plugins de interfaz? No, 3-Block Compose no interfiere con el modulo `ui` existente ni con otros plugins
 - Qué ocurre si cambia el complemento? Actualizarlo, desinstalarlo o desactivarlo cierra las sesiones activas e informa del error correspondiente; un complemento compatible y activado permite volver a montar
@@ -37,9 +40,9 @@ Vista previa local de desarrollo 1.2.0: requiere una compilación AutoJs6 que co
 
 ### Permisos y seguridad
 
-- Proteccion de componentes: tanto la Wake Activity como el servicio INFO estan protegidos por el permiso de firma `org.autojs.permission.PLUGIN`, de modo que solo el host AutoJs6 puede acceder a ellos
-- Comportamiento en segundo plano: sin servicio residente ni tareas programadas; el complemento recibe una difusión del sistema al actualizarse para normalizar los componentes del icono del lanzador y no consume recursos mientras el host no lo carga ni está abierto
-- Limite de datos: el plugin nunca lee ni escribe datos de scripts ni archivos del usuario; el estado de la interfaz solo existe en la memoria del proceso del host
+- Protección de componentes: la Wake Activity y el servicio INFO están protegidos por el permiso de firma `org.autojs.permission.PLUGIN`, de modo que solo el host AutoJs6 puede acceder a ellos; el editor del diseñador es un componente exportado sin permiso que solo acepta el Uri de un documento de script entregado por el usuario, y la lectura y escritura se limitan a ese Uri
+- Comportamiento en segundo plano: el complemento no tiene servicios residentes ni tareas programadas y solo recibe una difusión del sistema al actualizarse, para normalizar sus componentes de icono del lanzador; no consume nada mientras el host no lo carga y ni el diseñador ni la galería están abiertos
+- Límite de datos: el renderizador nunca lee ni escribe datos de scripts ni archivos del usuario, y el estado de la interfaz solo existe en la memoria del proceso del host; los proyectos y borradores del diseñador viven en el directorio privado del complemento, se importan y exportan solo mediante el selector de documentos del sistema, o leen y escriben un único archivo de script mediante un Uri entregado por el usuario; el directorio de proyectos se comparte solo a través del proveedor de contenido propio del complemento, por solicitud, al entregar un proyecto a AutoJs6
 - Politica de copias de seguridad: la copia de seguridad de la aplicacion y la transferencia entre dispositivos estan deshabilitadas, y el plugin no guarda datos que migrar
 
 Mas informacion (inicio rapido, notas de compilacion, hoja de ruta) en la pagina del proyecto: https://github.com/SuperMonster003/AutoJs6-Plugin-Three-Block-Compose

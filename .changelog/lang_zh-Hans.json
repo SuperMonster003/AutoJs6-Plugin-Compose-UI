@@ -9,7 +9,8 @@
       "released_date": "2026/10/13",
       "hint": [
         "插件由 Compose UI 更名为 3-Block Compose: 应用 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改为 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 将其视为新应用, 旧包可以保留并存, 设置与授权不会自动迁移, 新包需要在插件中心重新启用和授权",
-        "需要包含新插件身份的 AutoJs6 6.8.0 宿主构建 (宿主提交 f12665ffde 之后); 更早的宿主按旧包名发现插件, 不会识别本版本"
+        "需要包含新插件身份的 AutoJs6 6.8.0 宿主构建 (宿主提交 f12665ffde 之后); 更早的宿主按旧包名发现插件, 不会识别本版本",
+        "设计器的使用说明见文档站 \"3-Block Compose 设计器\" 页; AutoJs6 编辑器菜单的 \"在 3-Block Compose 设计器中打开\" 需要宿主提交 db7e6a1734 之后的 AutoJs6 6.8.0 构建, 其它去向只需已安装 AutoJs6"
       ],
       "feature": [
         "可视化设计器: 从启动器进入设计器首页, 可新建 / 导入 / 打开私有目录中的脚本工程; 编辑页提供真实渲染器预览画布, 大纲树, 组件面板与属性抽屉, 支持点选与长按拖拽换父, 大纲内重排, 撤销 / 重做, 草稿自动保存与恢复, 承载选项编辑, 契约目录校验报告, 以及复制脚本或发送到 AutoJs6 运行; 组件画廊与设置改从设计器首页进入",

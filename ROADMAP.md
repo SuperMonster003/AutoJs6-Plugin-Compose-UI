@@ -274,7 +274,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P5 | 健壮性, 兼容矩阵 (含 inrt), 性能与体积 | 1.0.0 | 已完成; Q5 第一版复核规则已于 2026-10-03 确认 |
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
-| P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面与 P8.4 存储 / 宿主衔接 (含宿主编辑器入口), P8.5 未开始 |
+| P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4.
 
@@ -613,9 +613,11 @@ P8.4 证据 (2026-10-13): 插件侧 `designer/storage` 新增 DocumentSource.kt 
 
 ### P8.5 文档, README, changelog 与 1.2.0 本地 gate
 
-- [ ] (文档) README 10 语言: 简介 / 功能特性 / 使用方式增加设计器 (入口, 工程, 四个去向, 反向打开); `AutoJs6-Documentation` 的设计器页面按 Q11; 离线文档同步; `aj6-int-compose.d.ts` 与 Ace 声明无变化 (脚本 API 未改).
-- [ ] (插件) `.changelog` 1.2.0 (10 语言, 通俗, 半角标点); 版本名 1.2.0; 体积增量与 Q8 预算对照写入证据; 图标与 alias 不变.
-- [ ] (发布) 本地 gate: `AGENTS.md` 第 14 节全部步骤 + P8.1 要求的宿主侧完整设备矩阵 + 设计器 instrumentation; 远端步骤遵守 D7; 证据 `docs/dev/p8-designer-evidence.md`.
+- [x] (文档) README 10 语言: 简介 / 功能特性 / 使用方式增加设计器 (入口, 工程, 四个去向, 反向打开); `AutoJs6-Documentation` 的设计器页面按 Q11; 离线文档同步; `aj6-int-compose.d.ts` 与 Ace 声明无变化 (脚本 API 未改).
+- [x] (插件) `.changelog` 1.2.0 (10 语言, 通俗, 半角标点); 版本名 1.2.0; 体积增量与 Q8 预算对照写入证据; 图标与 alias 不变.
+- [x] (发布) 本地 gate: `AGENTS.md` 第 14 节全部步骤 + P8.1 要求的宿主侧完整设备矩阵 + 设计器 instrumentation; 远端步骤遵守 D7; 证据 `docs/dev/p8-designer-evidence.md`.
+
+P8.5 证据 (2026-10-13): README 10 语言校订 (`p_introduction_how` / 使用步骤 / 功能特性在 P8.3 与 P8.4 已加入设计器与去向; 本小节改写 `p_status` (设计器, 指南页, 宿主编辑器入口需 db7e6a1734), 新增兼容性条目 (设计器不依赖宿主, 去向与宿主入口的要求), FAQ 两条 (可识别子集, 不执行脚本), 安全条目三条改写 (导出的编辑页只收文档 Uri, 设计器与画廊的后台行为, 工程与草稿的数据边界); 西班牙语不用倒问号). `.changelog` 1.2.0 复核: hint 2 条改名 / 宿主要求 + 1 条设计器指南与宿主入口要求, feature 2 条 (设计器, 衔接), improvement 4 条, dependency 1 条 (Rhino), 10 语言同步, 半角标点. 文档站 (Q11): `AutoJs6-Documentation` 8538de3 新增 `api/composeDesigner.md` (入口, 工程与文件, 编辑页, 可识别子集与往返规则, 与 AutoJs6 的衔接, 限制), `api/compose.md` 表格加一行链接, 侧栏 / 目录 / 站点 changelog / progress / 10 语言仓库 changelog, 全站生成 158 模块与离线搜索索引, `--check` 通过; 219dd49 为离线同步后的计数器 103. 离线文档: `auto-generate-for-autojs6.bat --dry-run` (新增 1, 变更 158) 与 `--verify-offline` 通过, Offline Docs 5f7bf9f (build 132) (assets 同步, provenance `source_base_commit` 指向 8538de3, 10 语言 changelog 一条, VERSION_BUILD 132). `aj6-int-compose.d.ts` 与 Ace 声明无变化 (脚本 API 未改). 体积: 1.2.0 release 与 1.1.0 build44 (4673146 B / 82466 引用) 对照见 `docs/dev/p8-designer-evidence.md`, 增量约 0.4 MiB, 在 Q8 预算内; 第 14 节复核线仍待维护者确认新基线. 本地 gate (JVM 121 项; lint 0 错误; classpath debug / release 通过; 插件 instrumentation AVD_API_30 与 AVD_API_24 各 87 / 87; release 启动检查两台通过; 宿主侧 compose 矩阵 15 类在两台 AVD 上通过, 例外为 API 24 的 TSX 类受 TypeScript Engine 编译器 Worker 超时阻塞, 以及 ComposeUiLoaderTest 需用 debug 插件包) 全部记录在 `docs/dev/p8-designer-evidence.md`; 为避免与另一会话争用真机, gate 全部在本机 AVD 完成.
 
 ---
 

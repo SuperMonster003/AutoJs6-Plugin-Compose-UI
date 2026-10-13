@@ -37,7 +37,8 @@ class Adb:
         completed = subprocess.run(self.base + list(args), capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
         if check and completed.returncode != 0:
             raise SystemExit(f"adb {' '.join(args)} failed ({completed.returncode}):\n{completed.stdout}\n{completed.stderr}")
-        return completed.stdout
+        # uiautomator and pm report some failures on stderr only; callers match substrings, so merge both streams.
+        return completed.stdout + ((chr(10) + completed.stderr) if completed.stderr.strip() else "")
 
     def shell(self, command: str, check: bool = True, timeout: int = 120) -> str:
         return self.run("shell", command, check=check, timeout=timeout)
@@ -78,8 +79,10 @@ def expand(component: str) -> str:
 
 
 def ui_tree(adb: Adb) -> ElementTree.Element:
-    for attempt in range(6):
+    last = ""
+    for attempt in range(12):
         output = adb.shell(f"uiautomator dump {UI_DUMP}", check=False, timeout=60)
+        last = output.strip()
         if "dumped to" in output:
             # API 24 occasionally answers the first cat with exit 255 while the dump is still being written.
             xml = adb.shell(f"cat {UI_DUMP}", check=False)
@@ -87,8 +90,9 @@ def ui_tree(adb: Adb) -> ElementTree.Element:
                 return ElementTree.fromstring(xml)
             except ElementTree.ParseError:
                 pass
+        # A slow emulator keeps reporting "could not get idle state" while an animation runs; wait it out.
         time.sleep(1.0 + attempt)
-    raise SystemExit("uiautomator could not dump the accessibility tree")
+    raise SystemExit(f"uiautomator could not dump the accessibility tree; last output: {last[-200:]}")
 
 
 def tap(adb: Adb, node: ElementTree.Element) -> None:

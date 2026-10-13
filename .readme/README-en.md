@@ -52,7 +52,7 @@ The plugin ships a visual designer and a component gallery: opening it from the 
 
 ******
 
-1.2.0 local development preview: use an AutoJs6 host build that contains the 3-Block Compose identity (host commit f12665ffde or later) and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. The icons now use the maintainer's final artwork.
+1.2.0 local development preview: requires an AutoJs6 host build that carries the new 3-Block Compose identity (host commit f12665ffde or later) with this plugin installed and enabled; the AutoJs6 editor menu entry "Open in 3-Block Compose designer" needs a build after host commit db7e6a1734. The local companion delivers UI pages, floating windows, the visual designer, five examples, the API reference, the designer guide page and TypeScript declarations. The verified compatibility and performance scope is recorded in the roadmap. Not yet listed in the official index; no official release. The icons use the maintainer's final artwork.
 
 ******
 
@@ -152,6 +152,7 @@ Runtime requirements and limits of the plugin:
 - This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
 - compose.memo is provided by AutoJs6 6.8.0 / 5323 to reuse render fragments whose dependencies are unchanged; this plugin needs no update, and companion TSX support requires TypeScript Engine 0.6.8
 - Since 1.2.0 the contract classes (org.autojs.plugin.compose.api) are packaged with the plugin for its standalone process; inside AutoJs6 the host supplies the same classes and the plugin copy is shadowed
+- The designer runs in the plugin's own process and does not depend on AutoJs6; running, opening in the AutoJs6 editor and importing into the AutoJs6 script directory need an installed AutoJs6, and the editor menu entry "Open in 3-Block Compose designer" needs an AutoJs6 build that contains it
 
 ******
 
@@ -160,6 +161,8 @@ Runtime requirements and limits of the plugin:
 ******
 
 - How do gallery examples run? "Run in AutoJs6" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts
+- Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column
+- Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; events do not fire and state shows its initial value. Running is left to AutoJs6
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, 3-Block Compose does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
@@ -176,9 +179,9 @@ Runtime requirements and limits of the plugin:
 
 The plugin requests no Android runtime permissions and never touches the network, storage, or sensors.
 
-- Component protection: both the Wake Activity and the INFO service are guarded by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them
-- Background behavior: no resident service or scheduled task; the plugin receives one system broadcast when it is updated to normalize its launcher icon components, and consumes no resources while neither loaded by the host nor opened
-- Data boundary: the plugin never reads or writes script data or user files; UI state exists only in the host process memory
+- Component protection: the Wake Activity and the INFO service are protected by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them; the designer editor is an exported component without a permission that only accepts a script document Uri handed over by the user, and reads and writes are limited to that Uri
+- Background behavior: the plugin has no resident service or scheduled task and only receives one system broadcast when it is updated, to normalize its launcher icon components; it consumes nothing while not loaded by the host and while neither the designer nor the gallery is open
+- Data boundary: the renderer never reads or writes script data or user files, and interface state lives only in the host process memory; designer projects and drafts live in the plugin's private directory, are imported and exported only through the system document picker, or read and write a single script file through a Uri the user handed over; the project directory is shared only through the plugin's own content provider, per request, when handing a project to AutoJs6
 - Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating
 
 When loading the renderer the host keeps its own script permission model; the plugin does not widen the system capabilities scripts can reach.
@@ -227,6 +230,7 @@ _2026/10/13_
 
 - `Hint` The plugin is renamed from Compose UI to 3-Block Compose: the application ID changes from io.github.supermonster003.autojs6.plugin.compose.ui to io.github.supermonster003.autojs6.plugin.three.block.compose. Android treats it as a new app, the old package can stay installed alongside, settings and authorizations are not migrated, and the new package must be enabled and authorized again in the plugin center
 - `Hint` Requires an AutoJs6 6.8.0 host build that contains the new plugin identity (host commit f12665ffde or later); earlier hosts discover the plugin by the old package name and do not recognize this version
+- `Hint` The designer is documented on the "3-Block Compose Designer" page of the documentation site; the AutoJs6 editor menu entry "Open in 3-Block Compose designer" needs an AutoJs6 6.8.0 build after host commit db7e6a1734, while the other destinations only need an installed AutoJs6
 - `Feature` Visual designer: the launcher opens the designer home, where script projects in private storage are created, imported or opened; the editor offers a real-renderer preview canvas, an outline tree, a component palette and a property drawer, with tap to select, long-press drag to reparent, reordering in the outline, undo / redo, automatic draft saving and recovery, host option editing, a contract-catalog validation report, and copying the script or sending it to AutoJs6; the component gallery and settings now open from the designer home
 - `Feature` Designer and AutoJs6 integration: the editor menu opens the current script in the AutoJs6 editor (the designer reloads after AutoJs6 saves), imports it into the AutoJs6 script directory, or exports it anywhere; the designer also opens .js files directly from the AutoJs6 editor or a file manager and saves back into the same file, falling back to a new project without write access; project files are shared through the plugin's own content provider with per-request grants and no other directory is exposed
 - `Improvement` The app title, plugin ID (three-block-compose), package and component names, release artifacts, documentation and the GitHub repository (AutoJs6-Plugin-Three-Block-Compose) follow the rename; the compose script API, the contract version and the rendering behavior are unchanged

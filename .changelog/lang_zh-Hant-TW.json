@@ -9,7 +9,8 @@
       "released_date": "2026/10/13",
       "hint": [
         "外掛由 Compose UI 更名為 3-Block Compose: 應用程式 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改為 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 會將其視為新應用程式, 舊套件可以保留並存, 設定與授權不會自動遷移, 新套件需要在外掛中心重新啟用和授權",
-        "需要包含新外掛身分的 AutoJs6 6.8.0 宿主建置 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名稱發現外掛, 不會識別本版本"
+        "需要包含新外掛身分的 AutoJs6 6.8.0 宿主建置 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名稱發現外掛, 不會識別本版本",
+        "設計器的使用說明見文件站 \"3-Block Compose 設計器\" 頁; AutoJs6 編輯器選單的 \"在 3-Block Compose 設計器中開啟\" 需要宿主提交 db7e6a1734 之後的 AutoJs6 6.8.0 建置, 其它去向只需已安裝 AutoJs6"
       ],
       "feature": [
         "視覺化設計器: 從啟動器進入設計器首頁, 可新增 / 匯入 / 開啟私有目錄中的指令碼專案; 編輯頁提供真實轉譯器預覽畫布, 大綱樹, 元件面板與屬性抽屜, 支援點選與長按拖曳換父, 大綱內重排, 復原 / 重做, 草稿自動儲存與還原, 承載選項編輯, 契約目錄驗證報告, 以及複製指令碼或傳送到 AutoJs6 執行; 元件展示與設定改從設計器首頁進入",

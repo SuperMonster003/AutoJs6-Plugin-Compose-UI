@@ -8,7 +8,7 @@
   "p_introduction_what": "3-Block Compose is a user interface rendering plugin for AutoJs6. Scripts declare interfaces through the host-provided `compose` / `$compose` entry, and the plugin renders them inside the host process with Jetpack Compose and Material 3. The current preview supports both `\"ui\";` activity content and floating windows from non-UI scripts.",
   "p_introduction_how": "The plugin ships a visual designer and a component gallery: opening it from the launcher lands on the designer home, where script projects are created or imported and edited on the real renderer, while the gallery shows previews and example scripts of every component; script interfaces are still rendered inside the host process. The host discovers the plugin through the INFO service, reads its version and compatibility information, and instantiates the renderer factory in its own process according to the contract (`org.autojs.plugin.compose.api`).",
   "h3_status": "Status",
-  "p_status": "1.2.0 local development preview: use an AutoJs6 host build that contains the 3-Block Compose identity (host commit f12665ffde or later) and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. The icons now use the maintainer's final artwork.",
+  "p_status": "1.2.0 local development preview: requires an AutoJs6 host build that carries the new 3-Block Compose identity (host commit f12665ffde or later) with this plugin installed and enabled; the AutoJs6 editor menu entry \"Open in 3-Block Compose designer\" needs a build after host commit db7e6a1734. The local companion delivers UI pages, floating windows, the visual designer, five examples, the API reference, the designer guide page and TypeScript declarations. The verified compatibility and performance scope is recorded in the roadmap. Not yet listed in the official index; no official release. The icons use the maintainer's final artwork.",
   "h3_features": "Features",
   "p_features_intro": "Capabilities of the current development preview",
   "features": [
@@ -60,11 +60,14 @@
     "cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions",
     "This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer",
     "compose.memo is provided by AutoJs6 6.8.0 / 5323 to reuse render fragments whose dependencies are unchanged; this plugin needs no update, and companion TSX support requires TypeScript Engine 0.6.8",
-    "Since 1.2.0 the contract classes (org.autojs.plugin.compose.api) are packaged with the plugin for its standalone process; inside AutoJs6 the host supplies the same classes and the plugin copy is shadowed"
+    "Since 1.2.0 the contract classes (org.autojs.plugin.compose.api) are packaged with the plugin for its standalone process; inside AutoJs6 the host supplies the same classes and the plugin copy is shadowed",
+    "The designer runs in the plugin's own process and does not depend on AutoJs6; running, opening in the AutoJs6 editor and importing into the AutoJs6 script directory need an installed AutoJs6, and the editor menu entry \"Open in 3-Block Compose designer\" needs an AutoJs6 build that contains it"
   ],
   "h3_faq": "FAQ",
   "faq_items": [
     "How do gallery examples run? \"Run in AutoJs6\" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts",
+    "Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column",
+    "Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; events do not fire and state shows its initial value. Running is left to AutoJs6",
     "Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it",
     "Do other UI plugins need to be uninstalled? No, 3-Block Compose does not interfere with the existing `ui` module or other plugins",
     "What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount",
@@ -76,9 +79,9 @@
   "h3_security": "Permissions and Security",
   "p_security_intro": "The plugin requests no Android runtime permissions and never touches the network, storage, or sensors.",
   "security_points": [
-    "Component protection: both the Wake Activity and the INFO service are guarded by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them",
-    "Background behavior: no resident service or scheduled task; the plugin receives one system broadcast when it is updated to normalize its launcher icon components, and consumes no resources while neither loaded by the host nor opened",
-    "Data boundary: the plugin never reads or writes script data or user files; UI state exists only in the host process memory",
+    "Component protection: the Wake Activity and the INFO service are protected by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them; the designer editor is an exported component without a permission that only accepts a script document Uri handed over by the user, and reads and writes are limited to that Uri",
+    "Background behavior: the plugin has no resident service or scheduled task and only receives one system broadcast when it is updated, to normalize its launcher icon components; it consumes nothing while not loaded by the host and while neither the designer nor the gallery is open",
+    "Data boundary: the renderer never reads or writes script data or user files, and interface state lives only in the host process memory; designer projects and drafts live in the plugin's private directory, are imported and exported only through the system document picker, or read and write a single script file through a Uri the user handed over; the project directory is shared only through the plugin's own content provider, per request, when handing a project to AutoJs6",
     "Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating"
   ],
   "p_security_permission": "When loading the renderer the host keeps its own script permission model; the plugin does not widen the system capabilities scripts can reach.",

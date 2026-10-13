@@ -10,6 +10,7 @@
 
 * `提示` 插件由 Compose UI 更名為 3-Block Compose: 應用 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改為 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 會將其視為新應用, 舊套件可以保留並存, 設定與授權不會自動遷移, 新套件需要在插件中心重新啟用和授權
 * `提示` 需要包含新插件身份的 AutoJs6 6.8.0 宿主構建 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名發現插件, 不會識別本版本
+* `提示` 設計器的使用說明見文檔站 "3-Block Compose 設計器" 頁; AutoJs6 編輯器選單的 "在 3-Block Compose 設計器中打開" 需要宿主提交 db7e6a1734 之後的 AutoJs6 6.8.0 構建, 其它去向只需已安裝 AutoJs6
 * `新增` 可視化設計器: 從啟動器進入設計器首頁, 可新建 / 匯入 / 開啟私有目錄中的腳本工程; 編輯頁提供真實渲染器預覽畫布, 大綱樹, 組件面板與屬性抽屜, 支援點選與長按拖曳換父, 大綱內重排, 撤銷 / 重做, 草稿自動儲存與恢復, 承載選項編輯, 契約目錄校驗報告, 以及複製腳本或發送到 AutoJs6 運行; 組件展示與設定改從設計器首頁進入
 * `新增` 設計器與 AutoJs6 的銜接: 編輯頁選單可把當前腳本在 AutoJs6 編輯器中打開 (AutoJs6 儲存後設計器自動重新載入), 匯入 AutoJs6 腳本目錄, 或匯出到任意位置; 設計器也可以從 AutoJs6 編輯器或檔案管理器直接打開 .js 檔案並儲存回原檔案, 沒有寫入權限時另存為工程; 工程檔案通過插件自己的內容提供器按次授權, 不對外公開其它目錄
 * `優化` 應用標題, 插件 ID (three-block-compose), 套件名與組件名, 發佈產物, 文件及 GitHub 倉庫 (AutoJs6-Plugin-Three-Block-Compose) 隨更名同步更新; 腳本 API compose, 契約版本與渲染行為不變
