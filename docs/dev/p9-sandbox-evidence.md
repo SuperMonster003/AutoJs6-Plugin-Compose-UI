@@ -93,5 +93,8 @@ debug APK (14314148 B, 144454 method references) and with `--shrunk` on the rele
 Growth by APK entry (compressed): `classes2.dex` +351684 B (Rhino's interpreter, which R8 removed while only the
 parser was used, and the sandbox), `resources.arsc` +13404 B (the console and sandbox strings in 11 languages),
 `designer-sandbox/preview-runtime.js` +9193 B, `classes.dex` +1676 B, the 1.5.0 changelog in the bundled
-documents about +7 KB. Q8 does not block below 10 MiB; per AGENTS section 14 the APK line stays as it is until the
-maintainer decides whether to accept the growth.
+documents about +7 KB. Q8 does not block below 10 MiB.
+
+The maintainer accepted the growth on 2026-10-14, after the release. The 1.5.0 release APK (build 139, `8bc620a`,
+`v1.5.0`) is the new baseline; with the rule of AGENTS section 14 (measured value plus 10 %, rounded up) the review
+lines are now 6177215 B and 105804 method references.
