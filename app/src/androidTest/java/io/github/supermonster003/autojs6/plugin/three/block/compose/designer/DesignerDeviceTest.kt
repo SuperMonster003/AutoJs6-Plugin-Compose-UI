@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -124,6 +125,23 @@ internal class DesignerDeviceTest {
             rule.onNodeWithTag("designer-outline-1").assertIsDisplayed()
         }
         assertFalse(store.draftFile(name).exists())
+    }
+
+    @Test
+    fun discardingOnExitLeavesNoDraftBehind() {
+        val name = project("discard")
+        val before = store.read(name)
+        launch(name).use { scenario ->
+            rule.onNodeWithTag("designer-outline-2").performClick()
+            rule.onNodeWithTag("designer-delete-node").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-back").performClick()
+            rule.onNodeWithTag("designer-exit-discard").performClick()
+            // finish() runs onStop, which used to write the discarded edits back as a draft.
+            rule.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
+        }
+        assertFalse("discarded edits are not kept as a draft", store.draftFile(name).exists())
+        assertEquals(before, store.read(name))
     }
 
     @Test

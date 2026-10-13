@@ -242,7 +242,8 @@ internal class DesignerActivity : StandaloneActivity() {
         LaunchedEffect(session.revision) {
             if (session.dirty) {
                 delay(1000)
-                io.writeDraft(source, session.script())
+                // Discarding on exit clears the dirty flag; a pause that ends just then must not bring the draft back.
+                if (session.dirty) io.writeDraft(source, session.script())
             }
         }
         BackHandler(enabled = session.dirty) { exitDialog = true }
@@ -371,7 +372,12 @@ internal class DesignerActivity : StandaloneActivity() {
             confirmButton = { TextButton(onClick = { save(); finish() }, modifier = Modifier.testTag("designer-exit-save")) { Text(stringResource(R.string.designer_save_exit)) } },
             dismissButton = {
                 Row {
-                    TextButton(onClick = { io.clearDraft(source); finish() }, modifier = Modifier.testTag("designer-exit-discard")) { Text(stringResource(R.string.designer_discard)) }
+                    TextButton(onClick = {
+                        // Not dirty any more, so onStop does not write the discarded edits back as a draft.
+                        session.dirty = false
+                        io.clearDraft(source)
+                        finish()
+                    }, modifier = Modifier.testTag("designer-exit-discard")) { Text(stringResource(R.string.designer_discard)) }
                     TextButton(onClick = { exitDialog = false }) { Text(stringResource(R.string.designer_keep_editing)) }
                 }
             },
