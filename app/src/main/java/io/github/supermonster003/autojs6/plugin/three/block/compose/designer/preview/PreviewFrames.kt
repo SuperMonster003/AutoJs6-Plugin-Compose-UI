@@ -31,7 +31,9 @@ import org.autojs.plugin.compose.api.v2.ComposeUiV2
  * elsewhere; opaque children, slots and unrenderable components become labeled placeholder texts whose
  * identities map back to the design node that owns them. Window-producing components (AlertDialog,
  * ModalBottomSheet, DropdownMenu, Tooltip) whose `open` resolves to true are shown as an inline card
- * holding their label, slots and children instead of a real window over the designer.
+ * holding their label, slots and children instead of a real window over the designer. A catalog component the
+ * designer cannot draw (AndroidView, whose view only exists in a running script) stands in as a tinted
+ * Surface that keeps the node's size modifiers and shows its view expression (roadmap P9.1, D44).
  */
 internal class PreviewFrame(
     val frame: RenderFrame?,
@@ -46,6 +48,8 @@ internal class PreviewFrame(
 internal object PreviewFrames {
     private const val PLACEHOLDER_BASE = 1_000_000
     private const val PLACEHOLDER_COLOR = 0xFF8A8A8A.toInt()
+    private const val STAND_IN_COLOR = 0x1F8A8A8A
+    private const val STAND_IN_SOURCE_LIMIT = 60
 
     /** Components the renderer presents in a separate window (dialog or popup) when `open` is true. */
     internal val WINDOWED = setOf(ComposeUiComponents.ALERT_DIALOG, "ModalBottomSheet", "DropdownMenu", "Tooltip")
@@ -82,7 +86,7 @@ internal object PreviewFrames {
             val spec = catalog.component(node.type)
             if (spec == null || node.type !in RendererCatalog.dispatch) {
                 problems += "${node.type} cannot be previewed"
-                return placeholder(node.id, "[${node.type}]")
+                return if (spec != null) standIn(node, parentType) else placeholder(node.id, "[${node.type}]")
             }
             val raw = LinkedHashMap<String, UiValue>()
             var key: String? = null
@@ -185,10 +189,47 @@ internal object PreviewFrames {
             return try { catalog.validateModifier(op, parentType); op } catch (error: ComposeUiContractException) { null }
         }
 
+        /**
+         * A catalog component without a design-time rendering: a tinted Surface carrying the node's shortcut and
+         * chained modifiers (so a sized AndroidView keeps its size and weight), labelled with its type and the
+         * source of its first expression property (the `view` factory).
+         */
+        private fun standIn(node: DesignNode, parentType: String?): Int {
+            val raw = LinkedHashMap<String, UiValue>()
+            val operations = ArrayList<ModifierOp>()
+            var source: String? = null
+            node.entries.forEach { entry ->
+                when (entry) {
+                    is NodeEntry.Prop -> when {
+                        catalog.shortcuts.any { it.name == entry.name } -> propValue(node, null, entry)?.let { raw[entry.name] = it }
+                        source == null && entry.value is PropValue.Expression -> source = (entry.value as PropValue.Expression).source
+                    }
+                    is NodeEntry.Modifier -> entry.chain.forEach { operation -> modifierOp(operation, parentType)?.let { operations += it } }
+                    else -> Unit
+                }
+            }
+            val shown = source?.replace(Regex("\\s+"), " ")?.let { if (it.length > STAND_IN_SOURCE_LIMIT) it.take(STAND_IN_SOURCE_LIMIT - 3) + "..." else it }
+            val padding = try {
+                // Box has no required property, so the catalog turns the shortcut into its modifier operation alone.
+                catalog.normalizeProperties(ComposeUiComponents.BOX, mapOf("padding" to UiValue.Dp(8.0)), emptyList()).modifier
+            } catch (error: ComposeUiContractException) { emptyList() }
+            val label = placeholder(node.id, "[${node.type}]" + (shown?.let { " $it" } ?: ""), padding)
+            val props = raw + (ComposeUiProps.COLOR to UiValue.Color(STAND_IN_COLOR))
+            val normalized = try {
+                catalog.normalizeProperties(ComposeUiComponents.SURFACE, props, operations)
+            } catch (error: ComposeUiContractException) {
+                try { catalog.normalizeProperties(ComposeUiComponents.SURFACE, mapOf(ComposeUiProps.COLOR to UiValue.Color(STAND_IN_COLOR)), emptyList()) } catch (ignored: ComposeUiContractException) { null }
+            }
+            val id = nextPlaceholder++
+            placeholders[id] = node.id
+            nodes[id] = UiNode(id, ComposeUiComponents.SURFACE, null, normalized?.props ?: emptyMap(), normalized?.modifier ?: emptyList(), listOf(label))
+            return id
+        }
+
         /** An open window component as an inline card: its label, then its slots and children in order. */
         private fun expanded(node: DesignNode, content: List<Int>): Int {
             val label = placeholder(node.id, "[${node.type}]")
-            val column = synthetic(node.id, ComposeUiComponents.COLUMN, mapOf("padding" to UiValue.Num(12.0), ComposeUiProps.SPACING to UiValue.Num(8.0)), listOf(label) + content)
+            val column = synthetic(node.id, ComposeUiComponents.COLUMN, mapOf("padding" to UiValue.Dp(12.0), ComposeUiProps.SPACING to UiValue.Dp(8.0)), listOf(label) + content)
             return synthetic(node.id, ComposeUiComponents.CARD, emptyMap(), listOf(column))
         }
 
@@ -200,14 +241,14 @@ internal object PreviewFrames {
             return id
         }
 
-        private fun placeholder(ownerId: Int, text: String): Int {
+        private fun placeholder(ownerId: Int, text: String, modifier: List<ModifierOp> = emptyList()): Int {
             val id = nextPlaceholder++
             placeholders[id] = ownerId
             nodes[id] = UiNode(id, ComposeUiComponents.TEXT, null, mapOf(
                 ComposeUiProps.TEXT to UiValue.Str(text),
                 ComposeUiProps.STYLE to UiValue.Enum("bodySmall"),
                 ComposeUiProps.COLOR to UiValue.Color(PLACEHOLDER_COLOR),
-            ))
+            ), modifier)
             return id
         }
     }

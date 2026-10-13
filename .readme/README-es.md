@@ -228,7 +228,9 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 _2026/10/13_
 
+- `Correccion` Los componentes emergentes abiertos (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) mostrados como tarjeta en el lienzo del diseñador no tenían relleno ni espaciado alrededor de su contenido
 - `Mejora` Arrastrar un nodo con pulsación larga en el lienzo del diseñador muestra una línea de inserción según la disposición del contenedor de destino (vertical, horizontal o en cuadrícula) y suelta el nodo donde está el dedo, en lugar de añadirlo siempre al final del contenedor
+- `Mejora` En el lienzo del diseñador, AndroidView se muestra ahora como un área sombreada que conserva sus modificadores de tamaño (como h y fillMaxWidth) y muestra el código de su expresión view
 
 #### v1.2.0
 

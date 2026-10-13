@@ -228,7 +228,9 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 _2026/10/13_
 
+- `Correction` Les composants contextuels ouverts (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) affichés en carte sur le canevas du concepteur n'avaient ni marge intérieure ni espacement autour de leur contenu
 - `Amelioration` Un glisser après appui long sur le canevas du concepteur affiche une ligne d'insertion selon la disposition du conteneur cible (verticale, horizontale ou en grille) et dépose le noeud à l'emplacement du doigt, au lieu de toujours l'ajouter à la fin du conteneur
+- `Amelioration` Sur le canevas du concepteur, AndroidView apparaît désormais comme une zone teintée qui conserve ses modificateurs de taille (comme h et fillMaxWidth) et affiche le source de son expression view
 
 #### v1.2.0
 

@@ -92,4 +92,35 @@ class PreviewFramesTest {
         assertEquals(listOf("weight"), text.modifier.map { it.name })
         assertEquals(PropValue.str("x"), document.root!!.let { (it.children.single() as DesignChild.Node).node.prop("text") })
     }
+
+    @Test
+    fun `an open window component is an inline card with padded content`() {
+        val document = reader.read("compose.mount(compose.Column({},\n    compose.ModalBottomSheet({key: 'sheet', open: true},\n        compose.Text({text: 'In the sheet'}))));\n")
+        val preview = PreviewFrames.build(document, 1)
+        val frame = preview.frame
+        assertNotNull(preview.problems.toString(), frame)
+        frame!!
+        val card = frame.nodes.values.single { it.type == "Card" }
+        val column = frame.nodes.getValue(card.children.single())
+        assertEquals("Column", column.type)
+        assertTrue(column.modifier.map { it.name }.toString(), column.modifier.any { it.name == "padding" })
+        assertNotNull(column.props.toString(), column.props["spacing"])
+    }
+
+    @Test
+    fun `an AndroidView stands in with its size and its view expression`() {
+        val document = reader.read("compose.mount(compose.Column({},\n    compose.AndroidView({key: 'native', h: 120, view: ui.inflate('<text text=\"x\"/>')})));\n")
+        val androidView = (document.root!!.children.single() as DesignChild.Node).node
+        val preview = PreviewFrames.build(document, 1)
+        val frame = preview.frame
+        assertNotNull(preview.problems.toString(), frame)
+        frame!!
+        val standIn = frame.nodes.values.single { it.type == "Surface" }
+        assertEquals(androidView.id, preview.placeholders[standIn.nodeId])
+        assertTrue(standIn.modifier.map { it.name }.toString(), standIn.modifier.any { it.name == "height" })
+        val label = frame.nodes.getValue(standIn.children.single())
+        assertEquals("[AndroidView] ui.inflate('<text text=\"x\"/>')", (label.props["text"] as UiValue.Str).value)
+        assertEquals("the label keeps off the stand-in's edges", listOf("padding"), label.modifier.map { it.name })
+        assertTrue(preview.problems.toString(), preview.problems.any { it.contains("AndroidView") })
+    }
 }
