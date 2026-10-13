@@ -15,6 +15,7 @@
 * `Amelioration` Sur le canevas du concepteur, AndroidView apparaît désormais comme une zone teintée qui conserve ses modificateurs de taille (comme h et fillMaxWidth) et affiche le source de son expression view
 * `Amelioration` La chaîne de modificateurs du tiroir de propriétés du concepteur se réordonne en faisant glisser la poignée à gauche de chaque opération, avec une ligne d'insertion jusqu'au relâchement; les boutons monter / descendre restent disponibles
 * `Amelioration` Les composants contextuels ouverts (open vaut true) sont désormais dessinés au plus près de leur rendu réel dans l'écran logique du canevas du concepteur: AlertDialog et ModalBottomSheet recouvrent la page avec un voile, DropdownMenu et Tooltip s'affichent sous ou au-dessus de leur ancre, et les nœuds qu'ils contiennent se sélectionnent d'un appui pour être modifiés; ils ne sont plus insérés dans la page sous forme de cartes et aucune vraie fenêtre ne s'ouvre
+* `Amelioration` Après chaque modification, le canevas du concepteur ne recompose que les nœuds modifiés et enregistre les positions des nœuds à moindre coût: un document plus grand (environ 250 nœuds) se redessine nettement plus vite après annuler / rétablir
 
 # v1.2.0
 

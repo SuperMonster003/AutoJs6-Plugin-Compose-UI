@@ -17,6 +17,7 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -90,7 +91,7 @@ internal fun DesignOverlay(overlay: Overlay, anchor: Rect?, onPopup: (Rect) -> U
                             .size(32.dp, 4.dp)
                             .background(colors.onSurfaceVariant.copy(alpha = 0.4f), RoundedCornerShape(2.dp)),
                     )
-                    overlay.children.forEach { render(it) }
+                    overlay.children.forEach { key(it) { render(it) } }
                 }
             }
         }
@@ -102,7 +103,7 @@ internal fun DesignOverlay(overlay: Overlay, anchor: Rect?, onPopup: (Rect) -> U
                 tonalElevation = 3.dp,
                 shadowElevation = 3.dp,
             ) {
-                Column(Modifier.padding(vertical = 8.dp)) { overlay.children.forEach { render(it) } }
+                Column(Modifier.padding(vertical = 8.dp)) { overlay.children.forEach { key(it) { render(it) } } }
             }
         }
         OverlayKind.TOOLTIP -> Box(Modifier.fillMaxSize()) {

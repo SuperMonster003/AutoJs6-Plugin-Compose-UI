@@ -16,6 +16,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,10 +86,28 @@ internal class CanvasControllers {
 
 /** Tracks the rendered bounds of every design node, keyed by node id, in root coordinates of the canvas composition. */
 internal class CanvasBounds {
-    val rects = mutableStateMapOf<Int, Rect>()
+    /**
+     * Bounds by node id. A plain map, not a state map: a state map compares its whole content on every put,
+     * which made the position callbacks of one layout (one per node) quadratic in the node count (P9.1).
+     * Readers observe [version] instead, which changes whenever a bound does.
+     */
+    private val nodeRects = HashMap<Int, Rect>()
+    private var version by mutableIntStateOf(0)
+    private val rects: Map<Int, Rect> get() = nodeRects.also { observe() }
     /** Bounds of the drawn popup of each open window component (P9.1), by owner id, in root coordinates. */
     val popups = mutableStateMapOf<Int, Rect>()
     var origin by mutableStateOf(Offset.Zero)
+
+    private fun observe(): Int = version
+
+    fun record(id: Int, rect: Rect) {
+        if (nodeRects.put(id, rect) != rect) version++
+    }
+
+    /** Drops the bounds of nodes the current frame no longer has, so they cannot win hit tests and drop positions. */
+    fun retain(ids: Set<Int>) {
+        if (nodeRects.keys.retainAll(ids)) version++
+    }
 
     /**
      * The bounds of design node [id] in local canvas coordinates; a node without bounds of its own (an
@@ -171,17 +191,20 @@ internal fun DesignCanvas(
     DisposableEffect(controllers) { onDispose { controllers.dispose() } }
     val generation = remember { LongArray(1) }
     val preview = remember(document, images) { PreviewFrames.build(document, ++generation[0], images = images) }
+    // Written here, before the canvas content reads it, so the changed nodes recompose in this same frame.
+    val live = remember { LiveFrame() }
+    val rendered = remember(preview) { preview.frame?.let(live::update) }
     LaunchedEffect(preview) {
         controllers.accept(preview)
         onProblems(preview.problems)
         // Bounds of nodes the new frame no longer has would otherwise still win hit tests and drop positions.
         val live = preview.frame?.nodes?.keys ?: emptySet()
-        bounds.rects.keys.filter { it !in live }.forEach { bounds.rects.remove(it) }
+        bounds.retain(live)
         val open = preview.overlays.map { it.ownerId }.toSet()
         bounds.popups.keys.filter { it !in open }.forEach { bounds.popups.remove(it) }
     }
     val decorator = remember(bounds) {
-        { id: Int, mapped: Modifier -> Modifier.onGloballyPositioned { bounds.rects[id] = it.boundsInRoot() }.then(mapped) }
+        { id: Int, mapped: Modifier -> Modifier.onGloballyPositioned { bounds.record(id, it.boundsInRoot()) }.then(mapped) }
     }
     // Zoom scales the layout density instead of applying a graphics-layer transform, so node bounds and
     // pointer positions stay in one coordinate space.
@@ -204,14 +227,16 @@ internal fun DesignCanvas(
                     CompositionLocalProvider(LocalNodeDecorator provides decorator) {
                         RendererWindowContext {
                             Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
-                                preview.frame?.let { frame ->
+                                rendered?.let { frame ->
                                     val render: @Composable (Int) -> Unit = { id ->
                                         RenderNode(frame, id, controllers.commands, controllers.fields, controllers.snackbar, { _, _, _, _, _ -> })
                                     }
                                     render(frame.rootId)
                                     // Open window components over the page, in tree order (P9.1).
                                     preview.overlays.forEach { overlay ->
-                                        DesignOverlay(overlay, bounds.local(overlay.ownerId), { rect -> bounds.popups[overlay.ownerId] = rect }, render)
+                                        key(overlay.ownerId) {
+                                            DesignOverlay(overlay, bounds.local(overlay.ownerId), { rect -> bounds.popups[overlay.ownerId] = rect }, render)
+                                        }
                                     }
                                 }
                             }

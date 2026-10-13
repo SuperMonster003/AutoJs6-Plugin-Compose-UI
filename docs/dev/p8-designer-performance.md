@@ -66,3 +66,65 @@ the designer does not use for these measurements.
   is confirmed, to update the preview per node instead of rebuilding it.
 - The AVD_API_30 figures are slower than the API 24 emulator for the pipeline; the PC was shared with another
   emulator during that run, so emulator numbers are only comparable within one run.
+
+## P9.1 follow-up: real frame time of an edit (1.3.0)
+
+The edit figures above are visibility-confirmation times. Roadmap P9.1 asked to separate the real frame time
+from the test's own overhead before deciding whether the preview should update per node. Two things made the
+earlier numbers hard to read:
+
+- While a compose test rule is active, recomposition is driven by the test's clock: the editor composes only
+  when the test synchronises or queries, so the rule-based test cannot observe frames on their own.
+  `DesignerFramePerformanceDeviceTest` (opt-in like the other class) therefore has no compose rule: it calls
+  undo / redo on the editor session on the main thread, sleeps without querying until the frames settle
+  (1.5 s), and records the window's `FrameMetrics` plus the main thread's CPU time (`Debug.threadCpuTimeNanos`)
+  over the same span; 2 warm-up and 10 measured rounds of undo and redo on the 251-node document.
+- The debug build is debuggable, so ART runs much of the code in the interpreter; absolute numbers are higher
+  than a release build would show, and the AVD shares its host with other emulators, which inflates wall times
+  unevenly. Main thread CPU time is the steadier figure; wall times are only comparable within one run.
+
+What the measurement found (AVD_API_30, simpleperf `--trace-offcpu` samples of the main thread):
+
+- The largest part was the canvas recomposing every one of the ~250 nodes: in a 20 s profile of the edit
+  loop before the change, `RenderNode` and its subtree took 288 ms of the 899 ms sampled under
+  `Choreographer.doFrame`. The renderer called children positionally
+  (`children.forEach { RenderNode(...) }`) with the `key(id, type)` inside `RenderNode`; that key only tells
+  nodes apart at one call position, so a row inserted or removed at the top shifted every later child to
+  another position and rebuilt its whole composition (fresh `LaunchedEffect`, modifiers, Material component
+  state). The same happens in the host: a sibling inserted before a stateful node reset it
+  (a LazyColumn's scroll position, for example). Fixed by keying each child call (`key(childId)`), covered by
+  `AdvancedRendererTest.aSiblingInsertedBeforeANodeLeavesThatNodesStateInPlace`, which failed before the fix.
+- The designer handed the renderer a new `RenderFrame` per preview, so even unmoved nodes could not skip.
+  `LiveFrame` keeps one frame whose nodes live in per-node snapshot states and writes only nodes whose contract
+  value changed; `RenderNode` (compiled `restartable skippable`) then skips every unchanged node.
+- Once that was fixed, the next largest part (about 113 ms of 723 ms in a 30 s profile) was the canvas
+  recording node bounds: each node's `onGloballyPositioned` wrote a `SnapshotStateMap`, which compares its
+  whole content on every put, so one layout cost O(n^2). The bounds now
+  live in a plain map with one version state.
+
+Results, AVD_API_30 (x86_64), debug builds, 251-node document, p50 / p90 in milliseconds over 10 undo and
+10 redo per run. Both builds were measured back to back with the same androidTest APK (`ae57054` sources, then
+the change); the host PC ran four emulators at about 93 % CPU, so the absolute values are higher than in the
+table above, while the comparison holds within this session. "Call" is the undo / redo call itself (history
+step and validation), which the change does not touch.
+
+| Measurement | Before, run 1 | Before, run 2 | After, run 1 | After, run 2 |
+| --- | --- | --- | --- | --- |
+| Undo: call to end of first frame | 365.4 / 531.2 | 376.2 / 860.9 | 139.8 / 172.1 | 153.8 / 185.5 |
+| Undo: main thread CPU | 380.0 / 537.8 | 366.4 / 864.3 | 146.2 / 185.3 | 170.0 / 197.1 |
+| Undo: longest frame | 355.1 / 518.3 | 327.1 / 837.2 | 131.1 / 170.1 | 152.9 / 176.9 |
+| Redo: call to end of first frame | 301.2 / 437.5 | 351.7 / 563.6 | 137.6 / 160.8 | 129.5 / 153.4 |
+| Redo: main thread CPU | 327.1 / 445.8 | 357.4 / 604.6 | 145.6 / 183.6 | 143.3 / 170.3 |
+| Redo: longest frame | 292.1 / 435.6 | 350.3 / 556.5 | 114.5 / 157.6 | 118.6 / 147.8 |
+| Call p50, undo / redo | 18.3 / 13.7 | 22.7 / 17.2 | 17.4 / 17.4 | 18.1 / 19.6 |
+
+`RenderNode` executions per edit, counted with a temporary counter (not committed): 252 for an undo and 247 for
+a redo before, 7 and 2 after (the root Column and, for an undo, the restored row with its texts, button and
+label). Each edit draws two frames: the one that applies it and one that redraws the selection overlay after
+the bounds moved.
+
+What is left, from the same profile: the editor's own composition (outline rows in view, toolbar title),
+deriving the preview (`PreviewFrames.build`, about 16 - 26 ms here), validation in the call, composing the
+restored row, and measuring the 50-row Column. These scale with the document but not quadratically; the
+roadmap does not take them further for 1.3.0. The phones of the 1.2.0 baseline were not measured again in
+this session.

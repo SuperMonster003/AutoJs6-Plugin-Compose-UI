@@ -146,20 +146,8 @@ internal class DesignerPerformanceDeviceTest {
     private fun countNodes(node: DesignNode): Int =
         1 + node.children.sumOf { child -> (child as? DesignChild.Node)?.node?.let(::countNodes) ?: 0 }
 
-    /** p50 / p90 / max in milliseconds with one decimal, over the measured samples. */
-    private fun summary(samples: List<Double>): String {
-        val sorted = samples.sorted()
-        fun at(fraction: Double) = sorted[((sorted.size - 1) * fraction).toInt()]
-        return "p50=%.1f p90=%.1f max=%.1f n=%d".format(Locale.ROOT, at(0.5), at(0.9), sorted.last(), sorted.size)
-    }
-
-    private fun report(kind: String, values: Map<String, String>) {
-        val fields = (mapOf("kind" to kind, "device" to "${Build.MANUFACTURER} ${Build.MODEL}", "api" to Build.VERSION.SDK_INT.toString()) + values)
-            .entries.joinToString(", ", "{", "}") { (key, value) -> "\"$key\": \"$value\"" }
-        Log.i(TAG, "DESIGNER_PERF $fields")
-    }
-
-    private companion object {
+    /** Shared with [DesignerFramePerformanceDeviceTest]. */
+    internal companion object {
         const val TAG = "DesignerPerformance"
         const val WARM_UP = 3
         const val ROUNDS = 10
@@ -178,6 +166,19 @@ internal class DesignerPerformanceDeviceTest {
                     "        compose.Button({key: 'b$row'},\n            'Go $row'))"
             })
             append("));\n")
+        }
+
+        /** p50 / p90 / max in milliseconds with one decimal, over the measured samples. */
+        fun summary(samples: List<Double>): String {
+            val sorted = samples.sorted()
+            fun at(fraction: Double) = sorted[((sorted.size - 1) * fraction).toInt()]
+            return "p50=%.1f p90=%.1f max=%.1f n=%d".format(Locale.ROOT, at(0.5), at(0.9), sorted.last(), sorted.size)
+        }
+
+        fun report(kind: String, values: Map<String, String>) {
+            val fields = (mapOf("kind" to kind, "device" to "${Build.MANUFACTURER} ${Build.MODEL}", "api" to Build.VERSION.SDK_INT.toString()) + values)
+                .entries.joinToString(", ", "{", "}") { (key, value) -> "\"$key\": \"$value\"" }
+            Log.i(TAG, "DESIGNER_PERF $fields")
         }
     }
 }
