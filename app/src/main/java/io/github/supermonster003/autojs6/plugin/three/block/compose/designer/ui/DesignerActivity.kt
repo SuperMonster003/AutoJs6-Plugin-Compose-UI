@@ -8,6 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -23,16 +27,17 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -52,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
@@ -60,22 +66,29 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptLa
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandaloneActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Severity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DesignerParseError
-import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ScriptReader
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DocumentReader
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ReadResult
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsxParserClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.CanvasBounds
-import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignImages
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignCanvas
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignImages
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentIo
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentSource
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.SourceSync
+import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.autojs.plugin.compose.api.model.ThemeSpec
-import java.nio.charset.StandardCharsets
 
 /**
  * The editing screen (roadmap P8.3 / D36 / D40): the real-renderer canvas on top, an outline / inspector
@@ -90,14 +103,25 @@ internal class DesignerActivity : StandaloneActivity() {
     private lateinit var store: ProjectStore
     private lateinit var io: DocumentIo
     private lateinit var sync: SourceSync
+    /** Reads this screen's document in its language; a TSX reader holds the TypeScript Engine parser binding. */
+    private lateinit var reader: DocumentReader
+    private val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     private var source: DocumentSource by mutableStateOf(DocumentSource.Local(""))
-    private var session: DesignerSession? = null
-    private var parseError: DesignerParseError? = null
-    private var readFailed = false
+    private var session: DesignerSession? by mutableStateOf(null)
+    /** The open document's editing state, once it is read (device performance tests drive it directly). */
+    internal val currentSession: DesignerSession? get() = session
+    private var parseError: DesignerParseError? by mutableStateOf(null)
+    private var readFailed by mutableStateOf(false)
+    /** A TSX document is being parsed by the TypeScript Engine (roadmap P9.2). */
+    private var loading by mutableStateOf(false)
+    /** A TSX document the parser cannot read right now, shown as read-only source (roadmap D42). */
+    private var readOnly: ReadOnlySource? by mutableStateOf(null)
     /** The text last loaded from or written to the document; the reference for external-change detection. */
     private var baseline: String? = null
     private var pendingDraft: String? by mutableStateOf(null)
     private var externalChange: String? by mutableStateOf(null)
+
+    private data class ReadOnlySource(val text: String, val result: ReadResult.Unavailable)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         store = ProjectStore(this)
@@ -110,6 +134,10 @@ internal class DesignerActivity : StandaloneActivity() {
         }
         if (resolved == null) { finish(); super.onCreate(savedInstanceState); return }
         source = resolved
+        val dialect = Dialect.of(resolved.title)
+        reader = DocumentReader(dialect, if (dialect == Dialect.TSX) TsxParserClient(this) else null) { cause ->
+            getString(R.string.designer_tsx_check_unavailable, cause)
+        }
         val text = io.readOrNull(resolved)
         if (text == null) {
             readFailed = true
@@ -120,14 +148,39 @@ internal class DesignerActivity : StandaloneActivity() {
         super.onCreate(savedInstanceState)
     }
 
-    private fun load(script: String): Boolean = try {
-        session = DesignerSession(ScriptReader().read(script))
-        parseError = null
-        baseline = script
-        true
-    } catch (error: DesignerParseError) {
-        parseError = error
-        false
+    override fun onDestroy() {
+        scope.cancel()
+        if (::reader.isInitialized) reader.close()
+        super.onDestroy()
+    }
+
+    /** Reads [text] in this document's language: at once for JavaScript, through the parser service for TSX. */
+    private fun read(text: String, onResult: (ReadResult) -> Unit) {
+        reader.readNow(text)?.let { onResult(it); return }
+        scope.launch { onResult(reader.read(text)) }
+    }
+
+    private fun load(script: String) {
+        loading = reader.dialect == Dialect.TSX && session == null
+        read(script) { result ->
+            loading = false
+            when (result) {
+                is ReadResult.Parsed -> {
+                    session = DesignerSession(result.document, syntax = reader)
+                    parseError = null
+                    readOnly = null
+                    baseline = script
+                }
+                is ReadResult.Rejected -> { parseError = result.error; readOnly = null }
+                is ReadResult.Unavailable -> readOnly = ReadOnlySource(script, result)
+            }
+        }
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        // A TSX document shown read-only is tried again: the TypeScript Engine may have been installed meanwhile.
+        if (readOnly != null && !loading) io.readOrNull(source)?.let { load(it) }
     }
 
     override fun onResume() {
@@ -139,12 +192,13 @@ internal class DesignerActivity : StandaloneActivity() {
     }
 
     private fun reloadFrom(session: DesignerSession, script: String) {
-        try {
-            session.replace(ScriptReader().read(script))
-            session.markSaved()
-            baseline = script
-        } catch (error: DesignerParseError) {
-            // The other editor left an unmappable script; keep the tree here and let an explicit save decide.
+        read(script) { result ->
+            // An unmappable or unreadable script from the other editor keeps the tree here; an explicit save decides.
+            if (result is ReadResult.Parsed) {
+                session.replace(result.document)
+                session.markSaved()
+                baseline = script
+            }
         }
     }
 
@@ -157,11 +211,60 @@ internal class DesignerActivity : StandaloneActivity() {
     override fun Content(palette: StandalonePalette) {
         val error = parseError
         val current = session
-        if (readFailed || error != null || current == null) {
-            ParseErrorScreen(error, palette)
-            return
+        val unavailable = readOnly
+        when {
+            current != null && !readFailed && error == null -> Editor(current, palette)
+            loading -> LoadingScreen(palette)
+            unavailable != null && !readFailed -> ReadOnlyScreen(unavailable, palette)
+            else -> ParseErrorScreen(error, palette)
         }
-        Editor(current, palette)
+    }
+
+    @Composable
+    private fun LoadingScreen(palette: StandalonePalette) {
+        Box(Modifier.fillMaxSize().background(Color(palette.background)).testTag("designer-loading"), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = Color(palette.accent))
+        }
+    }
+
+    /** Roadmap D42: without a usable TypeScript Engine parser a TSX document can be read and copied, not edited. */
+    @Composable
+    private fun ReadOnlyScreen(state: ReadOnlySource, palette: StandalonePalette) {
+        val context = LocalContext.current
+        val copied = stringResource(R.string.gallery_copied)
+        val snackbar = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
+        val result = state.result
+        val message = when (result.reason) {
+            TsxParserClient.Reason.NOT_INSTALLED -> stringResource(R.string.designer_tsx_engine_missing, TsxParserClient.MIN_VERSION_NAME)
+            TsxParserClient.Reason.TOO_OLD -> stringResource(R.string.designer_tsx_engine_old, TsxParserClient.MIN_VERSION_NAME, result.installedVersion ?: "?")
+            TsxParserClient.Reason.UNAVAILABLE -> stringResource(R.string.designer_tsx_parser_unavailable, result.installedVersion ?: "?")
+            null -> stringResource(R.string.designer_tsx_parser_unavailable, result.detail ?: "?")
+        }
+        Scaffold(containerColor = Color(palette.background), snackbarHost = { SnackbarHost(snackbar) }) { padding ->
+            Column(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp, vertical = 12.dp)) {
+                Text(source.title, color = Color(palette.text), fontSize = 18.sp)
+                Text(message, color = Color(palette.danger), fontSize = 14.sp, modifier = Modifier.padding(vertical = 12.dp).testTag("designer-readonly-message"))
+                Row {
+                    TextButton(onClick = {
+                        if (ScriptLauncher.copy(context, source.title, state.text)) scope.launch { snackbar.showSnackbar(copied) }
+                    }, modifier = Modifier.testTag("designer-readonly-copy")) { Text(stringResource(R.string.designer_copy_script)) }
+                    TextButton(onClick = { io.readOrNull(source)?.let { load(it) } }, modifier = Modifier.testTag("designer-readonly-retry")) {
+                        Text(stringResource(R.string.designer_retry))
+                    }
+                    TextButton(onClick = { finish() }) { Text(stringResource(R.string.designer_cancel)) }
+                }
+                SelectionContainer(Modifier.fillMaxWidth().weight(1f).background(Color(palette.surfaceVariant)).testTag("designer-readonly-source")) {
+                    Text(
+                        state.text,
+                        color = Color(palette.text),
+                        fontSize = 13.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.verticalScroll(rememberScrollState()).horizontalScroll(rememberScrollState()).padding(8.dp),
+                    )
+                }
+            }
+        }
     }
 
     @Composable
@@ -264,15 +367,16 @@ internal class DesignerActivity : StandaloneActivity() {
                 SourceSync.State.None -> Unit
                 is SourceSync.State.Unavailable -> syncPrompt = SyncPrompt.Unavailable(SyncAction.REIMPORT)
                 is SourceSync.State.Ready -> if ((state.projectChanged || session.dirty) && !confirmed) syncPrompt = SyncPrompt.Replace else {
-                    val document = try { ScriptReader().read(state.sourceText) } catch (error: DesignerParseError) { null }
-                    if (document == null) {
-                        scope.launch { snackbar.showSnackbar(sourceParseFailed) }
-                    } else {
-                        session.replace(document)
-                        sync.reimported(name, state.sourceText)
-                        baseline = state.sourceText
-                        io.clearDraft(source)
-                        scope.launch { snackbar.showSnackbar(sourceReimported) }
+                    read(state.sourceText) { result ->
+                        if (result !is ReadResult.Parsed) {
+                            scope.launch { snackbar.showSnackbar(sourceParseFailed) }
+                        } else {
+                            session.replace(result.document)
+                            sync.reimported(name, state.sourceText)
+                            baseline = state.sourceText
+                            io.clearDraft(source)
+                            scope.launch { snackbar.showSnackbar(sourceReimported) }
+                        }
                     }
                 }
             }
@@ -304,7 +408,8 @@ internal class DesignerActivity : StandaloneActivity() {
             scope.launch { snackbar.showSnackbar(imageFolderSet.format(name)) }
         }
 
-        val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ScriptLauncher.SCRIPT_MIME_TYPE)) { uri ->
+        val exportType = if (reader.dialect == Dialect.TSX) ScriptLauncher.TSX_EXPORT_MIME_TYPE else ScriptLauncher.SCRIPT_MIME_TYPE
+        val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(exportType)) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
             val ok = runCatching {
                 context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(session.script().toByteArray(StandardCharsets.UTF_8)) } != null
@@ -353,7 +458,9 @@ internal class DesignerActivity : StandaloneActivity() {
                                 }, modifier = Modifier.testTag("designer-menu-copy"))
                                 DropdownMenuItem(text = { Text(stringResource(R.string.gallery_run)) }, onClick = {
                                     menuOpen = false
-                                    when (ScriptLauncher.run(context, session.script())) {
+                                    // Roadmap P9.2: a TSX project runs from its file, so the host compiles it as TSX.
+                                    if (reader.dialect == Dialect.TSX) sendToHost { uri, _ -> ScriptLauncher.runIntent(uri) }
+                                    else when (ScriptLauncher.run(context, session.script())) {
                                         ScriptLauncher.Result.STARTED -> Unit
                                         ScriptLauncher.Result.HOST_MISSING -> scope.launch { snackbar.showSnackbar(missingHost) }
                                         ScriptLauncher.Result.FAILED -> scope.launch { snackbar.showSnackbar(runFailed) }
@@ -494,11 +601,16 @@ internal class DesignerActivity : StandaloneActivity() {
                 confirmButton = {
                     TextButton(onClick = {
                         pendingDraft = null
-                        try {
-                            session.replace(ScriptReader().read(draft))
-                            session.dirty = true
-                        } catch (error: DesignerParseError) {
-                            io.clearDraft(source)
+                        read(draft) { result ->
+                            when (result) {
+                                is ReadResult.Parsed -> {
+                                    session.replace(result.document)
+                                    session.dirty = true
+                                }
+                                is ReadResult.Rejected -> io.clearDraft(source)
+                                // The TSX parser is not available now; the draft stays for the next opening.
+                                is ReadResult.Unavailable -> Unit
+                            }
                         }
                     }, modifier = Modifier.testTag("designer-draft-restore")) { Text(stringResource(R.string.designer_draft_restore)) }
                 },

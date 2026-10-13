@@ -140,12 +140,9 @@ class ScriptReader(private val catalog: ComponentCatalog = ComposeUiV2.interopCa
 
         private fun fail(line: Int, column: Int, reason: String): Nothing = throw DesignerParseError(line, column, reason)
 
-        private fun lineOf(offset: Int): Int = 1 + source.substring(0, offset.coerceIn(0, source.length)).count { it == '\n' }
+        private fun lineOf(offset: Int): Int = SourceText.lineOf(source, offset)
 
-        private fun columnOf(offset: Int): Int {
-            val bounded = offset.coerceIn(0, source.length)
-            return bounded - source.lastIndexOf('\n', bounded - 1)
-        }
+        private fun columnOf(offset: Int): Int = SourceText.columnOf(source, offset)
 
         private fun slice(node: AstNode): String {
             val start = node.absolutePosition.coerceIn(0, source.length)
@@ -413,12 +410,7 @@ class ScriptReader(private val catalog: ComponentCatalog = ComposeUiV2.interopCa
 
         private fun isEventName(name: String): Boolean = name.length > 2 && name.startsWith("on") && name[2].isUpperCase()
 
-        private fun dedent(text: String): String {
-            val lines = text.split('\n').dropWhile { it.isBlank() }.dropLastWhile { it.isBlank() }
-            if (lines.isEmpty()) return ""
-            val indent = lines.filter { it.isNotBlank() }.minOf { line -> line.takeWhile { it == ' ' || it == '\t' }.length }
-            return lines.joinToString("\n") { line -> if (line.isBlank()) "" else line.substring(minOf(indent, line.takeWhile { it == ' ' || it == '\t' }.length)).trimEnd() }
-        }
+        private fun dedent(text: String): String = SourceText.dedent(text)
 
         companion object {
             /** compose members that are not component factories. */

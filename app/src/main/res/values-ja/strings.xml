@@ -69,6 +69,8 @@
     <string name="designer_issues_count">検証結果 (エラー %1$d 件)</string>
     <string name="designer_keep_editing">編集を続ける</string>
     <string name="designer_keep_mine">自分の変更を保持</string>
+    <string name="designer_language_javascript">JavaScript</string>
+    <string name="designer_language_tsx">TSX</string>
     <string name="designer_modified">更新 %1$s</string>
     <string name="designer_move_down">下へ</string>
     <string name="designer_move_up">上へ</string>
@@ -80,10 +82,12 @@
     <string name="designer_parse_error">このスクリプトはデザイナーで開けません. %1$d 行 %2$d 列: %3$s</string>
     <string name="designer_preview_interact">操作プレビュー</string>
     <string name="designer_preview_problems">プレビューできない部分</string>
+    <string name="designer_project_language">言語</string>
     <string name="designer_project_name">プロジェクト名</string>
     <string name="designer_redo">やり直す</string>
     <string name="designer_reload">再読み込み</string>
     <string name="designer_remove">削除</string>
+    <string name="designer_retry">再試行</string>
     <string name="designer_save">保存</string>
     <string name="designer_save_exit">保存して閉じる</string>
     <string name="designer_saved">保存しました</string>
@@ -121,6 +125,11 @@
     <string name="designer_tab_inspector">プロパティ</string>
     <string name="designer_tab_outline">アウトライン</string>
     <string name="designer_tab_state">状態</string>
+    <string name="designer_tsx_check_unavailable">TypeScript Engine の解析サービスを利用できないため, このハンドラーを検査できません (%1$s)</string>
+    <string name="designer_tsx_engine_missing">TSX プロジェクトをデザイナーで編集するには TypeScript Engine %1$s 以降が必要ですが, インストールされていません. ソースを読み取り専用で表示しています.</string>
+    <string name="designer_tsx_engine_old">TSX プロジェクトをデザイナーで編集するには TypeScript Engine %1$s 以降が必要です. インストールされているのは %2$s です. ソースを読み取り専用で表示しています.</string>
+    <string name="designer_tsx_needs_engine">TSX プロジェクトの編集には TypeScript Engine %1$s 以降が必要です</string>
+    <string name="designer_tsx_parser_unavailable">TypeScript Engine の解析サービスを現在利用できません (%1$s). ソースを読み取り専用で表示しています. しばらくしてから再試行してください.</string>
     <string name="designer_undo">元に戻す</string>
     <string name="designer_unknown_component">このコンポーネントはコントラクトのカタログにありません.</string>
     <string name="designer_value_expression">式</string>

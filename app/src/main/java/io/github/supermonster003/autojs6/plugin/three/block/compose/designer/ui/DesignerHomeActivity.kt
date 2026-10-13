@@ -24,6 +24,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -56,6 +57,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.app.Launcher
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.SettingsActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandaloneActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsxParserClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import kotlinx.coroutines.launch
 
@@ -158,22 +160,36 @@ internal class DesignerHomeActivity : StandaloneActivity() {
         }
         if (creating) {
             var name by remember { mutableStateOf("") }
+            // Roadmap P9.2: a new project is a JavaScript or a TSX script.
+            var tsx by remember { mutableStateOf(false) }
+            val engineMissing = remember(tsx) { tsx && !TsxParserClient.hasParserService(context) }
             val invalid = stringResource(R.string.designer_name_invalid)
             AlertDialog(
                 onDismissRequest = { creating = false },
                 title = { Text(stringResource(R.string.designer_new_project)) },
                 text = {
-                    OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.designer_project_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("home-project-name"))
+                    Column {
+                        OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.designer_project_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("home-project-name"))
+                        Text(stringResource(R.string.designer_project_language), color = Color(palette.muted), fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
+                        Row {
+                            FilterChip(selected = !tsx, onClick = { tsx = false }, label = { Text(stringResource(R.string.designer_language_javascript)) }, modifier = Modifier.padding(end = 8.dp).testTag("home-language-js"))
+                            FilterChip(selected = tsx, onClick = { tsx = true }, label = { Text(stringResource(R.string.designer_language_tsx)) }, modifier = Modifier.testTag("home-language-tsx"))
+                        }
+                        if (engineMissing) {
+                            Text(stringResource(R.string.designer_tsx_needs_engine, TsxParserClient.MIN_VERSION_NAME), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.testTag("home-tsx-hint"))
+                        }
+                    }
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        val stem = name.trim().removeSuffix(ProjectStore.EXTENSION)
-                        if (stem.isNotEmpty() && !ProjectStore.isValidName(stem + ProjectStore.EXTENSION)) {
+                        val extension = if (tsx) ProjectStore.TSX_EXTENSION else ProjectStore.EXTENSION
+                        val stem = name.trim().removeSuffix(extension)
+                        if (stem.isNotEmpty() && !ProjectStore.isValidName(stem + extension)) {
                             scope.launch { snackbar.showSnackbar(invalid) }
                             return@TextButton
                         }
                         creating = false
-                        val project = store.create(stem)
+                        val project = if (tsx) store.create(stem, ProjectStore.TSX_TEMPLATE, extension) else store.create(stem)
                         listRevision++
                         startActivity(DesignerActivity.intent(context, project.name))
                     }, modifier = Modifier.testTag("home-create")) { Text(stringResource(R.string.designer_create)) }

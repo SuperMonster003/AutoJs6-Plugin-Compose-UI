@@ -4,6 +4,17 @@
 
 ******
 
+# v1.4.0
+
+###### 2026/10/13
+
+* `Aviso` Los proyectos TSX del diseñador necesitan TypeScript Engine 0.7.0 o posterior; sin él, o con una versión anterior, un proyecto TSX solo se puede ver y copiar como código fuente de solo lectura
+* `Novedad` El diseñador admite proyectos TSX: un proyecto nuevo puede ser JavaScript o TSX, y los archivos .tsx se pueden importar o abrir directamente desde el editor de AutoJs6 y los gestores de archivos; el código TSX se analiza con TypeScript Engine y se edita en el lienzo, y se guarda como TSX con un formato uniforme (sangría de 4 espacios, atributos entre comillas simples, un elemento hijo por línea); el código que el diseñador no puede editar (como etiquetas alias o hijos generados por condiciones o bucles) se conserva tal cual, y el que no puede representar (como etiquetas XML y atributos de propagación) se rechaza indicando línea y columna
+* `Novedad` "Ejecutar" en un proyecto TSX del diseñador entrega el archivo del proyecto a AutoJs6, que lo compila con TypeScript Engine y lo ejecuta; los cambios sin guardar se guardan antes
+* `Novedad` Cuando TypeScript Engine no está instalado, es demasiado antiguo o su servicio de análisis no está disponible por el momento, el diseñador muestra el código del proyecto TSX en solo lectura con el motivo, y se puede copiar el código o reintentar; al volver al diseñador después de instalar o actualizar TypeScript Engine se reintenta automáticamente
+* `Mejora` Los controladores de eventos editados en un proyecto TSX los comprueba TypeScript Engine, por lo que se puede usar sintaxis de TypeScript como las anotaciones de tipo
+* `Dependencia` Se añade el artefacto de contrato typescript-parser-api.aar (contrato de análisis de árbol sintáctico de TypeScript v1), que el diseñador usa para leer proyectos TSX
+
 # v1.3.0
 
 ###### 2026/10/13

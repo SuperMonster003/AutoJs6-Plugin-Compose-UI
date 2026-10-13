@@ -63,7 +63,7 @@ internal class DesignerFramePerformanceDeviceTest {
         try {
             ActivityScenario.launch<DesignerActivity>(DesignerActivity.intent(context, name)).use { scenario ->
                 var session: DesignerSession? = null
-                scenario.onActivity { activity -> session = SESSION.get(activity) as DesignerSession }
+                scenario.onActivity { activity -> session = requireNotNull(activity.currentSession) }
                 val editor = checkNotNull(session)
                 val rows = { editor.document.root!!.children.size }
                 scenario.onActivity { editor.execute(EditCommand.RemoveNode(editor.document.root!!.children.first().let { (it as DesignChild.Node).node.id })) }
@@ -137,6 +137,5 @@ internal class DesignerFramePerformanceDeviceTest {
         const val WARM_UP = 2
         const val ROUNDS = 10
         const val SETTLE_MILLIS = 1500L
-        val SESSION = DesignerActivity::class.java.getDeclaredField("session").apply { isAccessible = true }
     }
 }

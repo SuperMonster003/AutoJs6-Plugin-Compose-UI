@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,7 +62,8 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.ModifierEntry
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeEntry
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PropValue
-import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ScriptReader
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.SyntaxCheck
+import kotlinx.coroutines.launch
 import org.autojs.plugin.compose.api.catalog.ModifierSpec
 import org.autojs.plugin.compose.api.catalog.PropSpec
 import org.autojs.plugin.compose.api.catalog.ValueType
@@ -197,7 +199,7 @@ internal fun InspectorPanel(session: DesignerSession, palette: StandalonePalette
             SectionTitle(stringResource(R.string.designer_section_events), palette)
             spec.events.forEach { event ->
                 val name = "on" + event.name.replaceFirstChar(Char::uppercaseChar)
-                HandlerEditor(name, node.handler(name), palette, onSeal = { session.seal() }) { handler ->
+                HandlerEditor(name, node.handler(name), palette, session.syntax, onSeal = { session.seal() }) { handler ->
                     session.execute(EditCommand.SetHandler(node.id, name, handler), merge = handler != null)
                 }
             }
@@ -330,14 +332,16 @@ private fun LiteralEditor(type: ValueType, literal: JsLiteral, palette: Standalo
 }
 
 @Composable
-private fun HandlerEditor(name: String, handler: HandlerSource?, palette: StandalonePalette, onSeal: () -> Unit, onChange: (HandlerSource?) -> Unit) {
+private fun HandlerEditor(name: String, handler: HandlerSource?, palette: StandalonePalette, syntax: SyntaxCheck, onSeal: () -> Unit, onChange: (HandlerSource?) -> Unit) {
     var params by remember(name, handler == null) { mutableStateOf(handler?.params?.joinToString(", ") ?: "") }
     var body by remember(name, handler == null) { mutableStateOf(handler?.body ?: "") }
     var error by remember(name) { mutableStateOf<String?>(null) }
+    var checking by remember(name) { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     Column(Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("designer-event-$name")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(name, color = Color(palette.text), fontSize = 13.sp, modifier = Modifier.weight(1f))
-            if (handler == null) TextButton(onClick = { onChange(HandlerSource(emptyList(), "// TODO")) }) { Text(stringResource(R.string.designer_add)) }
+            if (handler == null) TextButton(onClick = { onChange(HandlerSource(emptyList(), "// TODO")) }, modifier = Modifier.testTag("designer-handler-add-$name")) { Text(stringResource(R.string.designer_add)) }
             else TextButton(onClick = { onChange(null) }) { Text(stringResource(R.string.designer_remove)) }
         }
         if (handler != null) {
@@ -345,14 +349,20 @@ private fun HandlerEditor(name: String, handler: HandlerSource?, palette: Standa
                 textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = Color(palette.text)), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(value = body, onValueChange = { body = it }, label = { Text(stringResource(R.string.designer_handler_body), fontSize = 12.sp) }, minLines = 3,
                 textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = Color(palette.text)), modifier = Modifier.fillMaxWidth().testTag("designer-handler-body"))
-            error?.let { Text(it, color = Color(palette.danger), fontSize = 12.sp) }
+            error?.let { Text(it, color = Color(palette.danger), fontSize = 12.sp, modifier = Modifier.testTag("designer-handler-error")) }
             Row {
                 TextButton(onClick = {
                     val parameterList = params.split(',').map { it.trim() }.filter { it.isNotEmpty() }
-                    val problem = ScriptReader.checkHandler(parameterList, body)
-                    error = problem?.let { "${it.line}:${it.column} ${it.reason}" }
-                    if (problem == null) { onChange(HandlerSource(parameterList, body.trim(), handler.arrow, false)); onSeal() }
-                }, modifier = Modifier.testTag("designer-handler-apply")) { Text(stringResource(R.string.designer_apply)) }
+                    val edited = body
+                    // A TSX handler is checked by the TypeScript Engine parser, which answers asynchronously.
+                    checking = true
+                    scope.launch {
+                        val problem = syntax.checkHandler(parameterList, edited)
+                        checking = false
+                        error = problem?.let { "${it.line}:${it.column} ${it.reason}" }
+                        if (problem == null) { onChange(HandlerSource(parameterList, edited.trim(), handler.arrow, false)); onSeal() }
+                    }
+                }, enabled = !checking, modifier = Modifier.testTag("designer-handler-apply")) { Text(stringResource(R.string.designer_apply)) }
             }
         }
     }

@@ -69,6 +69,8 @@
     <string name="designer_issues_count">Validation (%1$d errors)</string>
     <string name="designer_keep_editing">Keep editing</string>
     <string name="designer_keep_mine">Keep my changes</string>
+    <string name="designer_language_javascript">JavaScript</string>
+    <string name="designer_language_tsx">TSX</string>
     <string name="designer_modified">Modified %1$s</string>
     <string name="designer_move_down">Move down</string>
     <string name="designer_move_up">Move up</string>
@@ -80,10 +82,12 @@
     <string name="designer_parse_error">The script cannot be opened in the designer. Line %1$d, column %2$d: %3$s</string>
     <string name="designer_preview_interact">Interact</string>
     <string name="designer_preview_problems">Not previewed</string>
+    <string name="designer_project_language">Language</string>
     <string name="designer_project_name">Project name</string>
     <string name="designer_redo">Redo</string>
     <string name="designer_reload">Reload</string>
     <string name="designer_remove">Remove</string>
+    <string name="designer_retry">Retry</string>
     <string name="designer_save">Save</string>
     <string name="designer_save_exit">Save and leave</string>
     <string name="designer_saved">Saved</string>
@@ -121,6 +125,11 @@
     <string name="designer_tab_inspector">Properties</string>
     <string name="designer_tab_outline">Outline</string>
     <string name="designer_tab_state">State</string>
+    <string name="designer_tsx_check_unavailable">The handler cannot be checked because the TypeScript Engine parser is not available (%1$s)</string>
+    <string name="designer_tsx_engine_missing">Editing a TSX project in the designer needs TypeScript Engine %1$s or later, which is not installed. The source is shown read-only.</string>
+    <string name="designer_tsx_engine_old">Editing a TSX project in the designer needs TypeScript Engine %1$s or later; version %2$s is installed. The source is shown read-only.</string>
+    <string name="designer_tsx_needs_engine">Editing TSX projects needs TypeScript Engine %1$s or later</string>
+    <string name="designer_tsx_parser_unavailable">The TypeScript Engine parser is not available right now (%1$s). The source is shown read-only; try again later.</string>
     <string name="designer_undo">Undo</string>
     <string name="designer_unknown_component">This component is not in the contract catalog.</string>
     <string name="designer_value_expression">Expression</string>

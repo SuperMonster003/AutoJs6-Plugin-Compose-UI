@@ -24,6 +24,13 @@ internal object ScriptLauncher {
     const val HOST_IMPORT_ACTIVITY = "org.autojs.autojs.external.open.ImportIntentActivity"
     const val EXTRA_SCRIPT = "script"
     const val SCRIPT_MIME_TYPE = "application/x-javascript"
+    /** The type the host's explorer gives TypeScript sources; TSX projects are handed over with it (roadmap P9.2). */
+    const val TYPESCRIPT_MIME_TYPE = "text/typescript"
+    /**
+     * The type a TSX export is created with: document providers keep the requested name for it, while a script type
+     * would make some of them append `.js` to `name.tsx`.
+     */
+    const val TSX_EXPORT_MIME_TYPE = "application/octet-stream"
     /** Suffix of the designer FileProvider authority (`<applicationId>.designer`, Manifest). */
     const val PROVIDER_AUTHORITY_SUFFIX = ".designer"
 
@@ -45,6 +52,15 @@ internal object ScriptLauncher {
     }.getOrDefault(false)
 
     fun run(context: Context, script: String): Result = start(context, intent(script))
+
+    /**
+     * Run a document through the host's public run entry by Uri (roadmap P9.2): the host names the source after the
+     * Uri's display name, so a `.tsx` project is compiled by the TypeScript Engine before it runs.
+     */
+    fun runIntent(uri: Uri): Intent = Intent(Intent.ACTION_VIEW)
+        .setClassName(ThreeBlockComposePlugin.HOST_PACKAGE_NAME, HOST_RUN_ACTIVITY)
+        .setDataAndType(uri, TYPESCRIPT_MIME_TYPE)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
     fun providerAuthority(context: Context): String = context.packageName + PROVIDER_AUTHORITY_SUFFIX
 

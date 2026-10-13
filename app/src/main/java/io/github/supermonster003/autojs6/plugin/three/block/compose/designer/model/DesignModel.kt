@@ -132,8 +132,11 @@ sealed class HostOptions {
     data class Expression(val source: String) : HostOptions()
 }
 
-/** `keyword name = compose.state(initial);` at the top level of the script. */
-data class StateDecl(val keyword: String, val name: String, val initial: PropValue)
+/**
+ * `keyword name = compose.state(initial);` at the top level of the script. [typeArguments] is the text between
+ * the angle brackets of `compose.state<T>(initial)` in a TSX document (roadmap P9.2), written back verbatim.
+ */
+data class StateDecl(val keyword: String, val name: String, val initial: PropValue, val typeArguments: String? = null)
 
 /** The single `compose.mount / floaty / dialog(...)` declaration of the script. */
 data class MountDecl(
@@ -157,7 +160,20 @@ sealed class Segment {
     data class Mount(val decl: MountDecl) : Segment()
 }
 
-data class DesignDocument(val segments: List<Segment>, val nextId: Int) {
+/**
+ * The language a document is read from and written in (roadmap P9.2 / D42): JavaScript with factory calls, or
+ * TSX with JSX elements. The tree is the same; only the reader and the writer differ.
+ */
+enum class Dialect {
+    JS, TSX;
+
+    companion object {
+        /** `.tsx` files are TSX documents; everything else is read as JavaScript. */
+        fun of(fileName: String): Dialect = if (fileName.endsWith(".tsx", ignoreCase = true)) TSX else JS
+    }
+}
+
+data class DesignDocument(val segments: List<Segment>, val nextId: Int, val dialect: Dialect = Dialect.JS) {
     val mount: MountDecl? get() = segments.filterIsInstance<Segment.Mount>().firstOrNull()?.decl
     val root: DesignNode? get() = mount?.root
     val states: List<StateDecl> get() = segments.filterIsInstance<Segment.State>().map { it.decl }

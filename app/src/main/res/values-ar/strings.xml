@@ -69,6 +69,8 @@
     <string name="designer_issues_count">التحقق (%1$d أخطاء)</string>
     <string name="designer_keep_editing">متابعة التحرير</string>
     <string name="designer_keep_mine">الاحتفاظ بتغييراتي</string>
+    <string name="designer_language_javascript">JavaScript</string>
+    <string name="designer_language_tsx">TSX</string>
     <string name="designer_modified">عدل في %1$s</string>
     <string name="designer_move_down">تحريك لأسفل</string>
     <string name="designer_move_up">تحريك لأعلى</string>
@@ -80,10 +82,12 @@
     <string name="designer_parse_error">لا يمكن فتح النص البرمجي في المصمم. السطر %1$d, العمود %2$d: %3$s</string>
     <string name="designer_preview_interact">تفاعل</string>
     <string name="designer_preview_problems">غير معروض في المعاينة</string>
+    <string name="designer_project_language">اللغة</string>
     <string name="designer_project_name">اسم المشروع</string>
     <string name="designer_redo">إعادة</string>
     <string name="designer_reload">إعادة التحميل</string>
     <string name="designer_remove">إزالة</string>
+    <string name="designer_retry">إعادة المحاولة</string>
     <string name="designer_save">حفظ</string>
     <string name="designer_save_exit">حفظ ومغادرة</string>
     <string name="designer_saved">تم الحفظ</string>
@@ -121,6 +125,11 @@
     <string name="designer_tab_inspector">الخصائص</string>
     <string name="designer_tab_outline">المخطط</string>
     <string name="designer_tab_state">الحالة</string>
+    <string name="designer_tsx_check_unavailable">لا يمكن فحص المعالج لأن خدمة التحليل في TypeScript Engine غير متاحة (%1$s)</string>
+    <string name="designer_tsx_engine_missing">يتطلب تحرير مشروع TSX في المصمم الإصدار TypeScript Engine %1$s أو أحدث, وهو غير مثبت. يعرض المصدر للقراءة فقط.</string>
+    <string name="designer_tsx_engine_old">يتطلب تحرير مشروع TSX في المصمم الإصدار TypeScript Engine %1$s أو أحدث, والإصدار المثبت هو %2$s. يعرض المصدر للقراءة فقط.</string>
+    <string name="designer_tsx_needs_engine">يتطلب تحرير مشاريع TSX الإصدار TypeScript Engine %1$s أو أحدث</string>
+    <string name="designer_tsx_parser_unavailable">خدمة التحليل في TypeScript Engine غير متاحة حاليا (%1$s). يعرض المصدر للقراءة فقط, أعد المحاولة لاحقا.</string>
     <string name="designer_undo">تراجع</string>
     <string name="designer_unknown_component">هذا المكون غير موجود في فهرس العقد.</string>
     <string name="designer_value_expression">تعبير</string>

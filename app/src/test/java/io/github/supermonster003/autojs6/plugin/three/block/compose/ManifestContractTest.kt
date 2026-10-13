@@ -30,8 +30,9 @@ class ManifestContractTest {
         assertEquals(listOf(ThreeBlockComposePlugin.PLUGIN_PERMISSION), manifest.children("uses-permission").map { it.androidAttribute("name") })
         // F.5: the gallery reads host appearance through the official settings Provider and hands scripts to the host.
         val queries = manifest.child("queries")
-        assertEquals(listOf("org.autojs.autojs6"), queries.children("package").map { it.androidAttribute("name") })
-        assertTrue("no intent or provider queries beyond the host package", queries.children("intent").isEmpty() && queries.children("provider").isEmpty())
+        // The host, and (P9.2) the TypeScript Engine whose parser service reads TSX projects.
+        assertEquals(listOf("org.autojs.autojs6", "io.github.supermonster003.autojs6.plugin.typescript"), queries.children("package").map { it.androidAttribute("name") })
+        assertTrue("no intent or provider queries beyond the two packages", queries.children("intent").isEmpty() && queries.children("provider").isEmpty())
         assertTrue("no uses-sdk override: minSdk comes from version.properties", manifest.children("uses-sdk").isEmpty())
         assertTrue("no feature or library requirements", manifest.children("uses-feature").isEmpty())
     }
@@ -74,7 +75,7 @@ class ManifestContractTest {
                 assertEquals(listOf("android.intent.action.EDIT", "android.intent.action.VIEW"), filter.children("action").map { it.androidAttribute("name") })
                 assertEquals(listOf("android.intent.category.DEFAULT"), filter.children("category").map { it.androidAttribute("name") })
                 assertEquals(listOf("content", "file"), filter.children("data").mapNotNull { it.androidAttributeOrNull("scheme") })
-                assertEquals(listOf("application/x-javascript", "text/javascript", "text/plain"), filter.children("data").mapNotNull { it.androidAttributeOrNull("mimeType") })
+                assertEquals(listOf("application/x-javascript", "text/javascript", "text/typescript", "text/plain"), filter.children("data").mapNotNull { it.androidAttributeOrNull("mimeType") })
             } else {
                 assertEquals("$name is reached through the launcher alias or the designer only", "false", screen.androidAttribute("exported"))
             }

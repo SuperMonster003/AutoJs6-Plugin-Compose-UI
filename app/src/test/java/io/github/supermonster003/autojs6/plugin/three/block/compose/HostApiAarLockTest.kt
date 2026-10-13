@@ -20,10 +20,11 @@ class HostApiAarLockTest {
     private val root: Path = findProjectRoot()
 
     @Test
-    fun `host api lock lists the INFO api and frozen renderer api with matching digests`() {
+    fun `host api lock lists the INFO api, the renderer api and the parser api with matching digests`() {
         val lock = readLock(root.resolve("locks/host-api-aars.lock"))
-        // V1 is frozen; F.2 adds a separately negotiated interop package in the same shared AAR.
-        assertEquals(setOf("common-plugin-api", "compose-ui-api"), lock.keys)
+        // V1 is frozen; F.2 adds a separately negotiated interop package in the same shared AAR. P9.2 adds the
+        // TypeScript parser contract that the designer uses for .tsx projects.
+        assertEquals(setOf("common-plugin-api", "compose-ui-api", "typescript-parser-api"), lock.keys)
         lock.forEach { (id, entry) ->
             val file = root.resolve("libs").resolve(entry.file)
             assertTrue("$id: missing ${entry.file}", Files.isRegularFile(file))

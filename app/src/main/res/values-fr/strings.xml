@@ -69,6 +69,8 @@
     <string name="designer_issues_count">Validation (%1$d erreurs)</string>
     <string name="designer_keep_editing">Continuer</string>
     <string name="designer_keep_mine">Garder mes modifications</string>
+    <string name="designer_language_javascript">JavaScript</string>
+    <string name="designer_language_tsx">TSX</string>
     <string name="designer_modified">Modifié %1$s</string>
     <string name="designer_move_down">Descendre</string>
     <string name="designer_move_up">Monter</string>
@@ -80,10 +82,12 @@
     <string name="designer_parse_error">Le script ne peut pas être ouvert dans le concepteur. Ligne %1$d, colonne %2$d: %3$s</string>
     <string name="designer_preview_interact">Interagir</string>
     <string name="designer_preview_problems">Non prévisualisé</string>
+    <string name="designer_project_language">Langage</string>
     <string name="designer_project_name">Nom du projet</string>
     <string name="designer_redo">Rétablir</string>
     <string name="designer_reload">Recharger</string>
     <string name="designer_remove">Retirer</string>
+    <string name="designer_retry">Réessayer</string>
     <string name="designer_save">Enregistrer</string>
     <string name="designer_save_exit">Enregistrer et quitter</string>
     <string name="designer_saved">Enregistré</string>
@@ -121,6 +125,11 @@
     <string name="designer_tab_inspector">Propriétés</string>
     <string name="designer_tab_outline">Plan</string>
     <string name="designer_tab_state">État</string>
+    <string name="designer_tsx_check_unavailable">Le gestionnaire ne peut pas être vérifié, car l\'analyseur de TypeScript Engine n\'est pas disponible (%1$s)</string>
+    <string name="designer_tsx_engine_missing">Modifier un projet TSX dans le concepteur nécessite TypeScript Engine %1$s ou une version ultérieure, qui n\'est pas installé. La source est affichée en lecture seule.</string>
+    <string name="designer_tsx_engine_old">Modifier un projet TSX dans le concepteur nécessite TypeScript Engine %1$s ou une version ultérieure; la version %2$s est installée. La source est affichée en lecture seule.</string>
+    <string name="designer_tsx_needs_engine">Modifier des projets TSX nécessite TypeScript Engine %1$s ou une version ultérieure</string>
+    <string name="designer_tsx_parser_unavailable">L\'analyseur de TypeScript Engine n\'est pas disponible pour le moment (%1$s). La source est affichée en lecture seule; réessayez plus tard.</string>
     <string name="designer_undo">Annuler</string>
     <string name="designer_unknown_component">Ce composant ne figure pas dans le catalogue du contrat.</string>
     <string name="designer_value_expression">Expression</string>

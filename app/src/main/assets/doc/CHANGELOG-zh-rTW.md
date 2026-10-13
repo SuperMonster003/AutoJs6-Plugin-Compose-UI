@@ -4,6 +4,17 @@
 
 ******
 
+# v1.4.0
+
+###### 2026/10/13
+
+* `提示` 設計器的 TSX 專案需要 TypeScript Engine 0.7.0 或更新版本; 未安裝或版本過舊時, TSX 專案只能以唯讀原始碼方式檢視與複製
+* `新增` 設計器支援 TSX 專案: 新增專案時可選 JavaScript 或 TSX, 也可以匯入 .tsx 檔案, 或從 AutoJs6 編輯器與檔案管理員直接開啟 .tsx 檔案; TSX 原始碼由 TypeScript Engine 解析後在畫布中編輯, 儲存為統一格式的 TSX (4 空格縮排, 單引號屬性, 每個子元素一行); 設計器無法編輯的寫法 (例如別名標籤, 條件或迴圈產生的子元素) 按原文保留, XML 標籤與展開屬性等無法表示的寫法會拒絕開啟並指出行列
+* `新增` 設計器中 TSX 專案的 "執行" 會把專案檔案交給 AutoJs6, 由 TypeScript Engine 編譯後執行; 有未儲存的修改時先儲存
+* `新增` TypeScript Engine 未安裝, 版本過舊或解析服務暫時無法使用時, 設計器以唯讀方式顯示 TSX 專案的原始碼並說明原因, 可以複製原始碼或重試; 安裝或更新 TypeScript Engine 後回到設計器會自動重試
+* `最佳化` TSX 專案中編輯事件處理函式時由 TypeScript Engine 檢查語法, 可以使用型別標註等 TypeScript 寫法
+* `相依` 附加 typescript-parser-api.aar 契約製品 (TypeScript 語法樹解析契約 v1), 供設計器讀取 TSX 專案
+
 # v1.3.0
 
 ###### 2026/10/13

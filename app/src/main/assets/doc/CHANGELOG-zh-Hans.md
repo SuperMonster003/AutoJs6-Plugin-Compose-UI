@@ -4,6 +4,17 @@
 
 ******
 
+# v1.4.0
+
+###### 2026/10/13
+
+* `提示` 设计器的 TSX 工程需要 TypeScript Engine 0.7.0 或更高版本; 未安装或版本过低时, TSX 工程只能以只读源码方式查看与复制
+* `新增` 设计器支持 TSX 工程: 新建工程时可选 JavaScript 或 TSX, 也可以导入 .tsx 文件, 或从 AutoJs6 编辑器与文件管理器直接打开 .tsx 文件; TSX 源码由 TypeScript Engine 解析后在画布中编辑, 保存为统一格式的 TSX (4 空格缩进, 单引号属性, 每个子元素一行); 设计器无法编辑的写法 (例如别名标签, 条件或循环生成的子元素) 按原文保留, XML 标签与展开属性等无法表示的写法会拒绝打开并指出行列
+* `新增` 设计器中 TSX 工程的 "运行" 会把工程文件交给 AutoJs6, 由 TypeScript Engine 编译后运行; 有未保存的修改时先保存
+* `新增` TypeScript Engine 未安装, 版本过低或解析服务暂时不可用时, 设计器以只读方式显示 TSX 工程的源码并说明原因, 可以复制源码或重试; 安装或更新 TypeScript Engine 后回到设计器会自动重试
+* `优化` TSX 工程中编辑事件处理函数时由 TypeScript Engine 检查语法, 可以使用类型标注等 TypeScript 写法
+* `依赖` 附加 typescript-parser-api.aar 契约制品 (TypeScript 语法树解析契约 v1), 供设计器读取 TSX 工程
+
 # v1.3.0
 
 ###### 2026/10/13

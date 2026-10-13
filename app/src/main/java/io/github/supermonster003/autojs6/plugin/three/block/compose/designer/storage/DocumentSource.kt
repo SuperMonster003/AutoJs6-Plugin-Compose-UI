@@ -29,7 +29,7 @@ internal sealed class DocumentSource {
 
     data class External(val uri: Uri, val displayName: String, val writable: Boolean) : DocumentSource() {
         override val title: String get() = displayName
-        override val draftKey: String get() = "external-" + sha1(uri.toString()).take(20) + ProjectStore.EXTENSION
+        override val draftKey: String get() = "external-" + sha1(uri.toString()).take(20) + ProjectStore.extensionFor(displayName)
     }
 
     companion object {
@@ -77,7 +77,7 @@ internal class DocumentIo(private val context: Context, private val store: Proje
     fun write(source: DocumentSource, text: String): WriteResult = when (source) {
         is DocumentSource.Local -> { store.write(source.name, text); WriteResult.Saved }
         is DocumentSource.External -> if (source.writable && writeUri(source.uri, text)) WriteResult.Saved else {
-            WriteResult.SavedAsProject(store.create(source.displayName.substringBeforeLast('.').ifBlank { "imported" }, text).name)
+            WriteResult.SavedAsProject(store.create(source.displayName.substringBeforeLast('.').ifBlank { "imported" }, text, ProjectStore.extensionFor(source.displayName)).name)
         }
     }
 

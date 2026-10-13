@@ -69,6 +69,8 @@
     <string name="designer_issues_count">驗證結果 (%1$d 個錯誤)</string>
     <string name="designer_keep_editing">繼續編輯</string>
     <string name="designer_keep_mine">保留我的修改</string>
+    <string name="designer_language_javascript">JavaScript</string>
+    <string name="designer_language_tsx">TSX</string>
     <string name="designer_modified">修改於 %1$s</string>
     <string name="designer_move_down">下移</string>
     <string name="designer_move_up">上移</string>
@@ -80,10 +82,12 @@
     <string name="designer_parse_error">設計器無法開啟此指令碼. 第 %1$d 行第 %2$d 欄: %3$s</string>
     <string name="designer_preview_interact">互動預覽</string>
     <string name="designer_preview_problems">未能預覽的部分</string>
+    <string name="designer_project_language">語言</string>
     <string name="designer_project_name">專案名稱</string>
     <string name="designer_redo">重做</string>
     <string name="designer_reload">重新載入</string>
     <string name="designer_remove">移除</string>
+    <string name="designer_retry">重試</string>
     <string name="designer_save">儲存</string>
     <string name="designer_save_exit">儲存並離開</string>
     <string name="designer_saved">已儲存</string>
@@ -121,6 +125,11 @@
     <string name="designer_tab_inspector">屬性</string>
     <string name="designer_tab_outline">大綱</string>
     <string name="designer_tab_state">狀態</string>
+    <string name="designer_tsx_check_unavailable">TypeScript Engine 的解析服務無法使用 (%1$s), 無法檢查這個處理函式</string>
+    <string name="designer_tsx_engine_missing">在設計器中編輯 TSX 專案需要 TypeScript Engine %1$s 或更新版本, 目前未安裝. 以下為唯讀原始碼.</string>
+    <string name="designer_tsx_engine_old">在設計器中編輯 TSX 專案需要 TypeScript Engine %1$s 或更新版本, 目前安裝的是 %2$s. 以下為唯讀原始碼.</string>
+    <string name="designer_tsx_needs_engine">編輯 TSX 專案需要 TypeScript Engine %1$s 或更新版本</string>
+    <string name="designer_tsx_parser_unavailable">TypeScript Engine 的解析服務暫時無法使用 (%1$s). 以下為唯讀原始碼, 請稍後重試.</string>
     <string name="designer_undo">復原</string>
     <string name="designer_unknown_component">該元件不在契約目錄中.</string>
     <string name="designer_value_expression">運算式</string>

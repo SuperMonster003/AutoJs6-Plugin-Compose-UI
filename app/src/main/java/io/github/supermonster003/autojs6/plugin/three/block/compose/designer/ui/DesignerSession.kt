@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.ScriptWriter
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.DocumentWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignNode
@@ -17,6 +17,8 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DropPlacements
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.LayoutAxes
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DocumentReader
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.SyntaxCheck
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.PreviewControls
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.v2.ComposeUiV2
@@ -25,7 +27,12 @@ import org.autojs.plugin.compose.api.v2.ComposeUiV2
  * The editing state of one open project (roadmap P8.3): the undo history, the selection, the canvas drag
  * state and the current diagnostics. Views observe its Compose state; all mutations go through commands.
  */
-internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCatalog = ComposeUiV2.interopCatalog) {
+internal class DesignerSession(
+    initial: DesignDocument,
+    val catalog: ComponentCatalog = ComposeUiV2.interopCatalog,
+    /** Checks edited handlers in the document's language (Rhino for JavaScript, the TypeScript parser for TSX). */
+    val syntax: SyntaxCheck = DocumentReader(initial.dialect, null),
+) {
     private val history = EditHistory(initial)
     private val validator = DesignValidator(catalog)
 
@@ -68,7 +75,7 @@ internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCa
 
     fun markSaved() { dirty = false }
 
-    fun script(): String = ScriptWriter.write(document)
+    fun script(): String = DocumentWriter.write(document)
 
     fun replace(document: DesignDocument) {
         history.reset(document)

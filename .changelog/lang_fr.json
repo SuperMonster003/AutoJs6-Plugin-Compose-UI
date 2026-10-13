@@ -5,6 +5,23 @@
   "changelog_label_improvement": "Amelioration",
   "changelog_label_dependency": "Dependance",
   "$data": {
+    "v1.4.0": {
+      "released_date": "2026/10/13",
+      "hint": [
+        "Les projets TSX du concepteur nécessitent TypeScript Engine 0.7.0 ou ultérieur; sans lui, ou avec une version plus ancienne, un projet TSX ne peut être que consulté et copié en source en lecture seule"
+      ],
+      "feature": [
+        "Le concepteur prend en charge les projets TSX: un nouveau projet peut être en JavaScript ou en TSX, et les fichiers .tsx peuvent être importés ou ouverts directement depuis l'éditeur AutoJs6 et les gestionnaires de fichiers; la source TSX est analysée par TypeScript Engine et modifiée sur le canevas, puis enregistrée en TSX dans un format uniforme (indentation de 4 espaces, attributs entre apostrophes, un élément enfant par ligne); le code que le concepteur ne peut pas modifier (balises d'alias, enfants produits par des conditions ou des boucles, etc.) est conservé tel quel, et le code qu'il ne peut pas représenter (balises XML, attributs de décomposition, etc.) est refusé avec ligne et colonne",
+        "\"Exécuter\" sur un projet TSX dans le concepteur transmet le fichier du projet à AutoJs6, qui le compile avec TypeScript Engine puis l'exécute; les modifications non enregistrées sont d'abord enregistrées",
+        "Lorsque TypeScript Engine n'est pas installé, est trop ancien ou que son service d'analyse est temporairement indisponible, le concepteur affiche la source du projet TSX en lecture seule avec la raison, et la source peut être copiée ou l'analyse relancée; revenir au concepteur après avoir installé ou mis à jour TypeScript Engine relance automatiquement l'analyse"
+      ],
+      "improvement": [
+        "Les gestionnaires d'événements modifiés dans un projet TSX sont vérifiés par TypeScript Engine, ce qui permet la syntaxe TypeScript comme les annotations de type"
+      ],
+      "dependency": [
+        "Ajout de l'artefact de contrat typescript-parser-api.aar (contrat d'analyse en arbre syntaxique TypeScript v1), utilisé par le concepteur pour lire les projets TSX"
+      ]
+    },
     "v1.3.0": {
       "released_date": "2026/10/13",
       "feature": [

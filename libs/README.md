@@ -9,6 +9,8 @@ Stage the audited **release** artifacts named exactly:
 
 - `common-plugin-api.aar` (host module `plugin-api/common-plugin-api`: `PluginInfo`, `IPluginInfoProvider`, `PluginActions`,
   `PluginCapabilityKeys`), consumed with `implementation`.
+- `typescript-parser-api.aar` (host module `plugin-api/typescript-parser-api`, P9.2): the TypeScript parser
+  contract, consumed with `implementation`; see the section below.
 - `compose-ui-api.aar` (host module `plugin-api/compose-ui-api`): frozen V1 loading interfaces,
   immutable Parcelable models, the 30-entry catalog and centralized vocabulary. Consumed with
   `compileOnly`, and `testImplementation` / `androidTestImplementation` for tests. The host supplies
@@ -81,6 +83,19 @@ together with the reviewed V1 snapshot; the module name, the
 discovers the plugin by `PLUGIN_PACKAGE_NAME`, so the renamed plugin needs a host
 build that contains this commit; `REQUIRED_HOST_VERSION` stays 5322 because an
 older host never evaluates it for the new package.
+
+## TypeScript parser contract (`typescript-parser-api.aar`, roadmap P9.2 / D42)
+
+`typescript-parser-api.aar` is the release AAR of the host module `plugin-api/typescript-parser-api` at host
+commit `fce22c83a6` (`feat(plugin-api): add the TypeScript parser contract`), assembled with
+`:plugin-api:typescript-parser-api:assembleRelease`; a rebuild from the same commit is byte-identical.
+SHA-256 `c5651a0c779903bde8832af185bc63038d1706d32f3e67069fbcf0e536658519`, MPL 2.0. It holds only the
+`ITypeScriptParserPlugin` AIDL stubs and `TypeScriptParserContract` (package
+`org.autojs.plugin.typescript.parser`, contract version 1, tree schema revision 1); it has no dependency.
+The host defines the contract but does not package the module, so the plugin consumes it with
+`implementation` in every process. The provider is the TypeScript Engine plugin 0.7.0 and later (action
+`org.autojs.plugin.typescript.PARSER`, PLUGIN permission); the designer binds it to read `.tsx` projects.
+The protocol is described in the host document `docs/dev/typescript-parser-plugin-protocol-v1.md`.
 
 ## Rhino parser jar (`libs/`, lock `../locks/rhino-jar.lock`, roadmap P8.1)
 

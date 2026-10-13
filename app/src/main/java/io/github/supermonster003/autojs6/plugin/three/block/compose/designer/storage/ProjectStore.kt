@@ -11,7 +11,7 @@ import java.security.MessageDigest
 
 /**
  * Designer projects are script files in the plugin's private storage (roadmap D39): `projects/` holds the
- * saved scripts, `drafts/` the periodically written working copies that survive a killed process (D40).
+ * saved scripts (`.js`, and `.tsx` since roadmap P9.2), `drafts/` the periodically written working copies that survive a killed process (D40).
  * Nothing here needs a storage permission; importing and exporting go through the system document picker.
  */
 internal class ProjectStore(context: Context) {
@@ -33,7 +33,7 @@ internal class ProjectStore(context: Context) {
 
     fun list(): List<Project> {
         projectsDir.mkdirs()
-        return (projectsDir.listFiles { file -> file.isFile && file.name.endsWith(EXTENSION) } ?: emptyArray())
+        return (projectsDir.listFiles { file -> file.isFile && isValidName(file.name) } ?: emptyArray())
             .map { Project(it.name, it, it.lastModified()) }
             .sortedWith(compareByDescending<Project> { it.modifiedAt }.thenBy { it.name })
     }
@@ -42,13 +42,17 @@ internal class ProjectStore(context: Context) {
 
     fun file(name: String): File = File(projectsDir, requireValidName(name))
 
-    /** Creates `<baseName>.js`, suffixing a counter while the name is taken, and writes the starter script. */
-    fun create(baseName: String, script: String = template()): Project {
+    /**
+     * Creates `<baseName><extension>` (`.js` or `.tsx`), suffixing a counter while the name is taken, and writes the
+     * starter script.
+     */
+    fun create(baseName: String, script: String = template(), extension: String = EXTENSION): Project {
+        require(extension in EXTENSIONS) { "Unsupported project extension: $extension" }
         projectsDir.mkdirs()
-        val stem = baseName.trim().removeSuffix(EXTENSION).ifBlank { "untitled" }
-        var candidate = stem + EXTENSION
+        val stem = baseName.trim().removeSuffix(extension).ifBlank { "untitled" }
+        var candidate = stem + extension
         var counter = 2
-        while (exists(candidate)) candidate = "$stem-${counter++}$EXTENSION"
+        while (exists(candidate)) candidate = "$stem-${counter++}$extension"
         val file = file(candidate)
         file.writeText(script, StandardCharsets.UTF_8)
         return Project(candidate, file, file.lastModified())
@@ -124,7 +128,7 @@ internal class ProjectStore(context: Context) {
             ?: throw IllegalStateException("Cannot read $uri")
         val stem = displayName.substringAfterLast('/').substringBeforeLast('.').replace(invalid, "-").ifBlank { "imported" }
         keepAccess(resolver, uri)
-        return create(stem, text).also { recordSource(it.name, Source(uri, digest(text))) }
+        return create(stem, text, extensionFor(displayName)).also { recordSource(it.name, Source(uri, digest(text))) }
     }
 
     /** The document a project was imported from, when it was imported through the picker. */
@@ -204,15 +208,35 @@ internal class ProjectStore(context: Context) {
 
     companion object {
         const val EXTENSION = ".js"
+        /** TSX projects (roadmap P9.2 / D42), read and written through the TypeScript Engine parser. */
+        const val TSX_EXTENSION = ".tsx"
+        val EXTENSIONS = listOf(EXTENSION, TSX_EXTENSION)
+
+        /** The starter of a TSX project (roadmap P9.2): the template's interface in the TSX writer's format. */
+        val TSX_TEMPLATE: String = """
+            "ui";
+
+            compose.mount(() => {
+                return (
+                    <compose.Column padding={16} spacing={12}>
+                        <compose.Text key='title' text='Hello' style='headlineSmall' />
+                    </compose.Column>
+                );
+            });
+        """.trimIndent() + LINE_END
+
         /** Types offered by the document picker when importing or relinking a script (any file as the last resort). */
-        val SCRIPT_DOCUMENT_TYPES = arrayOf("application/javascript", "text/javascript", "application/x-javascript", "text/plain", "*/*")
+        val SCRIPT_DOCUMENT_TYPES = arrayOf("application/javascript", "text/javascript", "application/x-javascript", "text/typescript", "text/plain", "*/*")
         /** A tab never occurs in a Uri string, so it separates the Uri from the baseline digest. */
         private const val FIELD_SEPARATOR = "\t"
         private const val LINE_END = "\n"
         private val invalid = Regex("[^A-Za-z0-9_.\\-\\u4e00-\\u9fff]")
-        private val valid = Regex("[A-Za-z0-9_\\-\\u4e00-\\u9fff][A-Za-z0-9_.\\-\\u4e00-\\u9fff]*\\.js")
+        private val valid = Regex("[A-Za-z0-9_\\-\\u4e00-\\u9fff][A-Za-z0-9_.\\-\\u4e00-\\u9fff]*\\.(js|tsx)")
 
         fun isValidName(name: String): Boolean = valid.matches(name) && ".." !in name
+
+        /** `.tsx` for a TSX document name, `.js` for anything else (an imported `.ts` or `.txt` becomes a script). */
+        fun extensionFor(displayName: String): String = if (displayName.endsWith(TSX_EXTENSION, ignoreCase = true)) TSX_EXTENSION else EXTENSION
 
         /** SHA-256 of a script's UTF-8 text: the baseline that tells which side of a source link changed. */
         fun digest(text: String): String =

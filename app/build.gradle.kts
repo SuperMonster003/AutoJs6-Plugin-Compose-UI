@@ -97,7 +97,7 @@ fun lockedAars(lockFile: File, ids: List<String>, directory: String): List<File>
 }
 
 // Host contract AARs: common-plugin-api from the host 6.8.0 snapshot 77b5a3b0c5 (build 5307), see libs/README.md.
-val hostApiIds = listOf("common-plugin-api", "compose-ui-api")
+val hostApiIds = listOf("common-plugin-api", "compose-ui-api", "typescript-parser-api")
 val hostApiAars = lockedAars(rootProject.file("locks/host-api-aars.lock"), hostApiIds, "libs")
 
 // P8.1 (roadmap D35): the slim Rhino jar derived by the host's slimRhinoJar task (no JLine / optimizer / JFR),
@@ -404,6 +404,9 @@ dependencies {
     // process and shadowed parent-first inside the host (see the D26 note above). JVM and device tests get it
     // through the application classpath; the device test APK must not carry a second copy.
     implementation(files(hostApiAars[1]))
+    // The TypeScript parser contract (P9.2 / D42): the designer binds the TypeScript Engine parser service to read
+    // .tsx projects. Only AIDL stubs and constants; the host does not package this module.
+    implementation(files(hostApiAars[2]))
     // The designer's script parser (P8.1 / D35): parse only, never Context.enter.
     implementation(files(rhinoJar))
     sharedDeps.forEach { (coordinate, version) ->

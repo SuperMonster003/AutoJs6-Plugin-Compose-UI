@@ -4,9 +4,13 @@
 
     <uses-permission android:name="org.autojs.permission.PLUGIN" />
 
-    <!-- F.5: the gallery reads host appearance through the official settings Provider and hands scripts to the host. -->
+    <!--
+        F.5: the gallery reads host appearance through the official settings Provider and hands scripts to the host.
+        P9.2 / D42: the designer binds the TypeScript Engine parser service (PLUGIN permission) to read TSX projects.
+    -->
     <queries>
         <package android:name="org.autojs.autojs6" />
+        <package android:name="io.github.supermonster003.autojs6.plugin.typescript" />
     </queries>
 
     <application
@@ -76,6 +80,7 @@
         <!--
             Roadmap P8.4 / D39: the editor also opens script documents handed over by the host editor or a file
             manager (content or file Uri) and writes them back through the same Uri when the grant allows it.
+            P9.2: `.tsx` documents (text/typescript) open as TSX projects.
         -->
         <activity
             android:name=".designer.ui.DesignerActivity"
@@ -90,6 +95,7 @@
                 <data android:scheme="file" />
                 <data android:mimeType="application/x-javascript" />
                 <data android:mimeType="text/javascript" />
+                <data android:mimeType="text/typescript" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>

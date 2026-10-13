@@ -9,6 +9,7 @@ reproduced in full in the distribution of the respective project.
 | Artifact | Origin | Version | License | SHA-256 |
 | --- | --- | --- | --- | --- |
 | `common-plugin-api.aar` | AutoJs6 module `plugin-api/common-plugin-api` (https://github.com/SuperMonster003/AutoJs6): `IPluginInfoProvider` AIDL, `PluginInfo`, `PluginActions`, `PluginCapabilityKeys` | host build 6.8.0 / 5307, commit `77b5a3b0c5` (module byte-identical to the copies staged by the other official plugins) | MPL 2.0 | `ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15` |
+| `typescript-parser-api.aar` | AutoJs6 module `plugin-api/typescript-parser-api` (https://github.com/SuperMonster003/AutoJs6): `ITypeScriptParserPlugin` AIDL, `TypeScriptParserContract` (TypeScript parser contract v1) | host commit `fce22c83a6` (6.8.0) | MPL 2.0 | `c5651a0c779903bde8832af185bc63038d1706d32f3e67069fbcf0e536658519` |
 
 The current `compose-ui-api.aar` release is from AutoJs6 branch `spike/compose-ui-p0`
 for F.3 (6.8.0 / 5321, commit `8cba2ce0e3aad5835879b0b91604caec9cb719b1`;
