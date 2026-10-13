@@ -37,9 +37,14 @@
 -keep class org.autojs.plugin.common.api.** { *; }
 -keep class org.autojs.plugin.compose.api.** { *; }
 
-# Rhino (P8.1 / D35): the slim parser jar is referenced only by the designer's parser package and never inside the
-# host, so nothing is kept; R8 retains the reachable Parser / AST closure and drops the interpreter. The slim jar
-# still declares JVM-only entry points (javax.script, java.lang.reflect proxies) that Android lacks.
+# Rhino (P8.1 / D35, P9.3 step 2 / D43): the slim jar is referenced only by the designer's parser and sandbox
+# packages and never inside the host. R8 retains what they reach: the Parser / AST closure and, for the sandbox,
+# the interpreter closure. Rhino looks two classes up by name and builds them reflectively (Context finds its
+# Evaluator, VMBridge its platform bridge), so only those two are kept; RegExp comes through ServiceLoader, which
+# R8 follows on its own. The slim jar still declares JVM-only entry points (javax.script, java.lang.reflect
+# proxies) that Android lacks.
+-keep class org.mozilla.javascript.Interpreter { <init>(); }
+-keep class org.mozilla.javascript.jdk18.VMBridge_jdk18 { <init>(); }
 -dontwarn org.mozilla.javascript.**
 -dontwarn org.mozilla.classfile.**
 

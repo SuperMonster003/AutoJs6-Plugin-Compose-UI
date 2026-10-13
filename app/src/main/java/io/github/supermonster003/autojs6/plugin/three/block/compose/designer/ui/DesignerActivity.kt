@@ -8,6 +8,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +48,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +59,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -77,6 +84,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.par
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.CanvasBounds
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignCanvas
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignImages
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.SandboxPreview
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentIo
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentSource
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
@@ -321,6 +329,28 @@ internal class DesignerActivity : StandaloneActivity() {
         val imageFolderSet = stringResource(R.string.designer_image_folder_set)
         val theme = remember(appearance) { ThemeSpec(seedArgb = appearance.primary, dark = appearance.dark) }
         val errors = session.diagnostics.count { it.severity == Severity.ERROR }
+        // Roadmap P9.3 step 2 (D43): the interactive preview of a JavaScript project runs its script in the sandbox,
+        // started afresh whenever the document or a preview value changes, and paused while the designer is hidden.
+        // A TSX project (and any project below Android 8.0) keeps the step 1 preview, whose controls set the preview values.
+        val sandbox = remember { SandboxPreview() }
+        val runsScript = session.document.dialect == Dialect.JS && SandboxPreview.SUPPORTED
+        var visible by remember { mutableStateOf(true) }
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        DisposableEffect(lifecycle) {
+            val observer = LifecycleEventObserver { _, _ -> visible = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED) }
+            lifecycle.addObserver(observer)
+            onDispose { lifecycle.removeObserver(observer); sandbox.stop() }
+        }
+        LaunchedEffect(session.interactive, runsScript, visible, session.document, session.previewValues) {
+            if (session.interactive && runsScript && visible) {
+                // Typing in the inspector restarts the script once the edits pause, not on every keystroke.
+                if (sandbox.running) delay(SANDBOX_RESTART_DELAY_MS)
+                sandbox.start(session.document, session.previewValues, source.title)
+            } else sandbox.stop()
+        }
+        val liveTree = if (session.interactive && runsScript) sandbox.tree else null
+        val sandboxProblems = sandbox.failure?.takeIf { session.interactive && runsScript }
+            ?.let { listOf(stringResource(if (it.stops) R.string.designer_sandbox_stopped else R.string.designer_sandbox_error, it.message)) }.orEmpty()
 
         fun save(announce: Boolean = true): Boolean {
             val text = session.script()
@@ -525,13 +555,36 @@ internal class DesignerActivity : StandaloneActivity() {
                         modifier = Modifier.fillMaxSize().padding(8.dp),
                         values = session.previewValues,
                         interactive = session.interactive,
-                        onEvent = { nodeId, type, payload -> session.previewEvent(nodeId, type) { field -> payload.get(field) } },
+                        live = liveTree,
+                        onEvent = { nodeId, type, callbackId, payload ->
+                            when {
+                                liveTree != null -> sandbox.dispatch(nodeId, type, callbackId, payload.keySet().associateWith { payload.get(it) })
+                                // Until the script's first tree arrives the canvas shows the document; input waits for the script.
+                                runsScript -> Unit
+                                else -> session.previewEvent(nodeId, type) { field -> payload.get(field) }
+                            }
+                        },
                     )
+                    // The script's last error, over the canvas; the console tab has the whole output.
+                    sandboxProblems.firstOrNull()?.let { problem ->
+                        Text(
+                            problem,
+                            color = Color(palette.danger),
+                            fontSize = 12.sp,
+                            maxLines = 2,
+                            modifier = Modifier.align(Alignment.BottomStart).padding(12.dp).background(Color(palette.background)).padding(6.dp)
+                                .clickable { tab = CONSOLE_TAB }.testTag("designer-sandbox-problem"),
+                        )
+                    }
                     // Edit mode selects and drags; the interactive preview passes input to the components (P9.3).
                     FilterChip(
                         selected = session.interactive,
                         onClick = { session.interactive = !session.interactive },
                         label = { Text(stringResource(R.string.designer_preview_interact)) },
+                        // Shown while the canvas holds the running script's tree, not the document's (P9.3 step 2).
+                        leadingIcon = if (liveTree == null) null else {
+                            { Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.designer_sandbox_running), modifier = Modifier.size(18.dp).testTag("designer-sandbox-live")) }
+                        },
                         modifier = Modifier.align(Alignment.TopEnd).padding(end = 12.dp).testTag("designer-interact"),
                     )
                 }
@@ -542,11 +595,13 @@ internal class DesignerActivity : StandaloneActivity() {
                         Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.designer_tab_outline)) }, modifier = Modifier.testTag("designer-tab-outline"))
                         Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.designer_tab_inspector)) }, modifier = Modifier.testTag("designer-tab-inspector"))
                         Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.designer_tab_state)) }, modifier = Modifier.testTag("designer-tab-state"))
+                        Tab(selected = tab == CONSOLE_TAB, onClick = { tab = CONSOLE_TAB }, text = { Text(stringResource(R.string.designer_tab_console)) }, modifier = Modifier.testTag("designer-tab-console"))
                     }
                     when (tab) {
                         0 -> OutlinePanel(session, palette, Modifier.fillMaxWidth())
                         1 -> InspectorPanel(session, palette, onPickSlotComponent = { slot -> paletteTarget = slot; paletteOpen = true }, modifier = Modifier.fillMaxWidth())
-                        else -> StatePanel(session, palette, Modifier.fillMaxWidth())
+                        2 -> StatePanel(session, palette, Modifier.fillMaxWidth())
+                        else -> ConsolePanel(sandbox, session.document.dialect, session.interactive, palette, Modifier.fillMaxWidth())
                     }
                 }
             }
@@ -575,7 +630,7 @@ internal class DesignerActivity : StandaloneActivity() {
             if (!inserted) scope.launch { snackbar.showSnackbar(insertFailed) }
         }, onDismiss = { paletteOpen = false })
         if (hostDialog) HostOptionsDialog(session, palette) { hostDialog = false }
-        if (issuesDialog) IssuesDialog(session.diagnostics, session.previewProblems, palette, onSelect = { session.selectedId = it }) { issuesDialog = false }
+        if (issuesDialog) IssuesDialog(session.diagnostics, session.previewProblems + sandboxProblems, palette, onSelect = { session.selectedId = it }) { issuesDialog = false }
         if (exitDialog) AlertDialog(
             onDismissRequest = { exitDialog = false },
             title = { Text(stringResource(R.string.designer_back_discard_title)) },
@@ -684,6 +739,8 @@ internal class DesignerActivity : StandaloneActivity() {
 
     companion object {
         const val EXTRA_PROJECT = "project"
+        private const val CONSOLE_TAB = 3
+        private const val SANDBOX_RESTART_DELAY_MS = 400L
 
         fun intent(context: Context, projectName: String): Intent = Intent(context, DesignerActivity::class.java).putExtra(EXTRA_PROJECT, projectName)
 

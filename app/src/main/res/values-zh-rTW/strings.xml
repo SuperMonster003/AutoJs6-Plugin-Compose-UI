@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">專案有未儲存的修改.</string>
     <string name="designer_back_discard_title">離開設計器?</string>
     <string name="designer_cancel">取消</string>
+    <string name="designer_console_clear">清除</string>
+    <string name="designer_console_idle">開啟 \"互動預覽\" 後會在預覽中執行指令碼, 指令碼的主控台輸出, toast 和錯誤顯示在這裡.</string>
+    <string name="designer_console_old_android">在預覽中執行指令碼需要 Android 8.0 或更新版本. 在此裝置上, JavaScript 專案按 TSX 專案的方式預覽: 繫結了狀態的控制項會修改預覽值.</string>
+    <string name="designer_console_running">指令碼正在預覽中執行. 預覽中只能使用 compose, console, toast 和計時器, 其他 AutoJs6 模組會提示預覽中無法使用.</string>
+    <string name="designer_console_stopped">預覽已停止執行指令碼. 修改專案或關閉再開啟 \"互動預覽\" 即可再次執行.</string>
+    <string name="designer_console_tsx">TSX 專案的預覽不執行指令碼, 因此這裡沒有輸出.</string>
     <string name="designer_copy_script">複製指令碼</string>
     <string name="designer_create">建立</string>
     <string name="designer_delete_node">刪除節點</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">重新載入</string>
     <string name="designer_remove">移除</string>
     <string name="designer_retry">重試</string>
+    <string name="designer_sandbox_error">指令碼錯誤: %1$s</string>
+    <string name="designer_sandbox_running">指令碼正在執行</string>
+    <string name="designer_sandbox_stopped">預覽已停止: %1$s</string>
     <string name="designer_save">儲存</string>
     <string name="designer_save_exit">儲存並離開</string>
     <string name="designer_saved">已儲存</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">無法寫入來源檔案, 它可能是唯讀的</string>
     <string name="designer_source_written">已寫回來源檔案</string>
     <string name="designer_state_empty">此指令碼沒有在頂層宣告 compose.state.</string>
-    <string name="designer_state_hint">預覽值只影響畫布, 指令碼中的初值不變. 開啟 \"互動預覽\" 後, 畫布中繫結了狀態的開關, 滑桿, 輸入框等控制項會直接修改這裡的值.</string>
+    <string name="designer_state_hint">預覽值只影響畫布, 指令碼中的初值不變. 開啟 \"互動預覽\" 後, JavaScript 專案以這些值為初值執行指令碼 (需要 Android 8.0 或更新版本); TSX 專案或 Android 8.0 以下的裝置上, 繫結了狀態的開關, 滑桿, 輸入框等控制項會直接修改這裡的值.</string>
     <string name="designer_state_initial">初值: %1$s</string>
     <string name="designer_state_reset">重設</string>
     <string name="designer_state_reset_all">全部重設</string>
     <string name="designer_state_value">預覽值</string>
+    <string name="designer_tab_console">主控台</string>
     <string name="designer_tab_inspector">屬性</string>
     <string name="designer_tab_outline">大綱</string>
     <string name="designer_tab_state">狀態</string>

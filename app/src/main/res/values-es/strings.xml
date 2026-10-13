@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">El proyecto tiene cambios sin guardar.</string>
     <string name="designer_back_discard_title">Salir del diseñador?</string>
     <string name="designer_cancel">Cancelar</string>
+    <string name="designer_console_clear">Borrar</string>
+    <string name="designer_console_idle">Activa Interactuar para ejecutar el script en la vista previa; su salida de consola, sus avisos y sus errores aparecen aquí.</string>
+    <string name="designer_console_old_android">Ejecutar el script en la vista previa requiere Android 8.0 o posterior. En este dispositivo un proyecto JavaScript se previsualiza como un proyecto TSX: los controles vinculados a un estado cambian los valores de vista previa.</string>
+    <string name="designer_console_running">El script se ejecuta en la vista previa. Allí solo funcionan compose, console, toast y los temporizadores; los demás módulos de AutoJs6 indican que no están disponibles.</string>
+    <string name="designer_console_stopped">La vista previa detuvo el script. Edita el proyecto o desactiva y vuelve a activar Interactuar para ejecutarlo de nuevo.</string>
+    <string name="designer_console_tsx">Los proyectos TSX se previsualizan sin ejecutar su script, por lo que aquí no se escribe nada.</string>
     <string name="designer_copy_script">Copiar script</string>
     <string name="designer_create">Crear</string>
     <string name="designer_delete_node">Eliminar nodo</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">Recargar</string>
     <string name="designer_remove">Quitar</string>
     <string name="designer_retry">Reintentar</string>
+    <string name="designer_sandbox_error">Error del script: %1$s</string>
+    <string name="designer_sandbox_running">El script se está ejecutando</string>
+    <string name="designer_sandbox_stopped">Vista previa detenida: %1$s</string>
     <string name="designer_save">Guardar</string>
     <string name="designer_save_exit">Guardar y salir</string>
     <string name="designer_saved">Guardado</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">No se puede escribir en el archivo de origen; puede ser de solo lectura</string>
     <string name="designer_source_written">Escrito de vuelta en el archivo de origen</string>
     <string name="designer_state_empty">Este script no declara ningún compose.state en el nivel superior.</string>
-    <string name="designer_state_hint">Los valores de vista previa solo cambian el lienzo; el script conserva sus valores iniciales. Con Interactuar activado, los interruptores, controles deslizantes, campos de texto y otros controles vinculados a un estado lo cambian aquí.</string>
+    <string name="designer_state_hint">Los valores de vista previa solo cambian el lienzo; el script conserva sus valores iniciales. Con Interactuar activado, un proyecto JavaScript ejecuta su script con estos valores iniciales (Android 8.0 o posterior); en un proyecto TSX, o con Android anterior a 8.0, los interruptores, controles deslizantes, campos de texto y otros controles vinculados a un estado los cambian aquí.</string>
     <string name="designer_state_initial">Valor inicial: %1$s</string>
     <string name="designer_state_reset">Restablecer</string>
     <string name="designer_state_reset_all">Restablecer todo</string>
     <string name="designer_state_value">Valor de vista previa</string>
+    <string name="designer_tab_console">Consola</string>
     <string name="designer_tab_inspector">Propiedades</string>
     <string name="designer_tab_outline">Esquema</string>
     <string name="designer_tab_state">Estado</string>

@@ -18,6 +18,7 @@ import org.autojs.plugin.compose.api.ComposeUiProps
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.catalog.ValueType
 import org.autojs.plugin.compose.api.model.ModifierOp
+import org.autojs.plugin.compose.api.model.UiCommand
 import org.autojs.plugin.compose.api.model.UiNode
 import org.autojs.plugin.compose.api.model.UiTree
 import org.autojs.plugin.compose.api.model.UiValue
@@ -47,7 +48,29 @@ internal class PreviewFrame(
     val placeholders: Map<Int, Int>,
     /** Open window components in tree preorder (a popup before those opened inside it), to draw over the page. */
     val overlays: List<Overlay> = emptyList(),
+    /** The sandbox's hooks when the frame shows its tree (P9.3 step 2). */
+    val live: LiveHooks? = null,
 )
+
+/**
+ * The interactive preview's script hooks (roadmap P9.3 step 2): the events of each node that have listeners in
+ * the sandbox, and the callback tokens of each node's modifier chain in chain order. With them the frame carries
+ * the callbacks the script declared instead of the state-bound controls of [PreviewControls].
+ */
+internal class LiveHooks(
+    val events: Map<Int, List<String>>,
+    val tokens: Map<Int, List<Int>>,
+    /**
+     * The edit sequence each text field's text in the tree goes with: the canvas sets a field to that text through
+     * an edit command, which the field refuses when the user has typed since, as the host's renderer does.
+     */
+    val fieldSequences: Map<Int, Long> = emptyMap(),
+    /** Handle commands (focus, blur, scrollTo) issued with this tree, carried out once it is drawn. */
+    val commands: List<UiCommand> = emptyList(),
+)
+
+/** The sandbox's current tree as a throwaway document whose node ids are the runtime's, with its hooks. */
+internal class LiveTree(val document: DesignDocument, val hooks: LiveHooks)
 
 /** How the canvas draws an open window component (roadmap P9.1). */
 internal enum class OverlayKind { DIALOG, SHEET, MENU, TOOLTIP }
@@ -75,7 +98,8 @@ internal object PreviewFrames {
     /**
      * [values] are preview values of top-level states (roadmap P9.3): they replace the initial values in
      * bindings without touching the document. Properties bound to a state get callbacks for the events that
-     * change them ([PreviewControls]), so an interactive canvas can report those changes.
+     * change them ([PreviewControls]), so an interactive canvas can report those changes. With [live] the
+     * document is the sandbox's tree (P9.3 step 2) and the callbacks are the script's own.
      */
     fun build(
         document: DesignDocument,
@@ -83,10 +107,12 @@ internal object PreviewFrames {
         catalog: ComponentCatalog = ComposeUiV2.interopCatalog,
         images: ImageSource? = null,
         values: Map<String, JsLiteral> = emptyMap(),
+        live: LiveHooks? = null,
     ): PreviewFrame {
-        val root = document.root ?: return PreviewFrame(null, null, generation, listOf("The document has no mount"), emptyMap())
+        // A sandbox whose script closed its session (or never mounted) shows an empty canvas, which is no problem.
+        val root = document.root ?: return PreviewFrame(null, null, generation, if (live == null) listOf("The document has no mount") else emptyList(), emptyMap())
         val states = document.states.associate { it.name to (values[it.name]?.let { value -> PropValue.Literal(value) } ?: it.initial) }
-        val builder = Builder(catalog, states, images)
+        val builder = Builder(catalog, states, images, live)
         val rootId = builder.emit(root, null)
         var nodes: Map<Int, UiNode> = builder.nodes
         val tree = try {
@@ -102,10 +128,10 @@ internal object PreviewFrames {
             }
         }
         val frame = tree?.let { RenderFrame(it.rootId, it.nodes.associateBy { node -> node.nodeId }, generation) }
-        return PreviewFrame(frame, tree, generation, builder.problems, builder.placeholders, if (frame == null) emptyList() else builder.overlays.filterNotNull())
+        return PreviewFrame(frame, tree, generation, builder.problems, builder.placeholders, if (frame == null) emptyList() else builder.overlays.filterNotNull(), live)
     }
 
-    private class Builder(private val catalog: ComponentCatalog, private val states: Map<String, PropValue>, private val images: ImageSource?) {
+    private class Builder(private val catalog: ComponentCatalog, private val states: Map<String, PropValue>, private val images: ImageSource?, private val live: LiveHooks?) {
         val nodes = LinkedHashMap<Int, UiNode>()
         val problems = ArrayList<String>()
         val placeholders = HashMap<Int, Int>()
@@ -122,6 +148,7 @@ internal object PreviewFrames {
             val raw = LinkedHashMap<String, UiValue>()
             var key: String? = null
             val operations = ArrayList<ModifierOp>()
+            val tokens = live?.let { it.tokens[node.id].orEmpty().iterator() }
             node.entries.forEach { entry ->
                 when (entry) {
                     is NodeEntry.Key -> key = when (val value = entry.value) {
@@ -129,7 +156,7 @@ internal object PreviewFrames {
                         else -> null
                     }
                     is NodeEntry.Prop -> propValue(node, spec.props.firstOrNull { it.name == entry.name || entry.name in it.aliases }?.type, entry)?.let { raw[entry.name] = it }
-                    is NodeEntry.Modifier -> entry.chain.forEach { operation -> modifierOp(operation, parentType)?.let { operations += it } }
+                    is NodeEntry.Modifier -> entry.chain.forEach { operation -> modifierOp(operation, parentType, tokens)?.let { operations += it } }
                     is NodeEntry.Slot, is NodeEntry.Handler, is NodeEntry.ModifierExpression -> Unit
                 }
             }
@@ -164,7 +191,9 @@ internal object PreviewFrames {
                 }
             }
             val props = (normalized?.props ?: emptyMap()).let { if (overlay != null) it + (ComposeUiProps.OPEN to UiValue.Bool(false)) else it }
-            val callbacks = PreviewControls.controls(node, spec).keys.associateWith { node.id }
+            val callbacks = if (live != null) {
+                live.events[node.id].orEmpty().filter { event -> spec.events.any { it.name == event } }.associateWith { node.id }
+            } else PreviewControls.controls(node, spec).keys.associateWith { node.id }
             val uiNode = try {
                 UiNode(node.id, node.type, key, props, normalized?.modifier ?: emptyList(), children, slots, callbacks).also { RendererCatalog.validate(it) }
             } catch (error: ComposeUiContractException) {
@@ -212,11 +241,22 @@ internal object PreviewFrames {
         private fun literal(literal: JsLiteral, type: ValueType): UiValue? =
             (JsValueConverter.convert(literal, type) as? JsValueConverter.Conversion.Ok)?.value
 
-        private fun modifierOp(operation: ModifierEntry, parentType: String?): ModifierOp? {
+        /**
+         * A document's callback arguments are source text, so such operations are left out; the sandbox's carry
+         * tokens ([tokens], taken in chain order even when the operation is left out, so later ones stay aligned).
+         */
+        private fun modifierOp(operation: ModifierEntry, parentType: String?, tokens: Iterator<Int>? = null): ModifierOp? {
+            val callbackTokens = operation.args.filterIsInstance<ModifierArg.Callback>().map { if (tokens?.hasNext() == true) tokens.next() else null }
             val spec = catalog.modifier(operation.name) ?: return null
             val signature = spec.signatures.firstOrNull { operation.args.size in it.requiredCount..it.args.size } ?: return null
-            if (operation.args.any { it is ModifierArg.Callback } || signature.args.take(operation.args.size).any { it.callback }) return null
+            if (tokens == null && (operation.args.any { it is ModifierArg.Callback } || signature.args.take(operation.args.size).any { it.callback })) return null
+            var nextToken = 0
             val args = operation.args.mapIndexed { index, argument ->
+                if (argument is ModifierArg.Callback) {
+                    val token = callbackTokens[nextToken++] ?: return null
+                    return@mapIndexed UiValue.Num(token.toDouble())
+                }
+                if (signature.args[index].callback) return null
                 val value = (argument as ModifierArg.Value).value
                 val literal = when (value) {
                     is PropValue.Literal -> value.value

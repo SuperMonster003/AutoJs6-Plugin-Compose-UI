@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">В проекте есть несохраненные изменения.</string>
     <string name="designer_back_discard_title">Выйти из дизайнера?</string>
     <string name="designer_cancel">Отмена</string>
+    <string name="designer_console_clear">Очистить</string>
+    <string name="designer_console_idle">Включите \"Взаимодействие\", чтобы выполнить скрипт в предпросмотре; его вывод в консоль, всплывающие сообщения и ошибки появятся здесь.</string>
+    <string name="designer_console_old_android">Для выполнения скрипта в предпросмотре нужен Android 8.0 или новее. На этом устройстве проект JavaScript показывается как проект TSX: элементы, привязанные к состоянию, меняют значения предпросмотра.</string>
+    <string name="designer_console_running">Скрипт выполняется в предпросмотре. Там работают только compose, console, toast и таймеры; другие модули AutoJs6 сообщают, что недоступны.</string>
+    <string name="designer_console_stopped">Предпросмотр остановил скрипт. Измените проект или выключите и снова включите \"Взаимодействие\", чтобы запустить его снова.</string>
+    <string name="designer_console_tsx">Проекты TSX показываются без выполнения скрипта, поэтому здесь ничего не выводится.</string>
     <string name="designer_copy_script">Копировать скрипт</string>
     <string name="designer_create">Создать</string>
     <string name="designer_delete_node">Удалить узел</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">Перезагрузить</string>
     <string name="designer_remove">Убрать</string>
     <string name="designer_retry">Повторить</string>
+    <string name="designer_sandbox_error">Ошибка скрипта: %1$s</string>
+    <string name="designer_sandbox_running">Скрипт выполняется</string>
+    <string name="designer_sandbox_stopped">Предпросмотр остановлен: %1$s</string>
     <string name="designer_save">Сохранить</string>
     <string name="designer_save_exit">Сохранить и выйти</string>
     <string name="designer_saved">Сохранено</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">Не удалось записать исходный файл: возможно, он доступен только для чтения</string>
     <string name="designer_source_written">Записано обратно в исходный файл</string>
     <string name="designer_state_empty">Этот скрипт не объявляет compose.state на верхнем уровне.</string>
-    <string name="designer_state_hint">Значения предпросмотра меняют только холст, начальные значения в скрипте остаются прежними. Когда включено \"Взаимодействие\", переключатели, ползунки, поля ввода и другие элементы, привязанные к состоянию, меняют его здесь.</string>
+    <string name="designer_state_hint">Значения предпросмотра меняют только холст, начальные значения в скрипте остаются прежними. Когда включено \"Взаимодействие\", проект JavaScript выполняет скрипт с этими начальными значениями (Android 8.0 или новее); в проекте TSX или на Android ниже 8.0 переключатели, ползунки, поля ввода и другие элементы, привязанные к состоянию, меняют их здесь.</string>
     <string name="designer_state_initial">Начальное значение: %1$s</string>
     <string name="designer_state_reset">Сбросить</string>
     <string name="designer_state_reset_all">Сбросить все</string>
     <string name="designer_state_value">Значение предпросмотра</string>
+    <string name="designer_tab_console">Консоль</string>
     <string name="designer_tab_inspector">Свойства</string>
     <string name="designer_tab_outline">Структура</string>
     <string name="designer_tab_state">Состояние</string>

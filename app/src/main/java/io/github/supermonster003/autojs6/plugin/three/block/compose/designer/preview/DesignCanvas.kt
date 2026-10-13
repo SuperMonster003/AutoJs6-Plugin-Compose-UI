@@ -2,6 +2,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.pr
 
 import android.os.Bundle
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -23,7 +24,9 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -35,6 +38,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
@@ -58,27 +62,31 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.autojs.plugin.compose.api.ComposeUiComponents
+import org.autojs.plugin.compose.api.ComposeUiContractException
 import org.autojs.plugin.compose.api.ComposeUiEventFields
 import org.autojs.plugin.compose.api.ComposeUiProps
 import org.autojs.plugin.compose.api.model.ThemeSpec
+import org.autojs.plugin.compose.api.model.UiCommand
 import org.autojs.plugin.compose.api.model.UiValue
 
 /**
  * Design-time renderer controllers: the same classes the in-host renderer uses, with errors collected for the
- * designer. Events go to [onEvent], which only the interactive preview (P9.3) uses; in edit mode the overlay
- * takes every pointer, so none arrive.
+ * designer. Events go to [onEvent] with the callback id the renderer emitted (the node's id, or a modifier
+ * callback's token in the sandbox's trees); only the interactive preview (P9.3) uses them, because in edit mode
+ * the overlay takes every pointer.
  */
 internal class CanvasControllers {
     val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     val commands = NodeCommandRegistry()
     val failures = ArrayList<Throwable>()
-    var onEvent: (nodeId: Int, type: String, payload: Bundle) -> Unit = { _, _, _ -> }
+    var onEvent: (nodeId: Int, type: String, callbackId: Int, payload: Bundle) -> Unit = { _, _, _, _ -> }
     /** The text each field last reported, so a frame echoing it does not reset a field the user is typing in. */
     private val typed = HashMap<Int, String>()
-    val emit: (Long, Int, String, Int, Bundle) -> Unit = { _, nodeId, type, _, payload ->
+    val emit: (Long, Int, String, Int, Bundle) -> Unit = { _, nodeId, type, callbackId, payload ->
         payload.getString(ComposeUiEventFields.TEXT)?.let { typed[nodeId] = it }
-        onEvent(nodeId, type, payload)
+        onEvent(nodeId, type, callbackId, payload)
     }
     val fields = TextFieldController(emit, { failures += it }, { scope })
     val snackbar = SnackbarController({ scope }, emit)
@@ -86,12 +94,30 @@ internal class CanvasControllers {
     fun accept(frame: PreviewFrame) {
         fields.acceptFrame(frame.tree, frame.generation)
         snackbar.acceptFrame(frame.tree, frame.generation)
-        // A field's text is its initial text in the renderer; when the document or a preview value changes it,
-        // set the field to it, unless the change is the field's own typing coming back.
+        val live = frame.live
         frame.tree?.nodes?.forEach { node ->
             if (node.type != ComposeUiComponents.TEXT_FIELD && node.type != ComposeUiComponents.OUTLINED_TEXT_FIELD) return@forEach
             val declared = (node.props[ComposeUiProps.TEXT] as? UiValue.Str)?.value ?: return@forEach
-            if (typed[node.nodeId] != declared) fields.replaceText(node.nodeId, declared)
+            if (live != null) {
+                // The sandbox's text goes with the edit sequence it last saw: like a script's edit in the host,
+                // it is refused when the user has typed since, and the sandbox hears of that typing next.
+                try {
+                    fields.execute(UiCommand.Edit(node.nodeId, declared, null, live.fieldSequences[node.nodeId] ?: 0L))
+                } catch (stale: ComposeUiContractException) { /* the field is ahead of the sandbox */ }
+            } else if (typed[node.nodeId] != declared) {
+                // A field's text is its initial text in the renderer; when the document or a preview value changes
+                // it, set the field to it, unless the change is the field's own typing coming back.
+                fields.replaceText(node.nodeId, declared)
+            }
+        }
+    }
+
+    /** Carries out the handle commands of a sandbox tree once it is drawn; one that no longer applies is dropped. */
+    fun run(live: LiveHooks) {
+        live.commands.forEach { command ->
+            scope.launch {
+                try { commands.execute(command) } catch (failure: ComposeUiContractException) { failures += failure }
+            }
         }
     }
 
@@ -210,18 +236,31 @@ internal fun DesignCanvas(
     /** Preview values of top-level states (P9.3). */
     values: Map<String, JsLiteral> = emptyMap(),
     interactive: Boolean = false,
-    onEvent: (nodeId: Int, type: String, payload: Bundle) -> Unit = { _, _, _ -> },
+    /** The sandbox's tree, drawn instead of [document] while the script runs (P9.3 step 2). */
+    live: LiveTree? = null,
+    onEvent: (nodeId: Int, type: String, callbackId: Int, payload: Bundle) -> Unit = { _, _, _, _ -> },
 ) {
     val controllers = remember { CanvasControllers() }
+    val focus = LocalFocusManager.current
+    // Leaving the interactive preview drops the focus a component may hold, and with it the keyboard.
+    LaunchedEffect(interactive) { if (!interactive) focus.clearFocus() }
     DisposableEffect(controllers) { onDispose { controllers.dispose() } }
     SideEffect { controllers.onEvent = onEvent }
     val generation = remember { LongArray(1) }
-    val preview = remember(document, images, values) { PreviewFrames.build(document, ++generation[0], images = images, values = values) }
+    val preview = remember(document, images, values, live) {
+        if (live != null) PreviewFrames.build(live.document, ++generation[0], images = images, live = live.hooks)
+        else PreviewFrames.build(document, ++generation[0], images = images, values = values)
+    }
     // Written here, before the canvas content reads it, so the changed nodes recompose in this same frame.
     val live = remember { LiveFrame() }
     val rendered = remember(preview) { preview.frame?.let(live::update) }
     LaunchedEffect(preview) {
         controllers.accept(preview)
+        preview.live?.takeIf { it.commands.isNotEmpty() }?.let { hooks ->
+            // After the frame that holds the nodes, so their focus requesters and list states are registered.
+            withFrameNanos { }
+            controllers.run(hooks)
+        }
         onProblems(preview.problems)
         // Bounds of nodes the new frame no longer has would otherwise still win hit tests and drop positions.
         val live = preview.frame?.nodes?.keys ?: emptySet()
@@ -252,7 +291,10 @@ internal fun DesignCanvas(
                 ThemeMapper.Content(theme) {
                     CompositionLocalProvider(LocalNodeDecorator provides decorator) {
                         RendererWindowContext {
-                            Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
+                            // In edit mode no component may take focus: on API 24 - 27 a window that gains focus outside
+                            // touch mode hands it to the first focusable view, which put a canvas text field in focus
+                            // and raised the keyboard over the panels. The interactive preview lets focus in.
+                            Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }.focusProperties { onEnter = { if (!interactive) cancelFocusChange() } }.focusGroup()) {
                                 rendered?.let { frame ->
                                     val render: @Composable (Int) -> Unit = { id ->
                                         RenderNode(frame, id, controllers.commands, controllers.fields, controllers.snackbar, controllers.emit)

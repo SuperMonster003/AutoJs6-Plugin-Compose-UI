@@ -6,7 +6,10 @@ still crashed from the launcher). This check installs the given APK on one devic
 alias exactly as a launcher would, opens the gallery and its first catalog entry (composing its preview), the
 settings screen, and a new designer project whose template the Rhino parser and the real renderer must turn
 into a visible preview (roadmap P8.3: the R8 release build keeps only the parser closure it references), all
-through the accessibility tree; it deletes the project again and fails on any crash, dead process or missing screen.
+through the accessibility tree. On Android 8.0 or later it then turns on the interactive preview, which runs the
+template in the designer's Rhino sandbox (roadmap P9.3 step 2: the release build keeps the interpreter closure and
+the two classes Rhino builds by name), and waits for the canvas to show the running script. It deletes the project
+again and fails on any crash, dead process, missing screen or stopped preview.
 
 usage: verify_standalone_launch.py --apk <apk> [--serial <serial>] [--uninstall] [--strings <values/strings.xml>]
 """
@@ -167,6 +170,11 @@ def main() -> None:
         "new": resource_string(args.strings, "designer_new_project"),
         "create": resource_string(args.strings, "designer_create"),
         "delete": resource_string(args.strings, "designer_delete_project"),
+        "interact": resource_string(args.strings, "designer_preview_interact"),
+        "running": resource_string(args.strings, "designer_sandbox_running"),
+        # The prefixes of the sandbox's problem line on the canvas (before the message).
+        "stopped": resource_string(args.strings, "designer_sandbox_stopped").split("%1$s")[0],
+        "error": resource_string(args.strings, "designer_sandbox_error").split("%1$s")[0],
     }
 
     api = adb.shell("getprop ro.build.version.sdk").strip()
@@ -185,6 +193,7 @@ def main() -> None:
     if "Status: ok" not in start:
         raise SystemExit(f"am start did not succeed for {component}:\n{start}")
 
+    labels["sandbox"] = int(api) >= 26
     try:
         gallery_component, pid, entry_label = walk(adb, settings_label, copy_label, gallery_label, labels)
         crashes = crash_lines(adb)
@@ -199,7 +208,8 @@ def main() -> None:
             adb.run("uninstall", PACKAGE, check=False)
     if crashes:
         raise SystemExit("the plugin process crashed:\n" + "\n".join(crashes))
-    print(f"STANDALONE_LAUNCH_OK api={api} component={gallery_component} pid={pid} entry={entry_label} settings=opened designer=opened apk={args.apk.name}")
+    sandbox = "ran" if labels["sandbox"] else "skipped(api<26)"
+    print(f"STANDALONE_LAUNCH_OK api={api} component={gallery_component} pid={pid} entry={entry_label} settings=opened designer=opened sandbox={sandbox} apk={args.apk.name}")
 
 
 def walk(adb: Adb, settings_label: str, copy_label: str, gallery_label: str, labels: dict[str, str]) -> tuple[str, int, str]:
@@ -269,10 +279,27 @@ def create_project(adb: Adb, labels: dict[str, str], stem: str) -> str:
 def open_and_delete_project(adb: Adb, labels: dict[str, str]) -> None:
     """Create a project from the home, let the editor parse and render its template, then delete it again."""
     file_name = create_project(adb, labels, "standalone-check")
+    if labels["sandbox"]:
+        run_preview(adb, labels)
     time.sleep(1.0)
     adb.shell("input keyevent KEYCODE_BACK")
     wait_for("the designer home after leaving the editor", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
     delete_project(adb, labels, file_name)
+
+
+def run_preview(adb: Adb, labels: dict) -> None:
+    """Turn on the interactive preview and wait until the canvas shows the template's running script."""
+    chip, _ = find_node(adb, "the interactive preview switch", lambda n: (n.get("text") or "").strip() == labels["interact"], clickable=True)
+    tap(adb, chip)
+    find_node(adb, "the running script's icon on the interactive preview switch", lambda n: (n.get("content-desc") or "").strip() == labels["running"])
+    find_node(adb, "the template text drawn by the running script", lambda n: (n.get("text") or "").strip() == TEMPLATE_TEXT)
+    problems = [n.get("text") for n in ui_tree(adb).iter("node")
+                if (n.get("text") or "").startswith(labels["stopped"]) or (n.get("text") or "").startswith(labels["error"])]
+    if problems:
+        raise SystemExit(f"the preview reported a problem: {problems}")
+    chip, _ = find_node(adb, "the interactive preview switch", lambda n: (n.get("text") or "").strip() == labels["interact"], clickable=True)
+    tap(adb, chip)
+    wait_for("the running script's icon to go", lambda: all((n.get("content-desc") or "").strip() != labels["running"] for n in ui_tree(adb).iter("node")))
 
 
 def delete_project(adb: Adb, labels: dict[str, str], file_name: str) -> None:

@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">The project has unsaved changes.</string>
     <string name="designer_back_discard_title">Leave the designer?</string>
     <string name="designer_cancel">Cancel</string>
+    <string name="designer_console_clear">Clear</string>
+    <string name="designer_console_idle">Turn on Interact to run the script in the preview; its console output, toasts and errors appear here.</string>
+    <string name="designer_console_old_android">Running the script in the preview needs Android 8.0 or later. On this device a JavaScript project is previewed like a TSX project: controls bound to a state change the preview values.</string>
+    <string name="designer_console_running">The script runs in the preview. Only compose, console, toast and timers work there; other AutoJs6 modules report that they are not available.</string>
+    <string name="designer_console_stopped">The preview stopped the script. Edit the project or turn Interact off and on to run it again.</string>
+    <string name="designer_console_tsx">TSX projects are previewed without running their script, so nothing is written here.</string>
     <string name="designer_copy_script">Copy script</string>
     <string name="designer_create">Create</string>
     <string name="designer_delete_node">Delete node</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">Reload</string>
     <string name="designer_remove">Remove</string>
     <string name="designer_retry">Retry</string>
+    <string name="designer_sandbox_error">Script error: %1$s</string>
+    <string name="designer_sandbox_running">The script is running</string>
+    <string name="designer_sandbox_stopped">Preview stopped: %1$s</string>
     <string name="designer_save">Save</string>
     <string name="designer_save_exit">Save and leave</string>
     <string name="designer_saved">Saved</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">The source file cannot be written; it may be read-only</string>
     <string name="designer_source_written">Written back to the source file</string>
     <string name="designer_state_empty">This script declares no compose.state at the top level.</string>
-    <string name="designer_state_hint">Preview values change only the canvas; the script keeps its initial values. With Interact on, switches, sliders, text fields and other controls bound to a state change it here.</string>
+    <string name="designer_state_hint">Preview values change only the canvas; the script keeps its initial values. With Interact on, a JavaScript project runs its script from these values (Android 8.0 or later); in a TSX project, or below Android 8.0, switches, sliders, text fields and other controls bound to a state change them here.</string>
     <string name="designer_state_initial">Initial: %1$s</string>
     <string name="designer_state_reset">Reset</string>
     <string name="designer_state_reset_all">Reset all</string>
     <string name="designer_state_value">Preview value</string>
+    <string name="designer_tab_console">Console</string>
     <string name="designer_tab_inspector">Properties</string>
     <string name="designer_tab_outline">Outline</string>
     <string name="designer_tab_state">State</string>

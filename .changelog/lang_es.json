@@ -5,6 +5,20 @@
   "changelog_label_improvement": "Mejora",
   "changelog_label_dependency": "Dependencia",
   "$data": {
+    "v1.5.0": {
+      "released_date": "2026/10/14",
+      "hint": [
+        "La vista previa interactiva del diseñador ahora ejecuta el script de un proyecto JavaScript (Android 8.0 o posterior). El script se ejecuta dentro del complemento en un entorno aislado restringido: solo puede usar compose, console, toast y temporizadores, no puede acceder a Java / Android ni a otros módulos de AutoJs6, y solo cambia el lienzo, nunca el proyecto. Los proyectos TSX y los dispositivos con Android anterior a 8.0 mantienen la vista previa interactiva anterior"
+      ],
+      "feature": [
+        "La vista previa interactiva ejecuta el script: con Interactuar activado, la función de renderizado y los controladores de eventos de un proyecto JavaScript se ejecutan de verdad, así que tocar botones, escribir y accionar interruptores actualiza el lienzo como decide el script; los valores de vista previa del panel Estado pasan a ser los valores iniciales de los state, y el script vuelve a empezar cuando cambia el proyecto o un valor de vista previa",
+        "Nueva pestaña Consola: muestra lo que el script escribe con console / log, sus avisos y sus errores en la vista previa; un error del script aparece en la parte inferior del lienzo y abre la consola al tocarlo; una ejecución de más de unos 3 segundos (un bucle infinito, por ejemplo) detiene el script e indica el motivo, y el diseñador sigue respondiendo",
+        "El interruptor Interactuar muestra un icono de ejecución mientras el script se ejecuta"
+      ],
+      "fix": [
+        "En el modo de edición, un campo de texto del lienzo podía tomar el foco por sí solo y abrir el teclado sobre los paneles (sobre todo en Android 7.x); ahora los componentes del lienzo no toman el foco en el modo de edición, y al salir de la vista previa interactiva se oculta el teclado"
+      ]
+    },
     "v1.4.0": {
       "released_date": "2026/10/13",
       "hint": [

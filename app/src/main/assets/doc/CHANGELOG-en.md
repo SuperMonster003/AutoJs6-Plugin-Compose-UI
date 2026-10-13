@@ -4,6 +4,16 @@
 
 ******
 
+# v1.5.0
+
+###### 2026/10/14
+
+* `Hint` The designer's interactive preview now runs a JavaScript project's script (Android 8.0 or later). The script runs inside the plugin in a restricted sandbox: it can use compose, console, toast and timers only, cannot reach Java / Android or other AutoJs6 modules, and changes only the canvas, never the project. TSX projects and devices below Android 8.0 keep the previous interactive preview
+* `Feature` The interactive preview runs the script: with Interact on, a JavaScript project's render function and event handlers really run, so tapping buttons, typing and flipping switches update the canvas the way the script decides; the State panel's preview values become the states' initial values, and the script starts again after the project or a preview value changes
+* `Feature` New Console tab: shows what the script writes with console / log, its toasts and its errors in the preview; a script error appears at the bottom of the canvas and opens the console when tapped; a run longer than about 3 seconds (an endless loop, for example) stops the script with the reason, and the designer itself stays responsive
+* `Feature` The Interact switch shows a running icon while the script runs
+* `Fix` In edit mode a text field on the canvas could take focus by itself and raise the keyboard over the panels (mostly on Android 7.x); components on the canvas no longer take focus in edit mode, and leaving the interactive preview hides the keyboard
+
 # v1.4.0
 
 ###### 2026/10/13

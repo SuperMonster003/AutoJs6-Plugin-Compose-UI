@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">プロジェクトに未保存の変更があります.</string>
     <string name="designer_back_discard_title">デザイナーを閉じますか?</string>
     <string name="designer_cancel">キャンセル</string>
+    <string name="designer_console_clear">クリア</string>
+    <string name="designer_console_idle">\"操作プレビュー\" をオンにするとプレビューでスクリプトを実行し, コンソール出力, トースト, エラーがここに表示されます.</string>
+    <string name="designer_console_old_android">プレビューでスクリプトを実行するには Android 8.0 以降が必要です. このデバイスでは JavaScript プロジェクトも TSX プロジェクトと同じ方法でプレビューされ, 状態にバインドされた操作でプレビュー値が変わります.</string>
+    <string name="designer_console_running">スクリプトはプレビューで実行中です. 使えるのは compose, console, toast とタイマーだけで, ほかの AutoJs6 モジュールはプレビューでは使えないと報告します.</string>
+    <string name="designer_console_stopped">プレビューはスクリプトを停止しました. プロジェクトを編集するか, \"操作プレビュー\" をオフにしてからオンにすると再実行します.</string>
+    <string name="designer_console_tsx">TSX プロジェクトはスクリプトを実行せずにプレビューするため, ここには何も出力されません.</string>
     <string name="designer_copy_script">スクリプトをコピー</string>
     <string name="designer_create">作成</string>
     <string name="designer_delete_node">ノードを削除</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">再読み込み</string>
     <string name="designer_remove">削除</string>
     <string name="designer_retry">再試行</string>
+    <string name="designer_sandbox_error">スクリプトのエラー: %1$s</string>
+    <string name="designer_sandbox_running">スクリプトを実行中</string>
+    <string name="designer_sandbox_stopped">プレビューを停止しました: %1$s</string>
     <string name="designer_save">保存</string>
     <string name="designer_save_exit">保存して閉じる</string>
     <string name="designer_saved">保存しました</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">元のファイルに書き込めません. 読み取り専用の可能性があります</string>
     <string name="designer_source_written">元のファイルに書き戻しました</string>
     <string name="designer_state_empty">このスクリプトはトップレベルで compose.state を宣言していません.</string>
-    <string name="designer_state_hint">プレビュー値はキャンバスだけに反映され, スクリプトの初期値は変わりません. \"操作プレビュー\" をオンにすると, 状態にバインドされたスイッチ, スライダー, テキストフィールドなどの操作でここの値が変わります.</string>
+    <string name="designer_state_hint">プレビュー値はキャンバスだけに反映され, スクリプトの初期値は変わりません. \"操作プレビュー\" をオンにすると, JavaScript プロジェクトはこれらの値を初期値としてスクリプトを実行します (Android 8.0 以降). TSX プロジェクトまたは Android 8.0 未満では, 状態にバインドされたスイッチ, スライダー, テキストフィールドなどの操作でここの値が変わります.</string>
     <string name="designer_state_initial">初期値: %1$s</string>
     <string name="designer_state_reset">リセット</string>
     <string name="designer_state_reset_all">すべてリセット</string>
     <string name="designer_state_value">プレビュー値</string>
+    <string name="designer_tab_console">コンソール</string>
     <string name="designer_tab_inspector">プロパティ</string>
     <string name="designer_tab_outline">アウトライン</string>
     <string name="designer_tab_state">状態</string>

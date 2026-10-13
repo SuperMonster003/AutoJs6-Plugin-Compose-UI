@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">يحتوي المشروع على تغييرات غير محفوظة.</string>
     <string name="designer_back_discard_title">مغادرة المصمم?</string>
     <string name="designer_cancel">إلغاء</string>
+    <string name="designer_console_clear">مسح</string>
+    <string name="designer_console_idle">شغل \"تفاعل\" لتشغيل البرنامج النصي في المعاينة; تظهر هنا مخرجات وحدة التحكم والرسائل المنبثقة والأخطاء.</string>
+    <string name="designer_console_old_android">يتطلب تشغيل البرنامج النصي في المعاينة Android 8.0 أو أحدث. على هذا الجهاز تعرض مشاريع JavaScript كما تعرض مشاريع TSX: تغير عناصر التحكم المرتبطة بحالة قيم المعاينة.</string>
+    <string name="designer_console_running">يعمل البرنامج النصي في المعاينة. لا يعمل هناك إلا compose و console و toast والمؤقتات; وتبلغ وحدات AutoJs6 الأخرى أنها غير متاحة.</string>
+    <string name="designer_console_stopped">أوقفت المعاينة البرنامج النصي. عدل المشروع أو أوقف \"تفاعل\" ثم شغله لتشغيله من جديد.</string>
+    <string name="designer_console_tsx">تعرض مشاريع TSX دون تشغيل برنامجها النصي, لذلك لا يكتب هنا شيء.</string>
     <string name="designer_copy_script">نسخ النص البرمجي</string>
     <string name="designer_create">إنشاء</string>
     <string name="designer_delete_node">حذف العقدة</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">إعادة التحميل</string>
     <string name="designer_remove">إزالة</string>
     <string name="designer_retry">إعادة المحاولة</string>
+    <string name="designer_sandbox_error">خطأ في البرنامج النصي: %1$s</string>
+    <string name="designer_sandbox_running">البرنامج النصي قيد التشغيل</string>
+    <string name="designer_sandbox_stopped">توقفت المعاينة: %1$s</string>
     <string name="designer_save">حفظ</string>
     <string name="designer_save_exit">حفظ ومغادرة</string>
     <string name="designer_saved">تم الحفظ</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">تعذرت الكتابة إلى الملف المصدر, فقد يكون للقراءة فقط</string>
     <string name="designer_source_written">تمت الكتابة إلى الملف المصدر</string>
     <string name="designer_state_empty">لا يعرف هذا البرنامج النصي أي compose.state في المستوى الأعلى.</string>
-    <string name="designer_state_hint">قيم المعاينة تغير اللوحة فقط, ويحتفظ البرنامج النصي بقيمه الأولية. عند تشغيل \"تفاعل\" تغير المفاتيح وأشرطة التمرير وحقول النص وغيرها من عناصر التحكم المرتبطة بحالة قيمتها هنا.</string>
+    <string name="designer_state_hint">قيم المعاينة تغير اللوحة فقط, ويحتفظ البرنامج النصي بقيمه الأولية. عند تشغيل \"تفاعل\" يشغل مشروع JavaScript برنامجه النصي بهذه القيم الأولية (Android 8.0 أو أحدث); وفي مشروع TSX أو على Android أقدم من 8.0 تغير المفاتيح وأشرطة التمرير وحقول النص وغيرها من عناصر التحكم المرتبطة بحالة قيمتها هنا.</string>
     <string name="designer_state_initial">القيمة الأولية: %1$s</string>
     <string name="designer_state_reset">إعادة تعيين</string>
     <string name="designer_state_reset_all">إعادة تعيين الكل</string>
     <string name="designer_state_value">قيمة المعاينة</string>
+    <string name="designer_tab_console">وحدة التحكم</string>
     <string name="designer_tab_inspector">الخصائص</string>
     <string name="designer_tab_outline">المخطط</string>
     <string name="designer_tab_state">الحالة</string>

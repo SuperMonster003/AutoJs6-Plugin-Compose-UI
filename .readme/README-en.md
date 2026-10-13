@@ -62,7 +62,7 @@ The plugin ships a visual designer and a component gallery: opening it from the 
 
 Capabilities of the current development preview:
 
-- Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6; canvas drops land where the pointer is, open popups are drawn inside the canvas, Image shows @drawable pictures and pictures from a project image folder, and the State panel with the interactive preview changes state preview values for a while; projects are JavaScript or TSX, and TSX projects are parsed by TypeScript Engine 0.7.0 or later and written back as canonical TSX
+- Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6; canvas drops land where the pointer is, open popups are drawn inside the canvas, Image shows @drawable pictures and pictures from a project image folder, the State panel changes state preview values for a while, and the interactive preview runs a JavaScript project's script in a restricted sandbox (Android 8.0 or later), so taps and typing update the canvas the way the script decides, with a console for its output and errors; projects are JavaScript or TSX, and TSX projects are parsed by TypeScript Engine 0.7.0 or later and written back as canonical TSX
 - AutoJs6 integration: a project can be sent to run, opened in the AutoJs6 editor (two-way sync), imported into the AutoJs6 script directory, copied or exported; the designer also opens .js / .tsx files straight from the AutoJs6 editor or a file manager and saves back into the same file; an imported project can be written back to its source or re-imported from it on request in the editor menu
 - Declarative UI: `compose.state` + `compose.mount(render)` re-render on state changes, while long-lived node handles (`compose.Text({...})` and friends) allow direct property and child updates
 - Material 3 core: 29 node factories for layouts, text, icons, images, buttons, inputs, selection controls, lazy lists, dialogs and progress; Snackbar is a session command, not a compose.Snackbar factory
@@ -154,6 +154,7 @@ Runtime requirements and limits of the plugin:
 - Since 1.2.0 the contract classes (org.autojs.plugin.compose.api) are packaged with the plugin for its standalone process; inside AutoJs6 the host supplies the same classes and the plugin copy is shadowed
 - The designer runs in the plugin's own process and does not depend on AutoJs6; running, opening in the AutoJs6 editor and importing into the AutoJs6 script directory need an installed AutoJs6, and the editor menu entry "Open in 3-Block Compose designer" needs an AutoJs6 build that contains it
 - TSX projects in the designer need TypeScript Engine 0.7.0 or later (it provides the syntax tree parsing service), and running one lets AutoJs6 compile it through TypeScript Engine; without it, or with an older version, a TSX project opens as read-only source that can be viewed and copied
+- Running the script in the designer's interactive preview needs Android 8.0 (API 26) or later, because the sandbox's JavaScript Date is built on java.time; on older Android a JavaScript project is previewed like a TSX project
 
 ******
 
@@ -163,7 +164,7 @@ Runtime requirements and limits of the plugin:
 
 - How do gallery examples run? "Run in AutoJs6" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts
 - Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column. In TSX projects, `compose.X` / `compose:X` tags are editable nodes, other tags and `{}` expressions are kept as written, and XML tags and spread attributes are refused
-- Does the designer run scripts? No. It only parses them (JavaScript with the Rhino parser, TSX with the TypeScript Engine parsing service) and previews them with the plugin's own renderer; event handlers do not run and state shows its initial value or a preview value set in the State panel. In the interactive preview, controls bound to a state (switches, sliders, text fields and so on) change its preview value directly, but handlers and render functions still do not run. Running is left to AutoJs6
+- Does the designer run scripts? Only in the interactive preview. While editing it only parses them (JavaScript with the Rhino parser, TSX with the TypeScript Engine parsing service) and previews them with the plugin's own renderer; event handlers do not run and state shows its initial value or a preview value set in the State panel. With Interact on, a JavaScript project's script runs inside the plugin in a restricted sandbox (Android 8.0 or later): it has compose, console, toast and timers only, cannot reach Java / Android classes, files, the network or other AutoJs6 modules, is stopped when one run takes longer than about 3 seconds, and changes only the canvas, never the project. A TSX project (or any project below Android 8.0) does not run its script; controls bound to a state change only its preview value. Really running a script is left to AutoJs6
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, 3-Block Compose does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
@@ -183,6 +184,7 @@ The plugin requests no Android runtime permissions and never touches the network
 - Component protection: the Wake Activity and the INFO service are protected by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them; the designer editor is an exported component without a permission that only accepts a script document Uri handed over by the user, and reads and writes are limited to that Uri
 - Background behavior: the plugin has no resident service or scheduled task and only receives one system broadcast when it is updated, to normalize its launcher icon components; it consumes nothing while not loaded by the host and while neither the designer nor the gallery is open
 - Data boundary: the renderer never reads or writes script data or user files, and interface state lives only in the host process memory; designer projects and drafts live in the plugin's private directory, are imported and exported only through the system document picker, or read and write a single script file through a Uri the user handed over; the project directory is shared only through the plugin's own content provider, per request, when handing a project to AutoJs6; an import keeps access to the picked file when its provider allows it, but the file is only read or written when the user chooses "Write back to source" or "Re-import from source"
+- Script sandbox: the designer's interactive preview runs a JavaScript project's script inside the plugin with Rhino's interpreter. It offers compose, console, toast and timers only; Java / Android classes, files, the network and other AutoJs6 modules are out of reach, every run has instruction and time limits, and what it does stays on the canvas: the project is never written
 - Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating
 
 When loading the renderer the host keeps its own script permission model; the plugin does not widen the system capabilities scripts can reach.
@@ -225,6 +227,16 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 ******
 
+#### v1.5.0
+
+_2026/10/14_
+
+- `Hint` The designer's interactive preview now runs a JavaScript project's script (Android 8.0 or later). The script runs inside the plugin in a restricted sandbox: it can use compose, console, toast and timers only, cannot reach Java / Android or other AutoJs6 modules, and changes only the canvas, never the project. TSX projects and devices below Android 8.0 keep the previous interactive preview
+- `Feature` The interactive preview runs the script: with Interact on, a JavaScript project's render function and event handlers really run, so tapping buttons, typing and flipping switches update the canvas the way the script decides; the State panel's preview values become the states' initial values, and the script starts again after the project or a preview value changes
+- `Feature` New Console tab: shows what the script writes with console / log, its toasts and its errors in the preview; a script error appears at the bottom of the canvas and opens the console when tapped; a run longer than about 3 seconds (an endless loop, for example) stops the script with the reason, and the designer itself stays responsive
+- `Feature` The Interact switch shows a running icon while the script runs
+- `Fix` In edit mode a text field on the canvas could take focus by itself and raise the keyboard over the panels (mostly on Android 7.x); components on the canvas no longer take focus in edit mode, and leaving the interactive preview hides the keyboard
+
 #### v1.4.0
 
 _2026/10/13_
@@ -251,21 +263,6 @@ _2026/10/13_
 - `Improvement` The modifier chain in the designer's property drawer can be reordered by dragging the handle on the left of each operation, with an insertion line until it is released; the move up / down buttons remain
 - `Improvement` Open popup components (open is true) are now drawn close to their real look inside the designer canvas's logical screen: AlertDialog and ModalBottomSheet cover the page with a scrim, DropdownMenu and Tooltip appear below or above their anchor, and the nodes inside them can be tapped to edit; they are no longer inserted into the page as cards and no real window opens
 - `Improvement` After each edit the designer canvas recomposes only the nodes that changed and records node positions more cheaply, so a larger document (about 250 nodes) redraws noticeably faster after undo / redo
-
-#### v1.2.0
-
-_2026/10/13_
-
-- `Hint` The plugin is renamed from Compose UI to 3-Block Compose: the application ID changes from io.github.supermonster003.autojs6.plugin.compose.ui to io.github.supermonster003.autojs6.plugin.three.block.compose. Android treats it as a new app, the old package can stay installed alongside, settings and authorizations are not migrated, and the new package must be enabled and authorized again in the plugin center
-- `Hint` Requires an AutoJs6 6.8.0 host build that contains the new plugin identity (host commit f12665ffde or later); earlier hosts discover the plugin by the old package name and do not recognize this version
-- `Hint` The designer is documented on the "3-Block Compose Designer" page of the documentation site; the AutoJs6 editor menu entry "Open in 3-Block Compose designer" needs an AutoJs6 6.8.0 build after host commit db7e6a1734, while the other destinations only need an installed AutoJs6
-- `Feature` Visual designer: the launcher opens the designer home, where script projects in private storage are created, imported or opened; the editor offers a real-renderer preview canvas, an outline tree, a component palette and a property drawer, with tap to select, long-press drag to reparent, reordering in the outline, undo / redo, automatic draft saving and recovery, host option editing, a contract-catalog validation report, and copying the script or sending it to AutoJs6; in landscape and on tablets the canvas and the panels sit side by side; the component gallery and settings now open from the designer home
-- `Feature` Designer and AutoJs6 integration: the editor menu opens the current script in the AutoJs6 editor (the designer reloads after AutoJs6 saves), imports it into the AutoJs6 script directory, or exports it anywhere; the designer also opens .js files directly from the AutoJs6 editor or a file manager and saves back into the same file, falling back to a new project without write access; project files are shared through the plugin's own content provider with per-request grants and no other directory is exposed
-- `Improvement` The app title, plugin ID (three-block-compose), package and component names, release artifacts, documentation and the GitHub repository (AutoJs6-Plugin-Three-Block-Compose) follow the rename; the compose script API, the contract version and the rendering behavior are unchanged
-- `Improvement` The launcher, plugin center and system App info icons now use the maintainer's final artwork, with the light and dark glyphs sharing one shape
-- `Improvement` The bundled examples and the host example category are renamed to 3-Block Compose
-- `Improvement` The compose-ui-api contract AAR is now packaged with the plugin and kept intact (previously compile-only) for the plugin's own process; inside AutoJs6 the host's identical contract classes still take precedence, so rendering behavior and the contract version are unchanged
-- `Dependency` Add the slim Rhino parser jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, the same build as the AutoJs6 host), used only by the visual designer to parse scripts, never to run them; release builds keep only the referenced parser classes
 
 ##### For more release history, see
 

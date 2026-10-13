@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">Le projet contient des modifications non enregistrées.</string>
     <string name="designer_back_discard_title">Quitter le concepteur?</string>
     <string name="designer_cancel">Annuler</string>
+    <string name="designer_console_clear">Effacer</string>
+    <string name="designer_console_idle">Activez Interagir pour exécuter le script dans l\'aperçu; sa sortie console, ses toasts et ses erreurs s\'affichent ici.</string>
+    <string name="designer_console_old_android">Exécuter le script dans l\'aperçu nécessite Android 8.0 ou plus récent. Sur cet appareil, un projet JavaScript est prévisualisé comme un projet TSX: les contrôles liés à un état modifient les valeurs d\'aperçu.</string>
+    <string name="designer_console_running">Le script s\'exécute dans l\'aperçu. Seuls compose, console, toast et les minuteurs y fonctionnent; les autres modules d\'AutoJs6 signalent qu\'ils ne sont pas disponibles.</string>
+    <string name="designer_console_stopped">L\'aperçu a arrêté le script. Modifiez le projet ou désactivez puis réactivez Interagir pour le relancer.</string>
+    <string name="designer_console_tsx">Les projets TSX sont prévisualisés sans exécuter leur script; rien n\'est donc écrit ici.</string>
     <string name="designer_copy_script">Copier le script</string>
     <string name="designer_create">Créer</string>
     <string name="designer_delete_node">Supprimer le nœud</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">Recharger</string>
     <string name="designer_remove">Retirer</string>
     <string name="designer_retry">Réessayer</string>
+    <string name="designer_sandbox_error">Erreur du script: %1$s</string>
+    <string name="designer_sandbox_running">Le script est en cours d\'exécution</string>
+    <string name="designer_sandbox_stopped">Aperçu arrêté: %1$s</string>
     <string name="designer_save">Enregistrer</string>
     <string name="designer_save_exit">Enregistrer et quitter</string>
     <string name="designer_saved">Enregistré</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">Impossible d\'écrire dans le fichier source; il est peut-être en lecture seule</string>
     <string name="designer_source_written">Réécrit dans le fichier source</string>
     <string name="designer_state_empty">Ce script ne déclare aucun compose.state au niveau supérieur.</string>
-    <string name="designer_state_hint">Les valeurs d\'aperçu ne modifient que le canevas; le script garde ses valeurs initiales. Avec Interagir activé, les interrupteurs, curseurs, champs de texte et autres contrôles liés à un état le modifient ici.</string>
+    <string name="designer_state_hint">Les valeurs d\'aperçu ne modifient que le canevas; le script garde ses valeurs initiales. Avec Interagir activé, un projet JavaScript exécute son script avec ces valeurs initiales (Android 8.0 ou plus récent); dans un projet TSX, ou sous Android 8.0, les interrupteurs, curseurs, champs de texte et autres contrôles liés à un état les modifient ici.</string>
     <string name="designer_state_initial">Valeur initiale: %1$s</string>
     <string name="designer_state_reset">Réinitialiser</string>
     <string name="designer_state_reset_all">Tout réinitialiser</string>
     <string name="designer_state_value">Valeur d\'aperçu</string>
+    <string name="designer_tab_console">Console</string>
     <string name="designer_tab_inspector">Propriétés</string>
     <string name="designer_tab_outline">Plan</string>
     <string name="designer_tab_state">État</string>

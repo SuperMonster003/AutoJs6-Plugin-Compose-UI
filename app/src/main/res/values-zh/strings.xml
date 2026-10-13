@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">工程有未保存的修改.</string>
     <string name="designer_back_discard_title">离开设计器?</string>
     <string name="designer_cancel">取消</string>
+    <string name="designer_console_clear">清空</string>
+    <string name="designer_console_idle">打开 \"交互预览\" 后会在预览中运行脚本, 脚本的控制台输出, toast 和错误显示在这里.</string>
+    <string name="designer_console_old_android">在预览中运行脚本需要 Android 8.0 或更高版本. 在此设备上, JavaScript 工程按 TSX 工程的方式预览: 绑定了状态的控件会修改预览值.</string>
+    <string name="designer_console_running">脚本正在预览中运行. 预览中只能使用 compose, console, toast 和定时器, 其他 AutoJs6 模块会提示预览中不可用.</string>
+    <string name="designer_console_stopped">预览已停止运行脚本. 修改工程或关闭再打开 \"交互预览\" 即可再次运行.</string>
+    <string name="designer_console_tsx">TSX 工程的预览不运行脚本, 因此这里没有输出.</string>
     <string name="designer_copy_script">复制脚本</string>
     <string name="designer_create">创建</string>
     <string name="designer_delete_node">删除节点</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">重新加载</string>
     <string name="designer_remove">移除</string>
     <string name="designer_retry">重试</string>
+    <string name="designer_sandbox_error">脚本错误: %1$s</string>
+    <string name="designer_sandbox_running">脚本正在运行</string>
+    <string name="designer_sandbox_stopped">预览已停止: %1$s</string>
     <string name="designer_save">保存</string>
     <string name="designer_save_exit">保存并离开</string>
     <string name="designer_saved">已保存</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">无法写入来源文件, 它可能是只读的</string>
     <string name="designer_source_written">已写回来源文件</string>
     <string name="designer_state_empty">此脚本没有在顶层声明 compose.state.</string>
-    <string name="designer_state_hint">预览值只影响画布, 脚本中的初值不变. 打开 \"交互预览\" 后, 画布中绑定了状态的开关, 滑块, 输入框等控件会直接修改这里的值.</string>
+    <string name="designer_state_hint">预览值只影响画布, 脚本中的初值不变. 打开 \"交互预览\" 后, JavaScript 工程以这些值为初值运行脚本 (需要 Android 8.0 或更高版本); TSX 工程或 Android 8.0 以下的设备上, 绑定了状态的开关, 滑块, 输入框等控件会直接修改这里的值.</string>
     <string name="designer_state_initial">初值: %1$s</string>
     <string name="designer_state_reset">重置</string>
     <string name="designer_state_reset_all">全部重置</string>
     <string name="designer_state_value">预览值</string>
+    <string name="designer_tab_console">控制台</string>
     <string name="designer_tab_inspector">属性</string>
     <string name="designer_tab_outline">大纲</string>
     <string name="designer_tab_state">状态</string>

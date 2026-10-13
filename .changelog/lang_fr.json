@@ -5,6 +5,20 @@
   "changelog_label_improvement": "Amelioration",
   "changelog_label_dependency": "Dependance",
   "$data": {
+    "v1.5.0": {
+      "released_date": "2026/10/14",
+      "hint": [
+        "L'aperçu interactif du concepteur exécute désormais le script d'un projet JavaScript (Android 8.0 ou ultérieur). Le script s'exécute dans le plugin, dans un bac à sable restreint: il ne peut utiliser que compose, console, toast et les minuteurs, n'accède ni à Java / Android ni aux autres modules d'AutoJs6, et ne modifie que le canevas, jamais le projet. Les projets TSX et les appareils sous Android 8.0 gardent l'aperçu interactif précédent"
+      ],
+      "feature": [
+        "L'aperçu interactif exécute le script: avec Interagir activé, la fonction de rendu et les gestionnaires d'événements d'un projet JavaScript s'exécutent réellement, si bien que toucher les boutons, saisir du texte ou basculer des interrupteurs met à jour le canevas comme le décide le script; les valeurs d'aperçu du panneau État deviennent les valeurs initiales des state, et le script redémarre après un changement du projet ou d'une valeur d'aperçu",
+        "Nouvel onglet Console: affiche ce que le script écrit avec console / log, ses toasts et ses erreurs dans l'aperçu; une erreur du script apparaît en bas du canevas et ouvre la console quand on la touche; une exécution de plus de 3 secondes environ (une boucle infinie, par exemple) arrête le script en indiquant la raison, et le concepteur reste réactif",
+        "L'interrupteur Interagir affiche une icône d'exécution pendant que le script s'exécute"
+      ],
+      "fix": [
+        "En mode édition, un champ de texte du canevas pouvait prendre le focus de lui-même et ouvrir le clavier par-dessus les panneaux (surtout sous Android 7.x); les composants du canevas ne prennent plus le focus en mode édition, et quitter l'aperçu interactif masque le clavier"
+      ]
+    },
     "v1.4.0": {
       "released_date": "2026/10/13",
       "hint": [

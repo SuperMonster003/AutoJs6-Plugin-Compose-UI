@@ -33,6 +33,12 @@
     <string name="designer_back_discard_message">프로젝트에 저장하지 않은 변경 사항이 있습니다.</string>
     <string name="designer_back_discard_title">디자이너를 닫을까요?</string>
     <string name="designer_cancel">취소</string>
+    <string name="designer_console_clear">지우기</string>
+    <string name="designer_console_idle">\"조작 미리보기\" 를 켜면 미리보기에서 스크립트를 실행하며, 콘솔 출력, 토스트, 오류가 여기에 표시됩니다.</string>
+    <string name="designer_console_old_android">미리보기에서 스크립트를 실행하려면 Android 8.0 이상이 필요합니다. 이 기기에서는 JavaScript 프로젝트도 TSX 프로젝트처럼 미리보기되며, 상태에 바인딩된 조작이 미리보기 값을 바꿉니다.</string>
+    <string name="designer_console_running">스크립트가 미리보기에서 실행 중입니다. compose, console, toast 와 타이머만 사용할 수 있으며, 다른 AutoJs6 모듈은 미리보기에서 사용할 수 없다고 알립니다.</string>
+    <string name="designer_console_stopped">미리보기가 스크립트를 중지했습니다. 프로젝트를 수정하거나 \"조작 미리보기\" 를 껐다 켜면 다시 실행됩니다.</string>
+    <string name="designer_console_tsx">TSX 프로젝트는 스크립트를 실행하지 않고 미리보기하므로 여기에는 출력이 없습니다.</string>
     <string name="designer_copy_script">스크립트 복사</string>
     <string name="designer_create">만들기</string>
     <string name="designer_delete_node">노드 삭제</string>
@@ -88,6 +94,9 @@
     <string name="designer_reload">다시 불러오기</string>
     <string name="designer_remove">제거</string>
     <string name="designer_retry">다시 시도</string>
+    <string name="designer_sandbox_error">스크립트 오류: %1$s</string>
+    <string name="designer_sandbox_running">스크립트 실행 중</string>
+    <string name="designer_sandbox_stopped">미리보기 중지됨: %1$s</string>
     <string name="designer_save">저장</string>
     <string name="designer_save_exit">저장하고 닫기</string>
     <string name="designer_saved">저장했습니다</string>
@@ -117,11 +126,12 @@
     <string name="designer_source_write_failed">원본 파일에 쓸 수 없습니다. 읽기 전용일 수 있습니다</string>
     <string name="designer_source_written">원본 파일에 다시 썼습니다</string>
     <string name="designer_state_empty">이 스크립트는 최상위에 compose.state 를 선언하지 않았습니다.</string>
-    <string name="designer_state_hint">미리보기 값은 캔버스에만 반영되며 스크립트의 초기값은 바뀌지 않습니다. \"조작 미리보기\" 를 켜면 상태에 바인딩된 스위치, 슬라이더, 텍스트 필드 등의 조작이 여기의 값을 바꿉니다.</string>
+    <string name="designer_state_hint">미리보기 값은 캔버스에만 반영되며 스크립트의 초기값은 바뀌지 않습니다. \"조작 미리보기\" 를 켜면 JavaScript 프로젝트는 이 값을 초기값으로 스크립트를 실행합니다 (Android 8.0 이상). TSX 프로젝트나 Android 8.0 미만에서는 상태에 바인딩된 스위치, 슬라이더, 텍스트 필드 등의 조작이 여기의 값을 바꿉니다.</string>
     <string name="designer_state_initial">초기값: %1$s</string>
     <string name="designer_state_reset">초기화</string>
     <string name="designer_state_reset_all">모두 초기화</string>
     <string name="designer_state_value">미리보기 값</string>
+    <string name="designer_tab_console">콘솔</string>
     <string name="designer_tab_inspector">속성</string>
     <string name="designer_tab_outline">개요</string>
     <string name="designer_tab_state">상태</string>
