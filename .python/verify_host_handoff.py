@@ -51,12 +51,20 @@ def host_top(adb: launch.Adb) -> str | None:
 
 
 def tap_host_text(adb: launch.Adb, text: str) -> None:
+    """Tap a menu item, scrolling the menu when it is longer than the screen (a landscape phone)."""
     def search():
-        for node in host_nodes(adb):
-            if (node.get("text") or "").strip() == text:
-                return node
+        nodes = host_nodes(adb)
+        match = next((node for node in nodes if (node.get("text") or "").strip() == text), None)
+        if match is not None:
+            return match
+        menus = [node for node in nodes if node.get("scrollable") == "true"]
+        if menus:
+            left, top, right, bottom = map(int, re.findall(r"\d+", menus[-1].get("bounds", "")))
+            x = (left + right) // 2
+            adb.shell(f"input swipe {x} {top + (bottom - top) * 4 // 5} {x} {top + (bottom - top) // 5} 600")
+            time.sleep(0.8)
         return None
-    launch.tap(adb, launch.wait_for(f"the AutoJs6 menu item {text!r}", search, timeout=15.0))
+    launch.tap(adb, launch.wait_for(f"the AutoJs6 menu item {text!r}", search, timeout=20.0))
 
 
 def open_overflow_menu(adb: launch.Adb) -> None:

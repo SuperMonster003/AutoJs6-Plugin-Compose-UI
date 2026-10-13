@@ -12,6 +12,7 @@ the unedited template. The edit is then discarded and the project deleted.
 usage: verify_designer_recovery.py --apk <apk> [--serial <serial>] [--uninstall] [--strings <values/strings.xml>]
 """
 import argparse
+import re
 import subprocess
 import sys
 import time
@@ -61,22 +62,44 @@ def insert_from_palette(adb: launch.Adb, add_label: str, component: str) -> None
     for _ in range(16):
         root = launch.ui_tree(adb)
         rotated = root.get("rotation", "0") in ("1", "3")
-        parents = {child: parent for parent in root.iter() for child in parent}
-        for node in root.iter("node"):
-            if node.get("package") == PACKAGE and (node.get("text") or "").strip() == component:
-                target = node
-                while target is not None and target.get("clickable") != "true":
-                    target = parents.get(target)
-                if target is not None:
-                    launch.tap(adb, target)
-                    return
         width, height = (int(value) for value in adb.shell("wm size").split()[-1].split("x"))
         if rotated:
             width, height = height, width
+        parents = {child: parent for parent in root.iter() for child in parent}
+        rows = []
+        for node in root.iter("node"):
+            if node.get("package") != PACKAGE or not (node.get("text") or "").strip():
+                continue
+            row = node
+            while row is not None and row.get("clickable") != "true":
+                row = parents.get(row)
+            if row is not None:
+                rows.append((node.get("text").strip(), bounds(row)))
+        target = next((box for text, box in rows if text == component), None)
+        if target is not None:
+            full = max(bottom - top for _, (_, top, _, bottom) in rows)
+            left, top, right, bottom = target
+            if bottom - top >= full * 0.9:
+                adb.shell(f"input tap {(left + right) // 2} {(top + bottom) // 2}")
+                return
+            # The entry is cut off by the sheet's edge, where a tap can land on the drag handle instead; nudge it
+            # fully into view first (finger down when it sits in the upper half, up otherwise).
+            # The drag starts on a row next to the entry, so it stays inside the sheet's list.
+            middle = (top + bottom) // 2
+            down = middle < height // 2
+            start = middle + full if down else middle - full
+            adb.shell(f"input swipe {(left + right) // 2} {start} {(left + right) // 2} {start + (full * 2 if down else -full * 2)} 800")
+            time.sleep(1.0)
+            continue
         # A slow drag scrolls without a fling, so the list is at rest when the next dump finds the entry.
         adb.shell(f"input swipe {width // 2} {height * 5 // 6} {width // 2} {height // 6} 1200")
         time.sleep(1.0)
     raise SystemExit(f"the palette entry {component} did not come into view")
+
+
+def bounds(node) -> tuple[int, int, int, int]:
+    left, top, right, bottom = map(int, re.findall(r"\d+", node.get("bounds", "")))
+    return left, top, right, bottom
 
 
 def main() -> None:
