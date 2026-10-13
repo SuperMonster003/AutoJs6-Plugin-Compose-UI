@@ -52,7 +52,7 @@ El complemento incluye un diseñador visual y una galería de componentes: al ab
 
 ******
 
-Vista previa de desarrollo local 1.3.0: requiere una compilación del host AutoJs6 con la nueva identidad de 3-Block Compose (commit del host f12665ffde o posterior) con este complemento instalado y habilitado; la entrada de menú del editor de AutoJs6 "Abrir en el diseñador de 3-Block Compose" necesita una compilación posterior al commit del host db7e6a1734. El acompañamiento local ofrece páginas de UI, ventanas flotantes, el diseñador visual, cinco ejemplos, la referencia de API, la página de guía del diseñador y las declaraciones de TypeScript. El alcance verificado de compatibilidad y rendimiento se registra en la hoja de ruta. Aún no figura en el índice oficial; no hay versión oficial. Los iconos usan el arte final del mantenedor.
+Vista previa de desarrollo local 1.4.0: requiere una compilación del host AutoJs6 con la nueva identidad de 3-Block Compose (commit del host f12665ffde o posterior) con este complemento instalado y habilitado; la entrada de menú del editor de AutoJs6 "Abrir en el diseñador de 3-Block Compose" necesita una compilación posterior al commit del host db7e6a1734. El acompañamiento local ofrece páginas de UI, ventanas flotantes, el diseñador visual, cinco ejemplos, la referencia de API, la página de guía del diseñador y las declaraciones de TypeScript. El alcance verificado de compatibilidad y rendimiento se registra en la hoja de ruta. Aún no figura en el índice oficial; no hay versión oficial. Los iconos usan el arte final del mantenedor.
 
 ******
 
@@ -62,8 +62,8 @@ Vista previa de desarrollo local 1.3.0: requiere una compilación del host AutoJ
 
 Funciones de la vista previa de desarrollo actual:
 
-- Diseñador visual: el archivo de script es el proyecto, el renderizador real muestra el árbol de interfaz mientras lo editas, el esquema / la paleta de componentes / el panel de propiedades cubren los 55 componentes, con deshacer / rehacer y recuperación de borradores; el script exportado se puede copiar o enviar directamente a AutoJs6; lo que se suelta en el lienzo queda donde está el puntero, las ventanas emergentes abiertas se dibujan dentro del lienzo, Image muestra imágenes @drawable y de una carpeta de imágenes del proyecto, y el panel Estado con la vista previa interactiva cambia temporalmente los valores de vista previa de los state
-- Integración con AutoJs6: un proyecto se puede enviar a ejecutar, abrir en el editor de AutoJs6 (sincronización bidireccional), importar al directorio de scripts de AutoJs6, copiar o exportar; el diseñador también abre archivos .js directamente desde el editor de AutoJs6 o un gestor de archivos y guarda en el mismo archivo; un proyecto importado se puede, a petición en el menú del editor, escribir de vuelta en su origen o reimportar desde él
+- Diseñador visual: el archivo de script es el proyecto, el renderizador real muestra el árbol de interfaz mientras lo editas, el esquema / la paleta de componentes / el panel de propiedades cubren los 55 componentes, con deshacer / rehacer y recuperación de borradores; el script exportado se puede copiar o enviar directamente a AutoJs6; lo que se suelta en el lienzo queda donde está el puntero, las ventanas emergentes abiertas se dibujan dentro del lienzo, Image muestra imágenes @drawable y de una carpeta de imágenes del proyecto, y el panel Estado con la vista previa interactiva cambia temporalmente los valores de vista previa de los state; los proyectos pueden ser JavaScript o TSX, y los proyectos TSX se analizan con TypeScript Engine 0.7.0 o posterior y se guardan como TSX canónico
+- Integración con AutoJs6: un proyecto se puede enviar a ejecutar, abrir en el editor de AutoJs6 (sincronización bidireccional), importar al directorio de scripts de AutoJs6, copiar o exportar; el diseñador también abre archivos .js / .tsx directamente desde el editor de AutoJs6 o un gestor de archivos y guarda en el mismo archivo; un proyecto importado se puede, a petición en el menú del editor, escribir de vuelta en su origen o reimportar desde él
 - Interfaz declarativa: `compose.state` + `compose.mount(render)` vuelven a dibujar automaticamente ante cada cambio de estado, mientras que los manejadores de nodo de larga vida (`compose.Text({...})` y similares) permiten modificar directamente propiedades e hijos
 - Núcleo Material 3: 29 fábricas de nodos para diseños, texto, iconos, imágenes, botones, entradas, selección, listas diferidas, diálogos e indicadores; Snackbar es un comando de sesión, no una fábrica compose.Snackbar
 - Modifiers encadenados: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserva el orden de las operaciones, y las operaciones con ambito se validan en el lado del host
@@ -153,6 +153,7 @@ Requisitos de ejecucion y limites del plugin:
 - compose.memo lo proporciona AutoJs6 6.8.0 / 5323 para reutilizar fragmentos de render cuyas dependencias no cambian; este complemento no necesita actualizarse y TSX requiere TypeScript Engine 0.6.8
 - Desde 1.2.0 las clases del contrato (org.autojs.plugin.compose.api) se empaquetan con el complemento para su proceso independiente; dentro de AutoJs6 el host proporciona las mismas clases y la copia del complemento queda oculta
 - El diseñador se ejecuta en el proceso propio del complemento y no depende de AutoJs6; ejecutar, abrir en el editor de AutoJs6 e importar al directorio de scripts de AutoJs6 requieren AutoJs6 instalado, y la entrada de menú del editor "Abrir en el diseñador de 3-Block Compose" requiere una compilación de AutoJs6 que la incluya
+- Los proyectos TSX del diseñador necesitan TypeScript Engine 0.7.0 o posterior (que ofrece el servicio de análisis de árbol sintáctico), y al ejecutarlos AutoJs6 los compila con TypeScript Engine; sin él, o con una versión anterior, un proyecto TSX se abre como código fuente de solo lectura que se puede ver y copiar
 
 ******
 
@@ -161,8 +162,8 @@ Requisitos de ejecucion y limites del plugin:
 ******
 
 - Como se ejecutan los ejemplos de la galería? "Ejecutar en AutoJs6" entrega el script al AutoJs6 instalado; la galería solo muestra vistas previas y código y nunca ejecuta scripts
-- Puede el diseñador abrir cualquier script? Solo interpreta las declaraciones `compose.state` de nivel superior y la única llamada `compose.mount` / `floaty` / `dialog`; el resto de sentencias se conserva tal cual. Las formas que no puede asignar (una raíz que no es una fábrica compose, varias llamadas de montaje, una función de renderizado sin return) se rechazan con línea y columna
-- El diseñador ejecuta scripts? No. Solo los analiza con el analizador Rhino y los previsualiza con el renderizador propio del complemento; los controladores de eventos no se ejecutan y el state muestra su valor inicial o un valor de vista previa fijado en el panel Estado. En la vista previa interactiva, los controles vinculados a un state (interruptores, controles deslizantes, campos de texto, etc.) cambian directamente su valor de vista previa, pero los controladores y las funciones de renderizado siguen sin ejecutarse. La ejecución corresponde a AutoJs6
+- Puede el diseñador abrir cualquier script? Solo interpreta las declaraciones `compose.state` de nivel superior y la única llamada `compose.mount` / `floaty` / `dialog`; el resto de sentencias se conserva tal cual. Las formas que no puede asignar (una raíz que no es una fábrica compose, varias llamadas de montaje, una función de renderizado sin return) se rechazan con línea y columna. En los proyectos TSX, las etiquetas `compose.X` / `compose:X` son nodos editables, las demás etiquetas y las expresiones `{}` se conservan tal cual, y las etiquetas XML y los atributos de propagación se rechazan
+- El diseñador ejecuta scripts? No. Solo los analiza (JavaScript con el analizador Rhino, TSX con el servicio de análisis de TypeScript Engine) y los previsualiza con el renderizador propio del complemento; los controladores de eventos no se ejecutan y el state muestra su valor inicial o un valor de vista previa fijado en el panel Estado. En la vista previa interactiva, los controles vinculados a un state (interruptores, controles deslizantes, campos de texto, etc.) cambian directamente su valor de vista previa, pero los controladores y las funciones de renderizado siguen sin ejecutarse. La ejecución corresponde a AutoJs6
 - Por qué falta `compose`? El objeto global lo proporciona la compilación local compatible del host; instalar solo el APK del plugin no lo añade
 - Hay que desinstalar otros plugins de interfaz? No, 3-Block Compose no interfiere con el modulo `ui` existente ni con otros plugins
 - Qué ocurre si cambia el complemento? Actualizarlo, desinstalarlo o desactivarlo cierra las sesiones activas e informa del error correspondiente; un complemento compatible y activado permite volver a montar
@@ -224,6 +225,17 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 ******
 
+#### v1.4.0
+
+_2026/10/13_
+
+- `Aviso` Los proyectos TSX del diseñador necesitan TypeScript Engine 0.7.0 o posterior; sin él, o con una versión anterior, un proyecto TSX solo se puede ver y copiar como código fuente de solo lectura
+- `Novedad` El diseñador admite proyectos TSX: un proyecto nuevo puede ser JavaScript o TSX, y los archivos .tsx se pueden importar o abrir directamente desde el editor de AutoJs6 y los gestores de archivos; el código TSX se analiza con TypeScript Engine y se edita en el lienzo, y se guarda como TSX con un formato uniforme (sangría de 4 espacios, atributos entre comillas simples, un elemento hijo por línea); el código que el diseñador no puede editar (como etiquetas alias o hijos generados por condiciones o bucles) se conserva tal cual, y el que no puede representar (como etiquetas XML y atributos de propagación) se rechaza indicando línea y columna
+- `Novedad` "Ejecutar" en un proyecto TSX del diseñador entrega el archivo del proyecto a AutoJs6, que lo compila con TypeScript Engine y lo ejecuta; los cambios sin guardar se guardan antes
+- `Novedad` Cuando TypeScript Engine no está instalado, es demasiado antiguo o su servicio de análisis no está disponible por el momento, el diseñador muestra el código del proyecto TSX en solo lectura con el motivo, y se puede copiar el código o reintentar; al volver al diseñador después de instalar o actualizar TypeScript Engine se reintenta automáticamente
+- `Mejora` Los controladores de eventos editados en un proyecto TSX los comprueba TypeScript Engine, por lo que se puede usar sintaxis de TypeScript como las anotaciones de tipo
+- `Dependencia` Se añade el artefacto de contrato typescript-parser-api.aar (contrato de análisis de árbol sintáctico de TypeScript v1), que el diseñador usa para leer proyectos TSX
+
 #### v1.3.0
 
 _2026/10/13_
@@ -253,31 +265,6 @@ _2026/10/13_
 - `Mejora` Los ejemplos incluidos y la categoría de ejemplos del host pasan a llamarse 3-Block Compose
 - `Mejora` El AAR del contrato compose-ui-api ahora se empaqueta con el complemento y se conserva íntegro (antes solo en compilación) para el proceso propio del complemento; dentro de AutoJs6 las clases de contrato idénticas del host siguen teniendo prioridad, por lo que el comportamiento de renderizado y la versión del contrato no cambian
 - `Dependencia` Se añade el jar reducido del analizador Rhino (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, la misma compilación que el host AutoJs6), usado solo por el diseñador visual para analizar scripts, nunca para ejecutarlos; las compilaciones release conservan solo las clases del analizador referenciadas
-
-#### v1.1.0
-
-_2026/10/08_
-
-- `Aviso` Vista previa local de desarrollo 1.1.0: requiere una compilación AutoJs6 correspondiente y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. El icono sigue siendo provisional hasta recibir las imágenes definitivas del mantenedor
-- `Aviso` Esta versión usa el contrato Compose UI V2 y requiere AutoJs6 6.8.0 / 5322; TSX requiere TypeScript Engine 0.6.7. Los anfitriones nuevos admiten los componentes existentes de renderizadores V1; los componentes ampliados requieren V2
-- `Aviso` compose.memo lo proporciona AutoJs6 6.8.0 / 5323 para reutilizar fragmentos de render cuyas dependencias no cambian; este complemento no necesita actualizarse y TSX requiere TypeScript Engine 0.6.8
-- `Aviso` La galería y los ajustes se ejecutan en el proceso del complemento y no cambian el renderizado dentro del host ni la versión mínima del host; ejecutar los ejemplos requiere AutoJs6 con este complemento instalado y habilitado
-- `Novedad` TSX admite `<compose.Column>`, `<compose:Text>`, referencias a fábricas de nodos, fragmentos, slots y callbacks reactivos; un mismo árbol no puede mezclar Compose y nodos XML existentes
-- `Novedad` Los contenedores XML `<compose>` y compose.attach integran sesiones Compose independientes en páginas UI o ventanas flotantes existentes; compose.AndroidView muestra una View Android existente o devuelta por una fábrica síncrona
-- `Novedad` compose.dialog devuelve una sesión que se puede actualizar y cerrar para diálogos y paneles inferiores modales en scripts UI o normales
-- `Novedad` Componentes Material 3 ampliados: navegación y paneles laterales, pestañas, paneles inferiores y menús, selectores de fecha y hora, paginación y cuadrículas, chips, insignias, botones segmentados y flotantes, búsqueda, ayudas y actualización al deslizar
-- `Novedad` Galería de componentes: ábrala desde el lanzador para ver vistas previas Material 3 y scripts de ejemplo de los 55 componentes, copiarlos al portapapeles o enviarlos al AutoJs6 instalado
-- `Novedad` Página de ajustes: el idioma, el modo oscuro y el color de tema siguen AutoJs6 por defecto y pueden fijarse por separado; el icono del lanzador ofrece opciones adaptativas (claro / oscuro / automático) y de fondo transparente
-- `Correccion` Corregido el fallo de compilación tras ajustar el fondo de los iconos del lanzador en Icon Studio
-- `Mejora` Los iconos de información de la aplicación de Android comparten las imágenes y los fondos claros y oscuros de Icon Studio, conservando las imágenes transparentes del centro de plugins y las opciones del lanzador
-- `Mejora` Las fábricas de View se ejecutan en el hilo principal antes del renderizado. Un reemplazo inválido conserva el contenido actual; una View no puede pertenecer a dos nodos ni tomarse de otro padre. Conserva sus listeners y los recursos siguen bajo control del llamador
-- `Mejora` cancelable=false desactiva el cierre al volver, pulsar fuera o deslizar; el cierre explícito y la salida del script liberan el diálogo conservando las páginas y otras sesiones
-- `Mejora` El icono del centro de complementos y el icono de información de la aplicación usan los fondos #FAFAFA claro / #212121 oscuro compartidos con los demás complementos independientes
-- `Dependencia` Actualizar compose-ui-api.aar con la extensión opcional AndroidView conservando V1
-- `Dependencia` Añadir la capacidad opcional de diálogo a compose-ui-api.aar conservando los contratos V1 y AndroidView existentes
-- `Dependencia` Añadir el catálogo V2 de compose-ui-api.aar conservando los modelos de nodos y la semántica de componentes V1
-- `Dependencia` Añadido material-color-utilities 4.1.1 (MIT) para la derivación del color de tema compartida con los demás complementos independientes
-- `Dependencia` Añadidas copias de AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines y sus complementos en las versiones fijadas por el host para la galería en el proceso del complemento; dentro del host siguen prevaleciendo las copias del host
 
 ##### Para ver mas historial de versiones, consulte
 

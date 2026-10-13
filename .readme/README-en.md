@@ -52,7 +52,7 @@ The plugin ships a visual designer and a component gallery: opening it from the 
 
 ******
 
-1.3.0 local development preview: requires an AutoJs6 host build that carries the new 3-Block Compose identity (host commit f12665ffde or later) with this plugin installed and enabled; the AutoJs6 editor menu entry "Open in 3-Block Compose designer" needs a build after host commit db7e6a1734. The local companion delivers UI pages, floating windows, the visual designer, five examples, the API reference, the designer guide page and TypeScript declarations. The verified compatibility and performance scope is recorded in the roadmap. Not yet listed in the official index; no official release. The icons use the maintainer's final artwork.
+1.4.0 local development preview: requires an AutoJs6 host build that carries the new 3-Block Compose identity (host commit f12665ffde or later) with this plugin installed and enabled; the AutoJs6 editor menu entry "Open in 3-Block Compose designer" needs a build after host commit db7e6a1734. The local companion delivers UI pages, floating windows, the visual designer, five examples, the API reference, the designer guide page and TypeScript declarations. The verified compatibility and performance scope is recorded in the roadmap. Not yet listed in the official index; no official release. The icons use the maintainer's final artwork.
 
 ******
 
@@ -62,8 +62,8 @@ The plugin ships a visual designer and a component gallery: opening it from the 
 
 Capabilities of the current development preview:
 
-- Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6; canvas drops land where the pointer is, open popups are drawn inside the canvas, Image shows @drawable pictures and pictures from a project image folder, and the State panel with the interactive preview changes state preview values for a while
-- AutoJs6 integration: a project can be sent to run, opened in the AutoJs6 editor (two-way sync), imported into the AutoJs6 script directory, copied or exported; the designer also opens .js files straight from the AutoJs6 editor or a file manager and saves back into the same file; an imported project can be written back to its source or re-imported from it on request in the editor menu
+- Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6; canvas drops land where the pointer is, open popups are drawn inside the canvas, Image shows @drawable pictures and pictures from a project image folder, and the State panel with the interactive preview changes state preview values for a while; projects are JavaScript or TSX, and TSX projects are parsed by TypeScript Engine 0.7.0 or later and written back as canonical TSX
+- AutoJs6 integration: a project can be sent to run, opened in the AutoJs6 editor (two-way sync), imported into the AutoJs6 script directory, copied or exported; the designer also opens .js / .tsx files straight from the AutoJs6 editor or a file manager and saves back into the same file; an imported project can be written back to its source or re-imported from it on request in the editor menu
 - Declarative UI: `compose.state` + `compose.mount(render)` re-render on state changes, while long-lived node handles (`compose.Text({...})` and friends) allow direct property and child updates
 - Material 3 core: 29 node factories for layouts, text, icons, images, buttons, inputs, selection controls, lazy lists, dialogs and progress; Snackbar is a session command, not a compose.Snackbar factory
 - Chained modifiers: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` keeps operation order, and scoped operations are validated on the host side
@@ -153,6 +153,7 @@ Runtime requirements and limits of the plugin:
 - compose.memo is provided by AutoJs6 6.8.0 / 5323 to reuse render fragments whose dependencies are unchanged; this plugin needs no update, and companion TSX support requires TypeScript Engine 0.6.8
 - Since 1.2.0 the contract classes (org.autojs.plugin.compose.api) are packaged with the plugin for its standalone process; inside AutoJs6 the host supplies the same classes and the plugin copy is shadowed
 - The designer runs in the plugin's own process and does not depend on AutoJs6; running, opening in the AutoJs6 editor and importing into the AutoJs6 script directory need an installed AutoJs6, and the editor menu entry "Open in 3-Block Compose designer" needs an AutoJs6 build that contains it
+- TSX projects in the designer need TypeScript Engine 0.7.0 or later (it provides the syntax tree parsing service), and running one lets AutoJs6 compile it through TypeScript Engine; without it, or with an older version, a TSX project opens as read-only source that can be viewed and copied
 
 ******
 
@@ -161,8 +162,8 @@ Runtime requirements and limits of the plugin:
 ******
 
 - How do gallery examples run? "Run in AutoJs6" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts
-- Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column
-- Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; event handlers do not run and state shows its initial value or a preview value set in the State panel. In the interactive preview, controls bound to a state (switches, sliders, text fields and so on) change its preview value directly, but handlers and render functions still do not run. Running is left to AutoJs6
+- Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column. In TSX projects, `compose.X` / `compose:X` tags are editable nodes, other tags and `{}` expressions are kept as written, and XML tags and spread attributes are refused
+- Does the designer run scripts? No. It only parses them (JavaScript with the Rhino parser, TSX with the TypeScript Engine parsing service) and previews them with the plugin's own renderer; event handlers do not run and state shows its initial value or a preview value set in the State panel. In the interactive preview, controls bound to a state (switches, sliders, text fields and so on) change its preview value directly, but handlers and render functions still do not run. Running is left to AutoJs6
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, 3-Block Compose does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount
@@ -224,6 +225,17 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 ******
 
+#### v1.4.0
+
+_2026/10/13_
+
+- `Hint` TSX projects in the designer need TypeScript Engine 0.7.0 or later; without it, or with an older version, a TSX project can only be viewed and copied as read-only source
+- `Feature` The designer supports TSX projects: a new project can be JavaScript or TSX, .tsx files can be imported or opened straight from the AutoJs6 editor and file managers; the TSX source is parsed by TypeScript Engine and edited on the canvas, and saved as TSX in one consistent format (4-space indentation, single-quoted attributes, one child element per line); code the designer cannot edit (such as alias tags, or children made by conditions or loops) is kept as written, and code it cannot represent (such as XML tags and spread attributes) is refused with a line and column
+- `Feature` "Run" on a TSX project in the designer hands the project file to AutoJs6, which compiles it with TypeScript Engine and runs it; unsaved changes are saved first
+- `Feature` When TypeScript Engine is not installed, too old, or its parsing service is temporarily unavailable, the designer shows the TSX project's source read-only with the reason, and the source can be copied or the parse retried; returning to the designer after installing or updating TypeScript Engine retries automatically
+- `Improvement` Event handlers edited in a TSX project are syntax-checked by TypeScript Engine, so TypeScript syntax such as type annotations can be used
+- `Dependency` Add the typescript-parser-api.aar contract artifact (TypeScript syntax tree parsing contract v1), used by the designer to read TSX projects
+
 #### v1.3.0
 
 _2026/10/13_
@@ -253,31 +265,6 @@ _2026/10/13_
 - `Improvement` The bundled examples and the host example category are renamed to 3-Block Compose
 - `Improvement` The compose-ui-api contract AAR is now packaged with the plugin and kept intact (previously compile-only) for the plugin's own process; inside AutoJs6 the host's identical contract classes still take precedence, so rendering behavior and the contract version are unchanged
 - `Dependency` Add the slim Rhino parser jar (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, the same build as the AutoJs6 host), used only by the visual designer to parse scripts, never to run them; release builds keep only the referenced parser classes
-
-#### v1.1.0
-
-_2026/10/08_
-
-- `Hint` 1.1.0 local development preview: use a matching AutoJs6 host build and the installed, enabled plugin. UI pages, floating windows, five examples, companion API reference and TypeScript declarations are provided for this local integration. Verified compatibility and performance scope is recorded in the roadmap. The plugin is not in the official index and has no official release. Current icon artwork is temporary, awaiting the maintainer's source images
-- `Hint` This build uses Compose UI contract V2 and requires the matching AutoJs6 6.8.0 / 5322 host; companion TSX support requires TypeScript Engine 0.6.7. New hosts still support existing components in older V1 renderers; extended components require a V2 renderer
-- `Hint` compose.memo is provided by AutoJs6 6.8.0 / 5323 to reuse render fragments whose dependencies are unchanged; this plugin needs no update, and companion TSX support requires TypeScript Engine 0.6.8
-- `Hint` The gallery and settings run in the plugin process and change neither in-host rendering nor the minimum host version; running example scripts requires AutoJs6 with this plugin installed and enabled
-- `Feature` TSX supports `<compose.Column>`, `<compose:Text>`, references to node factories, fragments, slots and reactive callbacks; a single tree cannot mix Compose and legacy XML nodes
-- `Feature` XML `<compose>` containers and compose.attach embed independent Compose sessions in UI pages or legacy floating windows; compose.AndroidView embeds an existing Android View or one returned by a synchronous factory
-- `Feature` compose.dialog returns an updatable, closable session for dialogs and modal bottom sheets in UI or ordinary scripts
-- `Feature` Material 3 extended components: navigation bars and drawers, tabs, bottom sheets and menus, date and time pickers, paging and grids, chips, badges, segmented buttons, floating action buttons, search bars, tooltips and pull to refresh
-- `Feature` Component gallery: open it from the launcher to browse Material 3 previews and example scripts of all 55 components, copy them to the clipboard or send them to the installed AutoJs6
-- `Feature` Settings page: language, dark mode and theme color follow AutoJs6 by default and can be set separately; the launcher icon offers adaptive (light / dark / automatic) and transparent background choices
-- `Fix` Fixed build failures after adjusting launcher icon backgrounds in Icon Studio
-- `Improvement` Android App info icons share Icon Studio artwork and light/dark backgrounds while preserving transparent Plugin Center artwork and existing launcher choices
-- `Improvement` View factories run on the main thread before rendering. Invalid replacements preserve the current content; a View cannot belong to two nodes or be taken from another parent. Borrowed Views retain their listeners and caller-owned resources
-- `Improvement` cancelable=false disables back, outside-click and swipe dismissal; explicit close and script exit still release the dialog while preserving existing pages and other sessions
-- `Improvement` The Plugin Center icon and the system app info icon use the #FAFAFA light / #212121 dark backgrounds shared with the other standalone plugins
-- `Dependency` Update compose-ui-api.aar with the optional AndroidView interop extension while preserving frozen V1
-- `Dependency` Add the optional dialog capability to compose-ui-api.aar while preserving existing V1 and AndroidView contracts
-- `Dependency` Add the compose-ui-api.aar V2 component catalog while preserving existing node models and V1 component semantics
-- `Dependency` Added material-color-utilities 4.1.1 (MIT) for the theme color derivation shared with the other standalone plugins
-- `Dependency` Added host-locked copies of AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines and their companions for the gallery in the plugin process; inside the host the host copies still take precedence
 
 ##### For more release history, see
 

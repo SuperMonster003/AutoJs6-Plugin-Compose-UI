@@ -52,7 +52,7 @@ Le plugin intègre un concepteur visuel et une galerie de composants: l'ouvrir d
 
 ******
 
-Aperçu de développement local 1.3.0: nécessite une version de l'hôte AutoJs6 portant la nouvelle identité 3-Block Compose (commit hôte f12665ffde ou ultérieur) avec ce plugin installé et activé; l'entrée de menu de l'éditeur AutoJs6 "Ouvrir dans le concepteur 3-Block Compose" nécessite une version postérieure au commit hôte db7e6a1734. L'accompagnement local fournit les pages UI, les fenêtres flottantes, le concepteur visuel, cinq exemples, la référence API, la page de guide du concepteur et les déclarations TypeScript. Le périmètre vérifié de compatibilité et de performance est consigné dans la feuille de route. Pas encore inscrit à l'index officiel; aucune version officielle. Les icônes utilisent le visuel final du mainteneur.
+Aperçu de développement local 1.4.0: nécessite une version de l'hôte AutoJs6 portant la nouvelle identité 3-Block Compose (commit hôte f12665ffde ou ultérieur) avec ce plugin installé et activé; l'entrée de menu de l'éditeur AutoJs6 "Ouvrir dans le concepteur 3-Block Compose" nécessite une version postérieure au commit hôte db7e6a1734. L'accompagnement local fournit les pages UI, les fenêtres flottantes, le concepteur visuel, cinq exemples, la référence API, la page de guide du concepteur et les déclarations TypeScript. Le périmètre vérifié de compatibilité et de performance est consigné dans la feuille de route. Pas encore inscrit à l'index officiel; aucune version officielle. Les icônes utilisent le visuel final du mainteneur.
 
 ******
 
@@ -62,8 +62,8 @@ Aperçu de développement local 1.3.0: nécessite une version de l'hôte AutoJs6
 
 Fonctions de l'aperçu de développement actuel:
 
-- Concepteur visuel: le fichier de script est le projet, le vrai moteur de rendu affiche l'arbre d'interface pendant l'édition, le plan / la palette de composants / le tiroir de propriétés couvrent les 55 composants, avec annuler / rétablir et restauration des brouillons; le script exporté peut être copié ou envoyé directement à AutoJs6; les dépôts sur le canevas arrivent sous le pointeur, les fenêtres contextuelles ouvertes sont dessinées dans le canevas, Image affiche les images @drawable et celles d'un dossier d'images du projet, et le panneau État avec l'aperçu interactif change temporairement les valeurs d'aperçu des state
-- Intégration AutoJs6: un projet peut être envoyé à l'exécution, ouvert dans l'éditeur AutoJs6 (synchronisation bidirectionnelle), importé dans le répertoire de scripts AutoJs6, copié ou exporté; le concepteur ouvre aussi les fichiers .js directement depuis l'éditeur AutoJs6 ou un gestionnaire de fichiers et enregistre dans le même fichier; un projet importé peut, sur demande dans le menu de l'éditeur, être réécrit dans sa source ou réimporté depuis celle-ci
+- Concepteur visuel: le fichier de script est le projet, le vrai moteur de rendu affiche l'arbre d'interface pendant l'édition, le plan / la palette de composants / le tiroir de propriétés couvrent les 55 composants, avec annuler / rétablir et restauration des brouillons; le script exporté peut être copié ou envoyé directement à AutoJs6; les dépôts sur le canevas arrivent sous le pointeur, les fenêtres contextuelles ouvertes sont dessinées dans le canevas, Image affiche les images @drawable et celles d'un dossier d'images du projet, et le panneau État avec l'aperçu interactif change temporairement les valeurs d'aperçu des state; les projets sont en JavaScript ou en TSX, et les projets TSX sont analysés par TypeScript Engine 0.7.0 ou ultérieur puis réécrits en TSX canonique
+- Intégration AutoJs6: un projet peut être envoyé à l'exécution, ouvert dans l'éditeur AutoJs6 (synchronisation bidirectionnelle), importé dans le répertoire de scripts AutoJs6, copié ou exporté; le concepteur ouvre aussi les fichiers .js / .tsx directement depuis l'éditeur AutoJs6 ou un gestionnaire de fichiers et enregistre dans le même fichier; un projet importé peut, sur demande dans le menu de l'éditeur, être réécrit dans sa source ou réimporté depuis celle-ci
 - Interface declarative : `compose.state` + `compose.mount(render)` redessinent automatiquement a chaque changement d'etat, tandis que des poignees de noeud durables (`compose.Text({...})` et consorts) permettent de modifier directement proprietes et enfants
 - Noyau Material 3: 29 fabriques de noeuds pour les dispositions, textes, icônes, images, boutons, saisies, sélections, listes paresseuses, dialogues et indicateurs; Snackbar est une commande de session, pas une fabrique compose.Snackbar
 - Modifiers chaines : `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserve l'ordre des operations, et les operations a portee limitee sont validees cote hote
@@ -153,6 +153,7 @@ Exigences d'execution et limites du plugin:
 - compose.memo est fourni par AutoJs6 6.8.0 / 5323 pour réutiliser les fragments de render dont les dépendances n'ont pas changé; ce plugin n'a pas besoin de mise à jour et TSX nécessite TypeScript Engine 0.6.8
 - Depuis 1.2.0 les classes du contrat (org.autojs.plugin.compose.api) sont empaquetées avec le plugin pour son processus autonome; dans AutoJs6 l'hôte fournit les mêmes classes et la copie du plugin est masquée
 - Le concepteur s'exécute dans le processus du plugin et ne dépend pas d'AutoJs6; exécuter, ouvrir dans l'éditeur AutoJs6 et importer dans le répertoire de scripts AutoJs6 nécessitent un AutoJs6 installé, et l'entrée de menu de l'éditeur "Ouvrir dans le concepteur 3-Block Compose" nécessite une version d'AutoJs6 qui la contient
+- Les projets TSX du concepteur nécessitent TypeScript Engine 0.7.0 ou ultérieur (qui fournit le service d'analyse en arbre syntaxique), et leur exécution laisse AutoJs6 les compiler via TypeScript Engine; sans lui, ou avec une version plus ancienne, un projet TSX s'ouvre en source en lecture seule, consultable et copiable
 
 ******
 
@@ -161,8 +162,8 @@ Exigences d'execution et limites du plugin:
 ******
 
 - Comment exécuter les exemples de la galerie? "Exécuter dans AutoJs6" transmet le script à l'AutoJs6 installé; la galerie n'affiche que des aperçus et du code et n'exécute jamais de script
-- Le concepteur peut-il ouvrir n'importe quel script? Il n'interprète que les déclarations `compose.state` de premier niveau et l'unique appel `compose.mount` / `floaty` / `dialog`; toute autre instruction est conservée telle quelle. Les formes qu'il ne peut pas mapper (une racine qui n'est pas une fabrique compose, plusieurs appels de montage, une fonction de rendu sans return) sont refusées avec ligne et colonne
-- Le concepteur exécute-t-il les scripts? Non. Il ne fait que les analyser avec l'analyseur Rhino et les prévisualiser avec le moteur de rendu du plugin; les gestionnaires d'événements ne s'exécutent pas et le state affiche sa valeur initiale ou une valeur d'aperçu définie dans le panneau État. Dans l'aperçu interactif, les contrôles liés à un state (interrupteurs, curseurs, champs de texte, etc.) changent directement sa valeur d'aperçu, mais les gestionnaires et les fonctions de rendu ne s'exécutent toujours pas. L'exécution revient à AutoJs6
+- Le concepteur peut-il ouvrir n'importe quel script? Il n'interprète que les déclarations `compose.state` de premier niveau et l'unique appel `compose.mount` / `floaty` / `dialog`; toute autre instruction est conservée telle quelle. Les formes qu'il ne peut pas mapper (une racine qui n'est pas une fabrique compose, plusieurs appels de montage, une fonction de rendu sans return) sont refusées avec ligne et colonne. Dans les projets TSX, les balises `compose.X` / `compose:X` sont des nœuds modifiables, les autres balises et les expressions `{}` sont conservées telles quelles, et les balises XML et les attributs de décomposition sont refusés
+- Le concepteur exécute-t-il les scripts? Non. Il ne fait que les analyser (JavaScript avec l'analyseur Rhino, TSX avec le service d'analyse de TypeScript Engine) et les prévisualiser avec le moteur de rendu du plugin; les gestionnaires d'événements ne s'exécutent pas et le state affiche sa valeur initiale ou une valeur d'aperçu définie dans le panneau État. Dans l'aperçu interactif, les contrôles liés à un state (interrupteurs, curseurs, champs de texte, etc.) changent directement sa valeur d'aperçu, mais les gestionnaires et les fonctions de rendu ne s'exécutent toujours pas. L'exécution revient à AutoJs6
 - Pourquoi `compose` est-il absent? L'objet global est fourni par la compilation locale compatible de l'hôte; installer uniquement l'APK du plugin ne l'ajoute pas
 - Faut-il desinstaller d'autres plugins d'interface ? Non, 3-Block Compose n'interfere ni avec le module `ui` existant ni avec les autres plugins
 - Que se passe-t-il si le plugin change? Sa mise à jour, désinstallation ou désactivation ferme les sessions actives et signale l'erreur correspondante; un plugin compatible et activé permet un nouveau montage
@@ -224,6 +225,17 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 ******
 
+#### v1.4.0
+
+_2026/10/13_
+
+- `Indication` Les projets TSX du concepteur nécessitent TypeScript Engine 0.7.0 ou ultérieur; sans lui, ou avec une version plus ancienne, un projet TSX ne peut être que consulté et copié en source en lecture seule
+- `Nouveaute` Le concepteur prend en charge les projets TSX: un nouveau projet peut être en JavaScript ou en TSX, et les fichiers .tsx peuvent être importés ou ouverts directement depuis l'éditeur AutoJs6 et les gestionnaires de fichiers; la source TSX est analysée par TypeScript Engine et modifiée sur le canevas, puis enregistrée en TSX dans un format uniforme (indentation de 4 espaces, attributs entre apostrophes, un élément enfant par ligne); le code que le concepteur ne peut pas modifier (balises d'alias, enfants produits par des conditions ou des boucles, etc.) est conservé tel quel, et le code qu'il ne peut pas représenter (balises XML, attributs de décomposition, etc.) est refusé avec ligne et colonne
+- `Nouveaute` "Exécuter" sur un projet TSX dans le concepteur transmet le fichier du projet à AutoJs6, qui le compile avec TypeScript Engine puis l'exécute; les modifications non enregistrées sont d'abord enregistrées
+- `Nouveaute` Lorsque TypeScript Engine n'est pas installé, est trop ancien ou que son service d'analyse est temporairement indisponible, le concepteur affiche la source du projet TSX en lecture seule avec la raison, et la source peut être copiée ou l'analyse relancée; revenir au concepteur après avoir installé ou mis à jour TypeScript Engine relance automatiquement l'analyse
+- `Amelioration` Les gestionnaires d'événements modifiés dans un projet TSX sont vérifiés par TypeScript Engine, ce qui permet la syntaxe TypeScript comme les annotations de type
+- `Dependance` Ajout de l'artefact de contrat typescript-parser-api.aar (contrat d'analyse en arbre syntaxique TypeScript v1), utilisé par le concepteur pour lire les projets TSX
+
 #### v1.3.0
 
 _2026/10/13_
@@ -253,31 +265,6 @@ _2026/10/13_
 - `Amelioration` Les exemples fournis et la catégorie d'exemples de l'hôte sont renommés 3-Block Compose
 - `Amelioration` L'AAR du contrat compose-ui-api est désormais empaqueté avec le plugin et conservé intact (auparavant en compilation seule) pour le processus propre du plugin; dans AutoJs6 les classes de contrat identiques de l'hôte restent prioritaires, le rendu et la version du contrat ne changent pas
 - `Dependance` Ajout du jar allégé de l'analyseur Rhino (org.mozilla.javascript 2.0.0-SNAPSHOT, MPL 2.0, la même compilation que l'hôte AutoJs6), utilisé uniquement par le concepteur visuel pour analyser les scripts, jamais pour les exécuter; les compilations release ne conservent que les classes d'analyse référencées
-
-#### v1.1.0
-
-_2026/10/08_
-
-- `Indication` Aperçu de développement local 1.1.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur
-- `Indication` Cette version utilise le contrat Compose UI V2 et nécessite AutoJs6 6.8.0 / 5322; TSX nécessite TypeScript Engine 0.6.7. Les nouveaux hôtes acceptent les composants existants des moteurs V1; les composants étendus nécessitent un moteur V2
-- `Indication` compose.memo est fourni par AutoJs6 6.8.0 / 5323 pour réutiliser les fragments de render dont les dépendances n'ont pas changé; ce plugin n'a pas besoin de mise à jour et TSX nécessite TypeScript Engine 0.6.8
-- `Indication` La galerie et les paramètres s'exécutent dans le processus du plugin et ne modifient ni le rendu dans l'hôte ni la version minimale de l'hôte; l'exécution des exemples nécessite AutoJs6 avec ce plugin installé et activé
-- `Nouveaute` TSX prend en charge `<compose.Column>`, `<compose:Text>`, les références aux fabriques de noeuds, les fragments, les emplacements et les rappels réactifs; un même arbre ne peut pas mélanger Compose et les anciens noeuds XML
-- `Nouveaute` Les conteneurs XML `<compose>` et compose.attach intègrent des sessions Compose indépendantes dans les pages UI ou les fenêtres flottantes existantes; compose.AndroidView affiche une View Android existante ou renvoyée par une fabrique synchrone
-- `Nouveaute` compose.dialog renvoie une session modifiable et fermable pour les dialogues et panneaux modaux inférieurs dans les scripts UI ou ordinaires
-- `Nouveaute` Composants Material 3 étendus: navigation et tiroirs, onglets, panneaux inférieurs et menus, sélecteurs de date et heure, pagination et grilles, puces, badges, boutons segmentés et flottants, recherche, infobulles et actualisation par glissement
-- `Nouveaute` Galerie de composants: ouvrez-la depuis le lanceur pour parcourir les aperçus Material 3 et les scripts d'exemple des 55 composants, les copier dans le presse-papiers ou les envoyer à l'AutoJs6 installé
-- `Nouveaute` Page des paramètres: la langue, le mode sombre et la couleur de thème suivent AutoJs6 par défaut et se règlent séparément; l'icône de lanceur propose des variantes adaptatives (claire / sombre / automatique) et à fond transparent
-- `Correction` Correction de l'échec de compilation après modification du fond des icônes du lanceur dans Icon Studio
-- `Amelioration` Les icônes des informations d'application Android utilisent les illustrations et les fonds clairs et sombres d'Icon Studio, en conservant les images transparentes du centre de plugins et les choix du lanceur
-- `Amelioration` Les fabriques de View tournent sur le thread principal avant le rendu. Un remplacement invalide conserve le contenu courant; une View ne peut appartenir à deux noeuds ni être prise à un autre parent. Ses écouteurs et les ressources du code appelant sont préservés
-- `Amelioration` cancelable=false désactive la fermeture par retour, clic extérieur et balayage; la fermeture explicite et la fin du script libèrent le dialogue sans remplacer les pages et sessions existantes
-- `Amelioration` L'icône du centre de plugins et l'icône d'informations système utilisent les fonds #FAFAFA clair / #212121 sombre partagés avec les autres plugins autonomes
-- `Dependance` Mettre à jour compose-ui-api.aar avec une extension AndroidView optionnelle tout en préservant V1
-- `Dependance` Ajout de la capacité de dialogue optionnelle à compose-ui-api.aar en conservant les contrats V1 et AndroidView existants
-- `Dependance` Ajout du catalogue V2 de compose-ui-api.aar en conservant les modèles de noeuds et la sémantique des composants V1
-- `Dependance` Ajout de material-color-utilities 4.1.1 (MIT) pour la dérivation de couleur de thème partagée avec les autres plugins autonomes
-- `Dependance` Ajout de copies d'AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines et de leurs compléments aux versions verrouillées par l'hôte pour la galerie dans le processus du plugin; dans l'hôte, les copies de l'hôte restent prioritaires
 
 ##### Pour un historique plus complet, voir
 
