@@ -28,6 +28,8 @@ internal class ProjectStore(context: Context) {
     val draftsDir = File(base, "drafts")
     /** Origins of imported projects, one `name=uri` or `name=uri<TAB>baseline` line each; only read on request. */
     private val sourcesFile = File(base, "sources.properties")
+    /** Image folders (roadmap P9.1, D44), one `key=uri` line per document, keyed like drafts. */
+    private val imageFoldersFile = File(base, "images.properties")
 
     fun list(): List<Project> {
         projectsDir.mkdirs()
@@ -69,6 +71,7 @@ internal class ProjectStore(context: Context) {
         file(name).delete()
         draftFile(name).delete()
         recordSource(name, null)
+        setImageFolder(name, null)
     }
 
     fun rename(name: String, newName: String): Project {
@@ -80,6 +83,10 @@ internal class ProjectStore(context: Context) {
         sourceOf(name)?.let { origin ->
             recordSource(name, null)
             recordSource(newName, origin)
+        }
+        imageFolderOf(name)?.let { folder ->
+            setImageFolder(name, null)
+            setImageFolder(newName, folder)
         }
         return Project(target.name, target, target.lastModified())
     }
@@ -134,6 +141,23 @@ internal class ProjectStore(context: Context) {
         val origin = sourceOf(name) ?: return
         recordSource(name, origin.copy(baseline = baseline))
     }
+
+    /**
+     * The folder whose files relative Image paths of the document with draft key [key] resolve against on the
+     * design canvas: a document tree picked by the user, or a file Uri.
+     */
+    fun imageFolderOf(key: String): Uri? = readMap(imageFoldersFile)[key]?.let(Uri::parse)
+
+    /** Records (or with null forgets) the image folder of the document with draft key [key]. */
+    fun setImageFolder(key: String, folder: Uri?) {
+        val updated = readMap(imageFoldersFile).toMutableMap()
+        if (folder == null) { if (updated.remove(key) == null) return } else updated[key] = folder.toString()
+        base.mkdirs()
+        imageFoldersFile.writeText(updated.entries.joinToString("") { (name, uri) -> name + "=" + uri + LINE_END }, StandardCharsets.UTF_8)
+    }
+
+    private fun readMap(file: File): Map<String, String> = if (!file.isFile) emptyMap() else
+        file.readLines(StandardCharsets.UTF_8).mapNotNull { line -> line.split('=', limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1] } }.toMap()
 
     private fun keepAccess(resolver: ContentResolver, uri: Uri) {
         if (uri.scheme != ContentResolver.SCHEME_CONTENT) return

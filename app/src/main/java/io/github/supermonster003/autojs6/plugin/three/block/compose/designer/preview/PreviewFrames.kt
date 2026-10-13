@@ -33,7 +33,8 @@ import org.autojs.plugin.compose.api.v2.ComposeUiV2
  * ModalBottomSheet, DropdownMenu, Tooltip) whose `open` resolves to true are shown as an inline card
  * holding their label, slots and children instead of a real window over the designer. A catalog component the
  * designer cannot draw (AndroidView, whose view only exists in a running script) stands in as a tinted
- * Surface that keeps the node's size modifiers and shows its view expression (roadmap P9.1, D44).
+ * Surface that keeps the node's size modifiers and shows its view expression (roadmap P9.1, D44). With an
+ * [ImageSource], a literal Image `src` string becomes the bitmap it names (P9.1, D44).
  */
 internal class PreviewFrame(
     val frame: RenderFrame?,
@@ -54,10 +55,10 @@ internal object PreviewFrames {
     /** Components the renderer presents in a separate window (dialog or popup) when `open` is true. */
     internal val WINDOWED = setOf(ComposeUiComponents.ALERT_DIALOG, "ModalBottomSheet", "DropdownMenu", "Tooltip")
 
-    fun build(document: DesignDocument, generation: Long, catalog: ComponentCatalog = ComposeUiV2.interopCatalog): PreviewFrame {
+    fun build(document: DesignDocument, generation: Long, catalog: ComponentCatalog = ComposeUiV2.interopCatalog, images: ImageSource? = null): PreviewFrame {
         val root = document.root ?: return PreviewFrame(null, null, generation, listOf("The document has no mount"), emptyMap())
         val states = document.states.associate { it.name to it.initial }
-        val builder = Builder(catalog, states)
+        val builder = Builder(catalog, states, images)
         val rootId = builder.emit(root, null)
         var nodes: Map<Int, UiNode> = builder.nodes
         val tree = try {
@@ -76,7 +77,7 @@ internal object PreviewFrames {
         return PreviewFrame(frame, tree, generation, builder.problems, builder.placeholders)
     }
 
-    private class Builder(private val catalog: ComponentCatalog, private val states: Map<String, PropValue>) {
+    private class Builder(private val catalog: ComponentCatalog, private val states: Map<String, PropValue>, private val images: ImageSource?) {
         val nodes = LinkedHashMap<Int, UiNode>()
         val problems = ArrayList<String>()
         val placeholders = HashMap<Int, Int>()
@@ -151,6 +152,12 @@ internal object PreviewFrames {
             val modifier = shortcut?.let { catalog.modifier(it.modifierName) }
             val valueType = type ?: modifier?.signatures?.first()?.args?.first()?.type ?: return null
             val propValue = entry.value
+            if (images != null && entry.name == ComposeUiProps.SRC && propValue is PropValue.Literal && propValue.value is JsLiteral.Str) {
+                return when (val lookup = images.resolve((propValue.value as JsLiteral.Str).value)) {
+                    is ImageLookup.Found -> lookup.value
+                    is ImageLookup.Missing -> { problems += lookup.problem; null }
+                }
+            }
             val converted: UiValue? = when (propValue) {
                 is PropValue.Literal -> {
                     val raw = propValue.value

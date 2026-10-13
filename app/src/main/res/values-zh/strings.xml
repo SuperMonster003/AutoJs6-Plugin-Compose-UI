@@ -59,6 +59,8 @@
     <string name="designer_host_option_name">选项</string>
     <string name="designer_host_option_value">值</string>
     <string name="designer_host_options">承载选项</string>
+    <string name="designer_image_folder">图片目录</string>
+    <string name="designer_image_folder_set">相对图片路径现在在 %1$s 中查找</string>
     <string name="designer_import_failed">无法导入该文件.</string>
     <string name="designer_import_project">导入脚本</string>
     <string name="designer_import_to_host">导入 AutoJs6 脚本目录</string>

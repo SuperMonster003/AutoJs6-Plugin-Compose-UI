@@ -10,6 +10,8 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PropValue
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Severity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ScriptReader
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.ImageLookup
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.ImageSource
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.PreviewFrames
 import org.autojs.plugin.compose.api.model.UiValue
 import org.junit.Assert.assertEquals
@@ -122,5 +124,17 @@ class PreviewFramesTest {
         assertEquals("[AndroidView] ui.inflate('<text text=\"x\"/>')", (label.props["text"] as UiValue.Str).value)
         assertEquals("the label keeps off the stand-in's edges", listOf("padding"), label.modifier.map { it.name })
         assertTrue(preview.problems.toString(), preview.problems.any { it.contains("AndroidView") })
+    }
+
+    @Test
+    fun `literal image sources go to the image source and its reason becomes a problem`() {
+        val asked = ArrayList<String>()
+        val images = ImageSource { src -> asked += src; ImageLookup.Missing("Image: $src is missing here") }
+        val document = reader.read("compose.mount(compose.Column({},\n    compose.Image({src: 'pics/logo.png', w: 48, h: 48}),\n    compose.Image({src: picture})));\n")
+        val preview = PreviewFrames.build(document, 1, images = images)
+        // Only the literal source is looked up; the expression stays a placeholder as before.
+        assertEquals(listOf("pics/logo.png"), asked)
+        assertTrue(preview.problems.toString(), "Image: pics/logo.png is missing here" in preview.problems)
+        assertEquals(0, preview.frame!!.nodes.values.count { it.type == "Image" })
     }
 }

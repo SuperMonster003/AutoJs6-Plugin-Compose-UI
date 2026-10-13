@@ -59,6 +59,8 @@
     <string name="designer_host_option_name">Option</string>
     <string name="designer_host_option_value">Valeur</string>
     <string name="designer_host_options">Options d\'affichage</string>
+    <string name="designer_image_folder">Dossier d\'images</string>
+    <string name="designer_image_folder_set">Les chemins d\'images relatifs sont désormais cherchés dans %1$s</string>
     <string name="designer_import_failed">Le fichier n\'a pas pu être importé.</string>
     <string name="designer_import_project">Importer un script</string>
     <string name="designer_import_to_host">Importer dans les scripts AutoJs6</string>

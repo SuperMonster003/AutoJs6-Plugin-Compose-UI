@@ -59,6 +59,8 @@
     <string name="designer_host_option_name">選項</string>
     <string name="designer_host_option_value">值</string>
     <string name="designer_host_options">承載選項</string>
+    <string name="designer_image_folder">圖片資料夾</string>
+    <string name="designer_image_folder_set">相對圖片路徑現在於 %1$s 中尋找</string>
     <string name="designer_import_failed">無法匯入該檔案.</string>
     <string name="designer_import_project">匯入腳本</string>
     <string name="designer_import_to_host">匯入 AutoJs6 腳本目錄</string>

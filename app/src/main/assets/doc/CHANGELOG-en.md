@@ -9,6 +9,7 @@
 ###### 2026/10/13
 
 * `Feature` Designer projects created with "Import script" can use "Write back to source" and "Re-import from source" in the editor menu: the import keeps access to the source file when its provider allows it, either action asks first when the other side changed since the last sync, and a source that can no longer be opened can be picked again to restore the link; saving a project never writes the source by itself
+* `Feature` The designer canvas previews Image pictures: '@drawable/name' comes from the installed AutoJs6, and relative paths are looked up in the folder chosen with "Image folder" in the editor menu (read-only access is kept); URLs and absolute paths stay placeholders with the reason in the issues list
 * `Fix` Open popup components (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) shown as cards on the designer canvas had no padding or spacing around their content
 * `Improvement` Long-press dragging a node on the designer canvas shows an insertion line along the target container's layout (vertical, horizontal or grid) and drops the node where the pointer is, instead of always at the end of the container
 * `Improvement` AndroidView on the designer canvas now shows a tinted placeholder that keeps its size modifiers (such as h and fillMaxWidth) and displays the source of its view expression

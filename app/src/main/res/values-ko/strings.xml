@@ -59,6 +59,8 @@
     <string name="designer_host_option_name">옵션</string>
     <string name="designer_host_option_value">값</string>
     <string name="designer_host_options">표시 옵션</string>
+    <string name="designer_image_folder">이미지 폴더</string>
+    <string name="designer_image_folder_set">상대 이미지 경로를 이제 %1$s 에서 찾습니다</string>
     <string name="designer_import_failed">파일을 가져올 수 없습니다.</string>
     <string name="designer_import_project">스크립트 가져오기</string>
     <string name="designer_import_to_host">AutoJs6 스크립트 폴더로 가져오기</string>

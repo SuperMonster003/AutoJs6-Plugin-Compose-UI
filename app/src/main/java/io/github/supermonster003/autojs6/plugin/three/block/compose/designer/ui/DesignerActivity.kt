@@ -64,6 +64,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DesignerParseError
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ScriptReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.CanvasBounds
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignImages
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignCanvas
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentIo
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentSource
@@ -196,6 +197,8 @@ internal class DesignerActivity : StandaloneActivity() {
         var zoom by remember { mutableStateOf(1f) }
         var syncPrompt by remember { mutableStateOf<SyncPrompt?>(null) }
         var relinkAction by remember { mutableStateOf<SyncAction?>(null) }
+        var imageFolderRevision by remember { mutableStateOf(0) }
+        val images = remember(source.draftKey, imageFolderRevision) { DesignImages(context, store.imageFolderOf(source.draftKey)) }
         val savedText = stringResource(R.string.designer_saved)
         val savedAsProject = stringResource(R.string.designer_external_readonly_saved)
         val insertFailed = stringResource(R.string.designer_insert_failed)
@@ -210,6 +213,7 @@ internal class DesignerActivity : StandaloneActivity() {
         val sourceWriteFailed = stringResource(R.string.designer_source_write_failed)
         val sourceReimported = stringResource(R.string.designer_source_reimported)
         val sourceParseFailed = stringResource(R.string.designer_source_parse_failed)
+        val imageFolderSet = stringResource(R.string.designer_image_folder_set)
         val theme = remember(appearance) { ThemeSpec(seedArgb = appearance.primary, dark = appearance.dark) }
         val errors = session.diagnostics.count { it.severity == Severity.ERROR }
 
@@ -284,6 +288,20 @@ internal class DesignerActivity : StandaloneActivity() {
             }
         }
 
+        // Roadmap P9.1 / D44: relative Image paths of this document resolve in a folder the user grants.
+        val imageFolderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            try {
+                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            } catch (error: SecurityException) {
+                // Not persistable (a provider without tree grants): the folder works until the grant lapses.
+            }
+            store.setImageFolder(source.draftKey, uri)
+            imageFolderRevision++
+            val name = uri.lastPathSegment?.substringAfterLast(':')?.substringAfterLast('/')?.ifBlank { null } ?: uri.toString()
+            scope.launch { snackbar.showSnackbar(imageFolderSet.format(name)) }
+        }
+
         val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ScriptLauncher.SCRIPT_MIME_TYPE)) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
             val ok = runCatching {
@@ -351,6 +369,10 @@ internal class DesignerActivity : StandaloneActivity() {
                                     menuOpen = false
                                     exporter.launch(source.title)
                                 }, modifier = Modifier.testTag("designer-menu-export"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_image_folder)) }, onClick = {
+                                    menuOpen = false
+                                    imageFolderPicker.launch(store.imageFolderOf(source.draftKey))
+                                }, modifier = Modifier.testTag("designer-menu-image-folder"))
                                 val linked = (source as? DocumentSource.Local)?.name?.takeIf { menuOpen && store.sourceOf(it) != null }
                                 if (linked != null) {
                                     DropdownMenuItem(text = { Text(stringResource(R.string.designer_source_write_back)) }, onClick = {
@@ -378,6 +400,7 @@ internal class DesignerActivity : StandaloneActivity() {
                 Box(placement.background(Color(palette.surfaceVariant)).testTag("designer-canvas")) {
                     DesignCanvas(
                         document = session.document,
+                        images = images,
                         theme = theme,
                         zoom = zoom,
                         selectedId = session.selectedId,

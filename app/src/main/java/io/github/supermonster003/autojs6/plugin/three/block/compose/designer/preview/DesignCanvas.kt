@@ -136,6 +136,8 @@ internal class CanvasBounds {
 @Composable
 internal fun DesignCanvas(
     document: DesignDocument,
+    /** Resolves literal Image sources (P9.1); null leaves every Image a placeholder. */
+    images: ImageSource?,
     theme: ThemeSpec,
     zoom: Float,
     selectedId: Int?,
@@ -154,7 +156,7 @@ internal fun DesignCanvas(
     val controllers = remember { CanvasControllers() }
     DisposableEffect(controllers) { onDispose { controllers.dispose() } }
     val generation = remember { LongArray(1) }
-    val preview = remember(document) { PreviewFrames.build(document, ++generation[0]) }
+    val preview = remember(document, images) { PreviewFrames.build(document, ++generation[0], images = images) }
     LaunchedEffect(preview) {
         controllers.accept(preview)
         onProblems(preview.problems)
