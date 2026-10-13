@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -83,6 +84,9 @@ private fun summary(node: DesignNode): String {
 
 private enum class DropZone { BEFORE, INTO, AFTER }
 
+/** Room below the last outline row or inspector field, so it can scroll out from under the editor's add button. */
+internal val AddButtonClearance = 88.dp
+
 /**
  * The outline tree (roadmap D36): rows in document order with collapse toggles, tap selection, up / down /
  * delete actions on the selected row, and long-press drag onto another row to reorder (top or bottom
@@ -95,7 +99,7 @@ internal fun OutlinePanel(session: DesignerSession, palette: StandalonePalette, 
     val rowBounds = remember { mutableStateMapOf<Int, Rect>() }
     var dropIndicator by remember { mutableStateOf<Pair<Int, DropZone>?>(null) }
     val accent = Color(palette.accent)
-    LazyColumn(modifier = modifier.fillMaxSize().testTag("designer-outline")) {
+    LazyColumn(modifier = modifier.fillMaxSize().testTag("designer-outline"), contentPadding = PaddingValues(bottom = AddButtonClearance)) {
         items(rows, key = { row -> row.id?.toString() ?: "expr-${rows.indexOf(row)}" }) { row ->
             val selected = row.id != null && row.id == session.selectedId
             val indicator = dropIndicator?.takeIf { it.first == row.id }

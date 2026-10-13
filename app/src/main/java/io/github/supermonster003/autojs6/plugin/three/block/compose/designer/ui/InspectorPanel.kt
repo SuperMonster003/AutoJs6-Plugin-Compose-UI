@@ -115,7 +115,7 @@ private fun SectionTitle(text: String, palette: StandalonePalette) {
 @Composable
 internal fun InspectorPanel(session: DesignerSession, palette: StandalonePalette, onPickSlotComponent: (String) -> Unit, modifier: Modifier = Modifier) {
     val node = session.selected
-    Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).testTag("designer-inspector")) {
+    Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, bottom = AddButtonClearance).testTag("designer-inspector")) {
         if (node == null) {
             Text(stringResource(R.string.designer_select_node_hint), color = Color(palette.muted), modifier = Modifier.padding(vertical = 16.dp))
             return@Column

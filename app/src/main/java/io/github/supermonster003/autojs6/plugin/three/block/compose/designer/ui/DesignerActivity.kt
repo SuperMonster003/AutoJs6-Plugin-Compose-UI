@@ -9,8 +9,10 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -307,14 +309,8 @@ internal class DesignerActivity : StandaloneActivity() {
                 }
             },
         ) { padding ->
-            Column(Modifier.fillMaxSize().padding(padding)) {
-                Box(
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1.1f)
-                        .background(Color(palette.surfaceVariant))
-                        .testTag("designer-canvas"),
-                ) {
+            val canvas: @Composable (Modifier) -> Unit = { placement ->
+                Box(placement.background(Color(palette.surfaceVariant)).testTag("designer-canvas")) {
                     DesignCanvas(
                         document = session.document,
                         theme = theme,
@@ -331,13 +327,30 @@ internal class DesignerActivity : StandaloneActivity() {
                         modifier = Modifier.fillMaxSize().padding(8.dp),
                     )
                 }
-                Column(Modifier.fillMaxWidth().weight(0.9f)) {
+            }
+            val panels: @Composable (Modifier) -> Unit = { placement ->
+                Column(placement) {
                     TabRow(selectedTabIndex = tab, containerColor = Color(palette.background), contentColor = Color(palette.text)) {
                         Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.designer_tab_outline)) }, modifier = Modifier.testTag("designer-tab-outline"))
                         Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.designer_tab_inspector)) }, modifier = Modifier.testTag("designer-tab-inspector"))
                     }
                     if (tab == 0) OutlinePanel(session, palette, Modifier.fillMaxWidth())
                     else InspectorPanel(session, palette, onPickSlotComponent = { slot -> paletteTarget = slot; paletteOpen = true }, modifier = Modifier.fillMaxWidth())
+                }
+            }
+            BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
+                // A window wider than tall (a phone on its side, a tablet) puts the canvas and the panels side by
+                // side: stacked under a 360 dp tall canvas the outline shows about one row, behind the add button.
+                if (maxWidth > maxHeight) {
+                    Row(Modifier.fillMaxSize()) {
+                        canvas(Modifier.fillMaxHeight().weight(1.1f))
+                        panels(Modifier.fillMaxHeight().weight(0.9f))
+                    }
+                } else {
+                    Column(Modifier.fillMaxSize()) {
+                        canvas(Modifier.fillMaxWidth().weight(1.1f))
+                        panels(Modifier.fillMaxWidth().weight(0.9f))
+                    }
                 }
             }
         }
