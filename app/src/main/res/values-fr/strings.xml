@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">Galerie de composants</string>
     <string name="designer_open_in_host">Ouvrir dans l\'éditeur AutoJs6</string>
     <string name="designer_parse_error">Le script ne peut pas être ouvert dans le concepteur. Ligne %1$d, colonne %2$d: %3$s</string>
+    <string name="designer_preview_interact">Interagir</string>
     <string name="designer_preview_problems">Non prévisualisé</string>
     <string name="designer_project_name">Nom du projet</string>
     <string name="designer_redo">Rétablir</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">Réécrire dans la source</string>
     <string name="designer_source_write_failed">Impossible d\'écrire dans le fichier source; il est peut-être en lecture seule</string>
     <string name="designer_source_written">Réécrit dans le fichier source</string>
+    <string name="designer_state_empty">Ce script ne déclare aucun compose.state au niveau supérieur.</string>
+    <string name="designer_state_hint">Les valeurs d\'aperçu ne modifient que le canevas; le script garde ses valeurs initiales. Avec Interagir activé, les interrupteurs, curseurs, champs de texte et autres contrôles liés à un état le modifient ici.</string>
+    <string name="designer_state_initial">Valeur initiale: %1$s</string>
+    <string name="designer_state_reset">Réinitialiser</string>
+    <string name="designer_state_reset_all">Tout réinitialiser</string>
+    <string name="designer_state_value">Valeur d\'aperçu</string>
     <string name="designer_tab_inspector">Propriétés</string>
     <string name="designer_tab_outline">Plan</string>
+    <string name="designer_tab_state">État</string>
     <string name="designer_undo">Annuler</string>
     <string name="designer_unknown_component">Ce composant ne figure pas dans le catalogue du contrat.</string>
     <string name="designer_value_expression">Expression</string>

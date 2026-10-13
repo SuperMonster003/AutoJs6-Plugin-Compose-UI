@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">组件画廊</string>
     <string name="designer_open_in_host">在 AutoJs6 编辑器中打开</string>
     <string name="designer_parse_error">设计器无法打开此脚本. 第 %1$d 行第 %2$d 列: %3$s</string>
+    <string name="designer_preview_interact">交互预览</string>
     <string name="designer_preview_problems">未能预览的部分</string>
     <string name="designer_project_name">工程名称</string>
     <string name="designer_redo">重做</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">写回来源</string>
     <string name="designer_source_write_failed">无法写入来源文件, 它可能是只读的</string>
     <string name="designer_source_written">已写回来源文件</string>
+    <string name="designer_state_empty">此脚本没有在顶层声明 compose.state.</string>
+    <string name="designer_state_hint">预览值只影响画布, 脚本中的初值不变. 打开 \"交互预览\" 后, 画布中绑定了状态的开关, 滑块, 输入框等控件会直接修改这里的值.</string>
+    <string name="designer_state_initial">初值: %1$s</string>
+    <string name="designer_state_reset">重置</string>
+    <string name="designer_state_reset_all">全部重置</string>
+    <string name="designer_state_value">预览值</string>
     <string name="designer_tab_inspector">属性</string>
     <string name="designer_tab_outline">大纲</string>
+    <string name="designer_tab_state">状态</string>
     <string name="designer_undo">撤销</string>
     <string name="designer_unknown_component">该组件不在契约目录中.</string>
     <string name="designer_value_expression">表达式</string>

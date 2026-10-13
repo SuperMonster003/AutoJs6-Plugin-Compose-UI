@@ -32,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -45,6 +46,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -414,6 +416,16 @@ internal class DesignerActivity : StandaloneActivity() {
                         onDrop = { session.endDrag() },
                         onProblems = { session.previewProblems = it },
                         modifier = Modifier.fillMaxSize().padding(8.dp),
+                        values = session.previewValues,
+                        interactive = session.interactive,
+                        onEvent = { nodeId, type, payload -> session.previewEvent(nodeId, type) { field -> payload.get(field) } },
+                    )
+                    // Edit mode selects and drags; the interactive preview passes input to the components (P9.3).
+                    FilterChip(
+                        selected = session.interactive,
+                        onClick = { session.interactive = !session.interactive },
+                        label = { Text(stringResource(R.string.designer_preview_interact)) },
+                        modifier = Modifier.align(Alignment.TopEnd).padding(end = 12.dp).testTag("designer-interact"),
                     )
                 }
             }
@@ -422,9 +434,13 @@ internal class DesignerActivity : StandaloneActivity() {
                     TabRow(selectedTabIndex = tab, containerColor = Color(palette.background), contentColor = Color(palette.text)) {
                         Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.designer_tab_outline)) }, modifier = Modifier.testTag("designer-tab-outline"))
                         Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.designer_tab_inspector)) }, modifier = Modifier.testTag("designer-tab-inspector"))
+                        Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.designer_tab_state)) }, modifier = Modifier.testTag("designer-tab-state"))
                     }
-                    if (tab == 0) OutlinePanel(session, palette, Modifier.fillMaxWidth())
-                    else InspectorPanel(session, palette, onPickSlotComponent = { slot -> paletteTarget = slot; paletteOpen = true }, modifier = Modifier.fillMaxWidth())
+                    when (tab) {
+                        0 -> OutlinePanel(session, palette, Modifier.fillMaxWidth())
+                        1 -> InspectorPanel(session, palette, onPickSlotComponent = { slot -> paletteTarget = slot; paletteOpen = true }, modifier = Modifier.fillMaxWidth())
+                        else -> StatePanel(session, palette, Modifier.fillMaxWidth())
+                    }
                 }
             }
             BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {

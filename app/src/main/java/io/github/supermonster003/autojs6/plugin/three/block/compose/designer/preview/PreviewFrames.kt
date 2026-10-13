@@ -72,9 +72,20 @@ internal object PreviewFrames {
         "Tooltip" to OverlayKind.TOOLTIP,
     )
 
-    fun build(document: DesignDocument, generation: Long, catalog: ComponentCatalog = ComposeUiV2.interopCatalog, images: ImageSource? = null): PreviewFrame {
+    /**
+     * [values] are preview values of top-level states (roadmap P9.3): they replace the initial values in
+     * bindings without touching the document. Properties bound to a state get callbacks for the events that
+     * change them ([PreviewControls]), so an interactive canvas can report those changes.
+     */
+    fun build(
+        document: DesignDocument,
+        generation: Long,
+        catalog: ComponentCatalog = ComposeUiV2.interopCatalog,
+        images: ImageSource? = null,
+        values: Map<String, JsLiteral> = emptyMap(),
+    ): PreviewFrame {
         val root = document.root ?: return PreviewFrame(null, null, generation, listOf("The document has no mount"), emptyMap())
-        val states = document.states.associate { it.name to it.initial }
+        val states = document.states.associate { it.name to (values[it.name]?.let { value -> PropValue.Literal(value) } ?: it.initial) }
         val builder = Builder(catalog, states, images)
         val rootId = builder.emit(root, null)
         var nodes: Map<Int, UiNode> = builder.nodes
@@ -153,12 +164,13 @@ internal object PreviewFrames {
                 }
             }
             val props = (normalized?.props ?: emptyMap()).let { if (overlay != null) it + (ComposeUiProps.OPEN to UiValue.Bool(false)) else it }
+            val callbacks = PreviewControls.controls(node, spec).keys.associateWith { node.id }
             val uiNode = try {
-                UiNode(node.id, node.type, key, props, normalized?.modifier ?: emptyList(), children, slots).also { RendererCatalog.validate(it) }
+                UiNode(node.id, node.type, key, props, normalized?.modifier ?: emptyList(), children, slots, callbacks).also { RendererCatalog.validate(it) }
             } catch (error: ComposeUiContractException) {
                 problems += "${node.type}: ${error.message ?: error.code}"
                 try {
-                    UiNode(node.id, node.type, key, emptyMap(), emptyList(), children, slots).also { RendererCatalog.validate(it) }
+                    UiNode(node.id, node.type, key, emptyMap(), emptyList(), children, slots, callbacks).also { RendererCatalog.validate(it) }
                 } catch (second: ComposeUiContractException) {
                     return placeholder(node.id, "[${node.type}]")
                 }

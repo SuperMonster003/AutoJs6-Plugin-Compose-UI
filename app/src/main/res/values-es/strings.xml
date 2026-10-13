@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">Galería de componentes</string>
     <string name="designer_open_in_host">Abrir en el editor de AutoJs6</string>
     <string name="designer_parse_error">El script no se puede abrir en el diseñador. Línea %1$d, columna %2$d: %3$s</string>
+    <string name="designer_preview_interact">Interactuar</string>
     <string name="designer_preview_problems">Sin vista previa</string>
     <string name="designer_project_name">Nombre del proyecto</string>
     <string name="designer_redo">Rehacer</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">Escribir de vuelta en el origen</string>
     <string name="designer_source_write_failed">No se puede escribir en el archivo de origen; puede ser de solo lectura</string>
     <string name="designer_source_written">Escrito de vuelta en el archivo de origen</string>
+    <string name="designer_state_empty">Este script no declara ningún compose.state en el nivel superior.</string>
+    <string name="designer_state_hint">Los valores de vista previa solo cambian el lienzo; el script conserva sus valores iniciales. Con Interactuar activado, los interruptores, controles deslizantes, campos de texto y otros controles vinculados a un estado lo cambian aquí.</string>
+    <string name="designer_state_initial">Valor inicial: %1$s</string>
+    <string name="designer_state_reset">Restablecer</string>
+    <string name="designer_state_reset_all">Restablecer todo</string>
+    <string name="designer_state_value">Valor de vista previa</string>
     <string name="designer_tab_inspector">Propiedades</string>
     <string name="designer_tab_outline">Esquema</string>
+    <string name="designer_tab_state">Estado</string>
     <string name="designer_undo">Deshacer</string>
     <string name="designer_unknown_component">Este componente no está en el catálogo del contrato.</string>
     <string name="designer_value_expression">Expresión</string>

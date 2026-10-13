@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -57,23 +58,41 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import org.autojs.plugin.compose.api.ComposeUiComponents
+import org.autojs.plugin.compose.api.ComposeUiEventFields
+import org.autojs.plugin.compose.api.ComposeUiProps
 import org.autojs.plugin.compose.api.model.ThemeSpec
+import org.autojs.plugin.compose.api.model.UiValue
 
 /**
- * Design-time renderer controllers: the same classes the in-host renderer uses, with events swallowed
- * (the canvas selects nodes through its own overlay) and errors collected for the designer.
+ * Design-time renderer controllers: the same classes the in-host renderer uses, with errors collected for the
+ * designer. Events go to [onEvent], which only the interactive preview (P9.3) uses; in edit mode the overlay
+ * takes every pointer, so none arrive.
  */
 internal class CanvasControllers {
     val scope = CoroutineScope(Dispatchers.Main.immediate + SupervisorJob())
     val commands = NodeCommandRegistry()
     val failures = ArrayList<Throwable>()
-    private val emit: (Long, Int, String, Int, Bundle) -> Unit = { _, _, _, _, _ -> }
+    var onEvent: (nodeId: Int, type: String, payload: Bundle) -> Unit = { _, _, _ -> }
+    /** The text each field last reported, so a frame echoing it does not reset a field the user is typing in. */
+    private val typed = HashMap<Int, String>()
+    val emit: (Long, Int, String, Int, Bundle) -> Unit = { _, nodeId, type, _, payload ->
+        payload.getString(ComposeUiEventFields.TEXT)?.let { typed[nodeId] = it }
+        onEvent(nodeId, type, payload)
+    }
     val fields = TextFieldController(emit, { failures += it }, { scope })
     val snackbar = SnackbarController({ scope }, emit)
 
     fun accept(frame: PreviewFrame) {
         fields.acceptFrame(frame.tree, frame.generation)
         snackbar.acceptFrame(frame.tree, frame.generation)
+        // A field's text is its initial text in the renderer; when the document or a preview value changes it,
+        // set the field to it, unless the change is the field's own typing coming back.
+        frame.tree?.nodes?.forEach { node ->
+            if (node.type != ComposeUiComponents.TEXT_FIELD && node.type != ComposeUiComponents.OUTLINED_TEXT_FIELD) return@forEach
+            val declared = (node.props[ComposeUiProps.TEXT] as? UiValue.Str)?.value ?: return@forEach
+            if (typed[node.nodeId] != declared) fields.replaceText(node.nodeId, declared)
+        }
     }
 
     fun dispose() {
@@ -163,7 +182,9 @@ internal class CanvasBounds {
  * theme, with an overlay for tap selection, long-press drag onto a container and highlight rectangles;
  * during a drag the container is highlighted and a line marks where the node would land (P9.1). Open window
  * components are drawn over the page in the canvas itself ([DesignOverlay]); no window ever opens.
- * Real controls never receive input; the overlay owns every pointer. The document is laid out on a
+ * In edit mode real controls never receive input, the overlay owns every pointer; in the interactive preview
+ * (P9.3, [interactive]) the overlay steps aside and value changes of state-bound properties reach [onEvent].
+ * The document is laid out on a
  * bounded logical screen the size of the canvas viewport (as `compose.mount` fills an Activity), so
  * scrollable components get finite constraints; zoom scales that screen and the viewport pans over it.
  */
@@ -186,11 +207,16 @@ internal fun DesignCanvas(
     onDrop: () -> Unit,
     onProblems: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
+    /** Preview values of top-level states (P9.3). */
+    values: Map<String, JsLiteral> = emptyMap(),
+    interactive: Boolean = false,
+    onEvent: (nodeId: Int, type: String, payload: Bundle) -> Unit = { _, _, _ -> },
 ) {
     val controllers = remember { CanvasControllers() }
     DisposableEffect(controllers) { onDispose { controllers.dispose() } }
+    SideEffect { controllers.onEvent = onEvent }
     val generation = remember { LongArray(1) }
-    val preview = remember(document, images) { PreviewFrames.build(document, ++generation[0], images = images) }
+    val preview = remember(document, images, values) { PreviewFrames.build(document, ++generation[0], images = images, values = values) }
     // Written here, before the canvas content reads it, so the changed nodes recompose in this same frame.
     val live = remember { LiveFrame() }
     val rendered = remember(preview) { preview.frame?.let(live::update) }
@@ -229,7 +255,7 @@ internal fun DesignCanvas(
                             Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
                                 rendered?.let { frame ->
                                     val render: @Composable (Int) -> Unit = { id ->
-                                        RenderNode(frame, id, controllers.commands, controllers.fields, controllers.snackbar, { _, _, _, _, _ -> })
+                                        RenderNode(frame, id, controllers.commands, controllers.fields, controllers.snackbar, controllers.emit)
                                     }
                                     render(frame.rootId)
                                     // Open window components over the page, in tree order (P9.1).
@@ -245,7 +271,8 @@ internal fun DesignCanvas(
                 }
             }
         }
-        Box(
+        // The interactive preview leaves the pointers to the components and hides the selection.
+        if (!interactive) Box(
             Modifier
                 .matchParentSize()
                 .testTag("designer-canvas-overlay")

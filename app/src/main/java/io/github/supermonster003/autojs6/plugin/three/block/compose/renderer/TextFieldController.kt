@@ -85,6 +85,18 @@ internal class TextFieldController(
 
     fun editor(nodeId: Int): TextFieldState = entry(nodeId).state
 
+    /**
+     * Design-time hook (the designer canvas, roadmap P9.3): sets an existing editor to [text] after the
+     * document or a preview value changed a field's declared text. The host never changes declared text
+     * ([validateNode] rejects it) and edits through commands; the designer has no script to send them.
+     */
+    fun replaceText(nodeId: Int, text: String) {
+        val editor = editors[nodeId] ?: return
+        if (closed || editor.state.text.toString() == text) return
+        synchronize(nodeId, editor)
+        execute(UiCommand.Edit(nodeId, text, null, editor.revision.sequence))
+    }
+
     fun inputTransformation(nodeId: Int): InputTransformation = entry(nodeId).input
 
     /** This method is synchronous, including reading native edits not yet observed by snapshotFlow. */

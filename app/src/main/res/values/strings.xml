@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">Component gallery</string>
     <string name="designer_open_in_host">Open in AutoJs6 editor</string>
     <string name="designer_parse_error">The script cannot be opened in the designer. Line %1$d, column %2$d: %3$s</string>
+    <string name="designer_preview_interact">Interact</string>
     <string name="designer_preview_problems">Not previewed</string>
     <string name="designer_project_name">Project name</string>
     <string name="designer_redo">Redo</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">Write back to source</string>
     <string name="designer_source_write_failed">The source file cannot be written; it may be read-only</string>
     <string name="designer_source_written">Written back to the source file</string>
+    <string name="designer_state_empty">This script declares no compose.state at the top level.</string>
+    <string name="designer_state_hint">Preview values change only the canvas; the script keeps its initial values. With Interact on, switches, sliders, text fields and other controls bound to a state change it here.</string>
+    <string name="designer_state_initial">Initial: %1$s</string>
+    <string name="designer_state_reset">Reset</string>
+    <string name="designer_state_reset_all">Reset all</string>
+    <string name="designer_state_value">Preview value</string>
     <string name="designer_tab_inspector">Properties</string>
     <string name="designer_tab_outline">Outline</string>
+    <string name="designer_tab_state">State</string>
     <string name="designer_undo">Undo</string>
     <string name="designer_unknown_component">This component is not in the contract catalog.</string>
     <string name="designer_value_expression">Expression</string>

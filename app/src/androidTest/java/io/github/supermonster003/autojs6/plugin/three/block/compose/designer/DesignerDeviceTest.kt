@@ -3,6 +3,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -14,6 +15,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -164,6 +166,23 @@ internal class DesignerDeviceTest {
         }
         val undone = store.read(name)
         assertTrue(undone, undone.contains(".padding(4).width(40).height(20)"))
+    }
+
+    @Test
+    fun aTextFieldOnTheCanvasFollowsItsTextProperty() {
+        val name = project("field-text", "compose.mount(compose.Column({padding: 16},\n    compose.TextField({key: 'field', text: 'One'})));\n")
+        launch(name).use {
+            val onCanvas = hasAnyAncestor(hasTestTag("designer-canvas-content"))
+            rule.waitUntil(5_000) { rule.onAllNodes(hasSetTextAction() and onCanvas and hasText("One")).fetchSemanticsNodes().isNotEmpty() }
+            rule.onNodeWithTag("designer-outline-2").performClick()
+            rule.onNodeWithTag("designer-tab-inspector").performClick()
+            // The renderer treats a field's text as its initial text; the canvas still has to show an edited one.
+            val property = hasSetTextAction() and hasAnyAncestor(hasTestTag("designer-inspector")) and hasText("One")
+            rule.onNode(property).performScrollTo().performTextReplacement("Two")
+            rule.waitUntil(5_000) { rule.onAllNodes(hasSetTextAction() and onCanvas and hasText("Two")).fetchSemanticsNodes().isNotEmpty() }
+            rule.onNodeWithTag("designer-undo").performClick()
+            rule.waitUntil(5_000) { rule.onAllNodes(hasSetTextAction() and onCanvas and hasText("One")).fetchSemanticsNodes().isNotEmpty() }
+        }
     }
 
     @Test

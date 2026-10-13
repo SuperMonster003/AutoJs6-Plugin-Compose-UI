@@ -13,9 +13,11 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Diagnostic
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditHistory
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.JsLiteral
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DropPlacements
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.LayoutAxes
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.PreviewControls
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.v2.ComposeUiV2
 
@@ -42,6 +44,11 @@ internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCa
     /** The insertion line drawn on the canvas, in canvas coordinates. */
     var dropLine: Pair<Offset, Offset>? by mutableStateOf(null)
     var previewProblems: List<String> by mutableStateOf(emptyList())
+    /** Preview values of top-level states by name (roadmap P9.3): they change only the canvas, never the document. */
+    var previewValues: Map<String, JsLiteral> by mutableStateOf(emptyMap())
+        private set
+    /** Interactive preview: the canvas passes input to the components, whose value changes set preview values. */
+    var interactive: Boolean by mutableStateOf(false)
 
     val canUndo: Boolean get() = history.canUndo
     val canRedo: Boolean get() = history.canRedo
@@ -67,7 +74,23 @@ internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCa
         history.reset(document)
         selectedId = document.root?.id
         dirty = false
+        previewValues = emptyMap()
         publishQuiet()
+    }
+
+    /** Sets (or with null, resets to the script's initial value) the preview value of state [name]. */
+    fun setPreviewValue(name: String, value: JsLiteral?) {
+        previewValues = if (value == null) previewValues - name else previewValues + (name to value)
+    }
+
+    fun resetPreviewValues() { previewValues = emptyMap() }
+
+    /** An event of the interactive canvas: when it changes a state-bound property, the state takes the new value. */
+    fun previewEvent(nodeId: Int, event: String, read: (String) -> Any?) {
+        val node = document.node(nodeId) ?: return
+        val spec = catalog.component(node.type) ?: return
+        val values = PreviewControls.values(node, spec, event, read)
+        if (values.isNotEmpty() && values.any { (name, value) -> previewValues[name] != value }) previewValues = previewValues + values
     }
 
     private fun publish() {

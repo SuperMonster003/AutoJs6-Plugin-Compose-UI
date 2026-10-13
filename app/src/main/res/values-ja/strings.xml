@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">コンポーネントギャラリー</string>
     <string name="designer_open_in_host">AutoJs6 のエディターで開く</string>
     <string name="designer_parse_error">このスクリプトはデザイナーで開けません. %1$d 行 %2$d 列: %3$s</string>
+    <string name="designer_preview_interact">操作プレビュー</string>
     <string name="designer_preview_problems">プレビューできない部分</string>
     <string name="designer_project_name">プロジェクト名</string>
     <string name="designer_redo">やり直す</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">元のファイルに書き戻す</string>
     <string name="designer_source_write_failed">元のファイルに書き込めません. 読み取り専用の可能性があります</string>
     <string name="designer_source_written">元のファイルに書き戻しました</string>
+    <string name="designer_state_empty">このスクリプトはトップレベルで compose.state を宣言していません.</string>
+    <string name="designer_state_hint">プレビュー値はキャンバスだけに反映され, スクリプトの初期値は変わりません. \"操作プレビュー\" をオンにすると, 状態にバインドされたスイッチ, スライダー, テキストフィールドなどの操作でここの値が変わります.</string>
+    <string name="designer_state_initial">初期値: %1$s</string>
+    <string name="designer_state_reset">リセット</string>
+    <string name="designer_state_reset_all">すべてリセット</string>
+    <string name="designer_state_value">プレビュー値</string>
     <string name="designer_tab_inspector">プロパティ</string>
     <string name="designer_tab_outline">アウトライン</string>
+    <string name="designer_tab_state">状態</string>
     <string name="designer_undo">元に戻す</string>
     <string name="designer_unknown_component">このコンポーネントはコントラクトのカタログにありません.</string>
     <string name="designer_value_expression">式</string>

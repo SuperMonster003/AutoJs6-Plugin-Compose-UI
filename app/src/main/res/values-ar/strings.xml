@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">معرض المكونات</string>
     <string name="designer_open_in_host">فتح في محرر AutoJs6</string>
     <string name="designer_parse_error">لا يمكن فتح النص البرمجي في المصمم. السطر %1$d, العمود %2$d: %3$s</string>
+    <string name="designer_preview_interact">تفاعل</string>
     <string name="designer_preview_problems">غير معروض في المعاينة</string>
     <string name="designer_project_name">اسم المشروع</string>
     <string name="designer_redo">إعادة</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">الكتابة إلى المصدر</string>
     <string name="designer_source_write_failed">تعذرت الكتابة إلى الملف المصدر, فقد يكون للقراءة فقط</string>
     <string name="designer_source_written">تمت الكتابة إلى الملف المصدر</string>
+    <string name="designer_state_empty">لا يعرف هذا البرنامج النصي أي compose.state في المستوى الأعلى.</string>
+    <string name="designer_state_hint">قيم المعاينة تغير اللوحة فقط, ويحتفظ البرنامج النصي بقيمه الأولية. عند تشغيل \"تفاعل\" تغير المفاتيح وأشرطة التمرير وحقول النص وغيرها من عناصر التحكم المرتبطة بحالة قيمتها هنا.</string>
+    <string name="designer_state_initial">القيمة الأولية: %1$s</string>
+    <string name="designer_state_reset">إعادة تعيين</string>
+    <string name="designer_state_reset_all">إعادة تعيين الكل</string>
+    <string name="designer_state_value">قيمة المعاينة</string>
     <string name="designer_tab_inspector">الخصائص</string>
     <string name="designer_tab_outline">المخطط</string>
+    <string name="designer_tab_state">الحالة</string>
     <string name="designer_undo">تراجع</string>
     <string name="designer_unknown_component">هذا المكون غير موجود في فهرس العقد.</string>
     <string name="designer_value_expression">تعبير</string>

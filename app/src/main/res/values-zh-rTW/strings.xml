@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">元件畫廊</string>
     <string name="designer_open_in_host">在 AutoJs6 編輯器中開啟</string>
     <string name="designer_parse_error">設計器無法開啟此指令碼. 第 %1$d 行第 %2$d 欄: %3$s</string>
+    <string name="designer_preview_interact">互動預覽</string>
     <string name="designer_preview_problems">未能預覽的部分</string>
     <string name="designer_project_name">專案名稱</string>
     <string name="designer_redo">重做</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">寫回來源</string>
     <string name="designer_source_write_failed">無法寫入來源檔案, 它可能是唯讀的</string>
     <string name="designer_source_written">已寫回來源檔案</string>
+    <string name="designer_state_empty">此指令碼沒有在頂層宣告 compose.state.</string>
+    <string name="designer_state_hint">預覽值只影響畫布, 指令碼中的初值不變. 開啟 \"互動預覽\" 後, 畫布中繫結了狀態的開關, 滑桿, 輸入框等控制項會直接修改這裡的值.</string>
+    <string name="designer_state_initial">初值: %1$s</string>
+    <string name="designer_state_reset">重設</string>
+    <string name="designer_state_reset_all">全部重設</string>
+    <string name="designer_state_value">預覽值</string>
     <string name="designer_tab_inspector">屬性</string>
     <string name="designer_tab_outline">大綱</string>
+    <string name="designer_tab_state">狀態</string>
     <string name="designer_undo">復原</string>
     <string name="designer_unknown_component">該元件不在契約目錄中.</string>
     <string name="designer_value_expression">運算式</string>

@@ -78,6 +78,7 @@
     <string name="designer_open_gallery">Галерея компонентов</string>
     <string name="designer_open_in_host">Открыть в редакторе AutoJs6</string>
     <string name="designer_parse_error">Скрипт нельзя открыть в дизайнере. Строка %1$d, столбец %2$d: %3$s</string>
+    <string name="designer_preview_interact">Взаимодействие</string>
     <string name="designer_preview_problems">Не показано в предпросмотре</string>
     <string name="designer_project_name">Имя проекта</string>
     <string name="designer_redo">Повторить</string>
@@ -111,8 +112,15 @@
     <string name="designer_source_write_back">Записать обратно в источник</string>
     <string name="designer_source_write_failed">Не удалось записать исходный файл: возможно, он доступен только для чтения</string>
     <string name="designer_source_written">Записано обратно в исходный файл</string>
+    <string name="designer_state_empty">Этот скрипт не объявляет compose.state на верхнем уровне.</string>
+    <string name="designer_state_hint">Значения предпросмотра меняют только холст, начальные значения в скрипте остаются прежними. Когда включено \"Взаимодействие\", переключатели, ползунки, поля ввода и другие элементы, привязанные к состоянию, меняют его здесь.</string>
+    <string name="designer_state_initial">Начальное значение: %1$s</string>
+    <string name="designer_state_reset">Сбросить</string>
+    <string name="designer_state_reset_all">Сбросить все</string>
+    <string name="designer_state_value">Значение предпросмотра</string>
     <string name="designer_tab_inspector">Свойства</string>
     <string name="designer_tab_outline">Структура</string>
+    <string name="designer_tab_state">Состояние</string>
     <string name="designer_undo">Отменить</string>
     <string name="designer_unknown_component">Этого компонента нет в каталоге контракта.</string>
     <string name="designer_value_expression">Выражение</string>
