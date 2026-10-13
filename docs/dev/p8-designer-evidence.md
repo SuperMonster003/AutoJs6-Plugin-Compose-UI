@@ -154,11 +154,14 @@ maintainer allowed replacing host and plugin builds on the devices, AutoJs6 was 
 on both phones; the hand-over check then passed on the Redmi (API 33) and on the G8441 (API 28, landscape).
 Two script fixes came out of it (f690b2f): on the landscape G8441 the editor's overflow menu is taller than
 the screen and "More" has to be scrolled to, and on the Redmi the palette could stop with the Button entry
-half under the sheet's top edge, where a tap lands on the drag handle. The isolated spike host cannot stand in
-for a regular host: its editor builds the
-content Uri with `AppFileProvider.AUTHORITY`, which is hard-coded to `org.autojs.autojs6.fileprovider`, so
-granting it from `org.autojs.autojs6.compose.spike` fails with a SecurityException (the regular host is not
-affected).
+half under the sheet's top edge, where a tap lands on the drag handle. The isolated spike host could not stand
+in for a regular host at first: its editor built the content Uri with `AppFileProvider.AUTHORITY`, then
+hard-coded to `org.autojs.autojs6.fileprovider`, so granting it from `org.autojs.autojs6.compose.spike` failed
+with a SecurityException. Host commit 5e0e23bd0b derives the authority from the build
+(`BuildConfig.FILE_PROVIDER_AUTHORITY`, the same value as the manifest placeholder, read through a method so
+callers do not inline it across incremental builds); with it, `verify_host_handoff.py --host-package
+org.autojs.autojs6.compose.spike` passed on AVD_API_30, and the regular host built from the same commit still
+passed with its unchanged authority.
 
 Host compose matrix on the Redmi (spike host 5352 built 12:42 with `-PcomposeUiSpike=true`, host
 androidTest APK, overlay granted through `appops`): 12 classes with the release plugin, 68 tests, 53 passed,
