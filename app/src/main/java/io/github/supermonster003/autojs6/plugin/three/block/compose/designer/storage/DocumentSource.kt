@@ -62,16 +62,21 @@ internal class DocumentIo(private val context: Context, private val store: Proje
     @Throws(IOException::class, SecurityException::class)
     fun read(source: DocumentSource): String = when (source) {
         is DocumentSource.Local -> store.read(source.name)
-        is DocumentSource.External -> context.contentResolver.openInputStream(source.uri)?.use { it.readBytes().toString(StandardCharsets.UTF_8) }
-            ?: throw FileNotFoundException(source.uri.toString())
+        is DocumentSource.External -> readUriOrThrow(source.uri)
     }
+
+    /** The text behind [uri], or null when it cannot be read (gone, or no grant). */
+    fun readUri(uri: Uri): String? = try { readUriOrThrow(uri) } catch (error: IOException) { null } catch (error: SecurityException) { null }
+
+    private fun readUriOrThrow(uri: Uri): String = context.contentResolver.openInputStream(uri)?.use { it.readBytes().toString(StandardCharsets.UTF_8) }
+        ?: throw FileNotFoundException(uri.toString())
 
     /** The current text when it can be read, or null (a document that vanished or lost its grant). */
     fun readOrNull(source: DocumentSource): String? = try { read(source) } catch (error: IOException) { null } catch (error: SecurityException) { null }
 
     fun write(source: DocumentSource, text: String): WriteResult = when (source) {
         is DocumentSource.Local -> { store.write(source.name, text); WriteResult.Saved }
-        is DocumentSource.External -> if (source.writable && writeExternal(source.uri, text)) WriteResult.Saved else {
+        is DocumentSource.External -> if (source.writable && writeUri(source.uri, text)) WriteResult.Saved else {
             WriteResult.SavedAsProject(store.create(source.displayName.substringBeforeLast('.').ifBlank { "imported" }, text).name)
         }
     }
@@ -93,7 +98,8 @@ internal class DocumentIo(private val context: Context, private val store: Proje
         is DocumentSource.External -> source.uri to source.writable
     }
 
-    private fun writeExternal(uri: Uri, text: String): Boolean {
+    /** Replaces the text behind [uri]; false when the provider refuses (read only, gone, no grant). */
+    fun writeUri(uri: Uri, text: String): Boolean {
         val bytes = text.toByteArray(StandardCharsets.UTF_8)
         for (mode in arrayOf("wt", "w")) {
             try {

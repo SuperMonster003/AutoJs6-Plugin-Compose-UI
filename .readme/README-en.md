@@ -181,7 +181,7 @@ The plugin requests no Android runtime permissions and never touches the network
 
 - Component protection: the Wake Activity and the INFO service are protected by the `org.autojs.permission.PLUGIN` signature permission, so only the AutoJs6 host can reach them; the designer editor is an exported component without a permission that only accepts a script document Uri handed over by the user, and reads and writes are limited to that Uri
 - Background behavior: the plugin has no resident service or scheduled task and only receives one system broadcast when it is updated, to normalize its launcher icon components; it consumes nothing while not loaded by the host and while neither the designer nor the gallery is open
-- Data boundary: the renderer never reads or writes script data or user files, and interface state lives only in the host process memory; designer projects and drafts live in the plugin's private directory, are imported and exported only through the system document picker, or read and write a single script file through a Uri the user handed over; the project directory is shared only through the plugin's own content provider, per request, when handing a project to AutoJs6
+- Data boundary: the renderer never reads or writes script data or user files, and interface state lives only in the host process memory; designer projects and drafts live in the plugin's private directory, are imported and exported only through the system document picker, or read and write a single script file through a Uri the user handed over; the project directory is shared only through the plugin's own content provider, per request, when handing a project to AutoJs6; an import keeps access to the picked file when its provider allows it, but the file is only read or written when the user chooses "Write back to source" or "Re-import from source"
 - Backup policy: app backup and device transfer are disabled, and the plugin holds no data worth migrating
 
 When loading the renderer the host keeps its own script permission model; the plugin does not widen the system capabilities scripts can reach.
@@ -228,6 +228,7 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 _2026/10/13_
 
+- `Feature` Designer projects created with "Import script" can use "Write back to source" and "Re-import from source" in the editor menu: the import keeps access to the source file when its provider allows it, either action asks first when the other side changed since the last sync, and a source that can no longer be opened can be picked again to restore the link; saving a project never writes the source by itself
 - `Fix` Open popup components (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) shown as cards on the designer canvas had no padding or spacing around their content
 - `Improvement` Long-press dragging a node on the designer canvas shows an insertion line along the target container's layout (vertical, horizontal or grid) and drops the node where the pointer is, instead of always at the end of the container
 - `Improvement` AndroidView on the designer canvas now shows a tinted placeholder that keeps its size modifiers (such as h and fillMaxWidth) and displays the source of its view expression

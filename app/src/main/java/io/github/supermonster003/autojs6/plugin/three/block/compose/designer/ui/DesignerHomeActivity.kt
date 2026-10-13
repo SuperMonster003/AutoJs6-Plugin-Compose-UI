@@ -115,7 +115,7 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_import_project)) }, onClick = {
                                     menuOpen = false
-                                    importer.launch(arrayOf("application/javascript", "text/javascript", "application/x-javascript", "text/plain", "*/*"))
+                                    importer.launch(ProjectStore.SCRIPT_DOCUMENT_TYPES)
                                 }, modifier = Modifier.testTag("home-import"))
                             }
                         }

@@ -68,6 +68,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.pre
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentIo
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentSource
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.SourceSync
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.autojs.plugin.compose.api.model.ThemeSpec
@@ -85,6 +86,7 @@ import java.nio.charset.StandardCharsets
 internal class DesignerActivity : StandaloneActivity() {
     private lateinit var store: ProjectStore
     private lateinit var io: DocumentIo
+    private lateinit var sync: SourceSync
     private var source: DocumentSource by mutableStateOf(DocumentSource.Local(""))
     private var session: DesignerSession? = null
     private var parseError: DesignerParseError? = null
@@ -97,6 +99,7 @@ internal class DesignerActivity : StandaloneActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         store = ProjectStore(this)
         io = DocumentIo(this, store)
+        sync = SourceSync(contentResolver, store, io)
         val projectName = intent.getStringExtra(EXTRA_PROJECT)?.takeIf { ProjectStore.isValidName(it) }
         val resolved: DocumentSource? = when {
             projectName != null -> DocumentSource.Local(projectName).takeIf { store.exists(projectName) }
@@ -191,6 +194,8 @@ internal class DesignerActivity : StandaloneActivity() {
         var issuesDialog by remember { mutableStateOf(false) }
         var exitDialog by remember { mutableStateOf(false) }
         var zoom by remember { mutableStateOf(1f) }
+        var syncPrompt by remember { mutableStateOf<SyncPrompt?>(null) }
+        var relinkAction by remember { mutableStateOf<SyncAction?>(null) }
         val savedText = stringResource(R.string.designer_saved)
         val savedAsProject = stringResource(R.string.designer_external_readonly_saved)
         val insertFailed = stringResource(R.string.designer_insert_failed)
@@ -201,10 +206,14 @@ internal class DesignerActivity : StandaloneActivity() {
         val hostFailed = stringResource(R.string.designer_host_failed)
         val exported = stringResource(R.string.designer_exported)
         val exportFailed = stringResource(R.string.designer_export_failed)
+        val sourceWritten = stringResource(R.string.designer_source_written)
+        val sourceWriteFailed = stringResource(R.string.designer_source_write_failed)
+        val sourceReimported = stringResource(R.string.designer_source_reimported)
+        val sourceParseFailed = stringResource(R.string.designer_source_parse_failed)
         val theme = remember(appearance) { ThemeSpec(seedArgb = appearance.primary, dark = appearance.dark) }
         val errors = session.diagnostics.count { it.severity == Severity.ERROR }
 
-        fun save(): Boolean {
+        fun save(announce: Boolean = true): Boolean {
             val text = session.script()
             val previous = source
             val result = io.write(previous, text)
@@ -212,7 +221,7 @@ internal class DesignerActivity : StandaloneActivity() {
             baseline = text
             session.markSaved()
             when (result) {
-                is DocumentIo.WriteResult.Saved -> scope.launch { snackbar.showSnackbar(savedText) }
+                is DocumentIo.WriteResult.Saved -> if (announce) scope.launch { snackbar.showSnackbar(savedText) }
                 is DocumentIo.WriteResult.SavedAsProject -> {
                     source = DocumentSource.Local(result.name)
                     scope.launch { snackbar.showSnackbar(savedAsProject.format(result.name)) }
@@ -228,6 +237,50 @@ internal class DesignerActivity : StandaloneActivity() {
                 ScriptLauncher.Result.STARTED -> Unit
                 ScriptLauncher.Result.HOST_MISSING -> scope.launch { snackbar.showSnackbar(hostMissing) }
                 ScriptLauncher.Result.FAILED -> scope.launch { snackbar.showSnackbar(hostFailed) }
+            }
+        }
+
+        // Roadmap P9.1 / D45: an imported project syncs with its source only on request, guarded by the last sync.
+        fun writeBack(name: String, confirmed: Boolean) {
+            if (session.dirty) save(announce = false)
+            when (val state = sync.state(name)) {
+                SourceSync.State.None -> Unit
+                is SourceSync.State.Unavailable -> syncPrompt = SyncPrompt.Unavailable(SyncAction.WRITE_BACK)
+                is SourceSync.State.Ready -> if (state.sourceChanged && !confirmed) syncPrompt = SyncPrompt.Overwrite else {
+                    val written = sync.writeBack(name, session.script())
+                    scope.launch { snackbar.showSnackbar(if (written) sourceWritten else sourceWriteFailed) }
+                }
+            }
+        }
+
+        fun reimport(name: String, confirmed: Boolean) {
+            when (val state = sync.state(name)) {
+                SourceSync.State.None -> Unit
+                is SourceSync.State.Unavailable -> syncPrompt = SyncPrompt.Unavailable(SyncAction.REIMPORT)
+                is SourceSync.State.Ready -> if ((state.projectChanged || session.dirty) && !confirmed) syncPrompt = SyncPrompt.Replace else {
+                    val document = try { ScriptReader().read(state.sourceText) } catch (error: DesignerParseError) { null }
+                    if (document == null) {
+                        scope.launch { snackbar.showSnackbar(sourceParseFailed) }
+                    } else {
+                        session.replace(document)
+                        sync.reimported(name, state.sourceText)
+                        baseline = state.sourceText
+                        io.clearDraft(source)
+                        scope.launch { snackbar.showSnackbar(sourceReimported) }
+                    }
+                }
+            }
+        }
+
+        val relinker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            val action = relinkAction
+            relinkAction = null
+            val name = (source as? DocumentSource.Local)?.name
+            if (uri == null || action == null || name == null) return@rememberLauncherForActivityResult
+            sync.relink(name, uri)
+            when (action) {
+                SyncAction.WRITE_BACK -> writeBack(name, confirmed = false)
+                SyncAction.REIMPORT -> reimport(name, confirmed = false)
             }
         }
 
@@ -298,6 +351,17 @@ internal class DesignerActivity : StandaloneActivity() {
                                     menuOpen = false
                                     exporter.launch(source.title)
                                 }, modifier = Modifier.testTag("designer-menu-export"))
+                                val linked = (source as? DocumentSource.Local)?.name?.takeIf { menuOpen && store.sourceOf(it) != null }
+                                if (linked != null) {
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.designer_source_write_back)) }, onClick = {
+                                        menuOpen = false
+                                        writeBack(linked, confirmed = false)
+                                    }, modifier = Modifier.testTag("designer-menu-write-back"))
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.designer_source_reimport)) }, onClick = {
+                                        menuOpen = false
+                                        reimport(linked, confirmed = false)
+                                    }, modifier = Modifier.testTag("designer-menu-reimport"))
+                                }
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_open_gallery)) }, onClick = { menuOpen = false; context.startActivity(Intent(context, GalleryActivity::class.java)) })
                             }
                         }
@@ -402,6 +466,45 @@ internal class DesignerActivity : StandaloneActivity() {
                 dismissButton = { TextButton(onClick = { pendingDraft = null; io.clearDraft(source) }, modifier = Modifier.testTag("designer-draft-discard")) { Text(stringResource(R.string.designer_draft_discard)) } },
             )
         }
+        val linkedName = (source as? DocumentSource.Local)?.name
+        when (val prompt = syncPrompt) {
+            null -> Unit
+            SyncPrompt.Overwrite -> AlertDialog(
+                onDismissRequest = { syncPrompt = null },
+                title = { Text(stringResource(R.string.designer_source_changed_title)) },
+                text = { Text(stringResource(R.string.designer_source_changed_message)) },
+                confirmButton = {
+                    TextButton(onClick = { syncPrompt = null; linkedName?.let { writeBack(it, confirmed = true) } }, modifier = Modifier.testTag("designer-source-overwrite")) {
+                        Text(stringResource(R.string.designer_source_overwrite))
+                    }
+                },
+                dismissButton = { TextButton(onClick = { syncPrompt = null }) { Text(stringResource(R.string.designer_cancel)) } },
+            )
+            SyncPrompt.Replace -> AlertDialog(
+                onDismissRequest = { syncPrompt = null },
+                title = { Text(stringResource(R.string.designer_source_replace_title)) },
+                text = { Text(stringResource(R.string.designer_source_replace_message)) },
+                confirmButton = {
+                    TextButton(onClick = { syncPrompt = null; linkedName?.let { reimport(it, confirmed = true) } }, modifier = Modifier.testTag("designer-source-replace")) {
+                        Text(stringResource(R.string.designer_source_replace))
+                    }
+                },
+                dismissButton = { TextButton(onClick = { syncPrompt = null }) { Text(stringResource(R.string.designer_cancel)) } },
+            )
+            is SyncPrompt.Unavailable -> AlertDialog(
+                onDismissRequest = { syncPrompt = null },
+                title = { Text(stringResource(R.string.designer_source_unavailable_title)) },
+                text = { Text(stringResource(R.string.designer_source_unavailable_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        syncPrompt = null
+                        relinkAction = prompt.action
+                        relinker.launch(ProjectStore.SCRIPT_DOCUMENT_TYPES)
+                    }, modifier = Modifier.testTag("designer-source-pick-again")) { Text(stringResource(R.string.designer_source_pick_again)) }
+                },
+                dismissButton = { TextButton(onClick = { syncPrompt = null }) { Text(stringResource(R.string.designer_cancel)) } },
+            )
+        }
         externalChange?.let { changed ->
             AlertDialog(
                 onDismissRequest = { externalChange = null },
@@ -415,6 +518,17 @@ internal class DesignerActivity : StandaloneActivity() {
                 },
             )
         }
+    }
+
+    private enum class SyncAction { WRITE_BACK, REIMPORT }
+
+    private sealed class SyncPrompt {
+        /** Writing back would overwrite edits made to the source since the last sync. */
+        object Overwrite : SyncPrompt()
+        /** Re-importing would replace edits made to the project since the last sync. */
+        object Replace : SyncPrompt()
+        /** The source cannot be opened; picking it again relinks the project and retries [action]. */
+        data class Unavailable(val action: SyncAction) : SyncPrompt()
     }
 
     companion object {

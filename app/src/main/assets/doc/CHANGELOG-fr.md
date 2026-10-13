@@ -8,6 +8,7 @@
 
 ###### 2026/10/13
 
+* `Nouveaute` Les projets du concepteur créés avec "Importer un script" peuvent utiliser "Réécrire dans la source" et "Réimporter depuis la source" dans le menu de l'éditeur: l'import conserve l'accès au fichier source quand son fournisseur le permet, chaque action demande d'abord confirmation si l'autre côté a changé depuis la dernière synchronisation, et une source qui ne s'ouvre plus peut être choisie à nouveau pour rétablir le lien; enregistrer un projet n'écrit jamais la source automatiquement
 * `Correction` Les composants contextuels ouverts (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) affichés en carte sur le canevas du concepteur n'avaient ni marge intérieure ni espacement autour de leur contenu
 * `Amelioration` Un glisser après appui long sur le canevas du concepteur affiche une ligne d'insertion selon la disposition du conteneur cible (verticale, horizontale ou en grille) et dépose le noeud à l'emplacement du doigt, au lieu de toujours l'ajouter à la fin du conteneur
 * `Amelioration` Sur le canevas du concepteur, AndroidView apparaît désormais comme une zone teintée qui conserve ses modificateurs de taille (comme h et fillMaxWidth) et affiche le source de son expression view

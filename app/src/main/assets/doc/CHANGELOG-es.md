@@ -8,6 +8,7 @@
 
 ###### 2026/10/13
 
+* `Novedad` Los proyectos del diseñador creados con "Importar script" pueden usar "Escribir de vuelta en el origen" y "Volver a importar desde el origen" en el menú del editor: la importación conserva el acceso al archivo de origen cuando su proveedor lo permite, cada acción pregunta antes si el otro lado cambió desde la última sincronización, y un origen que ya no se abre se puede elegir de nuevo para restablecer el vínculo; guardar un proyecto nunca escribe el origen por sí solo
 * `Correccion` Los componentes emergentes abiertos (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) mostrados como tarjeta en el lienzo del diseñador no tenían relleno ni espaciado alrededor de su contenido
 * `Mejora` Arrastrar un nodo con pulsación larga en el lienzo del diseñador muestra una línea de inserción según la disposición del contenedor de destino (vertical, horizontal o en cuadrícula) y suelta el nodo donde está el dedo, en lugar de añadirlo siempre al final del contenedor
 * `Mejora` En el lienzo del diseñador, AndroidView se muestra ahora como un área sombreada que conserva sus modificadores de tamaño (como h y fillMaxWidth) y muestra el código de su expresión view

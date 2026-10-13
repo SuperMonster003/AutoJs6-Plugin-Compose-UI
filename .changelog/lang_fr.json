@@ -7,6 +7,9 @@
   "$data": {
     "v1.3.0": {
       "released_date": "2026/10/13",
+      "feature": [
+        "Les projets du concepteur créés avec \"Importer un script\" peuvent utiliser \"Réécrire dans la source\" et \"Réimporter depuis la source\" dans le menu de l'éditeur: l'import conserve l'accès au fichier source quand son fournisseur le permet, chaque action demande d'abord confirmation si l'autre côté a changé depuis la dernière synchronisation, et une source qui ne s'ouvre plus peut être choisie à nouveau pour rétablir le lien; enregistrer un projet n'écrit jamais la source automatiquement"
+      ],
       "fix": [
         "Les composants contextuels ouverts (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) affichés en carte sur le canevas du concepteur n'avaient ni marge intérieure ni espacement autour de leur contenu"
       ],
