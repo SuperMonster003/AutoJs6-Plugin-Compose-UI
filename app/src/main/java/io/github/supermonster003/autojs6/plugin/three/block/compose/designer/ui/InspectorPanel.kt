@@ -1,6 +1,7 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -27,13 +29,19 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -350,12 +358,66 @@ private fun HandlerEditor(name: String, handler: HandlerSource?, palette: Standa
     }
 }
 
+/**
+ * The ordered modifier chain (roadmap D36): each operation with its arguments, up / down / remove buttons, and
+ * (P9.1) a drag handle that moves an operation to where it is released, shown by an insertion line. A drag is
+ * one undo step; the buttons stay as the accessible and keyboard path.
+ */
 @Composable
 private fun ModifierChainEditor(chain: List<ModifierEntry>, specs: List<ModifierSpec>, parentType: String?, palette: StandalonePalette, onSeal: () -> Unit, onChange: (List<ModifierEntry>) -> Unit) {
+    val accent = Color(palette.accent)
+    val rowBounds = remember { mutableStateMapOf<Int, Rect>() }
+    val handleBounds = remember { mutableStateMapOf<Int, Rect>() }
+    var dragging by remember { mutableStateOf<Int?>(null) }
+    /** The row the dragged operation would land before; null lands it after the last row. */
+    var insertBefore by remember { mutableStateOf<Int?>(null) }
+    fun landing(from: Int, before: Int?): Int = before?.let { if (it > from) it - 1 else it } ?: chain.lastIndex
     chain.forEachIndexed { index, operation ->
         val spec = specs.firstOrNull { it.name == operation.name }
-        Column(Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("designer-modifier-$index")) {
+        val dragged = dragging
+        if (dragged != null && insertBefore == index && landing(dragged, index) != dragged) {
+            Box(Modifier.fillMaxWidth().height(2.dp).background(accent).testTag("designer-modifier-drop-line"))
+        }
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { rowBounds[index] = it.boundsInRoot() }
+                .alpha(if (dragged == index) 0.4f else 1f)
+                .padding(vertical = 2.dp)
+                .testTag("designer-modifier-$index"),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Filled.Menu,
+                    contentDescription = null,
+                    tint = Color(palette.muted),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(6.dp)
+                        .onGloballyPositioned { handleBounds[index] = it.boundsInRoot() }
+                        .pointerInput(chain) {
+                            detectDragGestures(
+                                onDragStart = { dragging = index; insertBefore = index },
+                                onDrag = { change, _ ->
+                                    change.consume()
+                                    val pointer = (handleBounds[index]?.top ?: 0f) + change.position.y
+                                    insertBefore = chain.indices.firstOrNull { row -> row != index && (rowBounds[row]?.center?.y ?: Float.MAX_VALUE) > pointer }
+                                },
+                                onDragEnd = {
+                                    val to = landing(index, insertBefore)
+                                    dragging = null
+                                    insertBefore = null
+                                    if (to != index) {
+                                        onSeal()
+                                        onChange(chain.toMutableList().apply { add(to, removeAt(index)) })
+                                        onSeal()
+                                    }
+                                },
+                                onDragCancel = { dragging = null; insertBefore = null },
+                            )
+                        }
+                        .testTag("designer-modifier-handle-$index"),
+                )
                 Text(".${operation.name}", color = Color(palette.text), fontSize = 13.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
                 TextButton(enabled = index > 0, onClick = { onChange(chain.toMutableList().apply { add(index - 1, removeAt(index)) }) }) { Text(stringResource(R.string.designer_move_up)) }
                 TextButton(enabled = index < chain.lastIndex, onClick = { onChange(chain.toMutableList().apply { add(index + 1, removeAt(index)) }) }) { Text(stringResource(R.string.designer_move_down)) }
@@ -377,6 +439,11 @@ private fun ModifierChainEditor(chain: List<ModifierEntry>, specs: List<Modifier
             }
         }
         HorizontalDivider(color = Color(palette.divider))
+    }
+    dragging?.let { dragged ->
+        if (insertBefore == null && landing(dragged, null) != dragged) {
+            Box(Modifier.fillMaxWidth().height(2.dp).background(accent).testTag("designer-modifier-drop-line"))
+        }
     }
     var adding by remember { mutableStateOf(false) }
     Box {

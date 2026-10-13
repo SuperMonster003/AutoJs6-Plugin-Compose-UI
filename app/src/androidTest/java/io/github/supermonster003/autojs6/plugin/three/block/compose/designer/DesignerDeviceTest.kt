@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -132,6 +133,30 @@ internal class DesignerDeviceTest {
         }
         val saved = store.read(name)
         assertTrue(saved, saved.indexOf("key: 'c'") < saved.indexOf("key: 'a'") && saved.indexOf("key: 'a'") < saved.indexOf("key: 'b'"))
+    }
+
+    @Test
+    fun modifierChainDragMovesAnOperationWhereItIsReleased() {
+        val name = project("modifier-drag", "compose.mount(compose.Column({padding: 16},\n    compose.Text({key: 'x', text: 'X', modifier: compose.modifier().padding(4).width(40).height(20)})));\n")
+        launch(name).use {
+            rule.onNodeWithTag("designer-outline-2").performClick()
+            rule.onNodeWithTag("designer-tab-inspector").performClick()
+            rule.onNodeWithTag("designer-modifier-handle-2").performScrollTo()
+            val first = rule.onNodeWithTag("designer-modifier-0").fetchSemanticsNode().boundsInRoot
+            val handle = rule.onNodeWithTag("designer-modifier-handle-2").fetchSemanticsNode().boundsInRoot
+            // Drag the third operation (height) by its handle to just above the first one (padding).
+            rule.onNodeWithTag("designer-modifier-handle-2").performTouchInput {
+                down(center)
+                moveBy(Offset(0f, -viewConfiguration.touchSlop * 2), delayMillis = 50)
+                moveTo(Offset(center.x, center.y + (first.top + 2f - handle.center.y)), delayMillis = 100)
+                up()
+            }
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        val saved = store.read(name)
+        assertTrue(saved, saved.contains(".height(20).padding(4).width(40)"))
     }
 
     @Test

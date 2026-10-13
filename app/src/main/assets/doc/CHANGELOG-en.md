@@ -13,6 +13,7 @@
 * `Fix` Open popup components (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) shown as cards on the designer canvas had no padding or spacing around their content
 * `Improvement` Long-press dragging a node on the designer canvas shows an insertion line along the target container's layout (vertical, horizontal or grid) and drops the node where the pointer is, instead of always at the end of the container
 * `Improvement` AndroidView on the designer canvas now shows a tinted placeholder that keeps its size modifiers (such as h and fillMaxWidth) and displays the source of its view expression
+* `Improvement` The modifier chain in the designer's property drawer can be reordered by dragging the handle on the left of each operation, with an insertion line until it is released; the move up / down buttons remain
 
 # v1.2.0
 
