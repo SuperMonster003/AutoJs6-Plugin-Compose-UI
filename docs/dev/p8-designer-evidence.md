@@ -54,8 +54,10 @@ listed in the official index, and the host, documentation and Offline Docs commi
 The 1.2.0 gate build grows by 421215 B (about 0.40 MiB) and 5163 method references over the 1.1.0
 final, far inside the Q8 budget (increments under 10 MiB do not block). The section 14 review lines
 (2612576 B / 49194 references) were already exceeded by the 1.1.0 F.5 build that packaged the
-AndroidX runtime ("accepted-by-maintainer-for-f5; build44 growth reported for confirmation"); the
-new 1.2.0 baseline still needs the maintainer's confirmation under the section 14 rules.
+AndroidX runtime ("accepted-by-maintainer-for-f5; build44 growth reported for confirmation").
+On 2026-10-13 the maintainer accepted the 1.2.0 gate build as the new baseline: under the section 14
+rule (measured value plus 10 %, rounded up) the review lines are now 5603798 B and 96392 method
+references, recorded in AGENTS.md section 14.
 
 ## Local gate (AGENTS.md section 14)
 
