@@ -275,8 +275,9 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 | P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
+| P9 | 设计器增强 (规划): 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 起 (按 Q12) | 2026-10-13 维护者选定三个方向并要求只做规划; P9.1 - P9.3 已写入条目, 未开始实施, 待拍板 Q12 - Q16 |
 
-依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4.
+依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4. P9 依赖 1.2.0 本地 gate 与 Q12 - Q16 的拍板; P9.1 与 P9.2 互不依赖, P9.3 第二步依赖 Q14 与 P9.1 的弹层画布内绘制.
 
 ---
 
@@ -621,6 +622,47 @@ P8.5 证据 (2026-10-13): README 10 语言校订 (`p_introduction_how` / 使用�
 
 ---
 
+## P9: 设计器增强 (规划, 尚未实施)
+
+目标: 在 1.2.0 设计器的基础上补齐三个方向: 画布与预览精度 (P9.1), TSX 工程 (P9.2), 设计器内交互预览 (P9.3). 维护者于 2026-10-13 选定这三个方向, 要求本轮只做规划; 各小节进入实施前先拍板附录 D 的 Q12 - Q16, 结论写入固定决策 (D41 起). 下面的调研摘要来自 2026-10-13 对本仓库, 宿主与 TypeScript Engine 本地代码的只读调研.
+
+调研摘要:
+
+- 画布: 长按拖放只解析到目标容器, 编辑页忽略指针位置, `DesignerSession.endDrag` 经 `moveInto` 追加到末尾; 节点边界已由 `CanvasBounds.rects` (经 `LocalNodeDecorator`) 记录, `moveTo(id, parentId, index)` 已存在; 惰性列表中未组合的子项没有边界, 过期边界不会清理, 容器的排布方向 (Row / Column / Box / Flow / Grid / Pager) 没有建模. 大纲拖拽按行的上下四分之一判定 BEFORE / AFTER; 修饰链只有上下移与删除按钮.
+- 预览: 打开态的 AlertDialog / ModalBottomSheet / DropdownMenu / Tooltip 是内联卡片; DatePicker / TimePicker 由渲染器直接内联绘制; Image 没有 `BitmapRef` 时显示 `[Image]` 占位; AndroidView 不在渲染目录中, 显示 `[AndroidView]` 且不可从面板插入. 宿主解析图片的规则 (`ComposeScriptPlatform.resolveImage`): `@drawable/name` 取宿主资源, 含 `://` 的路径一律拒绝, 其余按脚本目录读取本地文件.
+- 导入来源: 导入时把 `name=uri` 写入 `sources.properties`, 但没有取持久授权 (`takePersistableUriPermission`), 记录的 Uri 会失效; `ProjectStore.rename` 不迁移记录, `sourceOf` 尚无调用方.
+- TSX: 宿主经 AIDL `ITypeScriptCompilerPlugin` (action `org.autojs.plugin.typescript.COMPILER`, signature 级 PLUGIN 权限, 服务在独立进程 `:typescript_compiler`) 调用 TypeScript Engine, 编译器运行在无头 WebView 的 Web Worker 里, 默认超时 30 s (API 24 x86 AVD 上的 `ERR_AUTOJS6_TYPESCRIPT_COMPILATION_TIMEOUT` 来自这里的预热探测); 编译参数固定为 `jsxFactory: "__autojs6Tsx"` / `jsxFragmentFactory: "__autojs6TsxFragment"`, `<compose.Column p={1}>` 编译为 `__autojs6Tsx(compose.Column, {p: 1}, ...)`, `<compose:Text/>` 为字符串类型. 该 AIDL 只编译, 不提供语法树; 宿主侧客户端约 4000 行; 工作区内没有可复用的 Kotlin / Java JSX 解析器 (Rhino 只有 E4X). 宿主的 compose TSX 样例在 `app/src/androidTest/assets/compose-tsx/` (10 个).
+- 交互预览: 宿主的 `compose` 脚本 API 全部用 Kotlin 实现 (`runtime/api/augment/compose/` 17 个文件约 3300 行, `core/plugin/compose/` 18 个文件约 1800 行), 依赖 `ScriptRuntime`, 脚本调度器, loopers, floaty, images / files 等运行时服务; 其中 `ComposeSession` / `TreeReconciler` / `CallbackRegistry` 只引用契约类. 插件的 Rhino slim jar 含解释器 (`Context` / `Interpreter`, 无 optimizer), 但 release 经 R8 只保留解析闭包 (130 类), `RhinoImportGuardTest` 禁止主源码进入 Rhino Context. 宿主没有 "运行脚本并把界面树回传给其它应用" 的协议, 发送运行的 `script` extra 只是一次普通的 Rhino 运行.
+
+### P9.1 画布与预览精度
+
+- [ ] (插件) 画布拖放的精确插入位置: 按目标容器的排布方向 (纵向: Column / LazyColumn / 纵向 Pager, Grid 按行优先; 横向: Row / LazyRow / 横向 Pager; 叠放: Box 系只追加) 比较指针与各子节点边界的中线, 得到插入序号并在画布上画出插入线, 落下时经既有 `moveTo` 生效; 不可见的惰性子项不参与计算, 每次重组前清理过期边界. 面板插入改为 "插到选中节点之后" (选中的是可容纳子节点的容器时仍追加为末子节点).
+- [ ] (插件) 修饰链拖动排序: 属性抽屉的修饰链列表支持长按拖动, 上下移按钮保留为无障碍与键盘路径; 一次拖动对应一条 `SetModifiers` 命令.
+- [ ] (插件) 弹层真实预览: 打开态的 AlertDialog / ModalBottomSheet / DropdownMenu / Tooltip 在画布逻辑屏幕内用真实组件绘制 (画布内遮罩层加组件本体, 不创建系统窗口), 卡片形式保留为后备; 多个弹层同时打开时按树序叠放.
+- [ ] (插件) Image 预览 (按 Q15): `@drawable/name` 经宿主包 Context 读取资源 (宿主包已在 `<queries>` 中, 无需权限); 本地文件按 Q15 的方案; 网络地址与宿主一致地拒绝, 并在问题列表中说明原因.
+- [ ] (插件) AndroidView 占位改进: 占位显示 `view` 表达式源码与尺寸修饰; 是否允许从面板插入随 Q15 拍板.
+- [ ] (插件) 导入来源同步 (按 Q16): 导入时取读写持久授权 (失败时降为只读并提示), 改名时迁移来源记录; 编辑页菜单增加 "写回来源" 与 "从来源重新导入", 以内容基线检测来源侧的修改并询问; 授权丢失时提示重新选择文件.
+- [ ] (测试) JVM: 插入序号计算 (各排布方向, 首 / 中 / 尾, 不可见子项), 来源记录迁移; instrumentation: 画布拖放到指定序号, 修饰链拖动与撤销, 弹层在画布内绘制且不新增系统窗口, `@drawable` 预览, 来源写回 (androidTest 自带的 DocumentsProvider 提供可持久授权的 Uri).
+
+### P9.2 TSX 工程
+
+- [ ] (插件) TSX 解析 (按 Q13, 建议插件内子集解析器): 新增 `designer/parse/TsxReader`, 用容错扫描器跳过字符串, 模板字面量, 注释, 正则与类型标注, 只把 JSX 元素树 (`compose.X` / `compose:X` 标签, 属性, `{}` 表达式容器, 文本子节点, `<>...</>` Fragment), 顶层 `compose.state` 声明与唯一的挂载调用映射为 `DesignDocument`, 其余源码按范围不透明保留; 无法映射时与 JavaScript 子集一样拒绝并定位. 模型增加 `dialect` (JS / TSX), 校验与预览路径不变.
+- [ ] (插件) TSX 生成: `designer/codegen/TsxWriter` 采用与 `ScriptWriter` 一致的规范格式 (4 空格缩进, 单引号字符串属性, 每个子元素一行), 往返不动点为硬要求; 事件属性与 state 绑定写成 `{...}` 表达式.
+- [ ] (插件) 工程与去向: `ProjectStore` 接受 `.tsx`, 新建工程可选 JavaScript / TSX; 编辑页 intent-filter 增加宿主实际交出的 TypeScript MIME 类型; TSX 工程的发送运行改为交出工程文件的 content Uri (宿主按显示名 `.tsx` 路由到 TypeScript Engine), 不再使用 `script` extra; 复制与导出不变.
+- [ ] (宿主) 若编辑器菜单 "在 3-Block Compose 设计器中打开" 目前只对 `.js` 可见, 扩展到 `.tsx`, 宿主 `.changelog` 10 语言; 由维护者协调.
+- [ ] (文档) `composeDesigner.md` 增加 TSX 小节 (可识别子集, 与 JavaScript 的差异, 运行需要 TypeScript Engine), 离线文档同步; README 与 changelog 10 语言.
+- [ ] (测试) JVM: 宿主的 10 个 compose TSX 样例 (复制到本仓库测试资源) 与 56 条画廊示例的 TSX 形式全部解析并往返; 错误定位用例 (泛型箭头函数, 非 compose 标签, 展开属性, 条件 / 循环生成的子元素); instrumentation: 新建 TSX 工程 -> 编辑 -> 保存 -> 重开一致; 装有 TypeScript Engine 时经宿主运行 TSX 工程的设备证据.
+
+### P9.3 设计器内交互预览
+
+- [ ] (插件) 第一步, 预览状态面板 (不执行脚本): 列出顶层 `compose.state`, 可临时修改其值 (只影响预览, 不写回脚本); 预览模式下受控组件的交互 (开关, 输入, 选择) 直接修改这些预览值; 条件 / 循环生成的内容仍为占位.
+- [ ] (插件) 第二步 (Q14 选沙箱时): 修订 D8 / D35 与 `RhinoImportGuardTest`, 在插件进程内以 Rhino 解释器执行渲染函数与事件处理函数: 独立的 `designer/sandbox` 包, `ClassShutter` 拒绝一切 Java 访问, 设置指令计数与墙钟上限, 只提供 `compose` 的预览实现 (state / render / memo / batch / 事件), `toast` / `log` 写入设计器控制台, 其它宿主模块的调用抛出 "预览中不可用"; 执行结果只用于画布, 不改动文档模型; R8 只为沙箱保留解释器闭包, 体积增量按 Q8 记录.
+- [ ] (插件) 编辑模式 (点选 / 拖拽) 与预览模式 (组件可交互, 事件进入预览值或沙箱) 的切换; 预览错误显示在问题列表, 不阻止编辑与保存.
+- [ ] (文档) 指南页说明预览模式的能力边界 (可用的 API, 与真实运行的差异), README 与 changelog 10 语言.
+- [ ] (测试) JVM: 沙箱拒绝 Java 访问, 死循环在上限内中止, 预览 `compose` 实现在计数器 / 表单 / 列表示例上与宿主语义一致; instrumentation: 预览模式点击计数器按钮后画布更新, 退出预览后文档不变.
+
+---
+
 ## 附录 A: 脚本 API 草案
 
 ### A.1 全局对象
@@ -919,6 +961,26 @@ F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6
 ### Q11 (P8.5 前): 文档页归属
 
 **已拍板 (2026-10-13)**: 按建议实施, `AutoJs6-Documentation` 新增独立指南页 (设计器使用, 工程与往返规则, 可识别的脚本子集), `api/compose.md` 只加一处链接; 离线文档同步.
+
+### Q12 (P9 前): 版本切分与顺序
+
+建议: 1.3.0 = P9.1 (画布与预览精度) + P9.3 第一步 (预览状态面板); 1.4.0 = P9.2 (TSX 工程); 1.5.0 = P9.3 第二步 (沙箱执行, 取决于 Q14). 理由: P9.1 风险最低, 直接改善 1.2.0 的已知限制; TSX 需要新解析器并与宿主协调; 沙箱执行要修订 D8 / D35 且涉及安全面, 放在最后.
+
+### Q13 (P9.2 前): TSX 解析方案
+
+选项: (a) 插件内 TSX 子集解析器 (Kotlin, 离线, 与 D35 "只解析不执行" 一致; 代价是自写扫描器, 要覆盖 TypeScript 类型语法以免误伤不透明段); (b) 经 TypeScript Engine 的编译 AIDL 取编译结果 (只得到 JavaScript 与诊断, 没有语法树, 无法写回 TSX, 且要复制约 4000 行客户端); (c) 在 TypeScript Engine 契约中追加 "解析为语法树" 的操作 (三个仓库的契约变更, 运行时依赖该插件). 建议 (a), 可选地在保存时经 (b) 做语法诊断 (未安装 TypeScript Engine 时跳过).
+
+### Q14 (P9.3 前): 交互预览方案
+
+选项: (a) 只做预览状态面板 (不执行脚本, 风险最低, 条件 / 循环仍为占位); (b) 插件内沙箱解释执行 (Rhino 解释器 + `ClassShutter` + 指令上限, 需修订 D8 / D35, 自行实现 `compose` 的预览语义, 有与宿主语义漂移的风险); (c) 宿主实时预览协议 (宿主真实运行脚本并经新的 Binder 契约把界面树回传设计器: 语义完全一致, 但脚本以完整权限运行, 预览会产生真实副作用, 需要宿主与契约改动). 建议先 (a), 再评估 (b); 不建议 (c).
+
+### Q15 (P9.1 前): 图片与 AndroidView 的预览范围
+
+图片选项: (a) 只支持 `@drawable/name`, 本地文件仍为占位 (不申请任何权限); (b) 另允许按工程授予一个图片目录 (SAF 目录树, 持久授权), 相对路径在该目录下解析; (c) 申请存储 / 媒体运行时权限 (与 `AGENTS.md` 第 15 节 "不申请任何运行时权限" 冲突). AndroidView 选项: (i) 保持不可从面板插入; (ii) 允许以 `view: null` 的不透明桩插入. 建议 (b) + (i).
+
+### Q16 (P9.1 前): 导入来源同步策略
+
+选项: (a) 手动: 菜单 "写回来源" / "从来源重新导入", 检测来源侧修改并询问; (b) 每次保存时自动同时写回来源; (c) 不做, 保持复制式导入. 建议 (a).
 
 ---
 
