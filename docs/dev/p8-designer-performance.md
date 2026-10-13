@@ -126,5 +126,19 @@ the bounds moved.
 What is left, from the same profile: the editor's own composition (outline rows in view, toolbar title),
 deriving the preview (`PreviewFrames.build`, about 16 - 26 ms here), validation in the call, composing the
 restored row, and measuring the 50-row Column. These scale with the document but not quadratically; the
-roadmap does not take them further for 1.3.0. The phones of the 1.2.0 baseline were not measured again in
-this session.
+roadmap does not take them further for 1.3.0.
+
+On the Redmi 22120RN86C (API 33) of the 1.2.0 baseline, with the change (build 126 sources, debug build, same
+251-node document; the phone was otherwise idle):
+
+| Measurement | 1.2.0 baseline (`0c632e9`) | After |
+| --- | --- | --- |
+| Undo restores a row (visibility, compose test rule) | 794.5 / 980.2 | 305.6 / 358.9 |
+| Redo removes a row (visibility, compose test rule) | 693.2 / 867.1 | 256.5 / 302.1 |
+| Undo: call to end of first frame | not measured | 239.3 / 266.5 |
+| Undo: main thread CPU | not measured | 281.3 / 312.1 |
+| Redo: call to end of first frame | not measured | 251.1 / 270.4 |
+| Redo: main thread CPU | not measured | 301.3 / 315.1 |
+
+The visibility times are the same test as the 1.2.0 row, so the two columns compare directly; the frame times
+were not collected before. The Sony G8441 was not measured again.

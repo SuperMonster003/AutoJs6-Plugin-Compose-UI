@@ -154,9 +154,16 @@ internal class DesignerDeviceTest {
             rule.waitForIdle()
             rule.onNodeWithTag("designer-save").performClick()
             rule.waitForIdle()
+            val saved = store.read(name)
+            assertTrue(saved, saved.contains(".height(20).padding(4).width(40)"))
+            // The whole drag is one step: a single undo restores the original chain.
+            rule.onNodeWithTag("designer-undo").performClick()
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
         }
-        val saved = store.read(name)
-        assertTrue(saved, saved.contains(".height(20).padding(4).width(40)"))
+        val undone = store.read(name)
+        assertTrue(undone, undone.contains(".padding(4).width(40).height(20)"))
     }
 
     @Test
