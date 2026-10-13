@@ -241,25 +241,42 @@ def walk(adb: Adb, settings_label: str, copy_label: str, gallery_label: str, lab
     return home_component, pid, entry_label
 
 
-def open_and_delete_project(adb: Adb, labels: dict[str, str]) -> None:
-    """Create a project from the home, let the editor parse and render its template, then delete it again."""
-    project = f"standalone-check-{int(time.time())}"
+def hide_keyboard(adb: Adb) -> None:
+    """Close the input method if it is showing; on a landscape phone it covers the dialog's buttons."""
+    if "mInputShown=true" in adb.shell("dumpsys input_method", check=False):
+        adb.shell("input keyevent KEYCODE_BACK")
+        time.sleep(0.5)
+
+
+def create_project(adb: Adb, labels: dict[str, str], stem: str) -> str:
+    """Create a project named <stem>-<time> from the home and wait until the editor shows its template."""
+    project = f"{stem}-{int(time.time())}"
     new_action, _ = find_node(adb, "the new project action", lambda n: (n.get("content-desc") or "").strip() == labels["new"], clickable=True)
     tap(adb, new_action)
     name_field, _ = find_node(adb, "the project name field", lambda n: n.get("class") == "android.widget.EditText")
     tap(adb, name_field)
     time.sleep(0.5)
     adb.shell(f"input text {project}")
+    hide_keyboard(adb)
     create, _ = find_node(adb, "the create button", lambda n: (n.get("text") or "").strip() == labels["create"], clickable=True)
     tap(adb, create)
     wait_for("the designer editor", lambda: (lambda t: t if t and expand(t[0]) == expand(DESIGNER_ACTIVITY) else None)(top_activity(adb)))
     # The template's Text must come out of the parser and the real renderer inside the release build.
     find_node(adb, "the template text on the design canvas", lambda n: (n.get("text") or "").strip() == TEMPLATE_TEXT)
+    return f"{project}.js"
+
+
+def open_and_delete_project(adb: Adb, labels: dict[str, str]) -> None:
+    """Create a project from the home, let the editor parse and render its template, then delete it again."""
+    file_name = create_project(adb, labels, "standalone-check")
     time.sleep(1.0)
     adb.shell("input keyevent KEYCODE_BACK")
     wait_for("the designer home after leaving the editor", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
+    delete_project(adb, labels, file_name)
 
-    file_name = f"{project}.js"
+
+def delete_project(adb: Adb, labels: dict[str, str], file_name: str) -> None:
+    """Delete a project through its row on the designer home and wait until the row is gone."""
 
     def delete_button():
         root = ui_tree(adb)
