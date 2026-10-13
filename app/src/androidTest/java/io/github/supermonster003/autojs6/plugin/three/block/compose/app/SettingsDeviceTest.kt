@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -22,7 +23,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-/** Pickers edit a draft; only confirm persists, and cancel or an outside click leaves the saved value untouched. */
+/**
+ * Pickers edit a draft; only confirm persists, and cancel or an outside click leaves the saved value untouched.
+ * Rows and options are scrolled into view before each click: on a 640 x 360 dp landscape phone the icon row sits
+ * below the page fold and the last dark mode option below the dialog's list fold.
+ */
 @RunWith(AndroidJUnit4::class)
 internal class SettingsDeviceTest {
     @get:Rule val rule = createAndroidComposeRule<SettingsActivity>()
@@ -38,15 +43,15 @@ internal class SettingsDeviceTest {
     @Test
     fun darkModeChoiceSavesOnlyAfterConfirmation() {
         rule.onNodeWithTag("settings-page").assertIsDisplayed()
-        rule.onNodeWithTag("settings-night").performClick()
+        rule.onNodeWithTag("settings-night").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-night").assertIsDisplayed()
-        rule.onNodeWithTag("dialog-night-option-3").performClick()
+        rule.onNodeWithTag("dialog-night-option-3").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-night-cancel").performClick()
         rule.waitForIdle()
         assertEquals("cancel keeps the saved value", AppearancePreferences.FOLLOW_HOST, AppearancePreferences.read(context).darkMode)
 
-        rule.onNodeWithTag("settings-night").performClick()
-        rule.onNodeWithTag("dialog-night-option-3").performClick()
+        rule.onNodeWithTag("settings-night").performScrollTo().performClick()
+        rule.onNodeWithTag("dialog-night-option-3").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-night-confirm").performClick()
         rule.waitForIdle()
         assertEquals(AppearancePreferences.DARK, AppearancePreferences.read(context).darkMode)
@@ -56,7 +61,7 @@ internal class SettingsDeviceTest {
 
     @Test
     fun themeColorAcceptsPresetsAndValidInputOnly() {
-        rule.onNodeWithTag("settings-color").performClick()
+        rule.onNodeWithTag("settings-color").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-color").assertIsDisplayed()
         rule.onNodeWithTag("dialog-color-input").performTextInput("not a color")
         rule.onNodeWithTag("dialog-color-confirm").assertIsNotEnabled()
@@ -68,16 +73,16 @@ internal class SettingsDeviceTest {
         rule.waitForIdle()
         assertNull("cancel discards the draft", AppearancePreferences.read(context).color)
 
-        rule.onNodeWithTag("settings-color").performClick()
-        rule.onNodeWithTag("dialog-color-preset-#2196F3").performClick()
+        rule.onNodeWithTag("settings-color").performScrollTo().performClick()
+        rule.onNodeWithTag("dialog-color-preset-#2196F3").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-color-confirm").performClick()
         rule.waitForIdle()
         assertEquals(0xff2196f3.toInt(), AppearancePreferences.read(context).color)
         rule.onNodeWithTag("settings-color-summary", useUnmergedTree = true).assertTextEquals("#2196F3")
         assertEquals(0xff2196f3.toInt(), rule.activity.appearance.accent)
 
-        rule.onNodeWithTag("settings-color").performClick()
-        rule.onNodeWithTag("dialog-color-follow").performClick()
+        rule.onNodeWithTag("settings-color").performScrollTo().performClick()
+        rule.onNodeWithTag("dialog-color-follow").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-color-confirm").performClick()
         rule.waitForIdle()
         assertNull("following the host clears the local color", AppearancePreferences.read(context).color)
@@ -85,9 +90,9 @@ internal class SettingsDeviceTest {
 
     @Test
     fun launcherIconChoicePersistsAsComponentStateAndRestores() {
-        rule.onNodeWithTag("settings-icon").performClick()
+        rule.onNodeWithTag("settings-icon").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-icon").assertIsDisplayed()
-        rule.onNodeWithTag("dialog-icon-option-3").performClick()
+        rule.onNodeWithTag("dialog-icon-option-3").performScrollTo().performClick()
         rule.onNodeWithTag("dialog-icon-confirm").performClick()
         rule.waitForIdle()
         assertEquals(LauncherIconMode.TRANSPARENT, LauncherIcons.current(context))

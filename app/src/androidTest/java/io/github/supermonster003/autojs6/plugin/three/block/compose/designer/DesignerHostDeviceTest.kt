@@ -1,6 +1,9 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
+import android.app.Activity
+import android.app.Instrumentation
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.compose.ui.test.assertIsDisplayed
@@ -11,6 +14,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -37,7 +41,9 @@ import java.nio.charset.StandardCharsets
  * Roadmap P8.4 / D39 device coverage: the designer FileProvider exposes a project read-write under its file
  * name, the host destinations target the host's public entries (and resolve when the host is installed),
  * an external document opens from its Uri and is written back through it, a read-only document falls back
- * to a private project, and a file changed outside the designer is reloaded on resume.
+ * to a private project, a file changed outside the designer is reloaded on resume, and the export writes the
+ * script into the document the system picker returns (the picker itself is answered by an Instrumentation
+ * monitor, so no system UI is involved).
  */
 @RunWith(AndroidJUnit4::class)
 internal class DesignerHostDeviceTest {
@@ -98,6 +104,72 @@ internal class DesignerHostDeviceTest {
             assertEquals(ScriptLauncher.Result.HOST_MISSING, ScriptLauncher.start(context, edit))
             assertEquals(ScriptLauncher.Result.HOST_MISSING, ScriptLauncher.start(context, import))
         }
+    }
+
+    /**
+     * Answers the export's ACTION_CREATE_DOCUMENT request with [result] instead of opening the system document
+     * picker, runs [block] and returns how many requests were answered.
+     */
+    private fun answeringDocumentPicker(result: Instrumentation.ActivityResult, block: () -> Unit): Int {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        val monitor = instrumentation.addMonitor(IntentFilter(Intent.ACTION_CREATE_DOCUMENT, ScriptLauncher.SCRIPT_MIME_TYPE), result, true)
+        try {
+            block()
+            return monitor.hits
+        } finally {
+            instrumentation.removeMonitor(monitor)
+        }
+    }
+
+    private fun exportFromTheMenu() {
+        rule.onNodeWithTag("designer-outline").assertIsDisplayed()
+        rule.onNodeWithTag("designer-menu").performClick()
+        rule.onNodeWithTag("designer-menu-export").performScrollTo().performClick()
+        rule.waitForIdle()
+    }
+
+    @Test
+    fun exportWritesTheScriptIntoThePickedDocument() {
+        val name = project("export", "compose.mount(compose.Column({padding: 16},\n    compose.Text({key: 'outgoing', text: 'Outgoing'})));\n")
+        val target = project("export-target")
+        val targetUri = ScriptLauncher.projectUri(context, store.file(target))
+        val hits = answeringDocumentPicker(Instrumentation.ActivityResult(Activity.RESULT_OK, Intent().setData(targetUri))) {
+            ActivityScenario.launch<DesignerActivity>(DesignerActivity.intent(context, name)).use {
+                exportFromTheMenu()
+                rule.waitUntil(5_000) { rule.onAllNodesWithText(context.getString(R.string.designer_exported)).fetchSemanticsNodes().isNotEmpty() }
+            }
+        }
+        assertEquals("one picker request", 1, hits)
+        val written = store.read(target)
+        assertTrue(written, written.contains("key: 'outgoing'"))
+        assertFalse("the picked document was truncated, not appended to", written.contains("Hello"))
+        assertTrue("the project itself is unchanged", store.read(name).contains("key: 'outgoing'"))
+    }
+
+    @Test
+    fun cancelledOrUnwritableExportLeavesDocumentsAlone() {
+        val name = project("export-cancel")
+        val target = project("export-untouched")
+        val before = store.read(target)
+        val cancelled = answeringDocumentPicker(Instrumentation.ActivityResult(Activity.RESULT_CANCELED, null)) {
+            ActivityScenario.launch<DesignerActivity>(DesignerActivity.intent(context, name)).use {
+                exportFromTheMenu()
+                assertEquals(0, rule.onAllNodesWithText(context.getString(R.string.designer_exported)).fetchSemanticsNodes().size)
+                assertEquals(0, rule.onAllNodesWithText(context.getString(R.string.designer_export_failed)).fetchSemanticsNodes().size)
+            }
+        }
+        assertEquals(1, cancelled)
+        assertEquals(before, store.read(target))
+        // A document the provider cannot open for writing reports the failure instead of crashing the editor.
+        val unwritable = Uri.parse("content://" + ScriptLauncher.providerAuthority(context) + "/missing/host-test-none.js")
+        answeringDocumentPicker(Instrumentation.ActivityResult(Activity.RESULT_OK, Intent().setData(unwritable))) {
+            ActivityScenario.launch<DesignerActivity>(DesignerActivity.intent(context, name)).use {
+                exportFromTheMenu()
+                rule.waitUntil(5_000) { rule.onAllNodesWithText(context.getString(R.string.designer_export_failed)).fetchSemanticsNodes().isNotEmpty() }
+                rule.onNodeWithTag("designer-outline").assertIsDisplayed()
+            }
+        }
+        assertEquals(before, store.read(target))
     }
 
     @Test
