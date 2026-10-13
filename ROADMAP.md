@@ -280,7 +280,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P6 | 文档, 声明, README / changelog, 1.0.0 本地 gate | 1.0.0 | 已完成本地 gate (2026-10-04); 正式图案待源图, 远端步骤遵守 D7 |
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 | P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
-| P9 | 设计器增强: 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 - 1.5.0 (D41) | 2026-10-13 维护者选定三个方向, Q12 - Q16 同日拍板 (D41 - D45); 1.2.0 发布基线 6db6da2, master 进入 1.3.0, P9.1 实施中 |
+| P9 | 设计器增强: 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 - 1.5.0 (D41) | 2026-10-13 维护者选定三个方向, Q12 - Q16 同日拍板 (D41 - D45); 1.2.0 发布基线 6db6da2. 1.3.0 (P9.1 全部, P9.3 第一步与模式切换) 同日完成并过本地 gate (build 129 源码, 证据 `docs/dev/p9-designer-evidence.md`), 未推送; 下一步 P9.2 (1.4.0, 依赖宿主与 TypeScript Engine 的解析契约), P9.3 第二步待 1.4.0 后评估 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4. P9 依赖 1.2.0 本地 gate; 按 D41 先 P9.1 与 P9.3 第一步 (1.3.0), 再 P9.2 (1.4.0, 依赖宿主与 TypeScript Engine 的解析契约), P9.3 第二步在 1.4.0 后评估并依赖 P9.1 的弹层画布内绘制.
 
@@ -676,7 +676,9 @@ P8.5 证据 (2026-10-13): README 10 语言校订 (`p_introduction_how` / 使用�
 - [x] (插件) 编辑模式 (点选 / 拖拽) 与预览模式 (组件可交互, 事件进入预览值, 第二步立项后进入沙箱) 的切换; 预览错误显示在问题列表, 不阻止编辑与保存.
   证据 (2026-10-13, build 128): 与第一步一同实现, 见上一条的 "交互预览" 开关; 预览问题沿用编辑页的问题列表 (`session.previewProblems`), 不影响编辑与保存. "进入沙箱" 一节随第二步, 第二步未立项前事件只进入预览值.
 - [ ] (文档) 指南页说明预览模式的能力边界 (可用的 API, 与真实运行的差异), README 与 changelog 10 语言.
+  进度 (2026-10-13, 第一步): 文档站 `1e8894d` 的设计器指南新增 "预览状态与交互预览" 一节 (状态面板, 会回写预览值的控件, 与真实运行的差异), 插件 README `a3b78d5` 与 changelog (build 128) 10 语言已更新; "可用的 API" 一项待第二步的沙箱确定后补写.
 - [ ] (测试) JVM: 沙箱拒绝 Java 访问, 死循环在上限内中止, 预览 `compose` 实现在计数器 / 表单 / 列表示例上与宿主语义一致; instrumentation: 预览模式点击计数器按钮后画布更新, 退出预览后文档不变.
+  进度 (2026-10-13, 第一步): 不执行脚本的部分已有测试: JVM `PreviewStateTest` 5 项, 设备 `DesignerPreviewStateDeviceTest` (交互预览中操作画布控件回写预览值, 结束后脚本不变且无草稿); 计数器按钮需要执行处理函数, 随第二步.
 
 ---
 
@@ -1312,3 +1314,14 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 设计器性能基线 (355654e): 新增默认跳过的 `DesignerPerformanceDeviceTest` (`-e designerPerformance true` 开启), 在 AVD_API_24 / AVD_API_30 / G8441 / Redmi 采集解析 / 校验 / 预览派生 / 生成, 编辑页打开与撤销 / 重做到画布的耗时, 记录在 `docs/dev/p8-designer-performance.md`; 管线各阶段 p90 不超过约 50 ms (56 个示例合计), 编辑页打开 0.2 - 0.7 s, Redmi 上 251 节点文档的撤销 / 重做约 0.7 - 0.8 s. 暂不设复核线, P9.1 增加一条先分清测试同步开销与真实帧耗时, 再决定是否做增量预览的条目.
 - 结束时两台真机为新宿主 + 3-Block Compose 1.2.0 release (build 110), spike 宿主与测试包已卸载.
 - 仍未执行: 真机上的宿主无障碍类 (需改设备无障碍设置), 远端 CI 与 D7 远端步骤 (按维护者决定暂不推送), 宿主 6.8.0 changelog 其余 9 种语言 (由维护者同步).
+
+### 2026-10-13 (晚): P9.1 与 P9.3 第一步, 1.3.0 本地 gate
+
+- P9.1 全部完成 (build 119 - 127): 画布拖放按排列方向插入, AndroidView 占位, 导入来源同步, Image 预览, 修饰链拖动, 弹层画在画布内, 大文档编辑延迟, 测试汇总项; 各条证据见 P9.1. P9.3 第一步 (状态面板, 交互预览) 与编辑 / 预览模式切换完成 (build 128); P9.3 的文档与测试条目都覆盖第二步 (沙箱的可用 API, 计数器按钮点击后画布更新), 第一步部分已在条目下注明进度, 两条仍未勾选.
+- 大文档编辑延迟的调查: 挂着 compose 测试规则时重组由测试时钟驱动, 新增不挂规则的 `DesignerFramePerformanceDeviceTest` 后用 `FrameMetrics` 与 simpleperf `--trace-offcpu` 定位到两处根因: 渲染器按位置调用子节点 (前面插入或删除兄弟会重建其后所有子节点的组合, 宿主同样受影响, `0ec4998` 修复并在 changelog 记为修复), 设计器每次给渲染器新帧 (`LiveFrame` 让未变化的节点跳过); 修正后又发现画布以 `SnapshotStateMap` 记录节点边界是平方级. 同一 AVD 上 undo / redo 到首帧 p50 约由 365 / 300 ms 降到 140 / 130 ms, Redmi 上可见性计时 p50 由 795 / 693 ms 降到 306 / 257 ms.
+- 实现交互预览时确认 1.2.0 起的缺陷: 在属性抽屉修改输入框的 text 后画布不更新 (渲染器把 text 当初值); 设计期钩子 `TextFieldController.replaceText` 修复, changelog 记为修复.
+- 真机: 经 3-Maple Image 与 Ace 1.44.0 会话同意借用 Redmi 22120RN86C (bek749scrwv4wo8h), 复测编辑耗时并以新脚本 `verify_source_sync.py` 走真实系统选择器验证导入来源的持久授权 (两次通过); 用完卸载 debug 包, 装回插件 1.3.0 release (build 126), 删除测试文件并通知两会话. 未使用 968e9f18 / QV770340J7 (3-Maple Image 大库测试独占), QV710AF65F (维护者手动测试 Ace) 与 G8441.
+- 文档: 文档站 `1e8894d` (设计器指南按 1.3.0 更新, 新增 "预览状态与交互预览" 一节) 与 `6aa273c` (计数 105); Offline Docs `ed59755` (build 134, `--verify-offline` 通过); 插件 README 10 语言 `a3b78d5`.
+- 1.3.0 本地 gate (build 129 源码): Markdown / 图标检查, JVM 138, 构建 + lint + 共享类路径, APK 类路径 (release 5167317 B / 88223 引用, 在复核线 5603798 B / 96392 之内), AVD_API_30 全套 instrumentation 111 项, release 包的独立启动 / 草稿恢复 / 宿主往返脚本均通过; 结果表见 `docs/dev/p9-designer-evidence.md`.
+- 未执行: 宿主侧 compose 设备矩阵 (本版唯一影响宿主内渲染的是 `0ec4998`, 插件自身的渲染器 instrumentation 已覆盖), `appendDigestToReleasedFiles`, 远端 CI 与推送 (维护者决定暂不推送), 其它真机.
+- 下一步: P9.2 TSX 工程 (1.4.0) 需要宿主 `plugin-api` 新增解析 AIDL 与 TypeScript Engine 实现 (D42), 涉及两个关联仓库, 开工前与维护者确认排期; 或由维护者决定 1.2.0 / 1.3.0 的推送与发布节奏 (D7).
