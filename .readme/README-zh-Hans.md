@@ -63,6 +63,7 @@
 当前开发预览的核心能力:
 
 - 可视化设计器: 脚本文件即工程, 真实渲染器所见即所得地预览界面树, 大纲 / 组件面板 / 属性抽屉覆盖全部 55 个组件, 支持撤销重做与草稿恢复; 导出的脚本可复制或直接发送到 AutoJs6 运行
+- 与 AutoJs6 衔接: 工程可发送运行, 在 AutoJs6 编辑器中打开 (双向同步), 导入 AutoJs6 脚本目录, 复制或导出; 设计器也能从 AutoJs6 编辑器或文件管理器直接打开 .js 文件并保存回原文件
 - 声明式界面: `compose.state` + `compose.mount(render)` 按状态变化自动重绘, 同时提供可长期持有的节点句柄 (`compose.Text({...})` 等) 直接修改属性与子节点
 - Material 3 核心集: 29 个节点工厂覆盖布局, 文本, 图标, 图片, 按钮, 输入, 选择控件, 惰性列表, 对话框与进度; Snackbar 是会话命令, 不是 compose.Snackbar 工厂
 - 链式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作顺序, 作用域操作在宿主侧校验
@@ -88,6 +89,7 @@
 2. 安装本插件 APK; 从启动器打开 3-Block Compose 进入设计器首页, 可新建脚本工程, 或从顶部栏打开组件画廊与设置
 3. 在 AutoJs6 的插件中心确认 3-Block Compose 已被识别并处于启用状态
 4. 在脚本中使用 `compose` 或 `$compose`; 通过 `compose.mount` 挂载 Activity 内容, 或先授予宿主悬浮窗权限再使用 `compose.floaty`
+5. 编辑页菜单提供发送运行, 在 AutoJs6 编辑器中打开, 导入 AutoJs6 脚本目录, 复制与导出; 在 AutoJs6 编辑器菜单 (需 AutoJs6 包含对应更新) 或文件管理器中选择 3-Block Compose 也可以直接编辑脚本文件
 
 ******
 
@@ -226,6 +228,7 @@ _2026/10/13_
 - `提示` 插件由 Compose UI 更名为 3-Block Compose: 应用 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改为 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 将其视为新应用, 旧包可以保留并存, 设置与授权不会自动迁移, 新包需要在插件中心重新启用和授权
 - `提示` 需要包含新插件身份的 AutoJs6 6.8.0 宿主构建 (宿主提交 f12665ffde 之后); 更早的宿主按旧包名发现插件, 不会识别本版本
 - `新增` 可视化设计器: 从启动器进入设计器首页, 可新建 / 导入 / 打开私有目录中的脚本工程; 编辑页提供真实渲染器预览画布, 大纲树, 组件面板与属性抽屉, 支持点选与长按拖拽换父, 大纲内重排, 撤销 / 重做, 草稿自动保存与恢复, 承载选项编辑, 契约目录校验报告, 以及复制脚本或发送到 AutoJs6 运行; 组件画廊与设置改从设计器首页进入
+- `新增` 设计器与 AutoJs6 的衔接: 编辑页菜单可把当前脚本在 AutoJs6 编辑器中打开 (AutoJs6 保存后设计器自动重新加载), 导入 AutoJs6 脚本目录, 或导出到任意位置; 设计器也可以从 AutoJs6 编辑器或文件管理器直接打开 .js 文件并保存回原文件, 没有写入权限时另存为工程; 工程文件通过插件自己的内容提供器按次授权, 不对外公开其它目录
 - `优化` 应用标题, 插件 ID (three-block-compose), 包名与组件名, 发布产物, 文档及 GitHub 仓库 (AutoJs6-Plugin-Three-Block-Compose) 随更名同步更新; 脚本 API compose, 契约版本与渲染行为不变
 - `优化` 启动器, 插件中心与系统应用信息图标改用维护者提供的正式图稿, 亮暗两套图案共用同一形状
 - `优化` 随包示例与宿主示例分类改为 3-Block Compose

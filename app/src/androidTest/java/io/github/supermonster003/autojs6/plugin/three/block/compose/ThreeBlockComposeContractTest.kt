@@ -17,6 +17,7 @@ import org.autojs.plugin.common.api.PluginCapabilityKeys
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -140,12 +141,18 @@ class ThreeBlockComposeContractTest {
     }
 
     @Test
-    fun noContentProviderIsRegistered() {
+    fun onlyTheDesignerFileProviderIsRegistered() {
         // The packaged AndroidX runtime (roadmap D32) would merge the androidx.startup InitializationProvider;
-        // the manifest removes it, so the installed package declares no provider at all.
+        // the manifest removes it. Roadmap P8.4 / D39 adds exactly one provider: the designer FileProvider,
+        // not exported, reachable only through per-Intent Uri grants.
         val packageInfo = context.packageManager.getPackageInfo(packageName, PackageManager.GET_PROVIDERS)
         val providers = packageInfo.providers.orEmpty()
-        assertTrue("no content provider is expected, found ${providers.map { it.name }}", providers.isEmpty())
+        assertEquals("one provider is expected, found ${providers.map { it.name }}", 1, providers.size)
+        val provider = providers.single()
+        assertEquals("androidx.core.content.FileProvider", provider.name)
+        assertEquals("$packageName.designer", provider.authority)
+        assertFalse(provider.exported)
+        assertTrue(provider.grantUriPermissions)
     }
 
     private fun assertCapabilities(capabilities: Bundle) {

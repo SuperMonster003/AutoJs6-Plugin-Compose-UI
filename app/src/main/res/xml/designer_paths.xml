@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Roadmap P8.4 / D39: the designer FileProvider exposes only the project directory. -->
+<paths>
+    <files-path
+        name="projects"
+        path="designer/projects/" />
+</paths>

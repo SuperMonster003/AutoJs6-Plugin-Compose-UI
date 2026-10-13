@@ -13,6 +13,7 @@
   "p_features_intro": "Funciones de la vista previa de desarrollo actual",
   "features": [
     "Diseñador visual: el archivo de script es el proyecto, el renderizador real muestra el árbol de interfaz mientras lo editas, el esquema / la paleta de componentes / el panel de propiedades cubren los 55 componentes, con deshacer / rehacer y recuperación de borradores; el script exportado se puede copiar o enviar directamente a AutoJs6",
+    "Integración con AutoJs6: un proyecto se puede enviar a ejecutar, abrir en el editor de AutoJs6 (sincronización bidireccional), importar al directorio de scripts de AutoJs6, copiar o exportar; el diseñador también abre archivos .js directamente desde el editor de AutoJs6 o un gestor de archivos y guarda en el mismo archivo",
     "Interfaz declarativa: `compose.state` + `compose.mount(render)` vuelven a dibujar automaticamente ante cada cambio de estado, mientras que los manejadores de nodo de larga vida (`compose.Text({...})` y similares) permiten modificar directamente propiedades e hijos",
     "Núcleo Material 3: 29 fábricas de nodos para diseños, texto, iconos, imágenes, botones, entradas, selección, listas diferidas, diálogos e indicadores; Snackbar es un comando de sesión, no una fábrica compose.Snackbar",
     "Modifiers encadenados: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` conserva el orden de las operaciones, y las operaciones con ambito se validan en el lado del host",
@@ -33,7 +34,8 @@
     "Instale una compilación local compatible de AutoJs6 que incluya la entrada compose (mínimo {{ required_host_version_name }} / {{ required_host_version_code }})",
     "Instale el APK del complemento; abra 3-Block Compose desde el lanzador para llegar al inicio del diseñador, crear un proyecto de script o abrir la galería de componentes y los ajustes desde la barra superior",
     "Confirme en el centro de plugins de AutoJs6 que 3-Block Compose se reconoce y esta habilitado",
-    "Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`"
+    "Use `compose` o `$compose` en scripts; monte actividades con `compose.mount`, o conceda al host permiso de superposición y use `compose.floaty`",
+    "El menú del editor ofrece ejecutar, abrir en el editor de AutoJs6, importar a los scripts de AutoJs6, copiar y exportar; elegir 3-Block Compose desde el menú del editor de AutoJs6 (requiere una compilación de AutoJs6 con la actualización correspondiente) o desde un gestor de archivos edita el archivo de script directamente"
   ],
   "h3_quick_start": "Inicio rapido",
   "p_quick_start_intro": "El contador y el HUD flotante siguientes pueden ejecutarse con el host local compatible de la vista previa. Antes de ejecutar el HUD, permita al host mostrarse sobre otras aplicaciones:",

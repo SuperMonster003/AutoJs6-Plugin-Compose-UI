@@ -65,7 +65,19 @@ class ManifestContractTest {
         val activities = application.children("activity")
         assertEquals(listOf(".WakeActivity", ".designer.ui.DesignerHomeActivity", ".designer.ui.DesignerActivity", ".app.GalleryActivity", ".app.SettingsActivity"), activities.map { it.androidAttribute("name") })
         activities.drop(1).forEach { screen ->
-            assertEquals("${screen.androidAttribute("name")} is reached through the launcher alias or the gallery only", "false", screen.androidAttribute("exported"))
+            val name = screen.androidAttribute("name")
+            if (name == ".designer.ui.DesignerActivity") {
+                // Roadmap P8.4 / D39: the editor receives script documents from the host editor and file managers.
+                assertEquals("true", screen.androidAttribute("exported"))
+                assertNull("documents need no permission beyond the Uri grant", screen.androidAttributeOrNull("permission"))
+                val filter = screen.child("intent-filter")
+                assertEquals(listOf("android.intent.action.EDIT", "android.intent.action.VIEW"), filter.children("action").map { it.androidAttribute("name") })
+                assertEquals(listOf("android.intent.category.DEFAULT"), filter.children("category").map { it.androidAttribute("name") })
+                assertEquals(listOf("content", "file"), filter.children("data").mapNotNull { it.androidAttributeOrNull("scheme") })
+                assertEquals(listOf("application/x-javascript", "text/javascript", "text/plain"), filter.children("data").mapNotNull { it.androidAttributeOrNull("mimeType") })
+            } else {
+                assertEquals("$name is reached through the launcher alias or the designer only", "false", screen.androidAttribute("exported"))
+            }
             assertTrue("appearance changes redraw in place: ${screen.androidAttribute("configChanges")}", screen.androidAttribute("configChanges").startsWith("uiMode|locale|layoutDirection"))
         }
         val wake = activities.first()
@@ -114,10 +126,22 @@ class ManifestContractTest {
         assertEquals(listOf(".app.LauncherIconUpdateReceiver"), receivers.map { it.androidAttribute("name") })
         assertEquals("false", receivers.single().androidAttribute("exported"))
         assertEquals(listOf("android.intent.action.MY_PACKAGE_REPLACED"), receivers.single().child("intent-filter").children("action").map { it.androidAttribute("name") })
-        // The packaged AndroidX runtime would merge androidx.startup; the plugin keeps declaring no provider.
+        // The packaged AndroidX runtime would merge androidx.startup; it stays removed. The designer FileProvider
+        // (roadmap P8.4 / D39) is the only provider and only exposes the project directory through Uri grants.
         val providers = application.children("provider")
-        assertEquals(listOf("androidx.startup.InitializationProvider"), providers.map { it.androidAttribute("name") })
-        assertEquals("remove", providers.single().getAttributeNS("http://schemas.android.com/tools", "node"))
+        assertEquals(listOf("androidx.startup.InitializationProvider", "androidx.core.content.FileProvider"), providers.map { it.androidAttribute("name") })
+        assertEquals("remove", providers[0].getAttributeNS("http://schemas.android.com/tools", "node"))
+        val fileProvider = providers[1]
+        assertEquals("\${applicationId}.designer", fileProvider.androidAttribute("authorities"))
+        assertEquals("false", fileProvider.androidAttribute("exported"))
+        assertEquals("true", fileProvider.androidAttribute("grantUriPermissions"))
+        val paths = fileProvider.child("meta-data")
+        assertEquals("android.support.FILE_PROVIDER_PATHS", paths.androidAttribute("name"))
+        assertEquals("@xml/designer_paths", paths.androidAttribute("resource"))
+        val pathsXml = DocumentBuilderFactory.newInstance().apply { isNamespaceAware = true }.newDocumentBuilder().parse(findProjectRoot().resolve("app/src/main/res/xml/designer_paths.xml").toFile()).documentElement
+        assertEquals("paths", pathsXml.tagName)
+        assertEquals(listOf("files-path"), pathsXml.children("files-path").map { it.tagName })
+        assertEquals("designer/projects/", pathsXml.children("files-path").single().getAttribute("path"))
     }
 
     @Test
@@ -138,11 +162,16 @@ class ManifestContractTest {
     }
 
     @Test
-    fun `only activation and discovery are exported and both require the plugin permission`() {
+    fun `only activation, discovery and the document editor are exported`() {
         val components = listOf("activity", "activity-alias", "service", "receiver").flatMap { application.children(it) }
         val exported = components.filter { it.androidAttribute("exported") == "true" }
         assertEquals(
-            mapOf(".WakeActivity" to ThreeBlockComposePlugin.PLUGIN_PERMISSION, ".ThreeBlockComposeInfoService" to ThreeBlockComposePlugin.PLUGIN_PERMISSION),
+            mapOf(
+                ".WakeActivity" to ThreeBlockComposePlugin.PLUGIN_PERMISSION,
+                ".ThreeBlockComposeInfoService" to ThreeBlockComposePlugin.PLUGIN_PERMISSION,
+                // Roadmap P8.4 / D39: document hand-over from the host editor or a file manager needs no permission.
+                ".designer.ui.DesignerActivity" to null,
+            ),
             exported.filterNot { it.tagName == "activity-alias" }.associate { it.androidAttribute("name") to it.androidAttributeOrNull("permission") },
         )
         // The four launcher aliases are exported without a permission, as every launcher entry must be.

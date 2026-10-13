@@ -8,6 +8,7 @@
 2. Install the plugin APK; open 3-Block Compose from the launcher to reach the designer home, create a script project, or open the component gallery and settings from the top bar
 3. Confirm in the AutoJs6 plugin center that 3-Block Compose is recognized and enabled
 4. Use `compose` or `$compose` in scripts; mount activity content with `compose.mount`, or grant the host overlay permission and use `compose.floaty`
+5. The editor menu offers run, open in AutoJs6 editor, import into AutoJs6 scripts, copy and export; choosing 3-Block Compose from the AutoJs6 editor menu (needs an AutoJs6 build with the matching update) or from a file manager edits the script file directly
 
 ### Compatibility
 

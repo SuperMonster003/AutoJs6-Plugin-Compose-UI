@@ -8,6 +8,7 @@ Aperçu de développement local 1.2.0: une compilation AutoJs6 contenant l'ident
 2. Installez l'APK du plugin; ouvrez 3-Block Compose depuis le lanceur pour atteindre l'accueil du concepteur, créer un projet de script ou ouvrir la galerie de composants et les paramètres depuis la barre supérieure
 3. Verifiez dans le centre de plugins d'AutoJs6 que 3-Block Compose est reconnu et active
 4. Utilisez `compose` ou `$compose` dans les scripts; montez les activités avec `compose.mount`, ou accordez la permission de superposition à l'hôte et utilisez `compose.floaty`
+5. Le menu de l'éditeur propose exécuter, ouvrir dans l'éditeur AutoJs6, importer dans les scripts AutoJs6, copier et exporter; choisir 3-Block Compose depuis le menu de l'éditeur AutoJs6 (nécessite une version d'AutoJs6 avec la mise à jour correspondante) ou depuis un gestionnaire de fichiers modifie directement le fichier de script
 
 ### Compatibilite
 

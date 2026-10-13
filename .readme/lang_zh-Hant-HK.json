@@ -13,6 +13,7 @@
   "p_features_intro": "目前開發預覽的核心能力",
   "features": [
     "可視化設計器: 腳本檔案即工程, 真實渲染器所見即所得地預覽界面樹, 大綱 / 組件面板 / 屬性抽屜覆蓋全部 55 個組件, 支援撤銷重做與草稿恢復; 匯出的腳本可複製或直接發送到 AutoJs6 運行",
+    "與 AutoJs6 銜接: 工程可發送運行, 在 AutoJs6 編輯器中打開 (雙向同步), 匯入 AutoJs6 腳本目錄, 複製或匯出; 設計器也能從 AutoJs6 編輯器或檔案管理器直接打開 .js 檔案並儲存回原檔案",
     "宣告式界面: `compose.state` + `compose.mount(render)` 按狀態變化自動重繪, 同時提供可長期持有的節點句柄 (`compose.Text({...})` 等) 直接修改屬性與子節點",
     "Material 3 核心集: 29 個節點工廠涵蓋佈局, 文字, 圖示, 圖片, 按鈕, 輸入, 選擇控制項, 惰性列表, 對話框與進度; Snackbar 是會話命令, 不是 compose.Snackbar 工廠",
     "鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 作用域操作在宿主側校驗",
@@ -33,7 +34,8 @@
     "安裝包含 compose 腳本入口的匹配本地 AutoJs6 構建 (最低 {{ required_host_version_name }} / {{ required_host_version_code }})",
     "安裝此插件 APK; 從啟動器打開 3-Block Compose 進入設計器首頁, 可新建腳本工程, 或從頂部欄打開組件展示與設定",
     "在 AutoJs6 的插件中心確認 3-Block Compose 已被識別並處於啟用狀態",
-    "在腳本中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮窗權限再使用 `compose.floaty`"
+    "在腳本中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮窗權限再使用 `compose.floaty`",
+    "編輯頁選單提供發送運行, 在 AutoJs6 編輯器中打開, 匯入 AutoJs6 腳本目錄, 複製與匯出; 在 AutoJs6 編輯器選單 (需 AutoJs6 包含對應更新) 或檔案管理器中選擇 3-Block Compose 也可以直接編輯腳本檔案"
   ],
   "h3_quick_start": "快速開始",
   "p_quick_start_intro": "以下計數器與懸浮窗 HUD 均可在匹配的本地預覽宿主中運行. 運行 HUD 前需授予宿主在其他應用程式上層顯示的權限:",

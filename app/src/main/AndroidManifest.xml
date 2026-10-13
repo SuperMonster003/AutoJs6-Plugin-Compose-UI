@@ -73,11 +73,26 @@
             android:name=".designer.ui.DesignerHomeActivity"
             android:configChanges="uiMode|locale|layoutDirection"
             android:exported="false" />
+        <!--
+            Roadmap P8.4 / D39: the editor also opens script documents handed over by the host editor or a file
+            manager (content or file Uri) and writes them back through the same Uri when the grant allows it.
+        -->
         <activity
             android:name=".designer.ui.DesignerActivity"
             android:configChanges="uiMode|locale|layoutDirection|orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/x-javascript" />
+                <data android:mimeType="text/javascript" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".app.GalleryActivity"
             android:configChanges="uiMode|locale|layoutDirection"
@@ -144,13 +159,26 @@
 
         <!--
             The packaged AndroidX runtime (roadmap D32) would merge the androidx.startup provider with the emoji,
-            process-lifecycle and profile initializers. None is needed by the gallery, and the plugin keeps
-            declaring no content provider at all.
+            process-lifecycle and profile initializers. None is needed by the plugin's screens, so it stays removed.
         -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             tools:node="remove" />
+        <!--
+            Roadmap P8.4 / D39: the only provider. It exposes the designer's project files to the host (open in
+            the host editor, import into the host script directory) through per-Intent Uri grants; nothing is
+            exported without a grant and no other directory is reachable.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.designer"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/designer_paths" />
+        </provider>
 
     </application>
 

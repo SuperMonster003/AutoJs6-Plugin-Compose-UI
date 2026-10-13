@@ -63,6 +63,7 @@
 目前開發預覽的核心能力:
 
 - 視覺化設計器: 指令碼檔案即專案, 真實轉譯器所見即所得地預覽介面樹, 大綱 / 元件面板 / 屬性抽屜涵蓋全部 55 個元件, 支援復原重做與草稿還原; 匯出的指令碼可複製或直接傳送到 AutoJs6 執行
+- 與 AutoJs6 銜接: 專案可傳送執行, 在 AutoJs6 編輯器中開啟 (雙向同步), 匯入 AutoJs6 指令碼目錄, 複製或匯出; 設計器也能從 AutoJs6 編輯器或檔案管理員直接開啟 .js 檔案並儲存回原檔案
 - 宣告式介面: `compose.state` + `compose.mount(render)` 依狀態變化自動重繪, 同時提供可長期持有的節點控制代碼 (`compose.Text({...})` 等) 直接修改屬性與子節點
 - Material 3 核心集: 29 個節點工廠涵蓋版面配置, 文字, 圖示, 圖片, 按鈕, 輸入, 選擇控制項, 惰性清單, 對話方塊與進度; Snackbar 是工作階段命令, 不是 compose.Snackbar 工廠
 - 鏈式 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` 保留操作順序, 範圍限定操作在宿主端驗證
@@ -88,6 +89,7 @@
 2. 安裝此外掛 APK; 從啟動器開啟 3-Block Compose 進入設計器首頁, 可新增指令碼專案, 或從頂部列開啟元件展示與設定
 3. 在 AutoJs6 的外掛程式中心確認 3-Block Compose 已被識別並處於啟用狀態
 4. 在指令碼中使用 `compose` 或 `$compose`; 透過 `compose.mount` 掛載 Activity 內容, 或先授予宿主懸浮視窗權限再使用 `compose.floaty`
+5. 編輯頁選單提供傳送執行, 在 AutoJs6 編輯器中開啟, 匯入 AutoJs6 指令碼目錄, 複製與匯出; 在 AutoJs6 編輯器選單 (需 AutoJs6 包含對應更新) 或檔案管理員中選擇 3-Block Compose 也可以直接編輯指令碼檔案
 
 ******
 
@@ -226,6 +228,7 @@ _2026/10/13_
 - `提示` 外掛由 Compose UI 更名為 3-Block Compose: 應用程式 ID 由 io.github.supermonster003.autojs6.plugin.compose.ui 改為 io.github.supermonster003.autojs6.plugin.three.block.compose. Android 會將其視為新應用程式, 舊套件可以保留並存, 設定與授權不會自動遷移, 新套件需要在外掛中心重新啟用和授權
 - `提示` 需要包含新外掛身分的 AutoJs6 6.8.0 宿主建置 (宿主提交 f12665ffde 之後); 更早的宿主按舊套件名稱發現外掛, 不會識別本版本
 - `新增` 視覺化設計器: 從啟動器進入設計器首頁, 可新增 / 匯入 / 開啟私有目錄中的指令碼專案; 編輯頁提供真實轉譯器預覽畫布, 大綱樹, 元件面板與屬性抽屜, 支援點選與長按拖曳換父, 大綱內重排, 復原 / 重做, 草稿自動儲存與還原, 承載選項編輯, 契約目錄驗證報告, 以及複製指令碼或傳送到 AutoJs6 執行; 元件展示與設定改從設計器首頁進入
+- `新增` 設計器與 AutoJs6 的銜接: 編輯頁選單可把目前指令碼在 AutoJs6 編輯器中開啟 (AutoJs6 儲存後設計器自動重新載入), 匯入 AutoJs6 指令碼目錄, 或匯出到任意位置; 設計器也可以從 AutoJs6 編輯器或檔案管理員直接開啟 .js 檔案並儲存回原檔案, 沒有寫入權限時另存為專案; 專案檔案透過外掛自己的內容提供者按次授權, 不對外公開其它目錄
 - `最佳化` 應用程式標題, 外掛 ID (three-block-compose), 套件名稱與元件名稱, 發行產物, 文件及 GitHub 儲存庫 (AutoJs6-Plugin-Three-Block-Compose) 隨更名同步更新; 指令碼 API compose, 契約版本與轉譯行為不變
 - `最佳化` 啟動器, 外掛中心與系統應用程式資訊圖示改用維護者提供的正式圖稿, 亮暗兩套圖案共用同一形狀
 - `最佳化` 隨套件範例與宿主範例分類改為 3-Block Compose

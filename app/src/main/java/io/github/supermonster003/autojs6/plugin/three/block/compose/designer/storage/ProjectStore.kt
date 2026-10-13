@@ -18,6 +18,8 @@ internal class ProjectStore(context: Context) {
     private val base = File(context.filesDir, "designer")
     val projectsDir = File(base, "projects")
     val draftsDir = File(base, "drafts")
+    /** Origin Uris of imported projects, one `name=uri` line each; informational, never dereferenced automatically. */
+    private val sourcesFile = File(base, "sources.properties")
 
     fun list(): List<Project> {
         projectsDir.mkdirs()
@@ -58,6 +60,7 @@ internal class ProjectStore(context: Context) {
     fun delete(name: String) {
         file(name).delete()
         draftFile(name).delete()
+        recordSource(name, null)
     }
 
     fun rename(name: String, newName: String): Project {
@@ -97,7 +100,20 @@ internal class ProjectStore(context: Context) {
         val text = resolver.openInputStream(uri)?.use { it.readBytes().toString(StandardCharsets.UTF_8) }
             ?: throw IllegalStateException("Cannot read $uri")
         val stem = displayName.substringAfterLast('/').substringBeforeLast('.').replace(invalid, "-").ifBlank { "imported" }
-        return create(stem, text)
+        return create(stem, text).also { recordSource(it.name, uri) }
+    }
+
+    /** The document Uri a project was imported from, when it was imported through the picker. */
+    fun sourceOf(name: String): Uri? = sources()[name]?.let(Uri::parse)
+
+    private fun sources(): Map<String, String> = if (!sourcesFile.isFile) emptyMap() else
+        sourcesFile.readLines(StandardCharsets.UTF_8).mapNotNull { line -> line.split('=', limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1] } }.toMap()
+
+    private fun recordSource(name: String, uri: Uri?) {
+        val updated = sources().toMutableMap()
+        if (uri == null) { if (updated.remove(name) == null) return } else updated[name] = uri.toString()
+        base.mkdirs()
+        sourcesFile.writeText(updated.entries.joinToString("") { it.key + "=" + it.value + "\n" }, StandardCharsets.UTF_8)
     }
 
     fun template(): String = """

@@ -13,6 +13,7 @@
   "p_features_intro": "현재 개발 미리보기의 핵심 기능",
   "features": [
     "비주얼 디자이너: 스크립트 파일이 곧 프로젝트이고 실제 렌더러가 편집 중인 UI 트리를 그대로 미리 보여 주며, 개요 / 구성요소 팔레트 / 속성 서랍으로 55개 구성요소를 모두 편집하고 실행 취소 / 다시 실행과 초안 복원을 지원합니다. 내보낸 스크립트는 복사하거나 AutoJs6로 바로 보내 실행할 수 있습니다",
+    "AutoJs6 연동: 프로젝트를 실행하도록 보내거나, AutoJs6 편집기에서 열거나 (양방향 동기화), AutoJs6 스크립트 폴더로 가져오거나, 복사하거나 내보낼 수 있고, 디자이너는 AutoJs6 편집기나 파일 관리자에서 .js 파일을 바로 열어 같은 파일에 저장합니다",
     "선언형 UI: `compose.state` + `compose.mount(render)`가 상태 변화에 따라 자동으로 다시 그리며, 오래 보유할 수 있는 노드 핸들 (`compose.Text({...})` 등)로 속성과 자식 노드를 직접 수정할 수 있습니다",
     "Material 3 핵심 구성: 노드 팩터리 29개가 레이아웃, 텍스트, 아이콘, 이미지, 버튼, 입력, 선택, 지연 목록, 대화 상자와 진행 표시를 제공; Snackbar는 세션 명령이며 compose.Snackbar 팩터리가 아닙니다",
     "체인형 Modifier: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')`는 연산 순서를 유지하며, 범위 한정 연산은 호스트 쪽에서 검증됩니다",
@@ -33,7 +34,8 @@
     "compose 스크립트 API가 포함된 호환 로컬 AutoJs6 빌드를 설치합니다 (최소 {{ required_host_version_name }} / {{ required_host_version_code }})",
     "플러그인 APK를 설치하고 런처에서 3-Block Compose를 열면 디자이너 홈으로 들어갑니다. 여기서 스크립트 프로젝트를 만들거나 상단 바에서 구성요소 갤러리와 설정을 열 수 있습니다",
     "AutoJs6 플러그인 센터에서 3-Block Compose가 인식되고 활성화되었는지 확인합니다",
-    "스크립트에서 `compose` 또는 `$compose`를 사용합니다. Activity 콘텐츠는 `compose.mount`, 플로팅 창은 호스트에 오버레이 권한을 부여한 뒤 `compose.floaty`를 사용합니다"
+    "스크립트에서 `compose` 또는 `$compose`를 사용합니다. Activity 콘텐츠는 `compose.mount`, 플로팅 창은 호스트에 오버레이 권한을 부여한 뒤 `compose.floaty`를 사용합니다",
+    "편집 화면 메뉴에 실행, AutoJs6 편집기에서 열기, AutoJs6 스크립트 폴더로 가져오기, 복사, 내보내기가 있습니다. AutoJs6 편집기 메뉴 (해당 업데이트가 포함된 AutoJs6 필요) 나 파일 관리자에서 3-Block Compose 를 선택하면 스크립트 파일을 바로 편집할 수 있습니다"
   ],
   "h3_quick_start": "빠른 시작",
   "p_quick_start_intro": "아래 카운터와 플로팅 HUD는 호환 로컬 미리보기 호스트에서 실행할 수 있습니다. HUD 실행 전에 호스트에 다른 앱 위에 표시할 권한을 부여하세요:",
