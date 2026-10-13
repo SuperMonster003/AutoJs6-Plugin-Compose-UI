@@ -5,6 +5,12 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v1.3.0": {
+      "released_date": "2026/10/13",
+      "improvement": [
+        "Long-press dragging a node on the designer canvas shows an insertion line along the target container's layout (vertical, horizontal or grid) and drops the node where the pointer is, instead of always at the end of the container"
+      ]
+    },
     "v1.2.0": {
       "released_date": "2026/10/13",
       "hint": [

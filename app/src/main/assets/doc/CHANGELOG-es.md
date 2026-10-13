@@ -4,6 +4,12 @@
 
 ******
 
+# v1.3.0
+
+###### 2026/10/13
+
+* `Mejora` Arrastrar un nodo con pulsación larga en el lienzo del diseñador muestra una línea de inserción según la disposición del contenedor de destino (vertical, horizontal o en cuadrícula) y suelta el nodo donde está el dedo, en lugar de añadirlo siempre al final del contenedor
+
 # v1.2.0
 
 ###### 2026/10/13

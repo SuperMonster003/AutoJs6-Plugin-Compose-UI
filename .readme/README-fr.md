@@ -52,7 +52,7 @@ Le plugin intègre un concepteur visuel et une galerie de composants: l'ouvrir d
 
 ******
 
-Aperçu de développement local 1.2.0: nécessite une version de l'hôte AutoJs6 portant la nouvelle identité 3-Block Compose (commit hôte f12665ffde ou ultérieur) avec ce plugin installé et activé; l'entrée de menu de l'éditeur AutoJs6 "Ouvrir dans le concepteur 3-Block Compose" nécessite une version postérieure au commit hôte db7e6a1734. L'accompagnement local fournit les pages UI, les fenêtres flottantes, le concepteur visuel, cinq exemples, la référence API, la page de guide du concepteur et les déclarations TypeScript. Le périmètre vérifié de compatibilité et de performance est consigné dans la feuille de route. Pas encore inscrit à l'index officiel; aucune version officielle. Les icônes utilisent le visuel final du mainteneur.
+Aperçu de développement local 1.3.0: nécessite une version de l'hôte AutoJs6 portant la nouvelle identité 3-Block Compose (commit hôte f12665ffde ou ultérieur) avec ce plugin installé et activé; l'entrée de menu de l'éditeur AutoJs6 "Ouvrir dans le concepteur 3-Block Compose" nécessite une version postérieure au commit hôte db7e6a1734. L'accompagnement local fournit les pages UI, les fenêtres flottantes, le concepteur visuel, cinq exemples, la référence API, la page de guide du concepteur et les déclarations TypeScript. Le périmètre vérifié de compatibilité et de performance est consigné dans la feuille de route. Pas encore inscrit à l'index officiel; aucune version officielle. Les icônes utilisent le visuel final du mainteneur.
 
 ******
 
@@ -224,6 +224,12 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 ******
 
+#### v1.3.0
+
+_2026/10/13_
+
+- `Amelioration` Un glisser après appui long sur le canevas du concepteur affiche une ligne d'insertion selon la disposition du conteneur cible (verticale, horizontale ou en grille) et dépose le noeud à l'emplacement du doigt, au lieu de toujours l'ajouter à la fin du conteneur
+
 #### v1.2.0
 
 _2026/10/13_
@@ -263,32 +269,6 @@ _2026/10/08_
 - `Dependance` Ajout du catalogue V2 de compose-ui-api.aar en conservant les modèles de noeuds et la sémantique des composants V1
 - `Dependance` Ajout de material-color-utilities 4.1.1 (MIT) pour la dérivation de couleur de thème partagée avec les autres plugins autonomes
 - `Dependance` Ajout de copies d'AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines et de leurs compléments aux versions verrouillées par l'hôte pour la galerie dans le processus du plugin; dans l'hôte, les copies de l'hôte restent prioritaires
-
-#### v1.0.0
-
-_2026/10/03_
-
-- `Indication` Aperçu de développement local 1.0.0: une compilation AutoJs6 correspondante et le plugin installé et activé sont nécessaires. Pages UI, fenêtres flottantes, cinq exemples, référence API et déclarations TypeScript sont fournis pour cette intégration locale. La portée des vérifications de compatibilité et de performance figure dans la feuille de route. Le plugin ne figure pas dans l'index officiel et n'a pas de publication officielle. L'icône reste provisoire en attendant les images définitives du mainteneur
-- `Indication` Necessite AutoJs6 6.8.0 (5316) ou ulterieur
-- `Indication` Les applications empaquetées nécessitent aussi l'installation séparée d'un plugin Compose UI compatible, avec activation/autorisation propres à cette application; la compatibilité porte sur le runtime AutoJs6 intégré, pas sur le versionCode de l'application
-- `Indication` Les deux mipmap clair/sombre sont conservés; le dessin actuel est provisoire et sera remplacé par les images noir et blanc définitives du mainteneur
-- `Nouveaute` compose / $compose appelables, handles de noeuds persistants, state/render/ref réactifs, modifications groupées, publications en file et contrôle du thème
-- `Nouveaute` Noyau Material 3: 29 fabriques de noeuds pour les dispositions, textes, icônes, images, boutons, saisies, sélections, listes paresseuses, dialogues et indicateurs; Snackbar est une commande de session, pas une fabrique compose.Snackbar
-- `Nouveaute` Les scripts UI montent le contenu Activity; compose.floaty propose aussi aux scripts hors UI des fenêtres raw ou redimensionnables, une géométrie en pixels, le contrôle du toucher/focus et la libération de leurs ressources
-- `Nouveaute` Les 20 opérations Modifier conservent l'ordre déclaré et prennent en charge la validation du contexte de mise en page, le défilement et les libellés d'accessibilité
-- `Nouveaute` Les thèmes Material 3 prennent en charge les couleurs sources, les modes clair et sombre, les couleurs dynamiques du système sur Android 12+, les familles de polices et la taille du texte
-- `Nouveaute` La saisie native préserve la sélection et la composition IME, permet le focus et les modifications explicites, et rejette les modifications tardives qui écraseraient une saisie plus récente; les interrupteurs et curseurs restent contrôlés par le script
-- `Nouveaute` Icônes core et images ImageWrapper/Bitmap, fichiers locaux et drawable de l'hôte; le moteur de rendu ne recycle pas automatiquement les images appartenant à l'appelant
-- `Nouveaute` Cinq exemples exécutables de compteur, validation de formulaire, liste à clés stables de 1000 éléments, HUD flottant hors mode UI et thèmes, avec prérequis et index, synchronisés dans la catégorie Compose UI des exemples de l'hôte correspondant
-- `Nouveaute` Référence API et déclarations TypeScript associées, ainsi que README, instructions du centre des plugins et historique en 10 langues
-- `Nouveaute` Détection dans le centre des plugins avec vérifications de version hôte, de contrat et d'autorisation, sans écran autonome ni entrée de lanceur
-- `Correction` Compose UI refuse de monter une autre page ou fenêtre flottante dans un rappel de rendu et conserve la page actuelle; les pages peuvent être remontées après une mise à jour du plugin
-- `Amelioration` Les vérifications et ComposeError signalent uniformément les plugins absents, désactivés, non autorisés ou incompatibles, les permissions manquantes et les sessions fermées; la libération couvre aussi les fenêtres annulées avant leur attachement natif; La mise à jour, la désinstallation ou la désactivation du plugin ferme ses sessions actives et signale l'erreur correspondante
-- `Dependance` Ajout de common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, verrouille par empreinte)
-- `Dependance` Ajout de Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependance` Ajout de compose-ui-api.aar V1 aligné sur AutoJs6 6.8.0 (5316) (MPL 2.0, empreinte verrouillée), avec les dépendances partagées alignées sur l'hôte
-- `Dependance` Ajout de Compose UI Test géré par BOM 2026.09.00 (Apache 2.0, uniquement pour les tests)
-- `Dependance` Ajout de JaCoCo version 0.8.14 (couverture des tests facultative uniquement, exclu des paquets de publication)
 
 ##### Pour un historique plus complet, voir
 

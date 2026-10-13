@@ -8,7 +8,7 @@
   "p_introduction_what": "3-Block Compose 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `\"ui\";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.",
   "p_introduction_how": "外掛內建視覺化設計器與元件展示: 從啟動器開啟即進入設計器首頁, 可新增或匯入指令碼專案並在真實轉譯器上編輯介面, 元件展示則呈現全部元件的預覽與範例指令碼; 指令碼介面的轉譯仍在宿主處理程序中進行. 宿主透過 INFO 服務發現外掛並讀取版本與相容資訊, 再依契約 (`org.autojs.plugin.compose.api`) 在自身處理程序內實例化轉譯器工廠.",
   "h3_status": "目前狀態",
-  "p_status": "1.2.0 本地開發預覽: 需要包含 3-Block Compose 新身份的 AutoJs6 宿主建置 (宿主提交 f12665ffde 之後), 並安裝和啟用本外掛; AutoJs6 編輯器選單的 \"在 3-Block Compose 設計器中開啟\" 需要宿主提交 db7e6a1734 之後的建置. 本地配套提供 UI 頁面, 懸浮窗, 視覺化設計器, 五個範例, API 參考, 設計器指南頁與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在路線圖中. 目前未登記官方索引, 尚無官方發行版. 圖示已採用維護者提供的正式圖稿.",
+  "p_status": "1.3.0 本地開發預覽: 需要包含 3-Block Compose 新身份的 AutoJs6 宿主建置 (宿主提交 f12665ffde 之後), 並安裝和啟用本外掛; AutoJs6 編輯器選單的 \"在 3-Block Compose 設計器中開啟\" 需要宿主提交 db7e6a1734 之後的建置. 本地配套提供 UI 頁面, 懸浮窗, 視覺化設計器, 五個範例, API 參考, 設計器指南頁與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在路線圖中. 目前未登記官方索引, 尚無官方發行版. 圖示已採用維護者提供的正式圖稿.",
   "h3_features": "功能特性",
   "p_features_intro": "目前開發預覽的核心能力",
   "features": [

@@ -5,6 +5,12 @@
   "changelog_label_improvement": "개선",
   "changelog_label_dependency": "의존성",
   "$data": {
+    "v1.3.0": {
+      "released_date": "2026/10/13",
+      "improvement": [
+        "디자이너 캔버스에서 노드를 길게 눌러 끌면 대상 컨테이너의 배치 방향에 맞춰 삽입선을 표시하고 (세로, 가로, 그리드), 손을 뗀 위치에 노드를 놓습니다. 이전에는 항상 컨테이너 끝에 추가되었습니다"
+      ]
+    },
     "v1.2.0": {
       "released_date": "2026/10/13",
       "hint": [

@@ -127,7 +127,8 @@ internal class CanvasBounds {
 
 /**
  * The preview canvas (roadmap P8.3): the document rendered by the real renderer under the host-like
- * theme, with an overlay for tap selection, long-press drag onto a container and highlight rectangles.
+ * theme, with an overlay for tap selection, long-press drag onto a container and highlight rectangles;
+ * during a drag the container is highlighted and a line marks where the node would land (P9.1).
  * Real controls never receive input; the overlay owns every pointer. The document is laid out on a
  * bounded logical screen the size of the canvas viewport (as `compose.mount` fills an Activity), so
  * scrollable components get finite constraints; zoom scales that screen and the viewport pans over it.
@@ -139,11 +140,13 @@ internal fun DesignCanvas(
     zoom: Float,
     selectedId: Int?,
     dropTargetId: Int?,
+    dropLine: Pair<Offset, Offset>?,
     bounds: CanvasBounds,
     accent: Color,
     onSelect: (Int?) -> Unit,
     onDragStart: (Int) -> Unit,
-    onDragOver: (Int?, Offset) -> Unit,
+    /** The node under the pointer, the pointer, and a lookup of node bounds in the same coordinates. */
+    onDragOver: (Int?, Offset, (Int) -> Rect?) -> Unit,
     onDrop: () -> Unit,
     onProblems: (List<String>) -> Unit,
     modifier: Modifier = Modifier,
@@ -155,6 +158,9 @@ internal fun DesignCanvas(
     LaunchedEffect(preview) {
         controllers.accept(preview)
         onProblems(preview.problems)
+        // Bounds of nodes the new frame no longer has would otherwise still win hit tests and drop positions.
+        val live = preview.frame?.nodes?.keys ?: emptySet()
+        bounds.rects.keys.filter { it !in live }.forEach { bounds.rects.remove(it) }
     }
     val decorator = remember(bounds) {
         { id: Int, mapped: Modifier -> Modifier.onGloballyPositioned { bounds.rects[id] = it.boundsInRoot() }.then(mapped) }
@@ -207,17 +213,18 @@ internal fun DesignCanvas(
                             if (dragging != null) {
                                 change.consume()
                                 val point = change.position
-                                onDragOver(bounds.hit(document, point, preview.placeholders), point)
+                                onDragOver(bounds.hit(document, point, preview.placeholders), point) { id -> bounds.local(id, preview.placeholders) }
                             }
                         },
                         onDragEnd = { if (dragging != null) { dragging = null; onDrop() } },
-                        onDragCancel = { if (dragging != null) { dragging = null; onDragOver(null, Offset.Zero); onDrop() } },
+                        onDragCancel = { if (dragging != null) { dragging = null; onDragOver(null, Offset.Zero) { null }; onDrop() } },
                     )
                 },
         ) {
             Canvas(Modifier.matchParentSize()) {
                 val stroke = Stroke(width = 2.dp.toPx())
                 dropTargetId?.let { id -> bounds.local(id, preview.placeholders)?.let { drawRect(accent.copy(alpha = 0.18f), it.topLeft, it.size); drawRect(accent, it.topLeft, it.size, style = stroke) } }
+                dropLine?.let { (start, end) -> drawLine(accent, start, end, strokeWidth = 3.dp.toPx()) }
                 selectedId?.let { id -> bounds.local(id, preview.placeholders)?.let { rect ->
                     val inflated = Rect(rect.topLeft - Offset(2f, 2f), Size(rect.width + 4f, rect.height + 4f))
                     drawRect(accent, inflated.topLeft, inflated.size, style = stroke)

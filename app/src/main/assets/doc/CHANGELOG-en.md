@@ -4,6 +4,12 @@
 
 ******
 
+# v1.3.0
+
+###### 2026/10/13
+
+* `Improvement` Long-press dragging a node on the designer canvas shows an insertion line along the target container's layout (vertical, horizontal or grid) and drops the node where the pointer is, instead of always at the end of the container
+
 # v1.2.0
 
 ###### 2026/10/13

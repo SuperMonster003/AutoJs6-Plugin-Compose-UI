@@ -5,6 +5,12 @@
   "changelog_label_improvement": "优化",
   "changelog_label_dependency": "依赖",
   "$data": {
+    "v1.3.0": {
+      "released_date": "2026/10/13",
+      "improvement": [
+        "设计器画布中长按拖动节点时, 会按目标容器的排列方向 (纵向, 横向, 网格) 显示插入线, 松手后节点放到指针所在的位置, 不再只能追加到容器末尾"
+      ]
+    },
     "v1.2.0": {
       "released_date": "2026/10/13",
       "hint": [

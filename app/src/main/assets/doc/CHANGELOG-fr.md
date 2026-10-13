@@ -4,6 +4,12 @@
 
 ******
 
+# v1.3.0
+
+###### 2026/10/13
+
+* `Amelioration` Un glisser après appui long sur le canevas du concepteur affiche une ligne d'insertion selon la disposition du conteneur cible (verticale, horizontale ou en grille) et dépose le noeud à l'emplacement du doigt, au lieu de toujours l'ajouter à la fin du conteneur
+
 # v1.2.0
 
 ###### 2026/10/13

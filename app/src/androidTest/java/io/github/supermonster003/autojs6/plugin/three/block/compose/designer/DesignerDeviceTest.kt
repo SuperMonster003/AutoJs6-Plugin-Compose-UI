@@ -1,11 +1,15 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -103,6 +107,31 @@ internal class DesignerDeviceTest {
             rule.waitForIdle()
         }
         assertFalse(store.read(name).contains("key: 'b'"))
+    }
+
+    @Test
+    fun canvasDragDropsTheNodeWhereThePointerIs() {
+        val name = project("canvas-drop", "compose.mount(compose.Column({padding: 16},\n    compose.Text({key: 'a', text: 'Alpha'}),\n    compose.Text({key: 'b', text: 'Beta'}),\n    compose.Text({key: 'c', text: 'Gamma'})));\n")
+        launch(name).use {
+            val onCanvas = hasAnyAncestor(hasTestTag("designer-canvas-content"))
+            fun boundsOf(text: String) = rule.onNode(hasText(text) and onCanvas).fetchSemanticsNode().boundsInRoot
+            val overlay = rule.onNodeWithTag("designer-canvas-overlay").fetchSemanticsNode().boundsInRoot.topLeft
+            val gamma = boundsOf("Gamma")
+            val alpha = boundsOf("Alpha")
+            // Long-press Gamma, then drag it just above Alpha: it becomes the Column's first child, not its last.
+            rule.onNodeWithTag("designer-canvas-overlay").performTouchInput {
+                down(gamma.center - overlay)
+                advanceEventTime(viewConfiguration.longPressTimeoutMillis + 200)
+                moveTo(Offset(gamma.center.x, (gamma.center.y + alpha.top) / 2) - overlay, delayMillis = 100)
+                moveTo(Offset(alpha.center.x, alpha.top + 1f) - overlay, delayMillis = 100)
+                up()
+            }
+            rule.waitForIdle()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        val saved = store.read(name)
+        assertTrue(saved, saved.indexOf("key: 'c'") < saved.indexOf("key: 'a'") && saved.indexOf("key: 'a'") < saved.indexOf("key: 'b'"))
     }
 
     @Test

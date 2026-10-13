@@ -3,6 +3,8 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.ScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignDocument
@@ -12,6 +14,8 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditHistory
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeTemplates
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DropPlacements
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.LayoutAxes
 import org.autojs.plugin.compose.api.catalog.ComponentCatalog
 import org.autojs.plugin.compose.api.v2.ComposeUiV2
 
@@ -33,6 +37,10 @@ internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCa
         private set
     var draggingId: Int? by mutableStateOf(null)
     var dropTargetId: Int? by mutableStateOf(null)
+    /** Position among the drop target's children (without the dragged node); null appends. */
+    var dropIndex: Int? by mutableStateOf(null)
+    /** The insertion line drawn on the canvas, in canvas coordinates. */
+    var dropLine: Pair<Offset, Offset>? by mutableStateOf(null)
     var previewProblems: List<String> by mutableStateOf(emptyList())
 
     val canUndo: Boolean get() = history.canUndo
@@ -159,13 +167,38 @@ internal class DesignerSession(initial: DesignDocument, val catalog: ComponentCa
         return null
     }
 
+    /**
+     * Chooses where a canvas drag would land (roadmap P9.1): the container under [hit] that accepts [dragged]
+     * and, along that container's layout axis, the position under [pointer]; [boundsOf] gives a node's
+     * bounds on the canvas, or null when it has none.
+     */
+    fun placeDrop(dragged: Int, hit: Int?, pointer: Offset, boundsOf: (Int) -> Rect?) {
+        val container = dropContainerFor(dragged, hit)?.let { document.node(it) }
+        dropTargetId = container?.id
+        if (container == null) {
+            dropIndex = null
+            dropLine = null
+            return
+        }
+        val children = container.children
+            .filter { child -> (child as? DesignChild.Node)?.node?.id != dragged }
+            .map { child -> (child as? DesignChild.Node)?.let { boundsOf(it.node.id) } }
+        val placement = DropPlacements.place(LayoutAxes.of(container.type), pointer, boundsOf(container.id), children)
+        dropIndex = placement.index
+        dropLine = placement.line
+    }
+
     fun endDrag() {
         val dragged = draggingId
         val target = dropTargetId
+        val index = dropIndex
         draggingId = null
         dropTargetId = null
+        dropIndex = null
+        dropLine = null
         if (dragged != null && target != null) {
-            if (moveInto(dragged, target)) selectedId = dragged
+            val moved = if (index != null) moveTo(dragged, target, index) else moveInto(dragged, target)
+            if (moved) selectedId = dragged
         }
     }
 }

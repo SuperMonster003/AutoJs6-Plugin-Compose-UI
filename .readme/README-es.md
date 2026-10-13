@@ -52,7 +52,7 @@ El complemento incluye un diseñador visual y una galería de componentes: al ab
 
 ******
 
-Vista previa de desarrollo local 1.2.0: requiere una compilación del host AutoJs6 con la nueva identidad de 3-Block Compose (commit del host f12665ffde o posterior) con este complemento instalado y habilitado; la entrada de menú del editor de AutoJs6 "Abrir en el diseñador de 3-Block Compose" necesita una compilación posterior al commit del host db7e6a1734. El acompañamiento local ofrece páginas de UI, ventanas flotantes, el diseñador visual, cinco ejemplos, la referencia de API, la página de guía del diseñador y las declaraciones de TypeScript. El alcance verificado de compatibilidad y rendimiento se registra en la hoja de ruta. Aún no figura en el índice oficial; no hay versión oficial. Los iconos usan el arte final del mantenedor.
+Vista previa de desarrollo local 1.3.0: requiere una compilación del host AutoJs6 con la nueva identidad de 3-Block Compose (commit del host f12665ffde o posterior) con este complemento instalado y habilitado; la entrada de menú del editor de AutoJs6 "Abrir en el diseñador de 3-Block Compose" necesita una compilación posterior al commit del host db7e6a1734. El acompañamiento local ofrece páginas de UI, ventanas flotantes, el diseñador visual, cinco ejemplos, la referencia de API, la página de guía del diseñador y las declaraciones de TypeScript. El alcance verificado de compatibilidad y rendimiento se registra en la hoja de ruta. Aún no figura en el índice oficial; no hay versión oficial. Los iconos usan el arte final del mantenedor.
 
 ******
 
@@ -224,6 +224,12 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 ******
 
+#### v1.3.0
+
+_2026/10/13_
+
+- `Mejora` Arrastrar un nodo con pulsación larga en el lienzo del diseñador muestra una línea de inserción según la disposición del contenedor de destino (vertical, horizontal o en cuadrícula) y suelta el nodo donde está el dedo, en lugar de añadirlo siempre al final del contenedor
+
 #### v1.2.0
 
 _2026/10/13_
@@ -263,32 +269,6 @@ _2026/10/08_
 - `Dependencia` Añadir el catálogo V2 de compose-ui-api.aar conservando los modelos de nodos y la semántica de componentes V1
 - `Dependencia` Añadido material-color-utilities 4.1.1 (MIT) para la derivación del color de tema compartida con los demás complementos independientes
 - `Dependencia` Añadidas copias de AndroidX activity, core, lifecycle, savedstate, emoji2, window, kotlinx-coroutines y sus complementos en las versiones fijadas por el host para la galería en el proceso del complemento; dentro del host siguen prevaleciendo las copias del host
-
-#### v1.0.0
-
-_2026/10/03_
-
-- `Aviso` Vista previa local de desarrollo 1.0.0: requiere una compilación AutoJs6 correspondiente y el complemento instalado y activado. Se proporcionan páginas UI, ventanas flotantes, cinco ejemplos, referencia de API y declaraciones TypeScript para esta integración local. La hoja de ruta registra el alcance verificado de compatibilidad y rendimiento. El complemento no figura en el índice oficial ni tiene una publicación oficial. El icono sigue siendo provisional hasta recibir las imágenes definitivas del mantenedor
-- `Aviso` Requiere AutoJs6 6.8.0 (5316) o posterior
-- `Aviso` Las aplicaciones empaquetadas también requieren instalar por separado un complemento Compose UI compatible, con activación/autorización propias de la aplicación; se comprueba el runtime AutoJs6 integrado, no el versionCode de la aplicación
-- `Aviso` Se mantienen los dos mipmap claro/oscuro; el dibujo actual es provisional hasta que el mantenedor proporcione las imágenes definitivas en blanco y negro
-- `Novedad` compose / $compose invocables, manejadores de nodos persistentes, state/render/ref reactivos, cambios agrupados, tareas encoladas y control del tema
-- `Novedad` Núcleo Material 3: 29 fábricas de nodos para diseños, texto, iconos, imágenes, botones, entradas, selección, listas diferidas, diálogos e indicadores; Snackbar es un comando de sesión, no una fábrica compose.Snackbar
-- `Novedad` Los scripts UI montan contenido Activity; compose.floaty también ofrece a scripts sin UI ventanas raw o redimensionables, geometría en píxeles, controles táctiles/de foco y limpieza de sus recursos
-- `Novedad` Las 20 operaciones Modifier conservan el orden declarado y admiten validación del ámbito de diseño, desplazamiento y etiquetas de accesibilidad
-- `Novedad` Los temas Material 3 admiten colores semilla, modos claro y oscuro, colores dinámicos del sistema en Android 12+, familias tipográficas y escala de texto
-- `Novedad` La edición nativa conserva la selección y la composición IME, admite foco y cambios explícitos, y rechaza cambios tardíos que sobrescribirían entradas más recientes; interruptores y deslizadores siguen controlados por el script
-- `Novedad` Iconos core e imágenes ImageWrapper/Bitmap, archivos locales y drawable del host; el renderizador no recicla automáticamente las imágenes propiedad del llamante
-- `Novedad` Cinco ejemplos ejecutables de contador, validación de formularios, lista de 1000 elementos con claves estables, HUD flotante sin modo UI y temas, con requisitos e índice, sincronizados con la categoría Compose UI del host correspondiente
-- `Novedad` Referencia API y declaraciones TypeScript asociadas, además de README, instrucciones del centro de complementos y registro de cambios en 10 idiomas
-- `Novedad` Descubrimiento en el centro de complementos con comprobaciones de versión del host, contrato y autorización, sin pantalla independiente ni entrada de lanzador
-- `Correccion` Compose UI rechaza volver a montar páginas o ventanas flotantes dentro del callback de renderizado y conserva la página actual; permite volver a montar páginas después de actualizar el plugin
-- `Mejora` Las comprobaciones y ComposeError informan de plugins ausentes, desactivados, no autorizados o incompatibles, permisos insuficientes y sesiones cerradas; la limpieza también cubre ventanas canceladas antes de su conexión nativa; Actualizar, desinstalar o desactivar el plugin cierra sus sesiones activas y comunica el error correspondiente
-- `Dependencia` Se agrega common-plugin-api.aar version 6.8.0 (5307) (MPL 2.0, bloqueado por hash)
-- `Dependencia` Se agrega Jetpack Compose BOM 2026.09.00 (Apache 2.0)
-- `Dependencia` Añadir compose-ui-api.aar V1 alineado con AutoJs6 6.8.0 (5316) (MPL 2.0, hash fijado), con las dependencias compartidas alineadas con el host
-- `Dependencia` Añadir Compose UI Test gestionado por BOM 2026.09.00 (Apache 2.0, solo para pruebas)
-- `Dependencia` Añadir JaCoCo versión 0.8.14 (solo cobertura opcional de pruebas, excluido de los paquetes de publicación)
 
 ##### Para ver mas historial de versiones, consulte
 
