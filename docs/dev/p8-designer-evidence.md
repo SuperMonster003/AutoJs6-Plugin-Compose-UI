@@ -21,6 +21,9 @@ listed in the official index, and the host, documentation and Offline Docs commi
 | Plugin follow-up | 0c632e9 | 110 | "Discard" on exit no longer writes the edits back as a draft |
 | Plugin follow-up | 9cdadf7 | 111 | `verify_designer_recovery.py`, `verify_host_handoff.py` |
 | Plugin follow-up | 1897550 | 112 | Roadmap P9 plan (designer enhancements, not started) |
+| Plugin follow-up | be3f8fb, a8f1055 | 113, 114 | This section and the session record; P9 decisions D41 - D45 |
+| Plugin follow-up | f690b2f | 115 | Scripts: clipped palette entry, long editor menu |
+| Plugin follow-up | 355654e | 116 | Opt-in designer performance test, `p8-designer-performance.md` |
 | Host | f12665ffde | - | Plugin identity constants, examples and strings renamed |
 | Host | db7e6a1734 | - | Editor menu "Open in 3-Block Compose designer", reload after hand-over |
 | Documentation | 8538de3 | counter 102 | Designer guide page composeDesigner, compose link, sidebar / toc / changelog / progress |
@@ -137,16 +140,22 @@ new review lines):
 | --- | --- | --- | --- |
 | `verify_standalone_launch.py` | pass | pass | - |
 | `verify_designer_recovery.py` (real `am kill`) | pass (editor restored in a new process) | pass (same) | pass |
-| `verify_host_handoff.py` | not run, see below | not run, see below | pass (AutoJs6 6.8.0 / 5352 debug installed 12:32, after db7e6a1734) |
+| `verify_host_handoff.py` | pass after the host reinstall below | pass after the host reinstall below | pass (AutoJs6 6.8.0 / 5352 debug installed 12:32, after db7e6a1734) |
 
 The first G8441 recovery run found a real bug: leaving the editor with "Discard" cleared the draft and
 finished the Activity, but onStop wrote the still-dirty session back as a draft, so the next open offered
 the discarded edits again. 0c632e9 fixes it and `DesignerDeviceTest.discardingOnExitLeavesNoDraftBehind`
 covers it.
 
-The hand-over check could not run on the two phones: their AutoJs6 (6.8.0 / 5352) was installed on
-2026-10-12, before db7e6a1734, and has no designer entry although the version code is the same; it was not
-replaced on the maintainer's devices. The isolated spike host cannot stand in: its editor builds the
+The hand-over check first could not run on the two phones: their AutoJs6 (6.8.0 / 5352) was installed on
+2026-10-12, before db7e6a1734, and has no designer entry although the version code is the same. After the
+maintainer allowed replacing host and plugin builds on the devices, AutoJs6 was built from host master
+`6e09d9abfd` (`:app:assembleAppDebug`, the same signing key, so the update kept the app's data) and installed
+on both phones; the hand-over check then passed on the Redmi (API 33) and on the G8441 (API 28, landscape).
+Two script fixes came out of it (f690b2f): on the landscape G8441 the editor's overflow menu is taller than
+the screen and "More" has to be scrolled to, and on the Redmi the palette could stop with the Button entry
+half under the sheet's top edge, where a tap lands on the drag handle. The isolated spike host cannot stand in
+for a regular host: its editor builds the
 content Uri with `AppFileProvider.AUTHORITY`, which is hard-coded to `org.autojs.autojs6.fileprovider`, so
 granting it from `org.autojs.autojs6.compose.spike` fails with a SecurityException (the regular host is not
 affected).
@@ -154,10 +163,17 @@ affected).
 Host compose matrix on the Redmi (spike host 5352 built 12:42 with `-PcomposeUiSpike=true`, host
 androidTest APK, overlay granted through `appops`): 12 classes with the release plugin, 68 tests, 53 passed,
 15 skipped by the suites' own opt-in assumptions, 0 failed; `ComposeUiLoaderTest` with the debug plugin
-7 / 7. Not run on the phone: `ComposeAccessibilityDeviceTest` (it needs the spike host's accessibility
-service enabled in the device settings) and `ComposeTsxDeviceTest` (the device has TypeScript Engine 0.6.3;
-the suite needs 0.6.8, and the installed plugin was left alone). The spike host, the test packages and the
-plugin were uninstalled from both phones afterwards.
+7 / 7. After TypeScript Engine on the Redmi was updated from 0.6.3 to the
+0.6.8 debug build (same signing key), `ComposeTsxDeviceTest` passed 10 / 10 there. The class still fails on
+AVD_API_24 because of the image, not the plugin: its WebView is 53.0.2785.124, and TypeScript Engine requires
+Chrome / WebView 119 or newer and fails closed on the stock API 24 / 25 provider (its quick start and 0.6.0
+release notes), which surfaces as the compiler worker probe timing out. Not run on a phone:
+`ComposeAccessibilityDeviceTest`, which needs an accessibility service enabled in the device settings. The
+spike host and the test packages were uninstalled afterwards; both phones keep the new AutoJs6 build and the
+3-Block Compose 1.2.0 release (build 110).
+
+Designer performance: the first baseline (pipeline, editor open, undo / redo on four devices) is in
+`p8-designer-performance.md`; no review line is set yet.
 
 ## Known limitations recorded for 1.2.0
 

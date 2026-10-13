@@ -642,6 +642,7 @@ P8.5 证据 (2026-10-13): README 10 语言校订 (`p_introduction_how` / 使用�
 ### P9.1 画布与预览精度
 
 - [ ] (插件) 画布拖放的精确插入位置: 按目标容器的排布方向 (纵向: Column / LazyColumn / 纵向 Pager, Grid 按行优先; 横向: Row / LazyRow / 横向 Pager; 叠放: Box 系只追加) 比较指针与各子节点边界的中线, 得到插入序号并在画布上画出插入线, 落下时经既有 `moveTo` 生效; 不可见的惰性子项不参与计算, 每次重组前清理过期边界. 面板插入改为 "插到选中节点之后" (选中的是可容纳子节点的容器时仍追加为末子节点).
+- [ ] (插件) 大文档编辑延迟: 1.2.0 基线 (`docs/dev/p8-designer-performance.md`) 中 Redmi 22120RN86C 上 251 节点文档的撤销 / 重做到画布约 0.7 - 0.8 s, 其中包含测试框架的同步与查询开销; 先用帧回调或 `gfxinfo` 分清真实帧耗时, 若确认偏慢, 让预览按节点增量更新 (保持渲染器节点 key 稳定, 只重建变化的子树) 并让大纲行惰性计算, 再以同一测试复测对比.
 - [ ] (插件) 修饰链拖动排序: 属性抽屉的修饰链列表支持长按拖动, 上下移按钮保留为无障碍与键盘路径; 一次拖动对应一条 `SetModifiers` 命令.
 - [ ] (插件) 弹层真实预览: 打开态的 AlertDialog / ModalBottomSheet / DropdownMenu / Tooltip 在画布逻辑屏幕内用真实组件绘制 (画布内遮罩层加组件本体, 不创建系统窗口), 卡片形式保留为后备; 多个弹层同时打开时按树序叠放.
 - [ ] (插件) Image 预览 (D44): `@drawable/name` 经宿主包 Context 读取资源 (宿主包已在 `<queries>` 中, 无需权限); 工程菜单可选择一个图片目录 (系统文件选择器的目录树, 持久授权, 记录在工程旁的元数据中), 相对路径在该目录下解析, 未授权或找不到时仍为占位; 网络地址与宿主一致地拒绝, 并在问题列表中说明原因.
@@ -1292,3 +1293,12 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 设备协调: 3-Maple Image 与 Ace 1.44.0 两个会话同时使用这批真机. Xiaomi Pad 的首轮在对方开始测试后停止并让出 (设备上的插件由 release build 104 换为 build 106); G8441 上一次与 Ace 会话的重叠使一个 IME 用例失败, 完整复跑通过. 结束时两台真机上的插件, 测试包与 spike 宿主均已卸载, AutoJs6 宿主与 TypeScript Engine 未改动.
 - P9 (1897550): 调研本仓库, 宿主与 TypeScript Engine 的现状后写入画布与预览精度 / TSX 工程 / 交互预览三个小节与附录 D 的 Q12 - Q16, 全部未勾选. 维护者随即分两轮拍板 Q12 - Q16, 结论写入 D41 - D45; 与建议不同的是 Q13: TSX 语法树由 TypeScript Engine 的独立解析契约提供 (而非插件内解析器), 缺少引擎时 `.tsx` 只读打开, P9.2 条目据此改写为宿主 / TypeScript Engine 的解析契约与插件侧客户端两部分.
 - 未执行: 真机上的宿主编辑器往返 (两台真机的 AutoJs6 6.8.0 / 5352 是 10-12 安装的, 早于 db7e6a1734 且版本号相同, 未覆盖维护者设备上的宿主; spike 宿主的 `AppFileProvider.AUTHORITY` 写死为 `org.autojs.autojs6.fileprovider`, 授权失败, 不能代替); 真机上的宿主无障碍类与 TSX 类 (需改设备无障碍设置; 设备上 TypeScript Engine 为 0.6.3); API 24 AVD 的 TSX 编译器 Worker 超时 (TypeScript Engine 侧的预热探测, 默认 30 s); 设计器性能基线; 远端 CI 与 D7 的远端步骤 (按维护者决定暂不推送); 宿主 6.8.0 changelog 的其余 9 种语言 (由维护者同步).
+
+### 2026-10-13 (续): 真机上的宿主往返, TSX 类与设计器性能基线
+
+- 维护者授权在真机上按需覆盖安装宿主与插件, 也可自行构建最新版本. 以宿主 master `6e09d9abfd` 构建正式包名的 debug 宿主 (`:app:assembleAppDebug`, 不自增构建号, 同签名覆盖保留数据) 安装到 G8441 与 Redmi; Redmi 的 TypeScript Engine 由 0.6.3 升为 0.6.8 debug (同签名). 设备使用事先与 3-Maple Image, Ace 1.44.0 两个会话协调.
+- 宿主编辑器与设计器往返 (`verify_host_handoff.py`) 在 Redmi (API 33) 与 G8441 (API 28) 通过; 脚本修正 f690b2f: 横屏 G8441 上编辑器溢出菜单超出屏高需滚动到 "More", Redmi 上组件面板可能停在 Button 被弹层顶边裁切处 (点击落在拖动手柄), 改为先回滚露出再点. 草稿恢复脚本在两台真机复跑通过.
+- 宿主侧 `ComposeTsxDeviceTest` 在 Redmi 10 / 10 通过; API 24 AVD 的失败原因查明: 镜像 WebView 为 53.0.2785.124, TypeScript Engine 要求 Chrome / WebView 119 以上并对 API 24 / 25 自带的旧 provider 直接拒绝, 属运行环境限制, 与本插件无关. `ComposeAccessibilityDeviceTest` 需在设备设置中开启无障碍服务, 仍未在真机运行.
+- 设计器性能基线 (355654e): 新增默认跳过的 `DesignerPerformanceDeviceTest` (`-e designerPerformance true` 开启), 在 AVD_API_24 / AVD_API_30 / G8441 / Redmi 采集解析 / 校验 / 预览派生 / 生成, 编辑页打开与撤销 / 重做到画布的耗时, 记录在 `docs/dev/p8-designer-performance.md`; 管线各阶段 p90 不超过约 50 ms (56 个示例合计), 编辑页打开 0.2 - 0.7 s, Redmi 上 251 节点文档的撤销 / 重做约 0.7 - 0.8 s. 暂不设复核线, P9.1 增加一条先分清测试同步开销与真实帧耗时, 再决定是否做增量预览的条目.
+- 结束时两台真机为新宿主 + 3-Block Compose 1.2.0 release (build 110), spike 宿主与测试包已卸载.
+- 仍未执行: 真机上的宿主无障碍类 (需改设备无障碍设置), 远端 CI 与 D7 远端步骤 (按维护者决定暂不推送), 宿主 6.8.0 changelog 其余 9 种语言 (由维护者同步).
