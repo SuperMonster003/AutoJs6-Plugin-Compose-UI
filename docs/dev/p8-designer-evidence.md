@@ -14,11 +14,19 @@ listed in the official index, and the host, documentation and Offline Docs commi
 | Plugin P8.2 | 398a3c7 | 103 | Design model, commands, Rhino parser, script writer, validator |
 | Plugin P8.3 | 37b418d | 104 | Designer home and editor, real-renderer canvas, outline, inspector, palette, drafts |
 | Plugin P8.4 | 16e7430 | 105 | FileProvider, host destinations, external documents, outside-change reload |
-| Plugin P8.5 | this commit | 106 | README / changelog revision, this file, gate run |
+| Plugin P8.5 | 1e09e86 | 106 | README / changelog revision, this file, gate run |
+| Plugin follow-up | d991e80 | 107 | Size baseline accepted (AGENTS.md section 14) |
+| Plugin follow-up | 23f1814 | 108 | Canvas beside the panels in landscape, room for the add button |
+| Plugin follow-up | 4c41ca2 | 109 | Export picker tests, settings rows scrolled into view |
+| Plugin follow-up | 0c632e9 | 110 | "Discard" on exit no longer writes the edits back as a draft |
+| Plugin follow-up | 9cdadf7 | 111 | `verify_designer_recovery.py`, `verify_host_handoff.py` |
+| Plugin follow-up | 1897550 | 112 | Roadmap P9 plan (designer enhancements, not started) |
 | Host | f12665ffde | - | Plugin identity constants, examples and strings renamed |
 | Host | db7e6a1734 | - | Editor menu "Open in 3-Block Compose designer", reload after hand-over |
 | Documentation | 8538de3 | counter 102 | Designer guide page composeDesigner, compose link, sidebar / toc / changelog / progress |
+| Documentation | f21f168, 1395253 (+ 9b4350a) | counter 104 | compose page names the 1.2.0 preview; editor layout in portrait and landscape |
 | Offline Docs | 5f7bf9f | 132 | Site sync with the designer page, 10-language changelog |
+| Offline Docs | 0b81293 | 133 | Site sync of the two documentation follow-ups (provenance 1395253) |
 
 ## What shipped
 
@@ -109,6 +117,48 @@ permission granted through `appops`. Real devices covered the earlier sub-phases
 passed on the Xiaomi Pad 23046RP50C (API 35) and the first multi-device run also passed on a
 Redmi 22120RN86C (API 33), a OnePlus OPD2413 (API 35) and a Sony G8441 (API 28).
 
+## Real-device follow-up (2026-10-13, afternoon)
+
+The maintainer confirmed the size baseline, kept every repository local and asked for real-device
+coverage on the Sony G8441, the Redmi 22120RN86C and the Xiaomi Pad. Other sessions were using the
+same USB devices, so each run was coordinated with them; the Xiaomi Pad run was stopped after two minutes
+when another session started its own instrumentation there (the device was left with the signed release
+build 106; build 104 had been installed before).
+
+| Device | Plugin instrumentation | Notes |
+| --- | --- | --- |
+| Sony G8441, API 28, 720 x 1280, held in landscape (640 x 360 dp), en-US | gate build 106: 83 / 87; build 107 tree: 89 / 89; build 110: 90 / 90 | The four first-round failures reproduced on a rerun: three settings tests clicked a row or dialog option scrolled outside the window, and `undoRedoAndOutlineMovesEditTheTree` hit the add button that covered the selected outline row's move button in the stacked layout. Fixed by 23f1814 (side-by-side layout when wider than tall, room under both panels) and 4c41ca2 (scroll before click). One build 110 run lost `WideRendererTest.searchQueriesImeSearchAndExpandedResultsStayControlled` while another session injected touches on the same device; the full rerun passed 90 / 90. |
+| Redmi 22120RN86C, API 33, 720 x 1650, portrait, en-US | gate build 106: 87 / 87; build 107 tree: 89 / 89; build 110: 90 / 90 | |
+
+Device scripts with the signed release APK of build 110 (5094845 B, 87646 method references, under the
+new review lines):
+
+| Check | G8441 (API 28, landscape) | Redmi (API 33) | AVD_API_30 |
+| --- | --- | --- | --- |
+| `verify_standalone_launch.py` | pass | pass | - |
+| `verify_designer_recovery.py` (real `am kill`) | pass (editor restored in a new process) | pass (same) | pass |
+| `verify_host_handoff.py` | not run, see below | not run, see below | pass (AutoJs6 6.8.0 / 5352 debug installed 12:32, after db7e6a1734) |
+
+The first G8441 recovery run found a real bug: leaving the editor with "Discard" cleared the draft and
+finished the Activity, but onStop wrote the still-dirty session back as a draft, so the next open offered
+the discarded edits again. 0c632e9 fixes it and `DesignerDeviceTest.discardingOnExitLeavesNoDraftBehind`
+covers it.
+
+The hand-over check could not run on the two phones: their AutoJs6 (6.8.0 / 5352) was installed on
+2026-10-12, before db7e6a1734, and has no designer entry although the version code is the same; it was not
+replaced on the maintainer's devices. The isolated spike host cannot stand in: its editor builds the
+content Uri with `AppFileProvider.AUTHORITY`, which is hard-coded to `org.autojs.autojs6.fileprovider`, so
+granting it from `org.autojs.autojs6.compose.spike` fails with a SecurityException (the regular host is not
+affected).
+
+Host compose matrix on the Redmi (spike host 5352 built 12:42 with `-PcomposeUiSpike=true`, host
+androidTest APK, overlay granted through `appops`): 12 classes with the release plugin, 68 tests, 53 passed,
+15 skipped by the suites' own opt-in assumptions, 0 failed; `ComposeUiLoaderTest` with the debug plugin
+7 / 7. Not run on the phone: `ComposeAccessibilityDeviceTest` (it needs the spike host's accessibility
+service enabled in the device settings) and `ComposeTsxDeviceTest` (the device has TypeScript Engine 0.6.3;
+the suite needs 0.6.8, and the installed plugin was left alone). The spike host, the test packages and the
+plugin were uninstalled from both phones afterwards.
+
 ## Known limitations recorded for 1.2.0
 
 - The designer does not run scripts: events do not fire, state bindings show their initial value,
@@ -118,8 +168,10 @@ Redmi 22120RN86C (API 33), a OnePlus OPD2413 (API 35) and a Sony G8441 (API 28).
 - Canvas drops append to the target container; exact positions are chosen in the outline. Modifier
   chains are reordered with move buttons.
 - TSX documents are not opened by the designer (JavaScript only in 1.2.0).
-- Draft recovery after a killed process is covered by a pre-written draft file, not by a real kill.
-  Export through the system document picker and the host editor hand-over were exercised by hand
-  (adb / uiautomator), not by automated tests.
+- Draft recovery after a killed process: instrumentation still uses a pre-written draft file (it runs in
+  the process it would have to kill); `verify_designer_recovery.py` covers the real kill on devices.
+  Export is covered by `DesignerHostDeviceTest` with the system picker answered by an Instrumentation
+  monitor; the host editor hand-over by `verify_host_handoff.py`, which needs an AutoJs6 build with the
+  editor entry and the regular application ID.
 - The documentation site page and the Offline Docs sync describe the local preview; remote steps
   (pushing, releases, index registration) follow D7 and the maintainer's decision.
