@@ -10,10 +10,10 @@
 
 * `Novedad` Los proyectos del diseñador creados con "Importar script" pueden usar "Escribir de vuelta en el origen" y "Volver a importar desde el origen" en el menú del editor: la importación conserva el acceso al archivo de origen cuando su proveedor lo permite, cada acción pregunta antes si el otro lado cambió desde la última sincronización, y un origen que ya no se abre se puede elegir de nuevo para restablecer el vínculo; guardar un proyecto nunca escribe el origen por sí solo
 * `Novedad` El lienzo del diseñador previsualiza las imágenes de Image: '@drawable/name' proviene del AutoJs6 instalado y las rutas relativas se buscan en la carpeta elegida con "Carpeta de imágenes" en el menú del editor (solo se conserva acceso de lectura); las URL y rutas absolutas siguen como marcadores, con el motivo en la lista de problemas
-* `Correccion` Los componentes emergentes abiertos (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) mostrados como tarjeta en el lienzo del diseñador no tenían relleno ni espaciado alrededor de su contenido
 * `Mejora` Arrastrar un nodo con pulsación larga en el lienzo del diseñador muestra una línea de inserción según la disposición del contenedor de destino (vertical, horizontal o en cuadrícula) y suelta el nodo donde está el dedo, en lugar de añadirlo siempre al final del contenedor
 * `Mejora` En el lienzo del diseñador, AndroidView se muestra ahora como un área sombreada que conserva sus modificadores de tamaño (como h y fillMaxWidth) y muestra el código de su expresión view
 * `Mejora` La cadena de modificadores del panel de propiedades del diseñador se reordena arrastrando el asa a la izquierda de cada operación, con una línea de inserción hasta soltarla; los botones subir / bajar se mantienen
+* `Mejora` Los componentes emergentes abiertos (open es true) ahora se dibujan con un aspecto cercano al real dentro de la pantalla lógica del lienzo del diseñador: AlertDialog y ModalBottomSheet cubren la página con un velo, DropdownMenu y Tooltip aparecen debajo o encima de su ancla, y los nodos que contienen se pueden tocar para editarlos; ya no se insertan en la página como tarjetas y no se abre ninguna ventana real
 
 # v1.2.0
 

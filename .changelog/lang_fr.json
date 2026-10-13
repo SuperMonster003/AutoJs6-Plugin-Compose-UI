@@ -11,13 +11,11 @@
         "Les projets du concepteur créés avec \"Importer un script\" peuvent utiliser \"Réécrire dans la source\" et \"Réimporter depuis la source\" dans le menu de l'éditeur: l'import conserve l'accès au fichier source quand son fournisseur le permet, chaque action demande d'abord confirmation si l'autre côté a changé depuis la dernière synchronisation, et une source qui ne s'ouvre plus peut être choisie à nouveau pour rétablir le lien; enregistrer un projet n'écrit jamais la source automatiquement",
         "Le canevas du concepteur prévisualise les images des Image: '@drawable/name' provient de l'AutoJs6 installé, et les chemins relatifs sont cherchés dans le dossier choisi avec \"Dossier d'images\" dans le menu de l'éditeur (seul un accès en lecture est conservé); les URL et chemins absolus restent des espaces réservés, avec la raison dans la liste des problèmes"
       ],
-      "fix": [
-        "Les composants contextuels ouverts (AlertDialog, ModalBottomSheet, DropdownMenu, Tooltip) affichés en carte sur le canevas du concepteur n'avaient ni marge intérieure ni espacement autour de leur contenu"
-      ],
       "improvement": [
         "Un glisser après appui long sur le canevas du concepteur affiche une ligne d'insertion selon la disposition du conteneur cible (verticale, horizontale ou en grille) et dépose le noeud à l'emplacement du doigt, au lieu de toujours l'ajouter à la fin du conteneur",
         "Sur le canevas du concepteur, AndroidView apparaît désormais comme une zone teintée qui conserve ses modificateurs de taille (comme h et fillMaxWidth) et affiche le source de son expression view",
-        "La chaîne de modificateurs du tiroir de propriétés du concepteur se réordonne en faisant glisser la poignée à gauche de chaque opération, avec une ligne d'insertion jusqu'au relâchement; les boutons monter / descendre restent disponibles"
+        "La chaîne de modificateurs du tiroir de propriétés du concepteur se réordonne en faisant glisser la poignée à gauche de chaque opération, avec une ligne d'insertion jusqu'au relâchement; les boutons monter / descendre restent disponibles",
+        "Les composants contextuels ouverts (open vaut true) sont désormais dessinés au plus près de leur rendu réel dans l'écran logique du canevas du concepteur: AlertDialog et ModalBottomSheet recouvrent la page avec un voile, DropdownMenu et Tooltip s'affichent sous ou au-dessus de leur ancre, et les nœuds qu'ils contiennent se sélectionnent d'un appui pour être modifiés; ils ne sont plus insérés dans la page sous forme de cartes et aucune vraie fenêtre ne s'ouvre"
       ]
     },
     "v1.2.0": {

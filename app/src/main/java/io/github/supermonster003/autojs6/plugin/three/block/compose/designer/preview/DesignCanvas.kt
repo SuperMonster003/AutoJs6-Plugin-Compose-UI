@@ -85,6 +85,8 @@ internal class CanvasControllers {
 /** Tracks the rendered bounds of every design node, keyed by node id, in root coordinates of the canvas composition. */
 internal class CanvasBounds {
     val rects = mutableStateMapOf<Int, Rect>()
+    /** Bounds of the drawn popup of each open window component (P9.1), by owner id, in root coordinates. */
+    val popups = mutableStateMapOf<Int, Rect>()
     var origin by mutableStateOf(Offset.Zero)
 
     /**
@@ -92,7 +94,7 @@ internal class CanvasBounds {
      * expanded window component or an unrenderable one) takes the union of the placeholders standing in for it.
      */
     fun local(id: Int, placeholders: Map<Int, Int> = emptyMap()): Rect? {
-        rects[id]?.let { return it.translate(-origin) }
+        (rects[id] ?: popups[id])?.let { return it.translate(-origin) }
         var union: Rect? = null
         placeholders.forEach { (placeholderId, ownerId) ->
             if (ownerId == id) rects[placeholderId]?.let { rect -> union = union?.let { Rect(minOf(it.left, rect.left), minOf(it.top, rect.top), maxOf(it.right, rect.right), maxOf(it.bottom, rect.bottom)) } ?: rect }
@@ -104,8 +106,19 @@ internal class CanvasBounds {
      * The deepest node whose bounds contain [point] (local canvas coordinates); preorder makes descendants
      * win. A placeholder selects its owner unless a descendant of the owner was already hit.
      */
-    fun hit(document: DesignDocument, point: Offset, placeholders: Map<Int, Int>): Int? {
+    fun hit(document: DesignDocument, point: Offset, placeholders: Map<Int, Int>, overlays: List<Overlay> = emptyList()): Int? {
         val root = point + origin
+        // A popup is drawn over the page, so a tap on it stays inside its owner even where a node that comes later
+        // in document order lies underneath; the topmost (last drawn) popup wins.
+        overlays.asReversed().firstOrNull { popups[it.ownerId]?.contains(root) == true }?.let { overlay ->
+            val owner = document.node(overlay.ownerId) ?: return overlay.ownerId
+            var inside = overlay.ownerId
+            owner.descendants().forEach { node -> rects[node.id]?.let { if (it.contains(root)) inside = node.id } }
+            placeholders.forEach { (placeholderId, ownerId) ->
+                if (rects[placeholderId]?.contains(root) == true && document.isDescendant(ownerId, overlay.ownerId) && !document.isDescendant(inside, ownerId)) inside = ownerId
+            }
+            return inside
+        }
         var found: Int? = null
         document.nodes().forEach { node -> rects[node.id]?.let { if (it.contains(root)) found = node.id } }
         placeholders.forEach { (placeholderId, ownerId) ->
@@ -128,7 +141,8 @@ internal class CanvasBounds {
 /**
  * The preview canvas (roadmap P8.3): the document rendered by the real renderer under the host-like
  * theme, with an overlay for tap selection, long-press drag onto a container and highlight rectangles;
- * during a drag the container is highlighted and a line marks where the node would land (P9.1).
+ * during a drag the container is highlighted and a line marks where the node would land (P9.1). Open window
+ * components are drawn over the page in the canvas itself ([DesignOverlay]); no window ever opens.
  * Real controls never receive input; the overlay owns every pointer. The document is laid out on a
  * bounded logical screen the size of the canvas viewport (as `compose.mount` fills an Activity), so
  * scrollable components get finite constraints; zoom scales that screen and the viewport pans over it.
@@ -163,6 +177,8 @@ internal fun DesignCanvas(
         // Bounds of nodes the new frame no longer has would otherwise still win hit tests and drop positions.
         val live = preview.frame?.nodes?.keys ?: emptySet()
         bounds.rects.keys.filter { it !in live }.forEach { bounds.rects.remove(it) }
+        val open = preview.overlays.map { it.ownerId }.toSet()
+        bounds.popups.keys.filter { it !in open }.forEach { bounds.popups.remove(it) }
     }
     val decorator = remember(bounds) {
         { id: Int, mapped: Modifier -> Modifier.onGloballyPositioned { bounds.rects[id] = it.boundsInRoot() }.then(mapped) }
@@ -187,9 +203,16 @@ internal fun DesignCanvas(
                 ThemeMapper.Content(theme) {
                     CompositionLocalProvider(LocalNodeDecorator provides decorator) {
                         RendererWindowContext {
-                            Box(Modifier.semantics { testTagsAsResourceId = true }) {
+                            Box(Modifier.fillMaxSize().semantics { testTagsAsResourceId = true }) {
                                 preview.frame?.let { frame ->
-                                    RenderNode(frame, frame.rootId, controllers.commands, controllers.fields, controllers.snackbar, { _, _, _, _, _ -> })
+                                    val render: @Composable (Int) -> Unit = { id ->
+                                        RenderNode(frame, id, controllers.commands, controllers.fields, controllers.snackbar, { _, _, _, _, _ -> })
+                                    }
+                                    render(frame.rootId)
+                                    // Open window components over the page, in tree order (P9.1).
+                                    preview.overlays.forEach { overlay ->
+                                        DesignOverlay(overlay, bounds.local(overlay.ownerId), { rect -> bounds.popups[overlay.ownerId] = rect }, render)
+                                    }
                                 }
                             }
                         }
@@ -202,20 +225,20 @@ internal fun DesignCanvas(
                 .matchParentSize()
                 .testTag("designer-canvas-overlay")
                 .pointerInput(document, preview) {
-                    detectTapGestures { offset -> onSelect(bounds.hit(document, offset, preview.placeholders)) }
+                    detectTapGestures { offset -> onSelect(bounds.hit(document, offset, preview.placeholders, preview.overlays)) }
                 }
                 .pointerInput(document, preview) {
                     var dragging: Int? = null
                     detectDragGesturesAfterLongPress(
                         onDragStart = { offset ->
-                            dragging = bounds.hit(document, offset, preview.placeholders)?.takeIf { it != document.root?.id }
+                            dragging = bounds.hit(document, offset, preview.placeholders, preview.overlays)?.takeIf { it != document.root?.id }
                             dragging?.let { onDragStart(it) }
                         },
                         onDrag = { change, _ ->
                             if (dragging != null) {
                                 change.consume()
                                 val point = change.position
-                                onDragOver(bounds.hit(document, point, preview.placeholders), point) { id -> bounds.local(id, preview.placeholders) }
+                                onDragOver(bounds.hit(document, point, preview.placeholders, preview.overlays), point) { id -> bounds.local(id, preview.placeholders) }
                             }
                         },
                         onDragEnd = { if (dragging != null) { dragging = null; onDrop() } },

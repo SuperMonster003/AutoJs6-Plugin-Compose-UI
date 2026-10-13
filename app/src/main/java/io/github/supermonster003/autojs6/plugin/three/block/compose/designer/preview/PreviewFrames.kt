@@ -30,8 +30,9 @@ import org.autojs.plugin.compose.api.v2.ComposeUiV2
  * value; opaque expressions become their source text where the property is text-like and are skipped
  * elsewhere; opaque children, slots and unrenderable components become labeled placeholder texts whose
  * identities map back to the design node that owns them. Window-producing components (AlertDialog,
- * ModalBottomSheet, DropdownMenu, Tooltip) whose `open` resolves to true are shown as an inline card
- * holding their label, slots and children instead of a real window over the designer. A catalog component the
+ * ModalBottomSheet, DropdownMenu, Tooltip) whose `open` resolves to true reach the renderer closed, so no
+ * system window opens and only what sits in place is drawn (a menu's anchor, a tooltip's anchor); their
+ * window content is listed as an [Overlay] the canvas draws over the page (roadmap P9.1). A catalog component the
  * designer cannot draw (AndroidView, whose view only exists in a running script) stands in as a tinted
  * Surface that keeps the node's size modifiers and shows its view expression (roadmap P9.1, D44). With an
  * [ImageSource], a literal Image `src` string becomes the bitmap it names (P9.1, D44).
@@ -44,7 +45,18 @@ internal class PreviewFrame(
     val problems: List<String>,
     /** Placeholder UiNode ids -> the design node id they stand in for (the owner for expression children). */
     val placeholders: Map<Int, Int>,
+    /** Open window components in tree preorder (a popup before those opened inside it), to draw over the page. */
+    val overlays: List<Overlay> = emptyList(),
 )
+
+/** How the canvas draws an open window component (roadmap P9.1). */
+internal enum class OverlayKind { DIALOG, SHEET, MENU, TOOLTIP }
+
+/**
+ * An open window component drawn inside the canvas instead of a window: [slots] and [children] are UiNode ids
+ * of the frame (the closed owner still holds them, so the contract tree stays closed) that the overlay draws.
+ */
+internal class Overlay(val ownerId: Int, val kind: OverlayKind, val slots: Map<String, Int>, val children: List<Int>)
 
 internal object PreviewFrames {
     private const val PLACEHOLDER_BASE = 1_000_000
@@ -53,7 +65,12 @@ internal object PreviewFrames {
     private const val STAND_IN_SOURCE_LIMIT = 60
 
     /** Components the renderer presents in a separate window (dialog or popup) when `open` is true. */
-    internal val WINDOWED = setOf(ComposeUiComponents.ALERT_DIALOG, "ModalBottomSheet", "DropdownMenu", "Tooltip")
+    internal val WINDOWED = mapOf(
+        ComposeUiComponents.ALERT_DIALOG to OverlayKind.DIALOG,
+        "ModalBottomSheet" to OverlayKind.SHEET,
+        "DropdownMenu" to OverlayKind.MENU,
+        "Tooltip" to OverlayKind.TOOLTIP,
+    )
 
     fun build(document: DesignDocument, generation: Long, catalog: ComponentCatalog = ComposeUiV2.interopCatalog, images: ImageSource? = null): PreviewFrame {
         val root = document.root ?: return PreviewFrame(null, null, generation, listOf("The document has no mount"), emptyMap())
@@ -74,13 +91,15 @@ internal object PreviewFrames {
             }
         }
         val frame = tree?.let { RenderFrame(it.rootId, it.nodes.associateBy { node -> node.nodeId }, generation) }
-        return PreviewFrame(frame, tree, generation, builder.problems, builder.placeholders)
+        return PreviewFrame(frame, tree, generation, builder.problems, builder.placeholders, if (frame == null) emptyList() else builder.overlays.filterNotNull())
     }
 
     private class Builder(private val catalog: ComponentCatalog, private val states: Map<String, PropValue>, private val images: ImageSource?) {
         val nodes = LinkedHashMap<Int, UiNode>()
         val problems = ArrayList<String>()
         val placeholders = HashMap<Int, Int>()
+        /** Open window components in tree preorder; a slot stays null when its owner ends up a placeholder. */
+        val overlays = ArrayList<Overlay?>()
         private var nextPlaceholder = PLACEHOLDER_BASE
 
         fun emit(node: DesignNode, parentType: String?): Int {
@@ -116,6 +135,9 @@ internal object PreviewFrames {
                 problems += "${node.type}: ${missing.joinToString { it.name }} not previewable"
                 return placeholder(node.id, "[${node.type}]")
             }
+            val overlay = WINDOWED[node.type]?.takeIf { (normalized?.props?.get(ComposeUiProps.OPEN) as? UiValue.Bool)?.value == true }
+            // Taken before the content is emitted, so a popup opened inside another one is drawn above it.
+            val overlaySlot = if (overlay != null) overlays.size.also { overlays += null } else -1
             val slots = LinkedHashMap<String, Int>()
             node.slots.forEach { slot ->
                 if (spec.slots.none { it.name == slot.name }) return@forEach
@@ -130,11 +152,9 @@ internal object PreviewFrames {
                     is DesignChild.Expression -> placeholder(node.id, "{${child.source}}")
                 }
             }
-            if (node.type in WINDOWED && (normalized?.props?.get(ComposeUiProps.OPEN) as? UiValue.Bool)?.value == true) {
-                return expanded(node, slots.values + children)
-            }
+            val props = (normalized?.props ?: emptyMap()).let { if (overlay != null) it + (ComposeUiProps.OPEN to UiValue.Bool(false)) else it }
             val uiNode = try {
-                UiNode(node.id, node.type, key, normalized?.props ?: emptyMap(), normalized?.modifier ?: emptyList(), children, slots).also { RendererCatalog.validate(it) }
+                UiNode(node.id, node.type, key, props, normalized?.modifier ?: emptyList(), children, slots).also { RendererCatalog.validate(it) }
             } catch (error: ComposeUiContractException) {
                 problems += "${node.type}: ${error.message ?: error.code}"
                 try {
@@ -144,6 +164,7 @@ internal object PreviewFrames {
                 }
             }
             nodes[uiNode.nodeId] = uiNode
+            if (overlay != null) overlays[overlaySlot] = Overlay(node.id, overlay, slots, children)
             return uiNode.nodeId
         }
 
@@ -230,21 +251,6 @@ internal object PreviewFrames {
             val id = nextPlaceholder++
             placeholders[id] = node.id
             nodes[id] = UiNode(id, ComposeUiComponents.SURFACE, null, normalized?.props ?: emptyMap(), normalized?.modifier ?: emptyList(), listOf(label))
-            return id
-        }
-
-        /** An open window component as an inline card: its label, then its slots and children in order. */
-        private fun expanded(node: DesignNode, content: List<Int>): Int {
-            val label = placeholder(node.id, "[${node.type}]")
-            val column = synthetic(node.id, ComposeUiComponents.COLUMN, mapOf("padding" to UiValue.Dp(12.0), ComposeUiProps.SPACING to UiValue.Dp(8.0)), listOf(label) + content)
-            return synthetic(node.id, ComposeUiComponents.CARD, emptyMap(), listOf(column))
-        }
-
-        private fun synthetic(ownerId: Int, type: String, raw: Map<String, UiValue>, children: List<Int>): Int {
-            val id = nextPlaceholder++
-            placeholders[id] = ownerId
-            val normalized = try { catalog.normalizeProperties(type, raw, emptyList()) } catch (error: ComposeUiContractException) { null }
-            nodes[id] = UiNode(id, type, null, normalized?.props ?: emptyMap(), normalized?.modifier ?: emptyList(), children)
             return id
         }
 

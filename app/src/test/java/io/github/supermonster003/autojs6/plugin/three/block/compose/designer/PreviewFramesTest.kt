@@ -12,6 +12,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ScriptReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.ImageLookup
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.ImageSource
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.OverlayKind
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.PreviewFrames
 import org.autojs.plugin.compose.api.model.UiValue
 import org.junit.Assert.assertEquals
@@ -96,17 +97,29 @@ class PreviewFramesTest {
     }
 
     @Test
-    fun `an open window component is an inline card with padded content`() {
-        val document = reader.read("compose.mount(compose.Column({},\n    compose.ModalBottomSheet({key: 'sheet', open: true},\n        compose.Text({text: 'In the sheet'}))));\n")
+    fun `an open window component reaches the renderer closed and is listed as an overlay`() {
+        val document = reader.read("compose.mount(compose.Column({},\n    compose.ModalBottomSheet({key: 'sheet', open: true},\n        compose.Text({text: 'In the sheet'})),\n    compose.ModalBottomSheet({key: 'closed', open: false},\n        compose.Text({text: 'Not shown'}))));\n")
         val preview = PreviewFrames.build(document, 1)
         val frame = preview.frame
         assertNotNull(preview.problems.toString(), frame)
         frame!!
-        val card = frame.nodes.values.single { it.type == "Card" }
-        val column = frame.nodes.getValue(card.children.single())
-        assertEquals("Column", column.type)
-        assertTrue(column.modifier.map { it.name }.toString(), column.modifier.any { it.name == "padding" })
-        assertNotNull(column.props.toString(), column.props["spacing"])
+        val sheets = document.root!!.children.map { (it as DesignChild.Node).node }
+        // Both sheets stay in the closed contract tree, so the renderer opens no window...
+        sheets.forEach { sheet -> assertEquals(UiValue.Bool(false), frame.nodes.getValue(sheet.id).props["open"]) }
+        // ...and only the open one is drawn over the page, with its content node.
+        val overlay = preview.overlays.single()
+        assertEquals(sheets[0].id, overlay.ownerId)
+        assertEquals(OverlayKind.SHEET, overlay.kind)
+        assertEquals("In the sheet", (frame.nodes.getValue(overlay.children.single()).props["text"] as UiValue.Str).value)
+        assertEquals(0, frame.nodes.values.count { it.type == "Card" })
+    }
+
+    @Test
+    fun `a popup opened inside another one is drawn above it`() {
+        val document = reader.read("compose.mount(compose.Column({},\n    compose.ModalBottomSheet({key: 'sheet', open: true},\n        compose.DropdownMenu({key: 'menu', open: true, anchor: compose.Button({}, 'More')},\n            compose.DropdownMenuItem({key: 'edit', text: 'Edit'}))),\n    compose.AlertDialog({key: 'later', open: true, title: 'Later'})));\n")
+        val preview = PreviewFrames.build(document, 1)
+        assertNotNull(preview.problems.toString(), preview.frame)
+        assertEquals(listOf(OverlayKind.SHEET, OverlayKind.MENU, OverlayKind.DIALOG), preview.overlays.map { it.kind })
     }
 
     @Test
