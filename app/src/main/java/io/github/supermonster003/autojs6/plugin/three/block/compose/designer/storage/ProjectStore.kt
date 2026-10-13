@@ -44,12 +44,13 @@ internal class ProjectStore(context: Context) {
 
     /**
      * Creates `<baseName><extension>` (`.js` or `.tsx`), suffixing a counter while the name is taken, and writes the
-     * starter script.
+     * starter script. [baseName] may be any document name (an import, a read-only document saved as a project):
+     * characters a project name cannot hold are replaced (see [stemOf]).
      */
     fun create(baseName: String, script: String = template(), extension: String = EXTENSION): Project {
         require(extension in EXTENSIONS) { "Unsupported project extension: $extension" }
         projectsDir.mkdirs()
-        val stem = baseName.trim().removeSuffix(extension).ifBlank { "untitled" }
+        val stem = stemOf(baseName.trim().removeSuffix(extension), "untitled")
         var candidate = stem + extension
         var counter = 2
         while (exists(candidate)) candidate = "$stem-${counter++}$extension"
@@ -126,7 +127,7 @@ internal class ProjectStore(context: Context) {
         } ?: uri.lastPathSegment ?: "imported.js"
         val text = resolver.openInputStream(uri)?.use { it.readBytes().toString(StandardCharsets.UTF_8) }
             ?: throw IllegalStateException("Cannot read $uri")
-        val stem = displayName.substringAfterLast('/').substringBeforeLast('.').replace(invalid, "-").ifBlank { "imported" }
+        val stem = stemOf(displayName.substringAfterLast('/').substringBeforeLast('.'), "imported")
         keepAccess(resolver, uri)
         return create(stem, text, extensionFor(displayName)).also { recordSource(it.name, Source(uri, digest(text))) }
     }
@@ -231,9 +232,24 @@ internal class ProjectStore(context: Context) {
         private const val FIELD_SEPARATOR = "\t"
         private const val LINE_END = "\n"
         private val invalid = Regex("[^A-Za-z0-9_.\\-\\u4e00-\\u9fff]")
+        private val dots = Regex("\\.{2,}")
         private val valid = Regex("[A-Za-z0-9_\\-\\u4e00-\\u9fff][A-Za-z0-9_.\\-\\u4e00-\\u9fff]*\\.(js|tsx)")
 
         fun isValidName(name: String): Boolean = valid.matches(name) && ".." !in name
+
+        /** Longest stem [stemOf] keeps: 64 CJK characters with a counter and extension stay under 255 bytes. */
+        const val MAX_STEM_CHARS = 64
+
+        /**
+         * A project file stem made from any document name: characters a project name cannot hold become `-`, runs
+         * of dots become one, leading and trailing dots are dropped (so neither `.x.js` nor `x..js` arises), and
+         * the stem is cut to [MAX_STEM_CHARS]; [fallback] when nothing is left. `stem + extension` and
+         * `stem-<n> + extension` are always valid names.
+         */
+        fun stemOf(name: String, fallback: String): String {
+            val stem = name.trim().replace(invalid, "-").replace(dots, ".").trim('.').take(MAX_STEM_CHARS).trimEnd('.')
+            return stem.ifEmpty { fallback }
+        }
 
         /** `.tsx` for a TSX document name, `.js` for anything else (an imported `.ts` or `.txt` becomes a script). */
         fun extensionFor(displayName: String): String = if (displayName.endsWith(TSX_EXTENSION, ignoreCase = true)) TSX_EXTENSION else EXTENSION

@@ -220,6 +220,32 @@ internal class DesignerHostDeviceTest {
     }
 
     @Test
+    fun readOnlyDocumentWhoseNameIsNoProjectNameIsSavedUnderACleanedName() {
+        // Spaces and parentheses (a file manager's "copy (1)") cannot be part of a project name; saving used to throw.
+        val file = File(context.cacheDir, "host-test read only (1).js")
+        file.writeText("compose.mount(compose.Column({padding: 8},\n    compose.Text({key: 'ro', text: 'Read only'})));\n", StandardCharsets.UTF_8)
+        assertTrue(file.setWritable(false, false))
+        try {
+            ActivityScenario.launch<DesignerActivity>(DesignerActivity.documentIntent(context, Uri.fromFile(file), writable = false)).use {
+                rule.onNodeWithTag("designer-outline-2").performClick()
+                rule.onNodeWithTag("designer-delete-node").performClick()
+                rule.waitForIdle()
+                rule.onNodeWithTag("designer-save").performClick()
+                rule.waitForIdle()
+                val fallback = store.list().map { it.name }.single { it.startsWith("host-test-read-only") }
+                created += fallback
+                assertEquals("host-test-read-only--1-.js", fallback)
+                assertFalse(store.read(fallback).contains("key: 'ro'"))
+                assertTrue("the title names the project", rule.onAllNodesWithText(fallback, substring = true).fetchSemanticsNodes().isNotEmpty())
+            }
+            assertTrue("the read-only file is untouched", file.readText(StandardCharsets.UTF_8).contains("key: 'ro'"))
+        } finally {
+            file.setWritable(true, false)
+            file.delete()
+        }
+    }
+
+    @Test
     fun changesMadeOutsideTheDesignerAreReloadedOnResume() {
         val name = project("reload")
         ActivityScenario.launch<DesignerActivity>(DesignerActivity.intent(context, name)).use { scenario ->

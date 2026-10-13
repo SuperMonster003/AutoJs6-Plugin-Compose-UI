@@ -15,6 +15,9 @@
         "\"Ejecutar\" en un proyecto TSX del diseñador entrega el archivo del proyecto a AutoJs6, que lo compila con TypeScript Engine y lo ejecuta; los cambios sin guardar se guardan antes",
         "Cuando TypeScript Engine no está instalado, es demasiado antiguo o su servicio de análisis no está disponible por el momento, el diseñador muestra el código del proyecto TSX en solo lectura con el motivo, y se puede copiar el código o reintentar; al volver al diseñador después de instalar o actualizar TypeScript Engine se reintenta automáticamente"
       ],
+      "fix": [
+        "Guardar un script externo que no se podía sobrescribir cerraba el diseñador en lugar de guardarlo como proyecto cuando el nombre del archivo tenía espacios, paréntesis u otros caracteres no permitidos en un nombre de proyecto; ahora esos caracteres se sustituyen por \"-\", y los scripts importados se nombran igual"
+      ],
       "improvement": [
         "Los controladores de eventos editados en un proyecto TSX los comprueba TypeScript Engine, por lo que se puede usar sintaxis de TypeScript como las anotaciones de tipo"
       ],

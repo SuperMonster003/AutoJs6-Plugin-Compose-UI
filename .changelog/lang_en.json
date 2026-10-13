@@ -15,6 +15,9 @@
         "\"Run\" on a TSX project in the designer hands the project file to AutoJs6, which compiles it with TypeScript Engine and runs it; unsaved changes are saved first",
         "When TypeScript Engine is not installed, too old, or its parsing service is temporarily unavailable, the designer shows the TSX project's source read-only with the reason, and the source can be copied or the parse retried; returning to the designer after installing or updating TypeScript Engine retries automatically"
       ],
+      "fix": [
+        "Saving an external script that cannot be written back made the designer crash instead of saving it as a project when the file name contained spaces, parentheses or other characters a project name cannot hold; such characters are now replaced with \"-\", and imported scripts are named the same way"
+      ],
       "improvement": [
         "Event handlers edited in a TSX project are syntax-checked by TypeScript Engine, so TypeScript syntax such as type annotations can be used"
       ],

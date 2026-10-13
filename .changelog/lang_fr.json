@@ -15,6 +15,9 @@
         "\"Exécuter\" sur un projet TSX dans le concepteur transmet le fichier du projet à AutoJs6, qui le compile avec TypeScript Engine puis l'exécute; les modifications non enregistrées sont d'abord enregistrées",
         "Lorsque TypeScript Engine n'est pas installé, est trop ancien ou que son service d'analyse est temporairement indisponible, le concepteur affiche la source du projet TSX en lecture seule avec la raison, et la source peut être copiée ou l'analyse relancée; revenir au concepteur après avoir installé ou mis à jour TypeScript Engine relance automatiquement l'analyse"
       ],
+      "fix": [
+        "L'enregistrement d'un script externe impossible à réécrire faisait planter le concepteur au lieu de l'enregistrer comme projet lorsque le nom du fichier contenait des espaces, des parenthèses ou d'autres caractères interdits dans un nom de projet; ces caractères sont désormais remplacés par \"-\", et les scripts importés sont nommés de la même façon"
+      ],
       "improvement": [
         "Les gestionnaires d'événements modifiés dans un projet TSX sont vérifiés par TypeScript Engine, ce qui permet la syntaxe TypeScript comme les annotations de type"
       ],
