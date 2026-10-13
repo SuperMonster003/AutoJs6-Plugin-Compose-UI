@@ -61,8 +61,9 @@ internal class DesignerPreviewStateDeviceTest {
             rule.onNodeWithTag("designer-tab-state").performClick()
             rule.onNodeWithTag("designer-state-on").assertIsDisplayed()
 
-            // The panel drives the canvas, including a text field whose renderer keeps its own text.
-            rule.onNodeWithTag("designer-state-value-on").performClick()
+            // The panel drives the canvas, including a text field whose renderer keeps its own text. On a small screen
+            // (the API 24 CI device is a Nexus 5) the hint pushes the first row below the visible part of the panel.
+            rule.onNodeWithTag("designer-state-value-on").performScrollTo().performClick()
             rule.waitUntil(5_000) { rule.onAllNodes(isToggleable() and onCanvas and SemanticsMatcher.expectValue(SemanticsProperties.ToggleableState, androidx.compose.ui.state.ToggleableState.On)).fetchSemanticsNodes().isNotEmpty() }
             rule.onNodeWithTag("designer-state-value-name").performScrollTo().performTextClearance()
             rule.onNodeWithTag("designer-state-value-name").performTextInput("Grace")

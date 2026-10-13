@@ -217,8 +217,9 @@ internal class DesignerDeviceTest {
             rule.waitForIdle()
             rule.onNodeWithTag("designer-back").performClick()
             rule.onNodeWithTag("designer-exit-discard").performClick()
-            // finish() runs onStop, which used to write the discarded edits back as a draft.
-            rule.waitUntil(5_000) { scenario.state == Lifecycle.State.DESTROYED }
+            // finish() runs onStop, which used to write the discarded edits back as a draft. API 24 may hold back
+            // onStop / onDestroy of a finished activity for up to 10 s while the next one is not idle.
+            rule.waitUntil(15_000) { scenario.state == Lifecycle.State.DESTROYED }
         }
         assertFalse("discarded edits are not kept as a draft", store.draftFile(name).exists())
         assertEquals(before, store.read(name))

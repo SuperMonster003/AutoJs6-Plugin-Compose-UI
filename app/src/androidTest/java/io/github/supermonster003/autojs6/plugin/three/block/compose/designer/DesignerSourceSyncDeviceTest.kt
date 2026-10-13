@@ -112,6 +112,9 @@ internal class DesignerSourceSyncDeviceTest {
             menuItem("designer-menu-reimport")
             rule.waitUntil(5_000) { rule.onAllNodesWithTag("designer-outline-3").fetchSemanticsNodes().isNotEmpty() }
             assertEquals(two, store.read(project))
+            // On a small screen (the API 24 CI device is a Nexus 5) the "re-imported" message covers the outline
+            // rows under it, so a click there would land on the message.
+            rule.waitUntil(10_000) { rule.onAllNodesWithText(context.getString(R.string.designer_source_reimported)).fetchSemanticsNodes().isEmpty() }
             // A local edit since that sync makes the next re-import ask first.
             rule.onNodeWithTag("designer-outline-3").performClick()
             rule.onNodeWithTag("designer-delete-node").performClick()
