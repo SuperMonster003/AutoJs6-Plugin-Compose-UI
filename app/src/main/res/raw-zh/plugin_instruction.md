@@ -1,6 +1,6 @@
 3-Block Compose 是 AutoJs6 的界面渲染插件. 脚本通过宿主提供的 `compose` / `$compose` 入口声明界面, 插件在宿主进程内以 Jetpack Compose 与 Material 3 完成渲染. 当前预览同时支持 `"ui";` 模式的 Activity 内容与非 ui 脚本的悬浮窗.
 
-1.4.0 本地开发预览: 需要包含 3-Block Compose 新身份的 AutoJs6 宿主构建 (宿主提交 f12665ffde 之后), 并安装和启用本插件; AutoJs6 编辑器菜单的 "在 3-Block Compose 设计器中打开" 需要宿主提交 db7e6a1734 之后的构建. 本地配套提供 UI 页面, 悬浮窗, 可视化设计器, 五个示例, API 参考, 设计器指南页与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 当前未登记官方索引, 尚无官方发行版. 图标已采用维护者提供的正式图稿.
+1.4.0 是首个公开发行版 (GitHub Release, 已登记官方插件索引). 需要 AutoJs6 6.8.0 (5322) 或更高版本中包含 3-Block Compose 新身份的构建 (宿主提交 f12665ffde 之后); 发布时 AutoJs6 6.8.0 尚未正式发布, 需要使用包含该提交的 AutoJs6 构建. AutoJs6 编辑器菜单的 "在 3-Block Compose 设计器中打开" 需要宿主提交 db7e6a1734 之后的构建, 设计器的 TSX 工程需要 TypeScript Engine 0.7.0. 本插件提供 UI 页面, 悬浮窗, 可视化设计器, 五个示例, API 参考, 设计器指南页与 TypeScript 声明. 已验证的兼容性及性能范围记录在路线图中. 图标已采用维护者提供的正式图稿.
 
 ### 使用方式
 

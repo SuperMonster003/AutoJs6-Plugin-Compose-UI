@@ -1,6 +1,6 @@
 3-Block Compose 是 AutoJs6 的介面轉譯外掛程式. 指令碼透過宿主提供的 `compose` / `$compose` 入口宣告介面, 外掛程式在宿主處理程序內以 Jetpack Compose 與 Material 3 完成轉譯. 目前預覽同時支援 `"ui";` 模式的 Activity 內容與非 ui 指令碼的懸浮視窗.
 
-1.4.0 本地開發預覽: 需要包含 3-Block Compose 新身份的 AutoJs6 宿主建置 (宿主提交 f12665ffde 之後), 並安裝和啟用本外掛; AutoJs6 編輯器選單的 "在 3-Block Compose 設計器中開啟" 需要宿主提交 db7e6a1734 之後的建置. 本地配套提供 UI 頁面, 懸浮窗, 視覺化設計器, 五個範例, API 參考, 設計器指南頁與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在路線圖中. 目前未登記官方索引, 尚無官方發行版. 圖示已採用維護者提供的正式圖稿.
+1.4.0 是首個公開發行版 (GitHub Release, 已登記官方外掛索引). 需要 AutoJs6 6.8.0 (5322) 或更新版本中包含 3-Block Compose 新身分的建置 (宿主提交 f12665ffde 之後); 發佈時 AutoJs6 6.8.0 尚未正式發佈, 需要使用包含該提交的 AutoJs6 建置. AutoJs6 編輯器選單的 "在 3-Block Compose 設計器中開啟" 需要宿主提交 db7e6a1734 之後的建置, 設計器的 TSX 專案需要 TypeScript Engine 0.7.0. 本外掛提供 UI 頁面, 懸浮窗, 視覺化設計器, 五個範例, API 參考, 設計器指南頁與 TypeScript 宣告. 已驗證的相容性及效能範圍記錄在路線圖中. 圖示已採用維護者提供的正式圖稿.
 
 ### 使用方式
 

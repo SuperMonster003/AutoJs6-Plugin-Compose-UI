@@ -8,7 +8,7 @@
   "p_introduction_what": "3-Block Compose 是 AutoJs6 的界面渲染插件. 腳本透過宿主提供的 `compose` / `$compose` 入口宣告界面, 插件在宿主進程內以 Jetpack Compose 與 Material 3 完成渲染. 目前預覽同時支援 `\"ui\";` 模式的 Activity 內容與非 ui 腳本的懸浮窗.",
   "p_introduction_how": "插件內置可視化設計器與組件展示: 從啟動器打開即進入設計器首頁, 可新建或匯入腳本工程並在真實渲染器上編輯界面, 組件展示則呈現全部組件的預覽與示例腳本; 腳本界面的渲染仍在宿主進程中進行. 宿主通過 INFO 服務發現插件並讀取版本與兼容資訊, 再按契約 (`org.autojs.plugin.compose.api`) 在自身進程內實例化渲染器工廠.",
   "h3_status": "當前狀態",
-  "p_status": "1.4.0 本地開發預覽: 需要包含 3-Block Compose 新身份的 AutoJs6 宿主構建 (宿主提交 f12665ffde 之後), 並安裝和啟用本插件; AutoJs6 編輯器選單的 \"在 3-Block Compose 設計器中打開\" 需要宿主提交 db7e6a1734 之後的構建. 本地配套提供 UI 頁面, 懸浮窗, 可視化設計器, 五個示例, API 參考, 設計器指南頁與 TypeScript 聲明. 已驗證的兼容性及性能範圍記錄在路線圖中. 當前未登記官方索引, 尚無官方發行版. 圖標已採用維護者提供的正式圖稿.",
+  "p_status": "1.4.0 是首個公開發行版 (GitHub Release, 已登記官方插件索引). 需要 AutoJs6 6.8.0 (5322) 或更高版本中包含 3-Block Compose 新身份的構建 (宿主提交 f12665ffde 之後); 發佈時 AutoJs6 6.8.0 尚未正式發佈, 需要使用包含該提交的 AutoJs6 構建. AutoJs6 編輯器選單的 \"在 3-Block Compose 設計器中打開\" 需要宿主提交 db7e6a1734 之後的構建, 設計器的 TSX 工程需要 TypeScript Engine 0.7.0. 本插件提供 UI 頁面, 懸浮窗, 可視化設計器, 五個示例, API 參考, 設計器指南頁與 TypeScript 聲明. 已驗證的兼容性及性能範圍記錄在路線圖中. 圖標已採用維護者提供的正式圖稿.",
   "h3_features": "功能特性",
   "p_features_intro": "目前開發預覽的核心能力",
   "features": [

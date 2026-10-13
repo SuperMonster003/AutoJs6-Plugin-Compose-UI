@@ -52,7 +52,7 @@ Le plugin intègre un concepteur visuel et une galerie de composants: l'ouvrir d
 
 ******
 
-Aperçu de développement local 1.4.0: nécessite une version de l'hôte AutoJs6 portant la nouvelle identité 3-Block Compose (commit hôte f12665ffde ou ultérieur) avec ce plugin installé et activé; l'entrée de menu de l'éditeur AutoJs6 "Ouvrir dans le concepteur 3-Block Compose" nécessite une version postérieure au commit hôte db7e6a1734. L'accompagnement local fournit les pages UI, les fenêtres flottantes, le concepteur visuel, cinq exemples, la référence API, la page de guide du concepteur et les déclarations TypeScript. Le périmètre vérifié de compatibilité et de performance est consigné dans la feuille de route. Pas encore inscrit à l'index officiel; aucune version officielle. Les icônes utilisent le visuel final du mainteneur.
+1.4.0 est la première version publique (GitHub Release, inscrite à l'index officiel des plugins). Elle nécessite une version d'AutoJs6 6.8.0 (5322) ou ultérieure portant la nouvelle identité 3-Block Compose (commit hôte f12665ffde ou ultérieur); AutoJs6 6.8.0 n'était pas encore officiellement publié lors de la parution de cette version, une version d'AutoJs6 contenant ce commit est donc nécessaire. L'entrée de menu de l'éditeur AutoJs6 "Ouvrir dans le concepteur 3-Block Compose" nécessite une version postérieure au commit hôte db7e6a1734, et les projets TSX du concepteur nécessitent TypeScript Engine 0.7.0. Le plugin fournit les pages UI, les fenêtres flottantes, le concepteur visuel, cinq exemples, la référence API, la page de guide du concepteur et les déclarations TypeScript. Le périmètre vérifié de compatibilité et de performance est consigné dans la feuille de route. Les icônes utilisent le visuel final du mainteneur.
 
 ******
 
