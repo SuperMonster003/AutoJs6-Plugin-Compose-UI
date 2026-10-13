@@ -29,7 +29,7 @@
 
 - How do gallery examples run? "Run in AutoJs6" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts
 - Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column
-- Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; events do not fire and state shows its initial value. Running is left to AutoJs6
+- Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; event handlers do not run and state shows its initial value or a preview value set in the State panel. In the interactive preview, controls bound to a state (switches, sliders, text fields and so on) change its preview value directly, but handlers and render functions still do not run. Running is left to AutoJs6
 - Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it
 - Do other UI plugins need to be uninstalled? No, 3-Block Compose does not interfere with the existing `ui` module or other plugins
 - What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount

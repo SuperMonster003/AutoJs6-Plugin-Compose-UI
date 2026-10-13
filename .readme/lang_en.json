@@ -12,8 +12,8 @@
   "h3_features": "Features",
   "p_features_intro": "Capabilities of the current development preview",
   "features": [
-    "Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6",
-    "AutoJs6 integration: a project can be sent to run, opened in the AutoJs6 editor (two-way sync), imported into the AutoJs6 script directory, copied or exported; the designer also opens .js files straight from the AutoJs6 editor or a file manager and saves back into the same file",
+    "Visual designer: the script file is the project, the real renderer previews the interface tree as you edit it, the outline / component palette / property drawer cover all 55 components, with undo / redo and draft recovery; the exported script can be copied or sent straight to AutoJs6; canvas drops land where the pointer is, open popups are drawn inside the canvas, Image shows @drawable pictures and pictures from a project image folder, and the State panel with the interactive preview changes state preview values for a while",
+    "AutoJs6 integration: a project can be sent to run, opened in the AutoJs6 editor (two-way sync), imported into the AutoJs6 script directory, copied or exported; the designer also opens .js files straight from the AutoJs6 editor or a file manager and saves back into the same file; an imported project can be written back to its source or re-imported from it on request in the editor menu",
     "Declarative UI: `compose.state` + `compose.mount(render)` re-render on state changes, while long-lived node handles (`compose.Text({...})` and friends) allow direct property and child updates",
     "Material 3 core: 29 node factories for layouts, text, icons, images, buttons, inputs, selection controls, lazy lists, dialogs and progress; Snackbar is a session command, not a compose.Snackbar factory",
     "Chained modifiers: `compose.modifier().padding(16).fillMaxWidth().background('#FFFFFF')` keeps operation order, and scoped operations are validated on the host side",
@@ -67,7 +67,7 @@
   "faq_items": [
     "How do gallery examples run? \"Run in AutoJs6\" hands the script to the installed AutoJs6; the gallery itself only shows previews and code and never executes scripts",
     "Can the designer open any script? It interprets only top-level `compose.state` declarations and the single `compose.mount` / `floaty` / `dialog` call; every other statement is kept verbatim. Shapes it cannot map (a root that is not a compose factory, several mount calls, a render function without return) are refused with a line and column",
-    "Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; events do not fire and state shows its initial value. Running is left to AutoJs6",
+    "Does the designer run scripts? No. It only parses them with the Rhino parser and previews them with the plugin's own renderer; event handlers do not run and state shows its initial value or a preview value set in the State panel. In the interactive preview, controls bound to a state (switches, sliders, text fields and so on) change its preview value directly, but handlers and render functions still do not run. Running is left to AutoJs6",
     "Why is `compose` missing? The global object is supplied by the matching local host build; installing this plugin APK alone does not add it",
     "Do other UI plugins need to be uninstalled? No, 3-Block Compose does not interfere with the existing `ui` module or other plugins",
     "What happens when the plugin changes? Updating, uninstalling or disabling it closes active sessions and reports the corresponding error; a compatible, enabled plugin allows a new mount",
