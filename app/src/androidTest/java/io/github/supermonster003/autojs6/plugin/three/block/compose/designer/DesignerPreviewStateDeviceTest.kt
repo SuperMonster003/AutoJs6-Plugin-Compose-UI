@@ -47,7 +47,7 @@ internal class DesignerPreviewStateDeviceTest {
         "    compose.Text({key: 'label', text: name.value}),\n" +
         "    compose.TextField({key: 'field', text: name.value})));\n"
 
-    @Before @After fun clean() { store.list().filter { it.name.startsWith("state-test-") }.forEach { store.delete(it.name) } }
+    @Before @After fun clean() { store.list().filter { it.name.startsWith("state-test") }.forEach { store.delete(it.name) } }
 
     private fun canvasText(text: String) = rule.onAllNodes(hasText(text) and onCanvas and !hasSetTextAction()).fetchSemanticsNodes().isNotEmpty()
 
