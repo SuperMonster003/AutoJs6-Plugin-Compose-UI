@@ -98,3 +98,32 @@ documents about +7 KB. Q8 does not block below 10 MiB.
 The maintainer accepted the growth on 2026-10-14, after the release. The 1.5.0 release APK (build 139, `8bc620a`,
 `v1.5.0`) is the new baseline; with the rule of AGENTS section 14 (measured value plus 10 %, rounded up) the review
 lines are now 6177215 B and 105804 method references.
+
+## 1.5.1: a text field that joins the canvas crashed the designer
+
+Reported by the maintainer on the Sony XQ-DQ72 (QV770340J7, Android 13): the 1.5.0 release closed three times in the
+designer (`ComposeUiContractException: NODE_DETACHED`, retraced with the 1.5.0 mapping `ebb6761d...` to
+`TextFieldController.entry` <- `RenderNode` <- `DesignCanvas`, inside `Recomposer.performRecompose`).
+
+Cause: since `1e1dba0` (1.4.0, "recompose only changed canvas nodes") the canvas writes a new tree into per-node
+states (`LiveFrame`) during composition, so the changed nodes recompose in the same pass, before the effects of
+that composition run. The fields were bound to the new tree (`TextFieldController.acceptFrame`) in a
+`LaunchedEffect`, so a text field that was not in the previous tree was drawn without a binding. Inserting a text
+field from the palette, an undo / redo that brings one back, and a sandbox script that shows one all hit it; the
+sandbox's trees change often, which made it frequent in 1.5.0.
+
+Fix: `CanvasControllers.bind` binds the fields and the snackbar host of a frame in the composition step that writes
+the frame, before any of it is drawn (the host renderer binds before it publishes a frame); bringing the fields to
+their text stays in the effect.
+
+| Check | Before (1.5.0) | After (1.5.1) |
+| --- | --- | --- |
+| `DesignerDeviceTest.textFieldsInsertedAndRemovedOnTheCanvasDrawRightAway` (two fields from the palette, undo, redo), AVD_API_30 | NODE_DETACHED | passed |
+| `DesignerSandboxDeviceTest.aFieldTheScriptAddsAndRemovesIsDrawnRightAway` (a script shows and hides a field three times), AVD_API_30 | NODE_DETACHED | passed |
+| QV770340J7, release APK, over adb as a user: new project, insert TextField twice, undo, redo | the first insert closed the plugin (FATAL EXCEPTION, NODE_DETACHED) | same process throughout, no crash; the temporary projects were deleted |
+
+Gate (build 144): `generate_markdown.py --check`, `generate_icon_studio.py --check`, `:app:testDebugUnitTest` (173),
+`:app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug :app:assembleRelease :app:verifySharedClasspath`
+(lint unchanged), `verify_apk_classpath.py` (debug 14316020 B / 144455; release `--shrunk` 5617018 B / 96186,
+`unresolved=0`, within the review lines 6177215 B / 105804), all 46 designer device tests and `TextFieldRendererTest`
+(9) on AVD_API_30, `verify_standalone_launch.py` with the release APK on AVD_API_30 (`sandbox=ran`).

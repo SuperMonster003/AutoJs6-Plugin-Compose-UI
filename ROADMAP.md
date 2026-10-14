@@ -1364,3 +1364,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 推送与 CI: 插件 `fe61b63` (功能, build 139) / `8bc620a` (路线图与证据), CI 全部通过 (单元测试与 APK, API 24 与 API 35 全套 instrumentation); 文档站 `34def8e` / `757f098` (重新生成, 158 个模块) / `0e9a0e9` (计数 107), Offline Docs `b7c5443` (VERSION_BUILD 137, `--verify-offline` 同步), CI 通过.
 - 发布: GitHub Release `v1.5.0` (tag = `8bc620a`, 与 `fe61b63` 的应用源码相同; APK 5615650 B, SHA-256 `c6616272...`, 与 `SHA256SUMS`), 最终 APK 在 AVD_API_30 上再跑 `verify_standalone_launch.py` 通过 (`sandbox=ran`); 官方索引 `8b095f6` 准入 3-Block Compose 1.5.0 (manifest 139), 索引测试与 Markdown 检查通过.
 - 1.5.0 APK 超出复核线 (AGENTS 第 14 节) 11852 B (方法引用未超线); 维护者于发布后接受该增长, 以 1.5.0 release 包 (build 139, `8bc620a`) 的实测 5615650 B / 96185 引用为新基线, 复核线改为 6177215 B / 105804 引用.
+
+### 2026-10-14 (续): 1.5.1 修复画布输入框崩溃
+
+- 维护者报告 QV770340J7 (Sony XQ-DQ72, Android 13) 上 1.5.0 release 在设计器中闪退三次: `NODE_DETACHED`, 以 1.5.0 的 mapping 还原为 `TextFieldController.entry` <- `RenderNode` <- `DesignCanvas` (重组中).
+- 原因: `1e1dba0` (1.4.0 的画布只重组变化节点) 起, 画布在组合中把新树写入逐节点状态 (`LiveFrame`), 变化的节点在同一轮重组中绘制, 早于登记输入框绑定的 `LaunchedEffect`; 新出现的输入框 (从组件面板插入, 撤销 / 重做恢复, 沙箱脚本显示) 因此没有绑定. 1.4.0 起即存在, 沙箱的树变化频繁, 1.5.0 中更容易触发.
+- 修复: `CanvasControllers.bind` 在写入新帧的同一组合步骤中先绑定输入框与 Snackbar 宿主 (与宿主渲染器先绑定再发布帧一致), 文字同步仍在 effect 中. 新增设备测试 `DesignerDeviceTest.textFieldsInsertedAndRemovedOnTheCanvasDrawRightAway` 与 `DesignerSandboxDeviceTest.aFieldTheScriptAddsAndRemovesIsDrawnRightAway`, 修复前在 AVD_API_30 上均复现 `NODE_DETACHED`, 修复后通过; QV770340J7 上以 adb 按用户操作对照: 1.5.0 release 插入第一个 TextField 即闪退, 1.5.1 release 插入两个, 撤销, 重做均无崩溃, 临时工程已删除 (经 3-Maple Image 会话协调使用该设备).
+- 1.5.1 (build 144) 本地 gate 与体积见 `docs/dev/p9-sandbox-evidence.md` 的 1.5.1 一节: release 5617018 B / 96186 引用, 在复核线 6177215 B / 105804 之内.
