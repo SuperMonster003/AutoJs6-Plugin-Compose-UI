@@ -5,6 +5,12 @@
   "changelog_label_improvement": "優化",
   "changelog_label_dependency": "依賴",
   "$data": {
+    "v1.5.1": {
+      "released_date": "2026/10/14",
+      "fix": [
+        "設計器畫布上出現新的輸入框時插件可能閃退, 例如從組件面板插入輸入框, 撤銷 / 重做使輸入框重新出現, 或互動預覽中的腳本顯示出輸入框 (自 1.4.0 起); 現在這些輸入框都會正常顯示"
+      ]
+    },
     "v1.5.0": {
       "released_date": "2026/10/14",
       "hint": [

@@ -227,6 +227,12 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 ******
 
+#### v1.5.1
+
+_2026/10/14_
+
+- `Correccion` El complemento podía cerrarse de forma inesperada cuando aparecía un nuevo campo de texto en el lienzo del diseñador, por ejemplo al insertar un campo de texto desde la paleta de componentes, cuando deshacer / rehacer volvía a mostrar un campo de texto, o cuando un script de la vista previa interactiva mostraba uno (desde 1.4.0); ahora estos campos de texto aparecen con normalidad
+
 #### v1.5.0
 
 _2026/10/14_
@@ -248,21 +254,6 @@ _2026/10/13_
 - `Correccion` Guardar un script externo que no se podía sobrescribir cerraba el diseñador en lugar de guardarlo como proyecto cuando el nombre del archivo tenía espacios, paréntesis u otros caracteres no permitidos en un nombre de proyecto; ahora esos caracteres se sustituyen por "-", y los scripts importados se nombran igual
 - `Mejora` Los controladores de eventos editados en un proyecto TSX los comprueba TypeScript Engine, por lo que se puede usar sintaxis de TypeScript como las anotaciones de tipo
 - `Dependencia` Se añade el artefacto de contrato typescript-parser-api.aar (contrato de análisis de árbol sintáctico de TypeScript v1), que el diseñador usa para leer proyectos TSX
-
-#### v1.3.0
-
-_2026/10/13_
-
-- `Novedad` Los proyectos del diseñador creados con "Importar script" pueden usar "Escribir de vuelta en el origen" y "Volver a importar desde el origen" en el menú del editor: la importación conserva el acceso al archivo de origen cuando su proveedor lo permite, cada acción pregunta antes si el otro lado cambió desde la última sincronización, y un origen que ya no se abre se puede elegir de nuevo para restablecer el vínculo; guardar un proyecto nunca escribe el origen por sí solo
-- `Novedad` El lienzo del diseñador previsualiza las imágenes de Image: '@drawable/name' proviene del AutoJs6 instalado y las rutas relativas se buscan en la carpeta elegida con "Carpeta de imágenes" en el menú del editor (solo se conserva acceso de lectura); las URL y rutas absolutas siguen como marcadores, con el motivo en la lista de problemas
-- `Novedad` El editor del diseñador tiene un nuevo panel Estado: enumera los compose.state de nivel superior del script con sus valores iniciales y permite establecer valores de vista previa que solo cambian el lienzo, nunca el script, y no añaden pasos de deshacer. Con Interactuar activado (arriba a la derecha del lienzo) se pueden manejar los componentes del lienzo, y los interruptores, controles deslizantes, campos de texto, selecciones, paginadores y otros controles vinculados a un estado cambian su valor de vista previa (los controladores de eventos del script no se ejecutan); al desactivarlo vuelven la selección y el arrastre
-- `Correccion` Cuando se insertaba, eliminaba o movía a otro lugar un hijo situado al principio de un contenedor, los hijos posteriores se reconstruían por completo y perdían su propio estado (por ejemplo, la posición de desplazamiento de una LazyColumn); ahora conservan su estado y ya no se reconstruyen
-- `Correccion` Tras cambiar el texto de un campo de texto (TextField / OutlinedTextField) en el panel de propiedades del diseñador, el campo del lienzo seguía mostrando el texto anterior
-- `Mejora` Arrastrar un nodo con pulsación larga en el lienzo del diseñador muestra una línea de inserción según la disposición del contenedor de destino (vertical, horizontal o en cuadrícula) y suelta el nodo donde está el dedo, en lugar de añadirlo siempre al final del contenedor
-- `Mejora` En el lienzo del diseñador, AndroidView se muestra ahora como un área sombreada que conserva sus modificadores de tamaño (como h y fillMaxWidth) y muestra el código de su expresión view
-- `Mejora` La cadena de modificadores del panel de propiedades del diseñador se reordena arrastrando el asa a la izquierda de cada operación, con una línea de inserción hasta soltarla; los botones subir / bajar se mantienen
-- `Mejora` Los componentes emergentes abiertos (open es true) ahora se dibujan con un aspecto cercano al real dentro de la pantalla lógica del lienzo del diseñador: AlertDialog y ModalBottomSheet cubren la página con un velo, DropdownMenu y Tooltip aparecen debajo o encima de su ancla, y los nodos que contienen se pueden tocar para editarlos; ya no se insertan en la página como tarjetas y no se abre ninguna ventana real
-- `Mejora` Tras cada edición, el lienzo del diseñador solo recompone los nodos que cambiaron y registra las posiciones de los nodos con menos coste, por lo que un documento más grande (unos 250 nodos) se redibuja claramente más rápido tras deshacer / rehacer
 
 ##### Para ver mas historial de versiones, consulte
 

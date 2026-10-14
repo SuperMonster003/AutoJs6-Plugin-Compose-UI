@@ -169,6 +169,27 @@ internal class DesignerDeviceTest {
     }
 
     @Test
+    fun textFieldsInsertedAndRemovedOnTheCanvasDrawRightAway() {
+        // A field that joins or leaves the tree is drawn (or dropped) in the frame that changes the tree, before
+        // the canvas's effects run; its editor must already be bound then (1.5.0 crashed with NODE_DETACHED).
+        val name = project("field-insert")
+        launch(name).use {
+            val onCanvas = hasAnyAncestor(hasTestTag("designer-canvas-content"))
+            repeat(2) {
+                rule.onNodeWithTag("designer-add").performClick()
+                rule.onNodeWithTag("designer-palette").performScrollToNode(hasTestTag("designer-palette-TextField"))
+                rule.onNodeWithTag("designer-palette-TextField").performClick()
+                rule.waitForIdle()
+            }
+            rule.waitUntil(5_000) { rule.onAllNodes(hasSetTextAction() and onCanvas).fetchSemanticsNodes().size == 2 }
+            rule.onNodeWithTag("designer-undo").performClick()
+            rule.waitUntil(5_000) { rule.onAllNodes(hasSetTextAction() and onCanvas).fetchSemanticsNodes().size == 1 }
+            rule.onNodeWithTag("designer-redo").performClick()
+            rule.waitUntil(5_000) { rule.onAllNodes(hasSetTextAction() and onCanvas).fetchSemanticsNodes().size == 2 }
+        }
+    }
+
+    @Test
     fun aTextFieldOnTheCanvasFollowsItsTextProperty() {
         val name = project("field-text", "compose.mount(compose.Column({padding: 16},\n    compose.TextField({key: 'field', text: 'One'})));\n")
         launch(name).use {

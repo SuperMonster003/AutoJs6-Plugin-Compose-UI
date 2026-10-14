@@ -4,6 +4,12 @@
 
 ******
 
+# v1.5.1
+
+###### 2026/10/14
+
+* `Correccion` El complemento podía cerrarse de forma inesperada cuando aparecía un nuevo campo de texto en el lienzo del diseñador, por ejemplo al insertar un campo de texto desde la paleta de componentes, cuando deshacer / rehacer volvía a mostrar un campo de texto, o cuando un script de la vista previa interactiva mostraba uno (desde 1.4.0); ahora estos campos de texto aparecen con normalidad
+
 # v1.5.0
 
 ###### 2026/10/14

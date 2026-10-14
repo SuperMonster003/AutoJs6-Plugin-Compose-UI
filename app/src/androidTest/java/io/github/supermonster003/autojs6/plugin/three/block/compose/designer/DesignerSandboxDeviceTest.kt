@@ -120,6 +120,33 @@ internal class DesignerSandboxDeviceTest {
     }
 
     @Test
+    fun aFieldTheScriptAddsAndRemovesIsDrawnRightAway() {
+        // The script's tree changes inside a frame of the canvas: a field that joins it must be bound before it is
+        // drawn, and one that leaves it must not be looked up afterwards (1.5.0 crashed with NODE_DETACHED).
+        val script = "var open = compose.state(false);\n\n" +
+            "compose.mount(function () {\n" +
+            "    return compose.Column(\n" +
+            "        compose.Button({key: 'toggle', onClick: function () {\n" +
+            "            open.value = !open.value;\n" +
+            "        }}, 'Toggle'),\n" +
+            "        open.value ? compose.TextField({key: 'name', text: 'Ada'}) : compose.Text({key: 'closed', text: 'Closed'}),\n" +
+            "        compose.Text({key: 'state', text: open.value ? 'Open' : 'Shut'}));\n" +
+            "});\n"
+        val name = store.create("sandbox-test-field", script).name
+        ActivityScenario.launch<DesignerActivity>(DesignerActivity.intent(context, name)).use {
+            rule.waitUntil(5_000) { canvasText("Toggle") }
+            enterPreview()
+            repeat(3) {
+                clickOnCanvas("Toggle")
+                rule.waitUntil(5_000) { canvasText("Open") && rule.onAllNodes(hasSetTextAction() and onCanvas and hasText("Ada")).fetchSemanticsNodes().size == 1 }
+                clickOnCanvas("Toggle")
+                rule.waitUntil(5_000) { canvasText("Shut") && rule.onAllNodes(hasSetTextAction() and onCanvas).fetchSemanticsNodes().isEmpty() }
+            }
+        }
+        assertEquals(script, store.read(name))
+    }
+
+    @Test
     fun anEndlessLoopStopsThePreviewAndTheDesignerStaysResponsive() {
         val script = "compose.mount(compose.Column(\n" +
             "    compose.Button({key: 'hang', onClick: function () {\n" +

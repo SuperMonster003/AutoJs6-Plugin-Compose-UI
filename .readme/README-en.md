@@ -227,6 +227,12 @@ Milestones, design decisions, and acceptance criteria are tracked in a single ro
 
 ******
 
+#### v1.5.1
+
+_2026/10/14_
+
+- `Fix` The plugin could close unexpectedly when a new text field appeared on the designer canvas, for example when inserting a text field from the component palette, when undo / redo brought a text field back, or when a script in the interactive preview showed one (since 1.4.0); such text fields now appear normally
+
 #### v1.5.0
 
 _2026/10/14_
@@ -248,21 +254,6 @@ _2026/10/13_
 - `Fix` Saving an external script that cannot be written back made the designer crash instead of saving it as a project when the file name contained spaces, parentheses or other characters a project name cannot hold; such characters are now replaced with "-", and imported scripts are named the same way
 - `Improvement` Event handlers edited in a TSX project are syntax-checked by TypeScript Engine, so TypeScript syntax such as type annotations can be used
 - `Dependency` Add the typescript-parser-api.aar contract artifact (TypeScript syntax tree parsing contract v1), used by the designer to read TSX projects
-
-#### v1.3.0
-
-_2026/10/13_
-
-- `Feature` Designer projects created with "Import script" can use "Write back to source" and "Re-import from source" in the editor menu: the import keeps access to the source file when its provider allows it, either action asks first when the other side changed since the last sync, and a source that can no longer be opened can be picked again to restore the link; saving a project never writes the source by itself
-- `Feature` The designer canvas previews Image pictures: '@drawable/name' comes from the installed AutoJs6, and relative paths are looked up in the folder chosen with "Image folder" in the editor menu (read-only access is kept); URLs and absolute paths stay placeholders with the reason in the issues list
-- `Feature` The designer editor has a new State panel: it lists the script's top-level compose.state declarations with their initial values and lets you set preview values that change only the canvas, never the script, and add no undo step. With Interact on (top right of the canvas) the components on the canvas can be operated, and switches, sliders, text fields, selections, pagers and other controls bound to a state change its preview value (the script's event handlers do not run); turning it off brings back selecting and dragging
-- `Fix` When a child near the start of a container was inserted, removed or moved elsewhere, the children after it were rebuilt from scratch and lost their own state (such as the scroll position of a LazyColumn); they now keep their state and are no longer rebuilt
-- `Fix` After changing the text of a text field (TextField / OutlinedTextField) in the designer's property drawer, the field on the canvas kept showing the old text
-- `Improvement` Long-press dragging a node on the designer canvas shows an insertion line along the target container's layout (vertical, horizontal or grid) and drops the node where the pointer is, instead of always at the end of the container
-- `Improvement` AndroidView on the designer canvas now shows a tinted placeholder that keeps its size modifiers (such as h and fillMaxWidth) and displays the source of its view expression
-- `Improvement` The modifier chain in the designer's property drawer can be reordered by dragging the handle on the left of each operation, with an insertion line until it is released; the move up / down buttons remain
-- `Improvement` Open popup components (open is true) are now drawn close to their real look inside the designer canvas's logical screen: AlertDialog and ModalBottomSheet cover the page with a scrim, DropdownMenu and Tooltip appear below or above their anchor, and the nodes inside them can be tapped to edit; they are no longer inserted into the page as cards and no real window opens
-- `Improvement` After each edit the designer canvas recomposes only the nodes that changed and records node positions more cheaply, so a larger document (about 250 nodes) redraws noticeably faster after undo / redo
 
 ##### For more release history, see
 

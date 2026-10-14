@@ -227,6 +227,12 @@ Les jalons, les decisions de conception et les criteres d'acceptation sont suivi
 
 ******
 
+#### v1.5.1
+
+_2026/10/14_
+
+- `Correction` Le plugin pouvait se fermer de manière inattendue quand un nouveau champ de texte apparaissait sur le canevas du concepteur, par exemple en insérant un champ de texte depuis la palette de composants, quand annuler / rétablir faisait réapparaître un champ de texte, ou quand un script de l'aperçu interactif en affichait un (depuis 1.4.0); ces champs de texte s'affichent maintenant normalement
+
 #### v1.5.0
 
 _2026/10/14_
@@ -248,21 +254,6 @@ _2026/10/13_
 - `Correction` L'enregistrement d'un script externe impossible à réécrire faisait planter le concepteur au lieu de l'enregistrer comme projet lorsque le nom du fichier contenait des espaces, des parenthèses ou d'autres caractères interdits dans un nom de projet; ces caractères sont désormais remplacés par "-", et les scripts importés sont nommés de la même façon
 - `Amelioration` Les gestionnaires d'événements modifiés dans un projet TSX sont vérifiés par TypeScript Engine, ce qui permet la syntaxe TypeScript comme les annotations de type
 - `Dependance` Ajout de l'artefact de contrat typescript-parser-api.aar (contrat d'analyse en arbre syntaxique TypeScript v1), utilisé par le concepteur pour lire les projets TSX
-
-#### v1.3.0
-
-_2026/10/13_
-
-- `Nouveaute` Les projets du concepteur créés avec "Importer un script" peuvent utiliser "Réécrire dans la source" et "Réimporter depuis la source" dans le menu de l'éditeur: l'import conserve l'accès au fichier source quand son fournisseur le permet, chaque action demande d'abord confirmation si l'autre côté a changé depuis la dernière synchronisation, et une source qui ne s'ouvre plus peut être choisie à nouveau pour rétablir le lien; enregistrer un projet n'écrit jamais la source automatiquement
-- `Nouveaute` Le canevas du concepteur prévisualise les images des Image: '@drawable/name' provient de l'AutoJs6 installé, et les chemins relatifs sont cherchés dans le dossier choisi avec "Dossier d'images" dans le menu de l'éditeur (seul un accès en lecture est conservé); les URL et chemins absolus restent des espaces réservés, avec la raison dans la liste des problèmes
-- `Nouveaute` L'éditeur du concepteur propose un nouveau panneau État: il liste les compose.state de premier niveau du script avec leurs valeurs initiales et permet de définir des valeurs d'aperçu qui ne modifient que le canevas, jamais le script, sans ajouter d'étape d'annulation. Avec Interagir activé (en haut à droite du canevas), les composants du canevas peuvent être manipulés, et les interrupteurs, curseurs, champs de texte, sélections, pagers et autres contrôles liés à un état modifient sa valeur d'aperçu (les gestionnaires d'événements du script ne s'exécutent pas); le désactiver rétablit la sélection et le glisser
-- `Correction` Lorsqu'un enfant situé au début d'un conteneur était inséré, supprimé ou déplacé ailleurs, les enfants suivants étaient entièrement reconstruits et perdaient leur propre état (par exemple la position de défilement d'une LazyColumn); ils conservent désormais leur état et ne sont plus reconstruits
-- `Correction` Après la modification du texte d'un champ (TextField / OutlinedTextField) dans le tiroir de propriétés du concepteur, le champ du canevas affichait toujours l'ancien texte
-- `Amelioration` Un glisser après appui long sur le canevas du concepteur affiche une ligne d'insertion selon la disposition du conteneur cible (verticale, horizontale ou en grille) et dépose le noeud à l'emplacement du doigt, au lieu de toujours l'ajouter à la fin du conteneur
-- `Amelioration` Sur le canevas du concepteur, AndroidView apparaît désormais comme une zone teintée qui conserve ses modificateurs de taille (comme h et fillMaxWidth) et affiche le source de son expression view
-- `Amelioration` La chaîne de modificateurs du tiroir de propriétés du concepteur se réordonne en faisant glisser la poignée à gauche de chaque opération, avec une ligne d'insertion jusqu'au relâchement; les boutons monter / descendre restent disponibles
-- `Amelioration` Les composants contextuels ouverts (open vaut true) sont désormais dessinés au plus près de leur rendu réel dans l'écran logique du canevas du concepteur: AlertDialog et ModalBottomSheet recouvrent la page avec un voile, DropdownMenu et Tooltip s'affichent sous ou au-dessus de leur ancre, et les nœuds qu'ils contiennent se sélectionnent d'un appui pour être modifiés; ils ne sont plus insérés dans la page sous forme de cartes et aucune vraie fenêtre ne s'ouvre
-- `Amelioration` Après chaque modification, le canevas du concepteur ne recompose que les nœuds modifiés et enregistre les positions des nœuds à moindre coût: un document plus grand (environ 250 nœuds) se redessine nettement plus vite après annuler / rétablir
 
 ##### Pour un historique plus complet, voir
 

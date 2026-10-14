@@ -91,9 +91,18 @@ internal class CanvasControllers {
     val fields = TextFieldController(emit, { failures += it }, { scope })
     val snackbar = SnackbarController({ scope }, emit)
 
-    fun accept(frame: PreviewFrame) {
+    /**
+     * Binds the fields and the snackbar host of [frame] before any of it is drawn, as the host renderer does before
+     * it publishes a frame: the canvas recomposes changed nodes in the frame that takes the tree, before its effects
+     * run, and a text field drawn without a binding fails with NODE_DETACHED.
+     */
+    fun bind(frame: PreviewFrame) {
         fields.acceptFrame(frame.tree, frame.generation)
         snackbar.acceptFrame(frame.tree, frame.generation)
+    }
+
+    /** Brings the bound fields to the text of [frame] once it is drawn. */
+    fun accept(frame: PreviewFrame) {
         val live = frame.live
         frame.tree?.nodes?.forEach { node ->
             if (node.type != ComposeUiComponents.TEXT_FIELD && node.type != ComposeUiComponents.OUTLINED_TEXT_FIELD) return@forEach
@@ -251,9 +260,13 @@ internal fun DesignCanvas(
         if (live != null) PreviewFrames.build(live.document, ++generation[0], images = images, live = live.hooks)
         else PreviewFrames.build(document, ++generation[0], images = images, values = values)
     }
-    // Written here, before the canvas content reads it, so the changed nodes recompose in this same frame.
+    // Written here, before the canvas content reads it, so the changed nodes recompose in this same frame; their
+    // fields are bound first.
     val live = remember { LiveFrame() }
-    val rendered = remember(preview) { preview.frame?.let(live::update) }
+    val rendered = remember(preview) {
+        controllers.bind(preview)
+        preview.frame?.let(live::update)
+    }
     LaunchedEffect(preview) {
         controllers.accept(preview)
         preview.live?.takeIf { it.commands.isNotEmpty() }?.let { hooks ->

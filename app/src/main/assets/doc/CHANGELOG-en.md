@@ -4,6 +4,12 @@
 
 ******
 
+# v1.5.1
+
+###### 2026/10/14
+
+* `Fix` The plugin could close unexpectedly when a new text field appeared on the designer canvas, for example when inserting a text field from the component palette, when undo / redo brought a text field back, or when a script in the interactive preview showed one (since 1.4.0); such text fields now appear normally
+
 # v1.5.0
 
 ###### 2026/10/14
