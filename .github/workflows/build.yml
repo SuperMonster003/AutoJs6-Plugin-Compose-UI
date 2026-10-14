@@ -117,6 +117,9 @@ jobs:
             # process has every class the gallery and settings screens need.
             # The device log and window state are saved right after the suite, before the launch check clears the log;
             # a system error dialog that held focus during the suite shows up there and in the per-test logcat.
+            # The emulator shows no crash or ANR dialogs at all: a launcher ANR on API 35 once held focus for the
+            # whole suite, and from API 31 the test listener (ForeignErrorDialogGuard) cannot see other apps' errors.
+            adb shell settings put global hide_error_dialogs 1
             ./gradlew :app:createDebugAndroidTestCoverageReport -PcomposeUiCoverage=true -Pautojs.gradle.build.number.auto.increment.enabled=false -Pautojs.gradle.build.time.update.enabled=false --console=plain --stacktrace; status=$?; mkdir -p app/build/reports/androidTests; adb logcat -d -b main -b system -b crash -b events > app/build/reports/androidTests/logcat-suite.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows-suite.txt || true; python3 .python/verify_standalone_launch.py --apk app/build/outputs/apk/debug/*.apk --uninstall || status=1; adb logcat -d > app/build/reports/androidTests/logcat-launch.txt || true; adb shell dumpsys window windows > app/build/reports/androidTests/windows-launch.txt || true; exit $status
 
       - name: Upload instrumentation and coverage reports

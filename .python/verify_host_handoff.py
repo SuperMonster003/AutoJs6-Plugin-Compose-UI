@@ -112,7 +112,7 @@ def main() -> None:
     if "package:" not in adb.shell(f"pm path {HOST}", check=False):
         raise SystemExit(f"{HOST} is not installed")
     api = adb.shell("getprop ro.build.version.sdk").strip()
-    install = adb.run("install", "-r", "-t", str(args.apk), check=False, timeout=600)
+    install = adb.install(args.apk)
     if "Success" not in install:
         raise SystemExit(f"install failed:\n{install}")
     adb.shell(f"am force-stop {launch.PACKAGE}", check=False)

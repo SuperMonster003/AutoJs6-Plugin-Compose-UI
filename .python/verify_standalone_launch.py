@@ -30,6 +30,8 @@ DESIGNER_ACTIVITY = f"{PACKAGE}/.designer.ui.DesignerActivity"
 # The starter script of a new project puts this text on the canvas (ProjectStore.template()).
 TEMPLATE_TEXT = "Hello"
 UI_DUMP = "/data/local/tmp/three-block-compose-standalone-launch.xml"
+# A debug APK installs within a minute even on a slow CI emulator; a longer wait only means a stalled transfer.
+INSTALL_TIMEOUT_S = 240
 
 
 class Adb:
@@ -45,6 +47,20 @@ class Adb:
 
     def shell(self, command: str, check: bool = True, timeout: int = 120) -> str:
         return self.run("shell", command, check=check, timeout=timeout)
+
+    def install(self, apk: Path) -> str:
+        """`adb install -r -t`, retried once after the device connection is reset if the transfer stalls.
+
+        On the CI's API 24 emulator the first install after the Gradle suite (which has just uninstalled the
+        plugin) twice hung until the timeout without any package manager activity on the device.
+        """
+        try:
+            return self.run("install", "-r", "-t", str(apk), check=False, timeout=INSTALL_TIMEOUT_S)
+        except subprocess.TimeoutExpired:
+            print(f"adb install stalled for {INSTALL_TIMEOUT_S} s; reconnecting and trying once more", file=sys.stderr)
+            self.run("reconnect", check=False, timeout=60)
+            self.run("wait-for-device", check=False, timeout=180)
+            return self.run("install", "-r", "-t", str(apk), check=False, timeout=INSTALL_TIMEOUT_S)
 
 
 def resource_string(strings: Path, name: str) -> str:
@@ -178,7 +194,7 @@ def main() -> None:
     }
 
     api = adb.shell("getprop ro.build.version.sdk").strip()
-    install = adb.run("install", "-r", "-t", str(args.apk), check=False, timeout=600)
+    install = adb.install(args.apk)
     if "Success" not in install:
         raise SystemExit(f"install failed:\n{install}")
     adb.shell(f"am force-stop {PACKAGE}", check=False)

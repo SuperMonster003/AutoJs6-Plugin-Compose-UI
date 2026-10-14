@@ -90,7 +90,7 @@ def main() -> None:
     labels = {"new": label("designer_new_project"), "create": label("designer_create"), "delete": label("designer_delete_project")}
 
     api = adb.shell("getprop ro.build.version.sdk").strip()
-    install = adb.run("install", "-r", "-t", str(args.apk), check=False, timeout=600)
+    install = adb.install(args.apk)
     if "Success" not in install:
         raise SystemExit(f"install failed:\n{install}")
     adb.shell(f"am force-stop {PACKAGE}", check=False)

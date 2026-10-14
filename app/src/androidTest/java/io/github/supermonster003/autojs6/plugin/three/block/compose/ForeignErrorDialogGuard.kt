@@ -25,6 +25,8 @@ import org.junit.runner.notification.RunListener
  *
  * The error list comes from ActivityManager.getProcessesInErrorState(). It includes other apps up to API 30; from
  * API 31 it only reports the caller's own processes, where this guard therefore never touches a foreign dialog.
+ * The CI emulators also run with `settings put global hide_error_dialogs 1` (.github/workflows/build.yml), so no
+ * error dialog is shown there on any API level; this guard covers devices and emulators set up by hand.
  */
 class ForeignErrorDialogGuard : RunListener() {
     private val instrumentation get() = InstrumentationRegistry.getInstrumentation()
