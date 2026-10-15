@@ -50,6 +50,10 @@ REQUIRED = {
     "Lorg/autojs/plugin/compose/api/model/UiNode;",
     "Lorg/autojs/plugin/compose/api/v2/ComposeUiV2;",
     "Lorg/autojs/plugin/compose/api/loading/ComposeUiRendererFactory;",
+    # P10.3: the ui-mode preview contract the designer binds the host with (AIDL stubs and constants, kept whole).
+    "Lorg/autojs/plugin/ui/preview/UiPreviewContract;",
+    "Lorg/autojs/plugin/ui/preview/IUiPreviewService$Stub$Proxy;",
+    "Lorg/autojs/plugin/ui/preview/IUiPreviewCallback$Stub;",
 }
 # The only host-only component stays out: View-system AppCompat, which nothing in the plugin references.
 FORBIDDEN_PREFIXES = ("Landroidx/appcompat/",)

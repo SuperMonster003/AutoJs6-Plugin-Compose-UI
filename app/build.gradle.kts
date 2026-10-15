@@ -97,7 +97,7 @@ fun lockedAars(lockFile: File, ids: List<String>, directory: String): List<File>
 }
 
 // Host contract AARs: common-plugin-api from the host 6.8.0 snapshot 77b5a3b0c5 (build 5307), see libs/README.md.
-val hostApiIds = listOf("common-plugin-api", "compose-ui-api", "typescript-parser-api")
+val hostApiIds = listOf("common-plugin-api", "compose-ui-api", "typescript-parser-api", "ui-preview-api")
 val hostApiAars = lockedAars(rootProject.file("locks/host-api-aars.lock"), hostApiIds, "libs")
 
 // P8.1 (roadmap D35): the slim Rhino jar derived by the host's slimRhinoJar task (no JLine / optimizer / JFR),
@@ -407,6 +407,9 @@ dependencies {
     // The TypeScript parser contract (P9.2 / D42): the designer binds the TypeScript Engine parser service to read
     // .tsx projects. Only AIDL stubs and constants; the host does not package this module.
     implementation(files(hostApiAars[2]))
+    // The ui-mode layout preview contract (P10.2 / D46): the designer binds the host's preview service so its XML
+    // canvas shows the real inflater's output (embedded on API 30+, a snapshot below). AIDL stubs and constants only.
+    implementation(files(hostApiAars[3]))
     // The designer's script parser (P8.1 / D35): parse only, never Context.enter.
     implementation(files(rhinoJar))
     sharedDeps.forEach { (coordinate, version) ->

@@ -36,6 +36,8 @@
 # own process it is the only copy and backs the designer's real-renderer preview.
 -keep class org.autojs.plugin.common.api.** { *; }
 -keep class org.autojs.plugin.compose.api.** { *; }
+-keep class org.autojs.plugin.typescript.parser.** { *; }
+-keep class org.autojs.plugin.ui.preview.** { *; }
 
 # Rhino (P8.1 / D35, P9.3 step 2 / D43): the slim jar is referenced only by the designer's parser and sandbox
 # packages and never inside the host. R8 retains what they reach: the Parser / AST closure and, for the sandbox,

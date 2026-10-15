@@ -11,6 +11,8 @@ Stage the audited **release** artifacts named exactly:
   `PluginCapabilityKeys`), consumed with `implementation`.
 - `typescript-parser-api.aar` (host module `plugin-api/typescript-parser-api`, P9.2): the TypeScript parser
   contract, consumed with `implementation`; see the section below.
+- `ui-preview-api.aar` (host module `plugin-api/ui-preview-api`, P10.2 / P10.3): the ui-mode layout preview
+  contract the designer binds the host with, consumed with `implementation`; see the section below.
 - `compose-ui-api.aar` (host module `plugin-api/compose-ui-api`): frozen V1 loading interfaces,
   immutable Parcelable models, the 30-entry catalog and centralized vocabulary. Consumed with
   `compileOnly`, and `testImplementation` / `androidTestImplementation` for tests. The host supplies
@@ -96,6 +98,20 @@ The host defines the contract but does not package the module, so the plugin con
 `implementation` in every process. The provider is the TypeScript Engine plugin 0.7.0 and later (action
 `org.autojs.plugin.typescript.PARSER`, PLUGIN permission); the designer binds it to read `.tsx` projects.
 The protocol is described in the host document `docs/dev/typescript-parser-plugin-protocol-v1.md`.
+
+## ui-mode layout preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51)
+
+`ui-preview-api.aar` is the release AAR of the host module `plugin-api/ui-preview-api` at host commit
+`8c50a8fabc` (`feat(plugin-api): add the ui-mode layout preview contract v1`), assembled with
+`:plugin-api:ui-preview-api:assembleRelease`; a rebuild from the same commit is byte-identical.
+SHA-256 `bdf89d7460252dec71f384f367bb894848edaa4aaa691c95f8b4e21911f363b9`, MPL 2.0, 18181 bytes, 13 class files.
+It holds the `IUiPreviewService` / `IUiPreviewCallback` AIDL stubs and `UiPreviewContract` (package
+`org.autojs.plugin.ui.preview`, contract version 1, hash `680f41b5...`); it has no dependency. The host packages
+the same module and provides the service (`org.autojs.plugin.ui.PREVIEW`, PLUGIN permission, host commit
+`306a8f7834` and later); the designer binds it for the XML canvas of `"ui"` mode projects, which the host
+inflates with its real layout inflater and embeds through `SurfaceControlViewHost` (API 30+) or returns as a
+snapshot (API 24 - 29). The plugin consumes it with `implementation` and keeps the package whole; the protocol
+is described in the host document `docs/dev/ui-preview-plugin-protocol-v1.md`.
 
 ## Rhino parser jar (`libs/`, lock `../locks/rhino-jar.lock`, roadmap P8.1)
 
