@@ -12,6 +12,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.UiPreviewClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.DesignerActivity
@@ -92,7 +93,11 @@ internal class UiPreviewDeviceTest {
             assertEquals(listOf(0, 1, 2, 3), bounds.map { it.index }.sorted())
             assertEquals(listOf("root", "title", "ok", "note"), bounds.sortedBy { it.index }.map { it.id })
             if (!client().embedded) assertNotNull("the snapshot mode shows a bitmap", client().snapshot)
-            assertTrue("the preview applied without problems: ${session().previewProblems}", session().previewProblems.isEmpty())
+            // The problems follow the frame in a later composition. With the declaration evaluator (Android 8.0+) the
+            // frame carries {{title}}'s value and has no problem; below, the host cannot know `title` and says so.
+            rule.waitUntil(10_000) {
+                if (DeclarationEvaluator.SUPPORTED) session().previewProblems.isEmpty() else session().previewProblems.any { "title" in it }
+            }
 
             // A tap on the button's bounds selects the button (zoom 1: canvas pixels are root pixels).
             val button = bounds.first { it.index == 2 }
