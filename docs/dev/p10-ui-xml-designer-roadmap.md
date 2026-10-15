@@ -145,10 +145,11 @@ designer/
 ### 3.4 宿主包结构 (新增)
 
 ```text
-plugin-api/ui-preview-api/        IUiPreviewService.aidl, IUiPreviewCallback.aidl, UiPreviewContract.kt (常量 / 键 / 错误码 / 上限), consumer-rules.pro
-app/.../core/ui/preview/          UiPreviewService (Service, exported, PLUGIN 权限, action org.autojs.plugin.ui.PREVIEW), UiPreviewSession (SCVH 或离屏根, 尺寸 / 配置, 边界采集, 快照绘制), PreviewUiHost (ui 模块的嵌入承载, 实现 UiContentHost), PreviewRuntimeFactory (合成脚本的 ScriptRuntime, 真实运行的 ScriptExecution)
-app/.../runtime/api/augment/ui/   UI.kt: ensureActivity -> ensureUiHost (UiContentHost 接口: 内容容器, 主题上下文, setContentView, 窗口级操作可选), 绑定失败在预览模式按属性报告而不中止 inflate
-app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; ExecutionConfig 增加预览会话标识 (可选, 默认无)
+plugin-api/ui-preview-api/        IUiPreviewService.aidl, IUiPreviewCallback.aidl, UiPreviewContract.kt (常量 / 键 / 错误码 / 上限), consumer-rules.pro, UiPreviewContractTest
+app/.../core/ui/UiContentHost.kt  ui.layout 内容承载接口 (inflaterContext / contentParent / contentRoot / hostWindow / showContent, 窗口级函数忽略钩子, 绑定失败钩子, 强制停止钩子), attached() = 引擎标签, of() = 引擎标签 ?: 全局 activity
+app/.../core/ui/preview/          UiPreviewService (Service, exported, PLUGIN 权限, action org.autojs.plugin.ui.PREVIEW, Binder 线程校验 + 主线程限时执行), UiPreviewSession (实现 UiContentHost: SCVH 或离屏根, 配置覆盖, 边界 / 点击 / 高亮, 快照绘制), UiPreviewScriptExecution (经 ScriptEngineService 注册的主线程引擎, Q20 (b)), UiPreviewTrackingDelegate (元素先序号, 失败定位, 快照占位替换), UiPreviewRootView, UiPreviewPlaceholderView, UiPreviewRequests / UiPreviewBounds / UiPreviewFailures (纯 Kotlin, JVM 测试), UiPreviewScript ("ui"; 常量)
+app/.../runtime/api/augment/ui/   UI.kt: layout / layoutFile / setContentView / inflate 经 ensureUiHost 取承载; 9 个窗口级函数经 ensureWindowActivity 在预览承载下空操作并经控制台警告一次; {{ }} 求值失败经 UiContentHost.onBindingFailed 决定保留原文还是照旧抛出
+app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; ExecutionConfig.uiContentHost (宿主持有, 不参与 Parcel); ScriptEngineService.execute 先按它分派; LoopBasedJavaScriptEngine.forceStop 通知承载
 ```
 
 ### 3.5 残余偏差清单 (与 "在 AutoJs6 中运行" 相比, 文档与预览界面须明示)
@@ -227,15 +228,24 @@ app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; Ex
 
 ### P10.2 预览契约 v1 与宿主预览服务 (宿主, 布局预览)
 
-- [ ] (宿主) 契约模块 `plugin-api/ui-preview-api` (附录 B): `IUiPreviewService.aidl` (`getContractVersion`, `getContractHash`, `getPreviewInfo`, `createSession`, `setLayout`, `resize`, `release`; 事务顺序冻结, 只追加), `IUiPreviewCallback.aidl` (oneway: `onBounds`, `onLayoutFailed`, `onSessionLost`), `UiPreviewContract.kt` (action `org.autojs.plugin.ui.PREVIEW`, 版本 1, HASH_INPUT / HASH, Bundle 键, 错误码, 上限), consumer-rules, JVM `UiPreviewContractTest` (哈希与键集合), 登记到 `settings.gradle.kts` 的 `pluginApi`; 文档 `docs/dev/ui-preview-plugin-protocol-v1.md`.
-- [ ] (宿主) `UiContentHost` 抽象: `ScriptExecuteActivity` 实现; `UI.kt` 的 `layout / layoutFile / setContentView / inflate` 经 `ensureUiHost` 取承载 (Activity 或预览承载), 窗口级函数在非 Activity 承载下空操作并经控制台警告一次; 既有行为与消息在 Activity 承载下逐字不变 (宿主 `UI` 相关测试回归).
-- [ ] (宿主) `UiPreviewService` (exported, `android:permission="org.autojs.permission.PLUGIN"`, 默认进程, Manifest 注册在插件相关组件旁): 校验调用方权限与契约版本; 会话表按客户端 Binder `linkToDeath`; `createSession` 在主线程创建 `SurfaceControlViewHost(context, displayManager.getDisplay(displayId), hostToken)` (`embedded`) 或离屏根 (`snapshot`), 以 `createConfigurationContext` 应用请求中的 densityDpi / 夜间 / 语言 / fontScale 覆盖 (缺省跟随宿主), 主题 `ScriptTheme`.
-- [ ] (宿主) `PreviewRuntimeFactory`: 每个会话一个真实 `ScriptRuntime` (经 `ScriptEngineService.execute(StringScriptSource, config)` 运行合成脚本, config 带预览会话标识, 不出现在用户可见的运行列表或以 "预览" 标注, 待 Q20); 合成脚本固定为 `"ui"; ui.bindingContext = JSON.parse(__bindings__); ui.layout(__xml__);` 两个值由宿主以 `ScriptEngine.put` 注入, 不拼接进源码; `{{expr}}` 求值失败时 (预览标识生效) 保留原文, 记入 `onLayoutFailed` 的属性级诊断而不中止 inflate; 每次 `setLayout` 复用同一运行时重新 `ui.layout`.
-- [ ] (宿主) 边界采集: 以 `LayoutInflaterDelegate.afterCreateView` 的 DOM `node` 先序号为键 (只数元素), 布局完成 (`OnGlobalLayoutListener` 去抖) 后回传 `(index, left, top, right, bottom, className, viewId)` 列表 (JSON, 超过内联上限时经调用方 fd), 坐标为嵌入根坐标 = 客户端 `SurfaceView` 像素.
-- [ ] (宿主) `snapshot` 模式: `measure(EXACTLY w, EXACTLY h) / layout / draw` 到 ARGB_8888 位图, 原始像素写入请求的 fd (行主序, 无压缩), 返回长度与 SHA-256; 需窗口的控件 (`WebView` / `SurfaceView` / `TextureView` / `VideoView` / `JsCanvasView`) 以带类名的占位矩形代替 (在 `afterCreateView` 替换); 像素上限见附录 B.
-- [ ] (宿主) 上限与拒绝: 每客户端会话数, 尺寸, XML 字节, 绑定 JSON 字节, 边界条目数, 单次 inflate 墙钟 (超时释放运行时并返回 `ERR_..._TIMEOUT`); 任何异常转为契约错误码, 不传播到服务进程主线程.
-- [ ] (测试) 宿主 JVM: 契约常量与哈希, 合成脚本不含请求内容 (注入而非拼接); 宿主 androidTest `UiPreviewServiceTest`: 以 instrumentation 进程 (与宿主同签名) 绑定服务, `embedded` 在 API 30+ 返回 `SurfacePackage` 且边界条目数 = 元素数; `snapshot` 位图长度 = w * h * 4 且 SHA-256 匹配; 非法 XML 返回带元素先序号的错误; 客户端死亡后会话释放; 并发两个会话互不影响.
-- [ ] (宿主) AAR 产出: `:plugin-api:ui-preview-api:assembleRelease`, SHA-256 与来源提交写入插件 `locks/host-api-aars.lock` / `libs/README.md` / `THIRD_PARTY_NOTICES.md` (P10.3 同一提交); 宿主 10 语言 changelog 记录新增服务.
+- [x] (宿主) 契约模块 `plugin-api/ui-preview-api` (附录 B): `IUiPreviewService.aidl` (`getContractVersion`, `getContractHash`, `getPreviewInfo`, `createSession`, `setLayout`, `resize`, `release`, `reattach`, `setPointerMode`, `setHighlight`; 事务顺序冻结, 只追加), `IUiPreviewCallback.aidl` (oneway: `onBounds`, `onLayoutFailed`, `onSessionLost`, `onTap`), `UiPreviewContract.kt` (action `org.autojs.plugin.ui.PREVIEW`, 版本 1, HASH_INPUT / HASH, Bundle 键, 错误码, 上限), consumer-rules, JVM `UiPreviewContractTest` (哈希与键集合), 登记到 `settings.gradle.kts` 的 `pluginApi`; 文档 `docs/dev/ui-preview-plugin-protocol-v1.md`.
+  证据 (2026-10-15): 宿主 `8c50a8fabc` (`feat(plugin-api): add the ui-mode layout preview contract v1`): 模块 + `settings.gradle.kts` + `app/build.gradle.kts` (`implementation`) + CI `android.yml` 跑 `:plugin-api:ui-preview-api:testDebugUnitTest`; `HASH` = `680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6`; `UiPreviewContractTest` 8 项 (哈希, 两个接口的事务顺序与 AIDL 文件一致, 回调 oneway, action / 权限 / 错误码前缀, D50 等级与指针模式, 上限自洽, JSON 成员与 Bundle 键不重复) 通过; 协议文档 `docs/dev/ui-preview-plugin-protocol-v1.md`.
+- [x] (宿主) `UiContentHost` 抽象: `ScriptExecuteActivity` 实现; `UI.kt` 的 `layout / layoutFile / setContentView / inflate` 经 `ensureUiHost` 取承载 (Activity 或预览承载), 窗口级函数在非 Activity 承载下空操作并经控制台警告一次; 既有行为与消息在 Activity 承载下逐字不变 (宿主 `UI` 相关测试回归).
+  证据 (2026-10-15): 宿主 `306a8f7834` (`feat(ui): host the ui-mode layout preview service for the 3-Block Compose designer`): `core/ui/UiContentHost.kt` (`inflaterContext` / `contentParent` / `contentRoot` / `hostWindow` / `showContent`, `onWindowFunctionIgnored` / `onBindingFailed` / `onEngineForceStop` 钩子; `attached()` 读引擎标签 `ui.content.host`, `of()` 回退到全局 `activity`), `ScriptExecuteActivity : UiContentHost` (`showContent` = `setContentView`; 接口方法不能叫 `setContentView`, 否则与 `AppCompatActivity.setContentView(View?)` 的 JVM 签名冲突), `UI.kt` 的 `ensureUiHost` / `ensureWindowActivity` (statusBarColor, statusBarIconLight(By), backgroundColor, navigationBarColor, navigationBarIconLight(By), keepScreenOn, finish 九个函数) 与 `bindValueForApplyingAttribute(scriptRuntime, attrName, value)` 的失败钩子, `ui.root` 改为承载的 `contentRoot`, 无 Activity 的 `ui.inflate` 借用承载的主题上下文; 没有承载时仍走 `ensureActivity` 与原消息. 回归: `ScriptLooperCompatibilityDeviceTest.uiAndOverlayCallbacksFinishAndClose` 与 `JsListViewDataBindingDeviceTest` 在 API 37 (emulator-5590) 与 API 24 (emulator-5570) 通过; JVM `TypeScriptTsxRuntimeTest` / `UIWidgetScopeCompatTest` / `RhinoUtilsScopeCompatTest` 23 项通过.
+- [x] (宿主) `UiPreviewService` (exported, `android:permission="org.autojs.permission.PLUGIN"`, 默认进程, Manifest 注册在插件相关组件旁): 校验调用方权限与契约版本; 会话表按客户端 Binder `linkToDeath`; `createSession` 在主线程创建 `SurfaceControlViewHost(context, displayManager.getDisplay(displayId), hostToken)` (`embedded`) 或离屏根 (`snapshot`), 以 `createConfigurationContext` 应用请求中的 densityDpi / 夜间 / 语言 / fontScale 覆盖 (缺省跟随宿主), 主题 `ScriptTheme`.
+  证据 (2026-10-15): `306a8f7834`: `core/ui/preview/UiPreviewService.kt` (Manifest 条目位于 `TimedTaskAlarmReceiver` 与 `ThreeStoveAgentAttachRequestReceiver` 之间; 每个事务 `checkCallingOrSelfPermission(PLUGIN)`, `contractVersion` 必须为 1 否则 `CONTRACT_MISMATCH`, 会话按调用 uid 归属 (他人的会话一律 `SESSION_NOT_FOUND`), 回调 Binder `linkToDeath` 释放; Binder 线程校验, 主线程 `FutureTask` 限时执行: `createSession` 15 s, 其余 5 s), `UiPreviewSession.kt` (API 35+ 优先用 `InputTransferToken` 构造, 否则 `hostToken`; API 37 `LayoutParams(w, h, focusable = true)`; `createDisplayContext` + `createConfigurationContext` (densityDpi / UI_MODE_NIGHT / setLocale / fontScale) + `ContextThemeWrapper(ScriptTheme)`; 根容器 `UiPreviewRootView` 带主题 `windowBackground`, 编辑模式拦截指针并回报 `onTap`, 绘制高亮). 设备: API 37 模拟器 `embeddedSessionReturnsASurfacePackageAndBounds` 通过 (InputTransferToken 路径); `hostToken` 路径 (API 30 - 34) 本会话未在设备上跑 (API 30 / 33 模拟器为其它会话的实例, 真机宿主不覆盖安装), 以 P10.0 spike 在 API 30 / 33 的实测为依据, P10.3 接入时补跑.
+- [x] (宿主) `PreviewRuntimeFactory`: 每个会话一个真实 `ScriptRuntime` (经 `ScriptEngineService.execute(StringScriptSource, config)` 运行合成脚本, config 带预览会话标识, 不出现在用户可见的运行列表或以 "预览" 标注, 待 Q20); 合成脚本固定为 `"ui"; ui.bindingContext = JSON.parse(__bindings__); ui.layout(__xml__);` 两个值由宿主以 `ScriptEngine.put` 注入, 不拼接进源码; `{{expr}}` 求值失败时 (预览标识生效) 保留原文, 记入 `onLayoutFailed` 的属性级诊断而不中止 inflate; 每次 `setLayout` 复用同一运行时重新 `ui.layout`.
+  证据 (2026-10-15, 按 Q20 建议 (b) 实施, 待维护者确认): `306a8f7834`: 实际形态为 `UiPreviewScriptExecution` (`AbstractScriptExecution`, `ExecutionConfig.uiContentHost` 宿主持有标识, `ScriptEngineService.execute` 优先按它分派; 主线程创建并 `init` 引擎, 标签 `ui.content.host`, `LoopBasedJavaScriptEngine.execute`), 以客户端 `label` (缺省 "3-Block Compose 预览", 11 目录字符串 `ui_preview_default_label`) 出现在运行列表, 宿主侧停止经 `LoopBasedJavaScriptEngine.forceStop` -> `UiContentHost.onEngineForceStop` 释放并回调 `onSessionLost(stopped)` (`stoppingTheRuntimeFromTheHostLosesTheSession`); 合成脚本是常量 `"ui";` (`UiPreviewScript.SOURCE`, JVM 守卫其不含 `{` / `$`), 每次 `setLayout` 在主线程以 `withRhinoContext` 直接调用 `UI.layout(runtime, [xml])`, 绑定上下文由 `JsonParser(cx, topLevelScope).parseValue` 得到 (这个 Rhino 构建的四参数 `NativeJSON.parse` 要求 reviver 非空), 请求内容从不进入源码; `{{missing}}` 求值失败经 `onBindingFailed` 保留原文并记入响应的 `diagnosticsJson` (`bindingFailureIsReportedWithoutStoppingTheFrame`: applied, 诊断 `{code: BINDING_FAILED, i: 1, a: "text"}`, 快照与 3 条边界照常), `setLayout` 之外的失败经 `onLayoutFailed`; 窗口级函数经 `ui_preview_window_function_ignored` 每函数警告一次.
+- [x] (宿主) 边界采集: 以 `LayoutInflaterDelegate.afterCreateView` 的 DOM `node` 先序号为键 (只数元素), 布局完成 (`OnGlobalLayoutListener` 去抖) 后回传 `(index, left, top, right, bottom, className, viewId)` 列表 (JSON, 超过内联上限时经调用方 fd), 坐标为嵌入根坐标 = 客户端 `SurfaceView` 像素.
+  证据 (2026-10-15): `UiPreviewTrackingDelegate` (包装 ui 模块的 delegate: `beforeInflateView` / `afterInflateView` 维护元素栈, `afterCreateView` 记录 `(view, 先序号, id)`, 先序号表按 Document 缓存, 列表项实例与模板同号并以 `n` 区分), `UiPreviewSession.reportBounds` (嵌入: `OnGlobalLayoutListener` 50 ms 去抖; 快照: 布局后即时), 条目 `{i, l, t, r, b, c, d, n, s}`, 超过 5000 条截断并 `boundsTruncated` (不走 fd, 见附录 B.4). 设备: `snapshotSessionReturnsPixelsAndBoundsAndAppliesBindings` 3 元素 -> 3 条 (`i` 0..2, `d` root / title / ok, 根 0,0,320,480, `w="{{w}}"` 绑定的 120 dp 宽度与 `displayMetrics.density` 换算在 1 px 内); 嵌入会话 3 条且根宽 400, `resize(300, 500)` 后新边界根宽 300.
+- [x] (宿主) `snapshot` 模式: `measure(EXACTLY w, EXACTLY h) / layout / draw` 到 ARGB_8888 位图, 原始像素写入请求的 fd (行主序, 无压缩), 返回长度与 SHA-256; 需窗口的控件 (`WebView` / `SurfaceView` / `TextureView` / `VideoView` / `JsCanvasView`) 以带类名的占位矩形代替 (在 `afterCreateView` 替换); 像素上限见附录 B.
+  证据 (2026-10-15): `UiPreviewSession.layoutOffscreen` / `drawSnapshot` (主线程绘制并 `copyPixelsToBuffer`), 像素在 Binder 线程求 SHA-256 并经 `AutoCloseOutputStream` 写入调用方 fd (宿主关闭自己的副本; 进程内调用方须传 dup); `replaceCreatedView` 把 `WebView` / `SurfaceView` / `TextureView` (含 `JsCanvasView`) / `VideoView` 换成 `UiPreviewPlaceholderView` (灰底边框 + 类名). 设备: API 37 与 API 24 模拟器上 320 x 480 快照长度 = w * h * 4 且文件 SHA-256 与响应一致, 两个会话 (300 x 200 / 200 x 300) 各得各的像素与边界.
+- [x] (宿主) 上限与拒绝: 每客户端会话数, 尺寸, XML 字节, 绑定 JSON 字节, 边界条目数, 单次 inflate 墙钟 (超时释放运行时并返回 `ERR_..._TIMEOUT`); 任何异常转为契约错误码, 不传播到服务进程主线程.
+  证据 (2026-10-15): `UiPreviewRequests` (纯 Kotlin: 会话 / 尺寸 / 布局 / 指针模式校验与标签清洗, JVM `UiPreviewRequestsTest` 8 项), `UiPreviewFailures` (SAXParseException -> `XML_INVALID` 带行列与之前最后打开的元素先序号; 其它 -> `INFLATE_FAILED` 带跟踪到的元素与属性; JVM `UiPreviewFailuresTest` 5 项), `UiPreviewBounds` (JVM `UiPreviewBoundsTest` 4 项); 超时: Binder 线程 `FutureTask.get(5 s)` 超时返回 `timed_out` + `TIMEOUT`, 主线程返回后释放会话并 `onSessionLost(timeout)` (代码路径, 未在设备上制造超时). 设备 `requestsBeyondTheLimitsAreRejected`: 5000 px / contractVersion 2 / mode "window" / 超长 XML / snapshot 无 fd / 绑定为数组 / resize 0 / 未知会话 / API < 33 的交互指针 / API < 30 的 embedded 全部返回对应错误码; `twoSessionsAreIndependentAndAThirdIsRefused` 第三个会话 `SESSION_LIMIT`; `invalidXmlReportsThePosition` (`<vertical><text text="a"></vertical>` -> `XML_INVALID`, line >= 1, 元素 1); `inflateFailureNamesTheElement` (`<nope/>` -> `INFLATE_FAILED`, 元素 2, 共 3 元素, 会话随后仍能应用下一帧).
+- [x] (测试) 宿主 JVM: 契约常量与哈希, 合成脚本不含请求内容 (注入而非拼接); 宿主 androidTest `UiPreviewServiceTest`: 以 instrumentation 进程 (与宿主同签名) 绑定服务, `embedded` 在 API 30+ 返回 `SurfacePackage` 且边界条目数 = 元素数; `snapshot` 位图长度 = w * h * 4 且 SHA-256 匹配; 非法 XML 返回带元素先序号的错误; 客户端死亡后会话释放; 并发两个会话互不影响.
+  证据 (2026-10-15): JVM 25 项新增 (`UiPreviewContractTest` 8, `UiPreviewRequestsTest` 8 (含 `UiPreviewScript.SOURCE == "ui";` 不含 `{` / `$`), `UiPreviewBoundsTest` 4, `UiPreviewFailuresTest` 5) 全部通过; `UiPreviewServiceTest` 9 项: emulator-5590 (API 37, x86_64) 全部通过, emulator-5570 (API 24, x86) 8 项通过 + embedded 按假设跳过 (两台均 `OK (11 tests)`, 各含两项 ui 回归). "客户端死亡后会话释放" 由 `linkToDeath` 实现, 进程内的本地 Binder 不会死亡, 测试无法模拟, 改以宿主侧 `forceStop` 释放 (`stoppingTheRuntimeFromTheHostLosesTheSession`: `onSessionLost(stopped)`, 运行列表中移除, 之后 `SESSION_NOT_FOUND`) 覆盖释放路径; 跨进程死亡由 P10.3 的插件客户端测试 (杀插件进程) 补.
+- [x] (宿主) AAR 产出: `:plugin-api:ui-preview-api:assembleRelease`, SHA-256 与来源提交写入插件 `locks/host-api-aars.lock` / `libs/README.md` / `THIRD_PARTY_NOTICES.md` (P10.3 同一提交); 宿主 10 语言 changelog 记录新增服务.
+  证据 (2026-10-15): 宿主 `8c50a8fabc` 源码的 `ui-preview-api-release.aar` 18181 B (13 个 class, 无依赖), SHA-256 `bdf89d7460252dec71f384f367bb894848edaa4aaa691c95f8b4e21911f363b9`, 模块 `lintRelease` 0 问题; 入锁与 README / 声明随 P10.3 第一条. 宿主 changelog `v6.8.0` feature 条目 "ui 模式布局预览服务 ..." 10 语言 (`306a8f7834`, 生成的 CHANGELOG / README 同步); 宿主 `.changelog` 另有其它会话遗留的 zh-Hans 独有条目 (feature 1 / fix 3 / improvement 1), 因此 `generate_markdown.py --check` 与 `check_translations.py --record-sync` 在本会话之前就不通过, 本会话不代为翻译.
 
 ### P10.3 预览客户端与 XML 画布 (插件, 1.6.0)
 
@@ -330,6 +340,8 @@ data class XmlSpan(val start: Int, val end: Int)   // 脚本文件内偏移, 行
 
 ### B.1 AIDL
 
+P10.2 (2026-10-15) 已按下面的最终形态落地 (与草案的差异: `setPointerMode` / `setHighlight` 返回 Bundle 以报告结果, `output` 标注 `@nullable`, 边界只内联不走 fd, 新增 `label` / `inputTransferToken` 键与 `diagnosticsJson`); `HASH_INPUT` 列出两个接口的全部事务, `HASH` = `680f41b5459648ff07bd1d3d9684c5279d9398b78f61c0307862f50f8dcac0b6`. 正式描述见宿主 `docs/dev/ui-preview-plugin-protocol-v1.md`.
+
 ```java
 interface IUiPreviewService {
     // The transaction order is frozen; new methods are append-only.
@@ -337,18 +349,18 @@ interface IUiPreviewService {
     String getContractHash();
     Bundle getPreviewInfo();                                   // 宿主版本, 支持的模式, 上限, 状态
     Bundle createSession(in Bundle request, IUiPreviewCallback callback);   // -> sessionId, (embedded) SurfacePackage
-    Bundle setLayout(String sessionId, in Bundle layout, in ParcelFileDescriptor output);   // output 可为 null; snapshot 必填
-    Bundle resize(String sessionId, int widthPx, int heightPx); // (embedded) relayout 并重新发送 SurfacePackage 若重建
+    Bundle setLayout(String sessionId, in Bundle layout, in @nullable ParcelFileDescriptor output);   // 同步返回结果; snapshot 必须给 output
+    Bundle resize(String sessionId, int widthPx, int heightPx); // (embedded) relayout; snapshot 记录尺寸供下次布局
     void release(String sessionId);
     Bundle reattach(String sessionId);                      // (embedded) 客户端表面重建后: 同一层级的新 SurfacePackage
-    void setPointerMode(String sessionId, int mode);        // 0 = 编辑 (根容器拦截指针并回报 onTap / onDrag), 1 = 交互 (放行, 仅 API 33+)
-    void setHighlight(String sessionId, int elementIndex);  // 宿主在根容器上画选中框, -1 清除
+    Bundle setPointerMode(String sessionId, int mode);      // 0 = 编辑 (根容器拦截指针并回报 onTap), 1 = 交互 (放行, 仅 API 33+, 否则 UNSUPPORTED_MODE)
+    Bundle setHighlight(String sessionId, int elementIndex); // 宿主在根容器上画选中框, -1 清除
     // v2 (1.7.0, 只追加): Bundle runScript(String sessionId, in Bundle request); void stopScript(String sessionId);
 }
 oneway interface IUiPreviewCallback {
-    void onBounds(String sessionId, in Bundle bounds);          // 内联 JSON 或 fd 长度 + SHA-256
-    void onLayoutFailed(String sessionId, in Bundle failure);   // 错误码, 消息, 元素先序号, 属性名 (可选)
-    void onSessionLost(String sessionId, in Bundle reason);
+    void onBounds(String sessionId, in Bundle bounds);          // 内联 JSON (boundsJson / boundsCount / boundsTruncated / elementCount)
+    void onLayoutFailed(String sessionId, in Bundle failure);   // setLayout 之外的失败 (如列表项稍后绑定): 错误码, 消息, 元素先序号, 属性名 (可选)
+    void onSessionLost(String sessionId, in Bundle reason);     // stopped / timeout / service_destroyed / script_error
     void onTap(String sessionId, in Bundle tap);                // 编辑模式: x, y, 最深命中的元素先序号与类名; 后续追加 onLongPress / onDrag
     // v2: onConsole, onScriptError, onScriptExit
 }
@@ -358,16 +370,18 @@ oneway interface IUiPreviewCallback {
 
 | 键 | 方向 | 含义 |
 | --- | --- | --- |
-| `mode` | 请求 | `embedded` / `snapshot` |
-| `hostToken` (Binder) / `displayId` | 请求 (embedded) | `SurfaceView.getHostToken()` 与所在显示器 |
-| `widthPx` / `heightPx` / `densityDpi` / `nightMode` / `localeTag` / `fontScale` | 请求 | 逻辑屏幕尺寸与配置覆盖; 缺省跟随宿主 |
-| `clientVersionCode` | 请求 | 插件版本 (审计) |
-| `xml` / `bindingsJson` / `xmlSha256` | setLayout | 已替换 `{expr}` 的 XML 文本, `{{}}` 绑定值 (对象, 值为 JSON 原始类型或字符串), 校验 |
+| `contractVersion` / `mode` | 请求 | 必须为 1; `embedded` / `snapshot` |
+| `hostToken` (Binder) / `inputTransferToken` (Parcelable, API 35+ 优先) / `displayId` | 请求 (embedded) | `SurfaceView.getHostToken()` 或 `getRootSurfaceControl().getInputTransferToken()`, 所在显示器 |
+| `widthPx` / `heightPx` / `densityDpi` / `nightMode` / `localeTag` / `fontScale` | 请求 | 逻辑屏幕尺寸与配置覆盖; 0 / 空跟随宿主 |
+| `clientVersionCode` / `label` | 请求 | 插件版本 (只记日志); 运行列表中显示的名称 (<= 128 字符, 缺省 "3-Block Compose 预览") |
+| `xml` / `bindingsJson` / `xmlSha256` | setLayout | 已替换 `{expr}` 的 XML 文本, `{{}}` 绑定上下文 (JSON 对象), 可选校验 |
 | `sessionId` / `surfacePackage` (Parcelable) | 响应 | 会话标识, 嵌入包 |
-| `outcome` / `errorCode` / `errorMessage` / `elementIndex` / `attrName` | 响应 / 回调 | `applied` / `failed` / `timed_out`; 失败定位 |
-| `boundsJson` / `boundsByteLength` / `boundsSha256` | 回调 | `[{ "i": 先序号, "l","t","r","b", "c": 类名, "v": viewId }]` |
-| `snapshotByteLength` / `snapshotSha256` / `snapshotFormat` | setLayout 响应 (snapshot) | `argb8888-rowmajor`, 长度 = w * h * 4 |
-| `hostVersionCode` / `hostVersionName` / `modes` / `maxSessionsPerClient` / `maxWidthPx` / `maxHeightPx` / `maxXmlChars` / `maxBindingsChars` / `maxBoundsEntries` / `maxSnapshotPixels` / `status` | getPreviewInfo | 能力与上限 |
+| `outcome` / `errorCode` / `errorMessage` / `elementIndex` / `attrName` / `line` / `column` / `elementCount` / `elapsedMs` / `diagnosticsJson` | 响应 / 回调 | `applied` / `failed` / `timed_out`; 失败定位; 未中止布局的属性级诊断 `[{ "code", "message", "i", "a" }]` |
+| `boundsJson` / `boundsCount` / `boundsTruncated` / `elementCount` | 回调 | `[{ "i": 先序号, "l","t","r","b", "c": 类名, "d": id 属性, "n": 实例序号 (列表项), "s": visibility }]`, 超过 5000 条截断并标记 |
+| `snapshotByteLength` / `snapshotSha256` / `snapshotFormat` / `snapshotWidthPx` / `snapshotHeightPx` | setLayout 响应 (snapshot) | `argb8888-rowmajor`, 长度 = w * h * 4 |
+| `x` / `y` / `elementIndex` / `className` | onTap | 编辑模式点击 |
+| `reason` | onSessionLost | `stopped` / `timeout` / `service_destroyed` / `script_error` |
+| `contractHash` / `hostVersionCode` / `hostVersionName` / `status` / `modes` / `interactivePointerSupported` / `imeSupported` / `maxSessionsPerClient` / `maxWidthPx` / `maxHeightPx` / `maxXmlChars` / `maxBindingsChars` / `maxBoundsEntries` / `maxSnapshotPixels` / `layoutTimeoutMs` | getPreviewInfo | 能力与上限 |
 
 ### B.3 错误码 (前缀 `ERR_AUTOJS6_UI_PREVIEW_`)
 
@@ -375,7 +389,7 @@ oneway interface IUiPreviewCallback {
 
 ### B.4 上限 (初值, P10.0 回填)
 
-每客户端会话 2; 尺寸 <= 4096 x 4096 px; XML <= 256 K chars; 绑定 JSON <= 64 K chars; 边界条目 <= 5000 (超过经 fd); 快照 <= 4096 x 4096 像素 (64 MiB 原始); 单次 inflate <= 5 s; `setLayout` 请求去抖由客户端负责, 服务对同一会话串行处理并丢弃排队中的旧请求. P10.0 实测: 首帧 (含引擎创建) 0.5 - 1.2 s, 再次运行 0.2 s, 边界在布局后约 0.2 s 回传; 1032 x 448 快照 (1.85 MB) 绘制 44 ms, 往返 64 ms (API 24 x86 模拟器), 1080 x 1920 按像素数估算约 0.2 - 0.3 s, 快照只按视口尺寸生成.
+每客户端会话 2; 尺寸 <= 4096 x 4096 px; XML <= 256 K chars; 绑定 JSON <= 64 K chars; 边界条目 <= 5000 (P10.2 落地: 超过时截断并以 `boundsTruncated` 标记, 不走 fd, 因为 oneway 回调没有调用方的描述符, 而 5000 条远低于 Binder 缓冲); 快照 <= 4096 x 4096 像素 (64 MiB 原始); 单次 `setLayout` <= 5 s (Binder 线程计时, 超时返回 `timed_out` 并在主线程返回后释放会话), `createSession` <= 15 s (含引擎创建); `setLayout` 请求去抖由客户端负责, 服务对同一会话按主线程队列串行处理. P10.0 实测: 首帧 (含引擎创建) 0.5 - 1.2 s, 再次运行 0.2 s, 边界在布局后约 0.2 s 回传; 1032 x 448 快照 (1.85 MB) 绘制 44 ms, 往返 64 ms (API 24 x86 模拟器), 1080 x 1920 按像素数估算约 0.2 - 0.3 s, 快照只按视口尺寸生成.
 
 ### B.5 安全
 
@@ -409,6 +423,8 @@ Compose 工程有 D37 (事件处理函数桩, state 绑定自动声明). XML 工
 ### Q20 (P10.2 前): 预览运行时在宿主中的可见性
 
 布局预览的合成脚本经 `ScriptEngineService` 运行, 会出现在宿主 "正在运行" 列表. (a) 列表中隐藏 (以预览标识过滤); (b) 显示并标注 "3-Block Compose 预览"; (c) 不经 `ScriptEngineService`, 直接构造 `ScriptRuntime` (需要宿主新增工厂, 绕过执行记录). 建议 (b): 可见但标注, 用户能从宿主侧停止, 不新增旁路.
+
+**P10.2 实施 (2026-10-15, 按建议 (b), 待维护者确认)**: 预览运行时经 `ScriptEngineService.execute(StringScriptSource(label, "\"ui\";"), listener, config)` 进入, `ExecutionConfig.uiContentHost` (宿主持有, 不从脚本参数接受) 让服务分派到新的 `UiPreviewScriptExecution` (主线程引擎, 预览根容器取代 Activity), 因此以客户端传入的 `label` (缺省 "3-Block Compose 预览") 出现在运行列表, 从宿主侧停止时 `LoopBasedJavaScriptEngine.forceStop` 经 `UiContentHost.onEngineForceStop` 释放会话并回调 `onSessionLost(stopped)`; spike 的 `getScriptEngineManager()` 旁路未保留. 合成脚本固定为 `"ui";`, XML 与绑定值由 Kotlin 直接作用于运行时 (`UI.layout` 与 `NativeJSON.parse`), 不再如条目草案那样经 `ScriptEngine.put` 注入变量.
 
 ### Q21 (P10.0 后): 嵌入模式的输入法最低 API
 

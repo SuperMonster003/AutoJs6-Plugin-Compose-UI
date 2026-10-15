@@ -286,7 +286,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 | P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
 | P9 | 设计器增强: 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 - 1.5.0 (D41) | 2026-10-13 维护者选定三个方向, Q12 - Q16 同日拍板 (D41 - D45); 1.2.0 发布基线 6db6da2. 1.3.0 (P9.1 全部, P9.3 第一步与模式切换) 同日完成并过本地 gate (build 129 源码, 证据 `docs/dev/p9-designer-evidence.md`), 未推送; 1.4.0 (P9.2 TSX 工程, 宿主 `fce22c83a6` 与 TypeScript Engine 0.7.0 `1e92487` 的解析契约) 同日完成并过本地 gate (证据 `docs/dev/p9-tsx-evidence.md`), 并作为首个公开发行版发布 (D7 再修订, GitHub Release `v1.4.0` 与官方索引 `b3085e8`); P9.3 第二步 (1.5.0) 由维护者于同日按 D43 立项, 2026-10-14 完成并过本地 gate (build 139 源码, 证据 `docs/dev/p9-sandbox-evidence.md`), 发布为 GitHub Release `v1.5.0` 并由官方索引 `8b095f6` 准入 |
-| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 同日完成 P10.0 spike (宿主分支 `spike/ui-preview-p10`, 插件 debug 页, 证据 `docs/dev/p10-spike-evidence.md`): 嵌入显示 API 30+, 触摸需表面置顶, 交互 (弹出层) API 33+, 输入法 API 35+, 快照 API 24 / 28 可行; 同日拍板 Q21 (D50) 并完成 P10.1 (XML 文档模型, 无损读写, 命令与历史, 文档生成的目录, 校验器; JVM 37 项, 宿主 46 个示例字节往返), P10.2 起未开始 |
+| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 同日完成 P10.0 spike (宿主分支 `spike/ui-preview-p10`, 插件 debug 页, 证据 `docs/dev/p10-spike-evidence.md`): 嵌入显示 API 30+, 触摸需表面置顶, 交互 (弹出层) API 33+, 输入法 API 35+, 快照 API 24 / 28 可行; 同日拍板 Q21 (D50) 并完成 P10.1 (XML 文档模型, 无损读写, 命令与历史, 文档生成的目录, 校验器; JVM 37 项, 宿主 46 个示例字节往返); 同日完成 P10.2 (宿主 master `8c50a8fabc` 契约模块 `plugin-api/ui-preview-api` v1, `306a8f7834` `UiContentHost` 承载抽象 + `UiPreviewService` 布局预览 (嵌入 + 快照), Q20 按建议 (b) 实施待确认; JVM 25 项, `UiPreviewServiceTest` 在 API 37 / API 24 模拟器通过; AAR SHA-256 `bdf89d74...` 待 P10.3 入锁), P10.3 起未开始 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4. P9 依赖 1.2.0 本地 gate; 按 D41 先 P9.1 与 P9.3 第一步 (1.3.0), 再 P9.2 (1.4.0, 依赖宿主与 TypeScript Engine 的解析契约), P9.3 第二步在 1.4.0 后评估并依赖 P9.1 的弹层画布内绘制.
 
@@ -923,8 +923,16 @@ P1.1 补充容器边界: `MAX_VALUE_DEPTH=64`, `MAX_VALUE_ITEMS=2000`, `MAX_PROP
 | `docs/dev/compose-ui-plugin-protocol-v1.md`, `compose-ui-spike-evidence.md` | 协议与证据 | P0.3, P1.3 |
 | `app/src/test/**` | `ComposeUiContractTest`, `ComponentCatalogConsistencyTest`, `ComposeUiHostCompileGuardTest`, `TreeReconcilerTest`, `ComposeSessionLimitsTest`, `CallbackRegistryTest`, `ComposeUiPluginHostSelectionTest`, `ComposeUiSharedClasspathTest`, `ComposeJsErrorsTest`, `PluginCenterComposeUiRegistrationTest` | P1 - P3 |
 | `app/src/androidTest/**` | `ComposeUiLoaderTest`, ui 模式 / 悬浮窗 端到端 | P1.2, P3 |
+| `settings.gradle.kts`, `app/build.gradle.kts`, `.github/workflows/android.yml` | `pluginApi += "ui-preview-api"`, `implementation(project(":plugin-api:ui-preview-api"))`, CI 跑该模块的 JVM 测试 | P10.2 |
+| `plugin-api/ui-preview-api/**` | 预览契约 v1 (`IUiPreviewService` / `IUiPreviewCallback` AIDL, `UiPreviewContract`, consumer-rules, `UiPreviewContractTest`) | P10.2 |
+| `app/src/main/java/org/autojs/autojs/core/ui/UiContentHost.kt` | `ui.layout` 内容承载接口 (Activity 或预览根容器) | P10.2 |
+| `app/src/main/java/org/autojs/autojs/core/ui/preview/**` | `UiPreviewService`, `UiPreviewSession`, `UiPreviewScriptExecution`, `UiPreviewTrackingDelegate`, 根容器 / 占位 View, 请求校验 / 边界 JSON / 失败分类, `UiPreviewScript` | P10.2 |
+| `runtime/api/augment/ui/UI.kt`, `execution/ScriptExecuteActivity.kt`, `execution/ExecutionConfig.kt`, `engine/ScriptEngineService.java`, `engine/LoopBasedJavaScriptEngine.java` | `ensureUiHost` / `ensureWindowActivity` / 绑定失败钩子; Activity 实现承载; `uiContentHost` 标识与分派; 强制停止通知承载 | P10.2 |
+| `app/src/main/AndroidManifest.xml`, `app/src/main/res/values*/strings.xml` | `UiPreviewService` (exported, PLUGIN 权限, action `org.autojs.plugin.ui.PREVIEW`); `ui_preview_*` 2 键 x 11 目录 | P10.2 |
+| `docs/dev/ui-preview-plugin-protocol-v1.md`, `.changelog/lang_*.json` | 协议文档; 10 语言 feature 条目 | P10.2 |
+| `app/src/test/**`, `app/src/androidTest/**` | `UiPreviewRequestsTest`, `UiPreviewBoundsTest`, `UiPreviewFailuresTest`; `UiPreviewServiceTest` | P10.2 |
 
-不改动: `runtime/api/augment/ui/UI.kt` 的对象模型 (`ui.view` 仍为 `View`), `com/stardust/**`, 旧 `DynamicLayoutInflater`.
+不改动: `runtime/api/augment/ui/UI.kt` 的对象模型 (`ui.view` 仍为 `View`; P10.2 只把 Activity 换成承载接口), `com/stardust/**`, 旧 `DynamicLayoutInflater`.
 
 ---
 
@@ -1036,7 +1044,7 @@ F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6
 
 ### Q18 - Q21 (P10 各阶段前): 文档页归属与命名, XML 工程的逻辑生成范围, 预览运行时在宿主中的可见性, 嵌入模式的输入法最低 API
 
-未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行. Q21 已有 P10.0 实测 (2026-10-15): 输入法只在 API 35+ 以 `InputTransferToken` 构造的嵌入窗口中可用, API 30 - 32 的弹出层会让宿主崩溃; 建议三级门禁 (显示 30+, 交互 33+, 输入法 35+); 维护者同日按此拍板 (D50).
+未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行. Q21 已有 P10.0 实测 (2026-10-15): 输入法只在 API 35+ 以 `InputTransferToken` 构造的嵌入窗口中可用, API 30 - 32 的弹出层会让宿主崩溃; 建议三级门禁 (显示 30+, 交互 33+, 输入法 35+); 维护者同日按此拍板 (D50). Q20 于 P10.2 (2026-10-15) 按建议 (b) 实施 (预览运行时经 `ScriptEngineService.execute` 注册, 以标签出现在运行列表并可从宿主侧停止), 待维护者确认; 若改选 (a) / (c), 只需调整 `UiPreviewScriptExecution` 的分派, 契约不变.
 
 ---
 
@@ -1409,3 +1417,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 维护者按 P10.0 建议拍板 Q21 为三级门禁 (D50), 随即开始 P10.1 (插件侧, 不依赖宿主). 新增 `designer/model/XmlModel.kt` (UiDocument / XmlNode / XmlAttr / XmlEntities), `designer/parse/XmlCst.kt` (带位置的容错 XML 词法层), `designer/parse/UiScriptReader.kt` (指令, 全部字面量, `ui.layout` 与 `ui.registerWidget` 识别), `designer/codegen/UiScriptWriter.kt` (未触碰节点按原文写回), `designer/model/UiEditCommand.kt` (SetAttr / SetTag / SetText / InsertElement / RemoveElement / MoveElement 与 `UiEditHistory`), `designer/model/UiCatalog.kt` + `UiValidator.kt`, 生成器 `.python/generate_ui_catalog.py` 与产物 `app/src/main/resources/designer-ui/catalog.json` (文档站 `0e9a0e9`: 49 标签, 40 类 440 属性), 测试语料 `app/src/test/resources/ui-samples/` (12 个宿主示例拷贝, SOURCES.txt 记录来源). 各条证据见 `docs/dev/p10-ui-xml-designer-roadmap.md` P10.1.
 - 验证: JVM 全套 210 项 (新增 37 项) 通过, `AUTOJS6_HOST_DIR` 指向宿主 master `6c151c900e` 时 46 个以字面量调用 `ui.layout` 的示例读取后写回字节相同; `generate_ui_catalog.py --check` 通过; `assembleDebug` 通过. 未执行: lint, release 包, 设备测试 (本节纯模型, 随 P10.5 gate).
 - 设计上的两个取舍: `UiEditHistory` 与 `EditHistory` 暂为两份同语义代码 (P10.4 接入编辑页时再合并); changelog 与 README 留到 P10.5 (1.6.0 一次写入).
+
+### 2026-10-15 (续): P10.2 预览契约 v1 与宿主预览服务
+
+- 维护者指示直接在宿主 master 上做. 宿主两笔提交: `8c50a8fabc` `feat(plugin-api): add the ui-mode layout preview contract v1` (模块 `plugin-api/ui-preview-api`: `IUiPreviewService` 10 个事务 / `IUiPreviewCallback` 4 个 oneway 回调 / `UiPreviewContract` 常量, `HASH` `680f41b5...`; `settings.gradle.kts`, `app/build.gradle.kts`, CI, `docs/dev/ui-preview-plugin-protocol-v1.md`); `306a8f7834` `feat(ui): host the ui-mode layout preview service for the 3-Block Compose designer` (`core/ui/UiContentHost.kt` 承载接口, `ScriptExecuteActivity` 实现, `UI.kt` 经承载取内容容器 / 窗口级函数在预览下空操作并警告一次 / `{{ }}` 失败钩子, `core/ui/preview/` 服务 + 会话 + 注册执行 + 跟踪 delegate + 根容器 / 占位 + 纯 Kotlin 的校验 / 边界 / 失败分类, `ExecutionConfig.uiContentHost` 与 `ScriptEngineService` 分派, `LoopBasedJavaScriptEngine.forceStop` 通知承载, Manifest 服务, 11 目录 2 键字符串, 10 语言 changelog). 逐条证据见 `docs/dev/p10-ui-xml-designer-roadmap.md` P10.2 (全部勾选), 附录 B 按最终契约修订, 附录 D 记 Q20 的实施形态 (建议 (b), 待确认).
+- 验证: JVM 48 项通过 (新增 25: 契约 8, 请求校验 8, 边界 JSON 4, 失败分类 5; 回归 23: ui 模块 12 + `RhinoUtilsScopeCompatTest` 11); 宿主 `app` debug + androidTest 装配, 模块 `lintRelease` 0 问题; `UiPreviewServiceTest` 9 项 + `ScriptLooperCompatibilityDeviceTest.uiAndOverlayCallbacksFinishAndClose` + `JsListViewDataBindingDeviceTest` 在 emulator-5590 (API 37, x86_64) 11 项全过, emulator-5570 (API 24, x86) 11 项全过 (embedded 按假设跳过). AAR `ui-preview-api-release.aar` SHA-256 `bdf89d7460252dec71f384f367bb894848edaa4aaa691c95f8b4e21911f363b9` (18181 B, 13 class), 入锁随 P10.3.
+- 未执行: `hostToken` 路径 (API 30 - 34) 的设备运行 (API 30 / 33 模拟器为其它会话的实例, 真机宿主不覆盖安装; 以 P10.0 的实测为依据, P10.3 补跑); 超时释放路径只有代码审查; 跨进程客户端死亡由 P10.3 的插件客户端测试覆盖; 宿主 `generate_markdown.py --check` 因其它会话遗留的 zh-Hans 独有 changelog 条目 (feature 1 / fix 3 / improvement 1) 在本会话前已不通过, 本会话只加入自己的 10 语言条目并重新生成, 不代为翻译.
+- 与草案的差异 (已回填附录 B): `setPointerMode` / `setHighlight` 返回 Bundle; `setLayout` 的 `output` 标注 `@nullable`; 边界只内联 (<= 5000 条, 超过截断并标记), 不走 fd; 新增 `label` / `inputTransferToken` 请求键与 `diagnosticsJson` 响应键; 合成脚本是常量 `"ui";`, XML 与绑定值由 Kotlin 直接作用于运行时而不是 `ScriptEngine.put` 注入变量. 接口方法命名为 `showContent` 而非 `setContentView` (与 `AppCompatActivity.setContentView(View?)` 的 JVM 签名冲突). P10.3 要点: 客户端进程内传给 `setLayout` 的 fd 会被宿主关闭 (远端调用方拿到的是副本, 无影响); 嵌入模式 `SurfaceView` 须 `setZOrderOnTop(true)`, 编辑态命中与高亮由宿主根容器完成 (`onTap` / `setHighlight`); 后台恢复用 `reattach`.
