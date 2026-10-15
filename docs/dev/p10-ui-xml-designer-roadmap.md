@@ -159,8 +159,8 @@ app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; Ex
 
 | 范围 | 预览中的行为 |
 | --- | --- |
-| `activity` 全局 | 布局预览: 不存在 (合成脚本无用户代码). 交互预览: `undefined`, 直接访问 `activity.*` 的脚本抛错并显示在控制台; `ui.finish` / `keepScreenOn` / `statusBarColor` 等窗口级 API 为空操作并打印一条警告 |
-| 生命周期事件 | `ui.emitter` 只发 `create`; 无 `resume` / `pause` / `back_pressed` / `activity_result` |
+| `activity` 全局 | 布局预览: 不存在 (合成脚本无用户代码). 交互预览: `undefined`, 直接访问 `activity.*` 的脚本抛错并显示在控制台; `ui.finish` / `keepScreenOn` / `statusBarColor` 等窗口级 API 为空操作并打印一条警告. 更正 (2026-10-16, P11.2 设备探针, API 33 + 宿主 5439): 未定义 (`typeof activity` 为 `"undefined"`, 访问 `activity.getIntent()` 抛 ReferenceError `"activity" is not defined`); 窗口级 API 的警告由 `UiPreviewSession.onWindowFunctionIgnored` 写到会话自身运行时的控制台, 不经 `onConsole` 回传, 设计器的控制台看不到 |
+| 生命周期事件 | `ui.emitter` 只发 `create`; 无 `resume` / `pause` / `back_pressed` / `activity_result`. 更正 (2026-10-16, P11.2 设备探针): `ui.emitter` 由 `ScriptExecuteActivity` 提供, 交互预览中为 null (`String(ui.emitter)` 为 "null"), `ui.emitter.on(...)` 抛 TypeError `Cannot call method "on" of null` 并结束运行, 也没有 `create` |
 | 对话框 | `dialogs.*` 没有 Activity 时走悬浮窗类型窗口 (需宿主悬浮窗权限; HyperOS 等须由用户在系统设置授予, adb appops 不算), 显示在设计器之上而不是画布内 (spike: Redmi / API 33 模拟器显示, 小米平板 HyperOS 被拦截) |
 | 弹出层 / 输入法 | Spinner 下拉与 Toolbar 菜单 (PopupWindow) 在 API 33+ 正常, API 30 - 32 会让宿主进程崩溃 (`BadTokenException`), 因此交互预览要求 API 33+, 30 - 32 只做不放行指针的布局预览; `<input>` 的输入法只在 API 35+ (以 `InputTransferToken` 构造嵌入窗口) 可用, API 33 - 34 可获焦点但键盘不弹, 预览中提示; 快照模式不可交互 |
 | 触摸与遮盖 (P10.6) | 指针只在 `SurfaceView` 置顶时到达嵌入树, 置顶表面盖住设计器窗口叠在画布上的一切: 交互期间没有选中 / 拖拽 overlay, 开关与运行状态放在画布上方一行, 缩放仍经表面缩放生效 |
