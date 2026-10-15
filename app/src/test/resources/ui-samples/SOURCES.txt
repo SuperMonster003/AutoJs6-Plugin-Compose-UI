@@ -1,0 +1,14 @@
+# Copies of AutoJs6 ui-mode sample scripts used by UiScriptRoundTripTest (host master 4b51002ed8, 2026-10-15).
+# name = host path under app/src/main/assets-app/sample
+login.js = 布局/登录界面.js
+list.js = 控件/列表控件.js
+spinner.js = 控件/下拉菜单.js
+card.js = 控件/卡片布局.js
+survey.js = 布局/用户调查.js
+template.js = 布局/界面模板一.js
+todo.js = 布局/待办事项 [v6.3.1+].js
+buttons.js = 控件/按钮控件.js
+inputs.js = 控件/输入框控件.js
+widget-template.js = 控件/自定义控件-布局模板.js
+console.js = 布局/控制台控件 [v6.8.0+].js
+android-layout.js = 布局/简单 Android 布局 [v6.7.0+].js

@@ -71,6 +71,7 @@
 | D47 | ui 模式预览的脚本执行 (2026-10-15) | 两级: "布局预览" 默认且实时, 宿主只运行常量合成脚本 `"ui"; ui.layout(xml)`, `{{expr}}` 的值由插件沙箱对顶层字面量类声明求值后随请求传入, 用户代码不在宿主运行; "交互预览" (1.7.0) 为显式开关, 宿主以嵌入树为 `ui` 承载真实运行整份脚本, 等价于 "运行", 有副作用, 设计器不可见时停止 |
 | D48 | API 24 - 29 的 ui 模式预览 (2026-10-15) | 位图快照: 宿主把 inflate 后的 View 树离屏 measure / layout / draw 为 ARGB_8888 位图, 连同节点边界经调用方拥有的 fd 传回; 画布显示快照并支持点选, 不可交互; 同一契约的 `snapshot` 会话模式 |
 | D49 | ui 模式工程的原样编辑 (2026-10-15) | 无损: XML 字面量以带位置的具体语法树保存 (空白, 注释, 属性顺序, 引号, `{expr}` 片段), 编辑以定位替换写回, 未触碰字节不变, 新元素按相邻缩进生成; 不采用 Compose 工程的规范化不动点格式 |
+| D50 | ui 模式预览的版本门禁 (2026-10-15, Q21) | 三级: 嵌入显示与布局预览 API 30+; 交互预览 API 33+ (更低版本的弹出层会让宿主崩溃); 预览中的输入法 API 35+ 并以 `InputTransferToken` 构造嵌入窗口, API 33 - 34 的输入框在预览中提示并禁用; API 24 - 29 快照 |
 
 由 D2 / D9 / D10 派生的硬约束:
 
@@ -285,7 +286,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 | P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
 | P9 | 设计器增强: 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 - 1.5.0 (D41) | 2026-10-13 维护者选定三个方向, Q12 - Q16 同日拍板 (D41 - D45); 1.2.0 发布基线 6db6da2. 1.3.0 (P9.1 全部, P9.3 第一步与模式切换) 同日完成并过本地 gate (build 129 源码, 证据 `docs/dev/p9-designer-evidence.md`), 未推送; 1.4.0 (P9.2 TSX 工程, 宿主 `fce22c83a6` 与 TypeScript Engine 0.7.0 `1e92487` 的解析契约) 同日完成并过本地 gate (证据 `docs/dev/p9-tsx-evidence.md`), 并作为首个公开发行版发布 (D7 再修订, GitHub Release `v1.4.0` 与官方索引 `b3085e8`); P9.3 第二步 (1.5.0) 由维护者于同日按 D43 立项, 2026-10-14 完成并过本地 gate (build 139 源码, 证据 `docs/dev/p9-sandbox-evidence.md`), 发布为 GitHub Release `v1.5.0` 并由官方索引 `8b095f6` 准入 |
-| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 同日完成 P10.0 spike (宿主分支 `spike/ui-preview-p10`, 插件 debug 页, 证据 `docs/dev/p10-spike-evidence.md`): 嵌入显示 API 30+, 触摸需表面置顶, 交互 (弹出层) API 33+, 输入法 API 35+, 快照 API 24 / 28 可行; P10.1 起未开始 |
+| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 同日完成 P10.0 spike (宿主分支 `spike/ui-preview-p10`, 插件 debug 页, 证据 `docs/dev/p10-spike-evidence.md`): 嵌入显示 API 30+, 触摸需表面置顶, 交互 (弹出层) API 33+, 输入法 API 35+, 快照 API 24 / 28 可行; 同日拍板 Q21 (D50) 并完成 P10.1 (XML 文档模型, 无损读写, 命令与历史, 文档生成的目录, 校验器; JVM 37 项, 宿主 46 个示例字节往返), P10.2 起未开始 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4. P9 依赖 1.2.0 本地 gate; 按 D41 先 P9.1 与 P9.3 第一步 (1.3.0), 再 P9.2 (1.4.0, 依赖宿主与 TypeScript Engine 的解析契约), P9.3 第二步在 1.4.0 后评估并依赖 P9.1 的弹层画布内绘制.
 
@@ -1035,7 +1036,7 @@ F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6
 
 ### Q18 - Q21 (P10 各阶段前): 文档页归属与命名, XML 工程的逻辑生成范围, 预览运行时在宿主中的可见性, 嵌入模式的输入法最低 API
 
-未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行. Q21 已有 P10.0 实测 (2026-10-15): 输入法只在 API 35+ 以 `InputTransferToken` 构造的嵌入窗口中可用, API 30 - 32 的弹出层会让宿主崩溃; 建议三级门禁 (显示 30+, 交互 33+, 输入法 35+).
+未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行. Q21 已有 P10.0 实测 (2026-10-15): 输入法只在 API 35+ 以 `InputTransferToken` 构造的嵌入窗口中可用, API 30 - 32 的弹出层会让宿主崩溃; 建议三级门禁 (显示 30+, 交互 33+, 输入法 35+); 维护者同日按此拍板 (D50).
 
 ---
 
@@ -1402,3 +1403,9 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 对照: 列表模板 `{{name}}` 的 ReferenceError 在真实 ui 模式与 Redmi 上的正式宿主 (官方示例 `列表控件.js`) 同样出现, 是宿主当前构建的问题, 已作为独立任务建议交给维护者.
 - 设备: AVD_API_30 / 33 (3-Maple Image 会话的实例, 误用约 30 分钟后已告知并卸载), 小米平板 968e9f18 / Redmi bek749scrwv4wo8h / G8441 BH900ASK9E (经该会话同意借用, 结束时卸载 spike 宿主并装回 1.5.1 release), 自建 AVD_API_24 只读实例与 AVD_API_37.1_16K. 宿主 worktree 提交后移除, 分支保留.
 - 未执行: 缩放态下的触摸命中, Toolbar 溢出菜单 (与 Spinner 同为 PopupWindow), 1080 x 1920 快照实测, 宿主侧 compose 设备矩阵 (本次不改宿主 master).
+
+### 2026-10-15 (续): Q21 拍板, P10.1 XML 文档模型与无损往返
+
+- 维护者按 P10.0 建议拍板 Q21 为三级门禁 (D50), 随即开始 P10.1 (插件侧, 不依赖宿主). 新增 `designer/model/XmlModel.kt` (UiDocument / XmlNode / XmlAttr / XmlEntities), `designer/parse/XmlCst.kt` (带位置的容错 XML 词法层), `designer/parse/UiScriptReader.kt` (指令, 全部字面量, `ui.layout` 与 `ui.registerWidget` 识别), `designer/codegen/UiScriptWriter.kt` (未触碰节点按原文写回), `designer/model/UiEditCommand.kt` (SetAttr / SetTag / SetText / InsertElement / RemoveElement / MoveElement 与 `UiEditHistory`), `designer/model/UiCatalog.kt` + `UiValidator.kt`, 生成器 `.python/generate_ui_catalog.py` 与产物 `app/src/main/resources/designer-ui/catalog.json` (文档站 `0e9a0e9`: 49 标签, 40 类 440 属性), 测试语料 `app/src/test/resources/ui-samples/` (12 个宿主示例拷贝, SOURCES.txt 记录来源). 各条证据见 `docs/dev/p10-ui-xml-designer-roadmap.md` P10.1.
+- 验证: JVM 全套 210 项 (新增 37 项) 通过, `AUTOJS6_HOST_DIR` 指向宿主 master `6c151c900e` 时 46 个以字面量调用 `ui.layout` 的示例读取后写回字节相同; `generate_ui_catalog.py --check` 通过; `assembleDebug` 通过. 未执行: lint, release 包, 设备测试 (本节纯模型, 随 P10.5 gate).
+- 设计上的两个取舍: `UiEditHistory` 与 `EditHistory` 暂为两份同语义代码 (P10.4 接入编辑页时再合并); changelog 与 README 留到 P10.5 (1.6.0 一次写入).

@@ -1,0 +1,5899 @@
+{
+  "schemaVersion": 1,
+  "docsCommit": "0e9a0e9",
+  "tags": [
+    {
+      "tag": "view",
+      "aliases": [
+        "view"
+      ],
+      "viewClass": "View",
+      "category": "other",
+      "container": false,
+      "axis": null,
+      "summary": "基础视图"
+    },
+    {
+      "tag": "space",
+      "aliases": [
+        "space"
+      ],
+      "viewClass": "Space",
+      "category": "other",
+      "container": false,
+      "axis": null,
+      "summary": "空白占位视图"
+    },
+    {
+      "tag": "linear",
+      "aliases": [
+        "linear",
+        "horizontal"
+      ],
+      "viewClass": "JsLinearLayout",
+      "category": "layout",
+      "container": true,
+      "axis": "horizontal",
+      "summary": "默认水平方向的线性布局"
+    },
+    {
+      "tag": "vertical",
+      "aliases": [
+        "vertical"
+      ],
+      "viewClass": "JsLinearLayout",
+      "category": "layout",
+      "container": true,
+      "axis": "vertical",
+      "summary": "垂直方向的线性布局"
+    },
+    {
+      "tag": "frame",
+      "aliases": [
+        "frame"
+      ],
+      "viewClass": "JsFrameLayout",
+      "category": "layout",
+      "container": true,
+      "axis": "stack",
+      "summary": "帧布局"
+    },
+    {
+      "tag": "compose",
+      "aliases": [
+        "compose"
+      ],
+      "viewClass": "ComposeContainerView",
+      "category": "other",
+      "container": false,
+      "axis": null,
+      "summary": "F2 空容器, 用 [compose.attach](compose#m-attach) 填入 Compose 内容"
+    },
+    {
+      "tag": "relative",
+      "aliases": [
+        "relative"
+      ],
+      "viewClass": "JsRelativeLayout",
+      "category": "layout",
+      "container": true,
+      "axis": "stack",
+      "summary": "相对布局"
+    },
+    {
+      "tag": "scroll",
+      "aliases": [
+        "scroll"
+      ],
+      "viewClass": "JsScrollView",
+      "category": "layout",
+      "container": true,
+      "axis": "vertical",
+      "summary": "垂直滚动布局"
+    },
+    {
+      "tag": "drawer",
+      "aliases": [
+        "drawer"
+      ],
+      "viewClass": "JsDrawerLayout",
+      "category": "layout",
+      "container": true,
+      "axis": "stack",
+      "summary": "抽屉布局"
+    },
+    {
+      "tag": "appbar",
+      "aliases": [
+        "appbar"
+      ],
+      "viewClass": "JsAppBarLayout",
+      "category": "layout",
+      "container": true,
+      "axis": "vertical",
+      "summary": "Material AppBar 布局"
+    },
+    {
+      "tag": "toolbar",
+      "aliases": [
+        "toolbar"
+      ],
+      "viewClass": "JsToolbar",
+      "category": "layout",
+      "container": true,
+      "axis": "horizontal",
+      "summary": "工具栏"
+    },
+    {
+      "tag": "actionmenu",
+      "aliases": [
+        "actionmenu"
+      ],
+      "viewClass": "JsActionMenuView",
+      "category": "layout",
+      "container": true,
+      "axis": "horizontal",
+      "summary": "工具栏菜单布局"
+    },
+    {
+      "tag": "card",
+      "aliases": [
+        "card"
+      ],
+      "viewClass": "JsCardView",
+      "category": "layout",
+      "container": true,
+      "axis": "stack",
+      "summary": "卡片布局"
+    },
+    {
+      "tag": "text",
+      "aliases": [
+        "text"
+      ],
+      "viewClass": "JsTextView",
+      "category": "text",
+      "container": false,
+      "axis": null,
+      "summary": "文本视图. Android API 级别低于 `26` 时使用兼容实现"
+    },
+    {
+      "tag": "button",
+      "aliases": [
+        "button",
+        "btn"
+      ],
+      "viewClass": "JsButton",
+      "category": "button",
+      "container": false,
+      "axis": null,
+      "summary": "按钮"
+    },
+    {
+      "tag": "input",
+      "aliases": [
+        "input",
+        "edittext"
+      ],
+      "viewClass": "JsEditText",
+      "category": "input",
+      "container": false,
+      "axis": null,
+      "summary": "文本输入框"
+    },
+    {
+      "tag": "checkedtext",
+      "aliases": [
+        "checkedtext"
+      ],
+      "viewClass": "JsCheckedTextView",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "可勾选文本"
+    },
+    {
+      "tag": "chronometer",
+      "aliases": [
+        "chronometer"
+      ],
+      "viewClass": "JsChronometer",
+      "category": "text",
+      "container": false,
+      "axis": null,
+      "summary": "计时文本"
+    },
+    {
+      "tag": "textclock",
+      "aliases": [
+        "textclock"
+      ],
+      "viewClass": "JsTextClock",
+      "category": "text",
+      "container": false,
+      "axis": null,
+      "summary": "时钟文本"
+    },
+    {
+      "tag": "textswitcher",
+      "aliases": [
+        "textswitcher"
+      ],
+      "viewClass": "JsTextSwitcher",
+      "category": "text",
+      "container": true,
+      "axis": "stack",
+      "summary": "带切换动画的文本"
+    },
+    {
+      "tag": "checkbox",
+      "aliases": [
+        "checkbox"
+      ],
+      "viewClass": "JsCheckBox",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "复选框"
+    },
+    {
+      "tag": "radio",
+      "aliases": [
+        "radio",
+        "radiobutton"
+      ],
+      "viewClass": "JsRadioButton",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "单选按钮"
+    },
+    {
+      "tag": "radiogroup",
+      "aliases": [
+        "radiogroup",
+        "radios"
+      ],
+      "viewClass": "JsRadioGroup",
+      "category": "choice",
+      "container": true,
+      "axis": "vertical",
+      "summary": "单选按钮组"
+    },
+    {
+      "tag": "switch",
+      "aliases": [
+        "switch"
+      ],
+      "viewClass": "JsSwitch",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "开关"
+    },
+    {
+      "tag": "togglebutton",
+      "aliases": [
+        "togglebutton"
+      ],
+      "viewClass": "JsToggleButton",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "切换按钮"
+    },
+    {
+      "tag": "spinner",
+      "aliases": [
+        "spinner"
+      ],
+      "viewClass": "JsSpinner",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "下拉选择器"
+    },
+    {
+      "tag": "numberpicker",
+      "aliases": [
+        "numberpicker"
+      ],
+      "viewClass": "JsNumberPicker",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "数值选择器"
+    },
+    {
+      "tag": "datepicker",
+      "aliases": [
+        "datepicker"
+      ],
+      "viewClass": "JsDatePicker",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "日期选择器"
+    },
+    {
+      "tag": "timepicker",
+      "aliases": [
+        "timepicker"
+      ],
+      "viewClass": "JsTimePicker",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "时间选择器"
+    },
+    {
+      "tag": "calendar",
+      "aliases": [
+        "calendar"
+      ],
+      "viewClass": "JsCalendarView",
+      "category": "choice",
+      "container": false,
+      "axis": null,
+      "summary": "日历"
+    },
+    {
+      "tag": "search",
+      "aliases": [
+        "search"
+      ],
+      "viewClass": "JsSearchView",
+      "category": "input",
+      "container": false,
+      "axis": null,
+      "summary": "搜索框"
+    },
+    {
+      "tag": "progressbar",
+      "aliases": [
+        "progressbar"
+      ],
+      "viewClass": "JsProgressBar",
+      "category": "progress",
+      "container": false,
+      "axis": null,
+      "summary": "进度条"
+    },
+    {
+      "tag": "seekbar",
+      "aliases": [
+        "seekbar"
+      ],
+      "viewClass": "JsSeekBar",
+      "category": "progress",
+      "container": false,
+      "axis": null,
+      "summary": "拖动条"
+    },
+    {
+      "tag": "ratingbar",
+      "aliases": [
+        "ratingbar"
+      ],
+      "viewClass": "JsRatingBar",
+      "category": "progress",
+      "container": false,
+      "axis": null,
+      "summary": "评分条"
+    },
+    {
+      "tag": "image",
+      "aliases": [
+        "image",
+        "img"
+      ],
+      "viewClass": "JsImageView",
+      "category": "image",
+      "container": false,
+      "axis": null,
+      "summary": "支持圆角的图片视图"
+    },
+    {
+      "tag": "imagebutton",
+      "aliases": [
+        "imagebutton"
+      ],
+      "viewClass": "JsImageButton",
+      "category": "button",
+      "container": false,
+      "axis": null,
+      "summary": "图片按钮"
+    },
+    {
+      "tag": "quickcontactbadge",
+      "aliases": [
+        "quickcontactbadge"
+      ],
+      "viewClass": "JsQuickContactBadge",
+      "category": "image",
+      "container": false,
+      "axis": null,
+      "summary": "联系人快捷入口"
+    },
+    {
+      "tag": "fab",
+      "aliases": [
+        "fab"
+      ],
+      "viewClass": "JsFloatingActionButton",
+      "category": "button",
+      "container": false,
+      "axis": null,
+      "summary": "Material 浮动操作按钮"
+    },
+    {
+      "tag": "video",
+      "aliases": [
+        "video"
+      ],
+      "viewClass": "JsVideoView",
+      "category": "media",
+      "container": false,
+      "axis": null,
+      "summary": "视频视图"
+    },
+    {
+      "tag": "webview",
+      "aliases": [
+        "webview",
+        "web"
+      ],
+      "viewClass": "JsWebView",
+      "category": "media",
+      "container": false,
+      "axis": null,
+      "summary": "WebView"
+    },
+    {
+      "tag": "canvas",
+      "aliases": [
+        "canvas"
+      ],
+      "viewClass": "JsCanvasView",
+      "category": "media",
+      "container": false,
+      "axis": null,
+      "summary": "可持续绘制的 Canvas 视图"
+    },
+    {
+      "tag": "console",
+      "aliases": [
+        "console"
+      ],
+      "viewClass": "JsConsoleView",
+      "category": "other",
+      "container": false,
+      "axis": null,
+      "summary": "当前脚本的控制台视图 (`global=\"true\"` 或裸属性 `global` 时显示全局控制台)"
+    },
+    {
+      "tag": "globalconsole",
+      "aliases": [
+        "globalconsole"
+      ],
+      "viewClass": "JsGlobalConsoleView",
+      "category": "other",
+      "container": false,
+      "axis": null,
+      "summary": "全局控制台视图, 等价于 `<console global>`"
+    },
+    {
+      "tag": "list",
+      "aliases": [
+        "list"
+      ],
+      "viewClass": "JsListView",
+      "category": "list",
+      "container": true,
+      "axis": "vertical",
+      "summary": "基于 RecyclerView 的列表"
+    },
+    {
+      "tag": "grid",
+      "aliases": [
+        "grid"
+      ],
+      "viewClass": "JsGridView",
+      "category": "list",
+      "container": true,
+      "axis": "vertical",
+      "summary": "基于 RecyclerView 的网格"
+    },
+    {
+      "tag": "viewpager",
+      "aliases": [
+        "viewpager"
+      ],
+      "viewClass": "JsViewPager",
+      "category": "layout",
+      "container": true,
+      "axis": "horizontal",
+      "summary": "分页视图"
+    },
+    {
+      "tag": "tabs",
+      "aliases": [
+        "tabs",
+        "tab"
+      ],
+      "viewClass": "JsTabLayout",
+      "category": "layout",
+      "container": false,
+      "axis": null,
+      "summary": "Material 标签栏"
+    },
+    {
+      "tag": "viewflipper",
+      "aliases": [
+        "viewflipper"
+      ],
+      "viewClass": "JsViewFlipper",
+      "category": "layout",
+      "container": true,
+      "axis": "stack",
+      "summary": "自动或手动切换子视图"
+    },
+    {
+      "tag": "viewswitcher",
+      "aliases": [
+        "viewswitcher"
+      ],
+      "viewClass": "JsViewSwitcher",
+      "category": "layout",
+      "container": true,
+      "axis": "stack",
+      "summary": "两个子视图之间切换"
+    }
+  ],
+  "chains": {
+    "View": [],
+    "ViewGroup": [
+      "View"
+    ],
+    "Space": [
+      "View"
+    ],
+    "TextView": [
+      "View"
+    ],
+    "Button": [
+      "TextView",
+      "View"
+    ],
+    "EditText": [
+      "TextView",
+      "View"
+    ],
+    "CheckedTextView": [
+      "TextView",
+      "View"
+    ],
+    "Chronometer": [
+      "TextView",
+      "View"
+    ],
+    "TextClock": [
+      "TextView",
+      "View"
+    ],
+    "CompoundButton": [
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "CheckBox": [
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "RadioButton": [
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "Switch": [
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "ToggleButton": [
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "ImageView": [
+      "View"
+    ],
+    "ImageButton": [
+      "ImageView",
+      "View"
+    ],
+    "QuickContactBadge": [
+      "ImageView",
+      "View"
+    ],
+    "FloatingActionButton": [
+      "ImageView",
+      "View"
+    ],
+    "ProgressBar": [
+      "View"
+    ],
+    "SeekBar": [
+      "ProgressBar",
+      "View"
+    ],
+    "RatingBar": [
+      "ProgressBar",
+      "View"
+    ],
+    "SurfaceView": [
+      "View"
+    ],
+    "VideoView": [
+      "SurfaceView",
+      "View"
+    ],
+    "CanvasView": [
+      "View"
+    ],
+    "WebView": [
+      "ViewGroup",
+      "View"
+    ],
+    "LinearLayout": [
+      "ViewGroup",
+      "View"
+    ],
+    "FrameLayout": [
+      "ViewGroup",
+      "View"
+    ],
+    "RelativeLayout": [
+      "ViewGroup",
+      "View"
+    ],
+    "ScrollView": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "HorizontalScrollView": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "DrawerLayout": [
+      "ViewGroup",
+      "View"
+    ],
+    "AppBarLayout": [
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "Toolbar": [
+      "ViewGroup",
+      "View"
+    ],
+    "ActionMenuView": [
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "CardView": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "RadioGroup": [
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "NumberPicker": [
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "DatePicker": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "TimePicker": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "CalendarView": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "SearchView": [
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "Spinner": [
+      "ViewGroup",
+      "View"
+    ],
+    "ConsoleView": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "RecyclerView": [
+      "ViewGroup",
+      "View"
+    ],
+    "ViewPager": [
+      "ViewGroup",
+      "View"
+    ],
+    "TabLayout": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "ViewAnimator": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "ViewFlipper": [
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "ViewSwitcher": [
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "TextSwitcher": [
+      "ViewSwitcher",
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "ImageSwitcher": [
+      "ViewSwitcher",
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsTextView": [
+      "TextView",
+      "View"
+    ],
+    "JsButton": [
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "JsEditText": [
+      "EditText",
+      "TextView",
+      "View"
+    ],
+    "JsCheckedTextView": [
+      "CheckedTextView",
+      "TextView",
+      "View"
+    ],
+    "JsChronometer": [
+      "Chronometer",
+      "TextView",
+      "View"
+    ],
+    "JsTextClock": [
+      "TextClock",
+      "TextView",
+      "View"
+    ],
+    "JsTextSwitcher": [
+      "TextSwitcher",
+      "ViewSwitcher",
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsCheckBox": [
+      "CheckBox",
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "JsRadioButton": [
+      "RadioButton",
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "JsRadioGroup": [
+      "RadioGroup",
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsSwitch": [
+      "Switch",
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "JsToggleButton": [
+      "ToggleButton",
+      "CompoundButton",
+      "Button",
+      "TextView",
+      "View"
+    ],
+    "JsSpinner": [
+      "Spinner",
+      "ViewGroup",
+      "View"
+    ],
+    "JsNumberPicker": [
+      "NumberPicker",
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsDatePicker": [
+      "DatePicker",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsTimePicker": [
+      "TimePicker",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsCalendarView": [
+      "CalendarView",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsSearchView": [
+      "SearchView",
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsProgressBar": [
+      "ProgressBar",
+      "View"
+    ],
+    "JsSeekBar": [
+      "SeekBar",
+      "ProgressBar",
+      "View"
+    ],
+    "JsRatingBar": [
+      "RatingBar",
+      "ProgressBar",
+      "View"
+    ],
+    "JsImageView": [
+      "ImageView",
+      "View"
+    ],
+    "JsImageButton": [
+      "ImageButton",
+      "ImageView",
+      "View"
+    ],
+    "JsQuickContactBadge": [
+      "QuickContactBadge",
+      "ImageView",
+      "View"
+    ],
+    "JsFloatingActionButton": [
+      "FloatingActionButton",
+      "ImageView",
+      "View"
+    ],
+    "JsVideoView": [
+      "VideoView",
+      "SurfaceView",
+      "View"
+    ],
+    "JsWebView": [
+      "WebView",
+      "ViewGroup",
+      "View"
+    ],
+    "JsCanvasView": [
+      "CanvasView",
+      "View"
+    ],
+    "JsConsoleView": [
+      "ConsoleView",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsGlobalConsoleView": [
+      "ConsoleView",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsListView": [
+      "RecyclerView",
+      "ViewGroup",
+      "View"
+    ],
+    "JsGridView": [
+      "RecyclerView",
+      "ViewGroup",
+      "View"
+    ],
+    "JsLinearLayout": [
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsFrameLayout": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsRelativeLayout": [
+      "RelativeLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsScrollView": [
+      "ScrollView",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsDrawerLayout": [
+      "DrawerLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsAppBarLayout": [
+      "AppBarLayout",
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsToolbar": [
+      "Toolbar",
+      "ViewGroup",
+      "View"
+    ],
+    "JsActionMenuView": [
+      "ActionMenuView",
+      "LinearLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsCardView": [
+      "CardView",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsViewPager": [
+      "ViewPager",
+      "ViewGroup",
+      "View"
+    ],
+    "JsTabLayout": [
+      "TabLayout",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsViewFlipper": [
+      "ViewFlipper",
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "JsViewSwitcher": [
+      "ViewSwitcher",
+      "ViewAnimator",
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ],
+    "ComposeContainerView": [
+      "FrameLayout",
+      "ViewGroup",
+      "View"
+    ]
+  },
+  "classes": {
+    "AppBarLayout": {
+      "attrs": [
+        {
+          "name": "expanded",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "AppBarLayout"
+        },
+        {
+          "name": "isLifted",
+          "aliases": [
+            "lifted"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "AppBarLayout"
+        },
+        {
+          "name": "statusBarForegroundColor",
+          "aliases": [
+            "statusBarFgColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "AppBarLayout"
+        },
+        {
+          "name": "elevation",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸. 写入 Material AppBar 的 target elevation",
+          "summary": "",
+          "group": "AppBarLayout"
+        }
+      ]
+    },
+    "CalendarView": {
+      "attrs": [
+        {
+          "name": "date",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "Unix epoch ms",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "firstDayOfWeek",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "`MON`, `MONDAY` 等英文星期名, 或 Java `Calendar` 星期整数",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "minDate",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "yyyy/MM/dd",
+            "MM/dd/yyyy"
+          ],
+          "typeText": "`yyyy/MM/dd` 或 `MM/dd/yyyy`",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "maxDate",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "yyyy/MM/dd",
+            "MM/dd/yyyy"
+          ],
+          "typeText": "`yyyy/MM/dd` 或 `MM/dd/yyyy`",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        }
+      ]
+    },
+    "CardView": {
+      "attrs": [
+        {
+          "name": "cardBackgroundColor",
+          "aliases": [
+            "cardBgColor",
+            "cardBg"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "radius",
+          "aliases": [
+            "cardCornerRadius",
+            "cornerRadius"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "cardElevation",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "maxCardElevation",
+          "aliases": [
+            "cardMaxElevation"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "preventCornerOverlap",
+          "aliases": [
+            "cardPreventCornerOverlap"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "useCompatPadding",
+          "aliases": [
+            "cardUseCompatPadding"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "contentPadding",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸列表",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "contentPaddingLeft",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "contentPaddingTop",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "contentPaddingRight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        },
+        {
+          "name": "contentPaddingBottom",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CardView"
+        }
+      ]
+    },
+    "CheckedTextView": {
+      "attrs": [
+        {
+          "name": "checkMarkDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "checkMarkTintList",
+          "aliases": [
+            "checkMarkTint"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": "CompoundButton"
+        }
+      ]
+    },
+    "Chronometer": {
+      "attrs": [
+        {
+          "name": "base",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "SystemClock.elapsedRealtime()"
+          ],
+          "typeText": "`SystemClock.elapsedRealtime()` 时间基准值, 单位为 ms",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        },
+        {
+          "name": "isCountDown",
+          "aliases": [
+            "countDown"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        },
+        {
+          "name": "format",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        },
+        {
+          "name": "autoStart",
+          "aliases": [
+            "isAutoStart"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean. 只有真值会调用 `start()`",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        }
+      ]
+    },
+    "CompoundButton": {
+      "attrs": [
+        {
+          "name": "checked",
+          "aliases": [
+            "check",
+            "isChecked"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "buttonDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "buttonTint",
+          "aliases": [
+            "tint"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "1 个颜色, 或依次表示未选中和选中的 2 个颜色",
+          "summary": "",
+          "group": "CompoundButton"
+        }
+      ]
+    },
+    "ConsoleView": {
+      "attrs": [
+        {
+          "name": "global",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean. `true` 显示全局控制台, `false` 显示当前脚本的控制台; 仅 `console` 支持, 可写作裸属性 `<console global>`",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "title",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串. 设置后显示标题栏",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleBarVisible",
+          "aliases": [
+            "showTitleBar"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleTextSize",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数, sp",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleTextColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleBackgroundColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleBackgroundTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleBackgroundAlpha",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "0 ~ 1 的浮点数",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "titleIconsTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "textSize",
+          "aliases": [
+            "contentTextSize"
+          ],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数, sp",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "textColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色. 同时应用于标题及全部日志等级",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "textColors",
+          "aliases": [
+            "contentTextColors",
+            "contentTextColor"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "单个颜色, 或最多 6 个颜色依次为 verbose, debug, info, warn, error, assert",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "verboseTextColor",
+          "aliases": [
+            "verboseColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "debugTextColor",
+          "aliases": [
+            "debugColor",
+            "logTextColor",
+            "logColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "infoTextColor",
+          "aliases": [
+            "infoColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "warnTextColor",
+          "aliases": [
+            "warnColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "errorTextColor",
+          "aliases": [
+            "errorColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "assertTextColor",
+          "aliases": [
+            "assertColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "contentBackgroundColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "contentBackgroundTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "contentBackgroundAlpha",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "0 ~ 1 的浮点数",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "backgroundColor",
+          "aliases": [
+            "bgColor",
+            "backgroundTint",
+            "bgTint"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色. 同时应用于标题栏及日志区域",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "backgroundAlpha",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "0 ~ 1 的浮点数. 同时应用于标题栏及日志区域",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "timeVisible",
+          "aliases": [
+            "showTime",
+            "timestampVisible"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean, 默认 `false`",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "timeFormat",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "SimpleDateFormat",
+            "HH:mm:ss.SSS"
+          ],
+          "typeText": "`SimpleDateFormat` 模式, 默认 `HH:mm:ss.SSS`",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "colorful",
+          "aliases": [
+            "logColoring"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean, 默认 `true`",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "inputVisible",
+          "aliases": [
+            "showInput",
+            "inputBarVisible"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean, 默认 `false`",
+          "summary": "",
+          "group": "ConsoleView"
+        },
+        {
+          "name": "isPinchToZoomEnabled",
+          "aliases": [
+            "pinchToZoomEnabled",
+            "enablePinchToZoom"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ConsoleView"
+        }
+      ]
+    },
+    "DatePicker": {
+      "attrs": [
+        {
+          "name": "minDate",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "maxDate",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "firstDayOfWeek",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "spinnersShown",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        },
+        {
+          "name": "calendarViewShown",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Calendar 与 DatePicker"
+        }
+      ]
+    },
+    "EditText": {
+      "attrs": [
+        {
+          "name": "selectAll",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "文本非空且为真时请求焦点并全选",
+          "group": ""
+        },
+        {
+          "name": "extendsSelection",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "文本非空时扩展选择到指定索引",
+          "group": ""
+        },
+        {
+          "name": "setSelection",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数或 `start,end`",
+          "summary": "文本非空时设置光标或选择范围",
+          "group": ""
+        }
+      ]
+    },
+    "FloatingActionButton": {
+      "attrs": [
+        {
+          "name": "customSize",
+          "aliases": [
+            "fabCustomSize"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "自定义直径",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "size",
+          "aliases": [
+            "fabSize"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "当前实现按尺寸转为整数",
+          "summary": "直接写入 Material FAB size 字段",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "elevation",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "compat elevation",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "useCompatPadding",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "兼容阴影内边距",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "rippleColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "波纹颜色",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "backgroundTint",
+          "aliases": [
+            "bgTint"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "背景着色",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "ensureMinTouchTargetSize",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "最小触摸区域",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "maxImageSize",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数 px",
+          "summary": "最大图标尺寸",
+          "group": "FloatingActionButton"
+        },
+        {
+          "name": "excludeFromNavigationBar",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "动作属性",
+          "summary": "只要应用即执行排除逻辑, 不检查属性值",
+          "group": "FloatingActionButton"
+        }
+      ]
+    },
+    "HorizontalScrollView": {
+      "attrs": [
+        {
+          "name": "isFillViewport",
+          "aliases": [
+            "fillViewport"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "smoothScrollingEnabled",
+          "aliases": [
+            "enableSmoothScrolling",
+            "isSmoothScrollingEnabled",
+            "isSmoothScrolling"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "leftEdgeEffectColor",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "rightEdgeEffectColor",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "setEdgeEffectColor",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "ScrollView"
+        }
+      ]
+    },
+    "ImageSwitcher": {
+      "attrs": [
+        {
+          "name": "imageDrawable",
+          "aliases": [
+            "drawable"
+          ],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "imageResource",
+          "aliases": [
+            "resource"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数资源 ID",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "imageURI",
+          "aliases": [
+            "uri"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "URI 字符串",
+          "summary": "",
+          "group": "ViewAnimator"
+        }
+      ]
+    },
+    "ImageView": {
+      "attrs": [
+        {
+          "name": "adjustViewBounds",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "baseline",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "baselineAlignBottom",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "cropToPadding",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "maxHeight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "maxWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "path",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "本地图片路径",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "src",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable, 本地路径, URL 或 Base64 data URI",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "url",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "URL",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "scaleType",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "center",
+            "centerCrop",
+            "centerInside",
+            "fitCenter",
+            "fitEnd",
+            "fitStart",
+            "fitXY",
+            "matrix"
+          ],
+          "typeText": "`center`, `centerCrop`, `centerInside`, `fitCenter`, `fitEnd`, `fitStart`, `fitXY`, `matrix`",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "tint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "tintMode",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "add",
+            "multiply",
+            "screen",
+            "src_atop",
+            "src_in",
+            "src_over"
+          ],
+          "typeText": "`add`, `multiply`, `screen`, `src_atop`, `src_in`, `src_over`",
+          "summary": "",
+          "group": ""
+        }
+      ]
+    },
+    "JsGridView": {
+      "attrs": [
+        {
+          "name": "spanCount",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "isUsingSpansToEstimateScrollbarDimensions",
+          "aliases": [
+            "usingSpansToEstimateScrollbarDimensions"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "orientation",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "vertical",
+            "horizontal"
+          ],
+          "typeText": "`vertical` 或 `horizontal`",
+          "summary": "",
+          "group": ""
+        }
+      ]
+    },
+    "JsImageView": {
+      "attrs": [
+        {
+          "name": "cornerRadius",
+          "aliases": [
+            "radius"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "cornerRadiusTopLeft",
+          "aliases": [
+            "radiusTopLeft"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "cornerRadiusTopRight",
+          "aliases": [
+            "radiusTopRight"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "cornerRadiusBottomLeft",
+          "aliases": [
+            "radiusBottomLeft"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "cornerRadiusBottomRight",
+          "aliases": [
+            "radiusBottomRight"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "isOval",
+          "aliases": [
+            "oval"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "tileX",
+          "aliases": [
+            "tileModeX"
+          ],
+          "type": "enum",
+          "values": [
+            "clamp",
+            "mirror",
+            "repeat"
+          ],
+          "typeText": "`clamp`, `mirror`, `repeat`",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "tileY",
+          "aliases": [
+            "tileModeY"
+          ],
+          "type": "enum",
+          "values": [
+            "clamp",
+            "mirror",
+            "repeat"
+          ],
+          "typeText": "`clamp`, `mirror`, `repeat`",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "borderWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "borderColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "圆角图片属性"
+        },
+        {
+          "name": "circle",
+          "aliases": [
+            "isCircle"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "动作属性. 当前实现只要出现就设为圆形, 不检查值",
+          "summary": "",
+          "group": "圆角图片属性"
+        }
+      ]
+    },
+    "JsListView": {
+      "attrs": [
+        {
+          "name": "orientation",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "vertical",
+            "horizontal"
+          ],
+          "typeText": "`vertical` 或 `horizontal`",
+          "summary": "",
+          "group": ""
+        }
+      ]
+    },
+    "LinearLayout": {
+      "attrs": [
+        {
+          "name": "isBaselineAligned",
+          "aliases": [
+            "baselineAligned"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "baselineAlignedChildIndex",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "divider",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "gravity",
+          "aliases": [],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "isMeasureWithLargestChildEnabled",
+          "aliases": [
+            "measureWithLargestChildEnabled",
+            "measureWithLargestChild",
+            "enableMeasureWithLargestChild"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "orientation",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "vertical",
+            "horizontal"
+          ],
+          "typeText": "`vertical`, `horizontal`",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "showDividers",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "beginning",
+            "middle",
+            "end",
+            "none"
+          ],
+          "typeText": "`beginning`, `middle`, `end`, `none`, 可组合",
+          "summary": "",
+          "group": "LinearLayout"
+        },
+        {
+          "name": "weightSum",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "LinearLayout"
+        }
+      ]
+    },
+    "NumberPicker": {
+      "attrs": [
+        {
+          "name": "maxValue",
+          "aliases": [
+            "max",
+            "minValue",
+            "min"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "onLongPressUpdateInterval",
+          "aliases": [
+            "longPressUpdateInterval"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数, ms",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "wrapSelectorWheel",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "value",
+          "aliases": [
+            "selectedIndex",
+            "currentIndex"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "displayedValues",
+          "aliases": [
+            "values"
+          ],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串列表",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "distinctDisplayedValues",
+          "aliases": [
+            "distinctValues"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "去重后的字符串列表",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "textColor",
+          "aliases": [
+            "color"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色. Android API 级别低于 `29` 时不执行操作",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "textSize",
+          "aliases": [
+            "size"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸. Android API 级别低于 `29` 时不执行操作",
+          "summary": "",
+          "group": "NumberPicker"
+        },
+        {
+          "name": "selectionDividerHeight",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数 px. Android API 级别低于 `29` 时不执行操作",
+          "summary": "",
+          "group": "NumberPicker"
+        }
+      ]
+    },
+    "ProgressBar": {
+      "attrs": [
+        {
+          "name": "isIndeterminate",
+          "aliases": [
+            "indeterminate"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "indeterminateDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "indeterminateTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "progressBackgroundTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "progressTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "secondaryProgressTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "indeterminateTintMode",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "着色模式",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "progressBackgroundTintMode",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "着色模式",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "progressTintMode",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "着色模式",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "secondaryProgressTintMode",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "着色模式",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "min",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数. Android API 级别低于 `26` 时抛出异常",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "max",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "minHeight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "minWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "progress",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "secondaryProgress",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "progressDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "tint",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "1 至 3 个颜色",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "keyProgressIncrement",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "splitTrack",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "thumb",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "tickMark",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "thumbOffset",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数 px",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "thumbTintList",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "tickMarkTintList",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": ""
+        }
+      ]
+    },
+    "QuickContactBadge": {
+      "attrs": [
+        {
+          "name": "overlay",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "QuickContactBadge"
+        },
+        {
+          "name": "phone",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "电话号码",
+          "summary": "",
+          "group": "QuickContactBadge"
+        },
+        {
+          "name": "email",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "邮箱地址",
+          "summary": "",
+          "group": "QuickContactBadge"
+        },
+        {
+          "name": "prioritizedMimeType",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "联系人 MIME 类型枚举",
+          "summary": "",
+          "group": "QuickContactBadge"
+        }
+      ]
+    },
+    "RatingBar": {
+      "attrs": [
+        {
+          "name": "isIndicator",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "numStars",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "rating",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "stepSize",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": ""
+        }
+      ]
+    },
+    "RelativeLayout": {
+      "attrs": [
+        {
+          "name": "gravity",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "RelativeLayout"
+        },
+        {
+          "name": "horizontalGravity",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "RelativeLayout"
+        },
+        {
+          "name": "verticalGravity",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "RelativeLayout"
+        }
+      ]
+    },
+    "ScrollView": {
+      "attrs": [
+        {
+          "name": "isFillViewport",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "isSmoothScrollingEnabled",
+          "aliases": [
+            "isSmoothScrolling",
+            "smoothScrollingEnabled",
+            "enableSmoothScrolling"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "topEdgeEffectColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色. Android API 级别低于 `29` 时不执行操作",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "bottomEdgeEffectColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色. Android API 级别低于 `29` 时不执行操作",
+          "summary": "",
+          "group": "ScrollView"
+        },
+        {
+          "name": "edgeEffectColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色. Android API 级别低于 `29` 时不执行操作",
+          "summary": "",
+          "group": "ScrollView"
+        }
+      ]
+    },
+    "SearchView": {
+      "attrs": [
+        {
+          "name": "imeOptions",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "与 TextView 相同",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "inputType",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "与 TextView 相同",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "maxWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "queryHint",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "isIconified",
+          "aliases": [
+            "iconified"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "isIconifiedByDefault",
+          "aliases": [
+            "iconifiedByDefault"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "isQueryRefinementEnabled",
+          "aliases": [
+            "queryRefinementEnabled",
+            "isQueryRefinement",
+            "enableQueryRefinement"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SearchView"
+        },
+        {
+          "name": "isSubmitButtonEnabled",
+          "aliases": [
+            "submitButtonEnabled",
+            "isSubmitButton",
+            "enableSubmitButton"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SearchView"
+        }
+      ]
+    },
+    "Spinner": {
+      "attrs": [
+        {
+          "name": "dropDownHorizontalOffset",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "dropDownVerticalOffset",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "dropDownWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "gravity",
+          "aliases": [],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "popupBackgroundDrawable",
+          "aliases": [
+            "popupBgDrawable",
+            "popupBackground",
+            "popupBg"
+          ],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "prompt",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "entries",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "使用 `",
+          "summary": "` 分隔的项目文本",
+          "group": "Spinner"
+        },
+        {
+          "name": "entryTextColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "textColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "entryTextSize",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "textSize",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "entryTextStyle",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "bold",
+            "italic",
+            "normal"
+          ],
+          "typeText": "`bold`, `italic`, `normal`, 可组合",
+          "summary": "",
+          "group": "Spinner"
+        },
+        {
+          "name": "textStyle",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "bold",
+            "italic",
+            "normal"
+          ],
+          "typeText": "`bold`, `italic`, `normal`, 可组合",
+          "summary": "",
+          "group": "Spinner"
+        }
+      ]
+    },
+    "SurfaceView": {
+      "attrs": [
+        {
+          "name": "clipBounds",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "`left,top,right,bottom` 四个整数 px",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        },
+        {
+          "name": "secure",
+          "aliases": [
+            "isSecure"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        },
+        {
+          "name": "zOrderOnTop",
+          "aliases": [
+            "isZOrderOnTop"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        },
+        {
+          "name": "zOrderMediaOverlay",
+          "aliases": [
+            "isZOrderMediaOverlay"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        },
+        {
+          "name": "visibility",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "visible",
+            "invisible",
+            "gone"
+          ],
+          "typeText": "`visible`, `invisible`, `gone`",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        }
+      ]
+    },
+    "Switch": {
+      "attrs": [
+        {
+          "name": "showText",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "textOff",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "textOn",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "thumbDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "trackDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "thumbTextPadding",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "switchMinWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "switchPadding",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "thumbTint",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "1 个颜色, 或未选中和选中的 2 个颜色",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "trackTint",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "1 个颜色, 或未选中和选中的 2 个颜色",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "splitTrack",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "CompoundButton"
+        },
+        {
+          "name": "switchTypeface",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "字体系列名称",
+          "summary": "",
+          "group": "CompoundButton"
+        }
+      ]
+    },
+    "TabLayout": {
+      "attrs": [
+        {
+          "name": "tabGravity",
+          "aliases": [],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "selectedTabIndicatorColor",
+          "aliases": [
+            "tabIndicatorColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "tabMode",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "fixed",
+            "scrollable"
+          ],
+          "typeText": "`fixed`, `scrollable`",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "tabRippleColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "tabIconTint",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色状态列表",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "selectedTabIndicatorGravity",
+          "aliases": [
+            "tabIndicatorGravity"
+          ],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "selectedTabIndicator",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "tabSelectedTextColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "tabTextColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "isTabIndicatorFullWidth",
+          "aliases": [
+            "tabIndicatorFullWidth"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "isInlineLabel",
+          "aliases": [
+            "inlineLabel"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "tabIndicatorHeight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        }
+      ]
+    },
+    "TextClock": {
+      "attrs": [
+        {
+          "name": "format12Hour",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        },
+        {
+          "name": "format24Hour",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        },
+        {
+          "name": "timeZone",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "",
+          "summary": "",
+          "group": "Chronometer 与 TextClock"
+        }
+      ]
+    },
+    "TextSwitcher": {
+      "attrs": [
+        {
+          "name": "text",
+          "aliases": [
+            "nextText"
+          ],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串. 使用切换动画显示下一文本",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "currentText",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串. 不使用切换动画设置当前文本",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "anim",
+          "aliases": [
+            "animation"
+          ],
+          "type": "other",
+          "values": [
+            "from left",
+            "from right",
+            "from top",
+            "from bottom",
+            "micro",
+            "fade",
+            "fast fade",
+            "shrink"
+          ],
+          "typeText": "`from left`, `from right`, `from top`, `from bottom`, `micro`, `fade`, `fast fade`, `shrink` 等内置模式",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "animIn",
+          "aliases": [
+            "inAnim",
+            "inAnimation"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "动画资源, 可用名称见\"动画资源\"一节",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "animOut",
+          "aliases": [
+            "outAnim",
+            "outAnimation"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "动画资源, 可用名称见\"动画资源\"一节",
+          "summary": "",
+          "group": "ViewAnimator"
+        }
+      ]
+    },
+    "TextView": {
+      "attrs": [
+        {
+          "name": "text",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "hint",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "textColor",
+          "aliases": [
+            "color"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "hintTextColor",
+          "aliases": [
+            "textColorHint"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "linkTextColor",
+          "aliases": [
+            "textColorLink"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "highlightTextColor",
+          "aliases": [
+            "textColorHighlight"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "textSize",
+          "aliases": [
+            "size"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "textStyle",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "bold",
+            "italic",
+            "normal"
+          ],
+          "typeText": "`bold`, `italic`, `normal`, 可组合",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "typeface",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "字体系列名称",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "fontFamily",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "typeface"
+          ],
+          "typeText": "字体系列名称. 设置后优先于 `typeface`",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "fontFeatureSettings",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "OpenType 特性字符串",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "textAppearance",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "样式资源",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "textScaleX",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "当前实现按尺寸解析",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "letterSpacing",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "gravity",
+          "aliases": [],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "includeFontPadding",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "isElegantTextHeight",
+          "aliases": [
+            "elegantTextHeight"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "isAllCaps",
+          "aliases": [
+            "allCaps",
+            "textAllCaps"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "内容与排版"
+        },
+        {
+          "name": "lines",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "minLines",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "maxLines",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "ems",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "minEms",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "maxEms",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "minWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "maxWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "minHeight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "maxHeight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "maxLength",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "lineSpacingExtra",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "lineSpacingMultiplier",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "当前实现按尺寸解析后传给 multiplier",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "isSingleLine",
+          "aliases": [
+            "singleLine"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "scrollHorizontally",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "ellipsize",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "end",
+            "marquee",
+            "none",
+            "start",
+            "middle"
+          ],
+          "typeText": "`end`, `marquee`, `none`, `start`, `middle`",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "marqueeRepeatLimit",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数或 `marquee_forever`",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "hyphenationFrequency",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "full",
+            "none",
+            "normal"
+          ],
+          "typeText": "`full`, `none`, `normal`",
+          "summary": "",
+          "group": "行数与尺寸"
+        },
+        {
+          "name": "inputType",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "见下方输入类型",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "imeOptions",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "见下方 IME 值",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "imeActionId",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "imeActionLabel",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "privateImeOptions",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "autoText",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "capitalize",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "characters",
+            "none",
+            "sentences",
+            "words"
+          ],
+          "typeText": "`characters`, `none`, `sentences`, `words`",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "digit",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "true",
+            "false"
+          ],
+          "typeText": "`true`, `false` 或允许字符组成的字符串",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "numeric",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "decimal",
+            "number",
+            "signed"
+          ],
+          "typeText": "`decimal`, `number`, `signed`, 可组合",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "password",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean. 只有字符串 `true` 会添加密码 variation",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "phoneNumber",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean. 当前实现添加 `TYPE_TEXT_VARIATION_PHONETIC`, 不等效于 `inputType=\"phone\"`",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "selectAllOnFocus",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "textIsSelectable",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "isCursorVisible",
+          "aliases": [
+            "cursorVisible"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "freezesText",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "输入与选择"
+        },
+        {
+          "name": "autoLink",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "all",
+            "email",
+            "map",
+            "none",
+            "phone",
+            "web"
+          ],
+          "typeText": "`all`, `email`, `map`, `none`, `phone`, `web`",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "linksClickable",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "drawableLeft",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "drawableTop",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "drawableRight",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "drawableBottom",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "drawables",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "1, 2, 3 或 4 个 Drawable. 4 值顺序为 left, top, right, bottom",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "drawablePadding",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "shadowColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "shadowDx",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "shadowDy",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        },
+        {
+          "name": "shadowRadius",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "链接, Drawable 与阴影"
+        }
+      ]
+    },
+    "TimePicker": {
+      "attrs": [
+        {
+          "name": "hour",
+          "aliases": [
+            "hh"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "TimePicker"
+        },
+        {
+          "name": "minute",
+          "aliases": [
+            "mm"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "TimePicker"
+        },
+        {
+          "name": "is24HourView",
+          "aliases": [
+            "is24Hour",
+            "is24H",
+            "is24"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "TimePicker"
+        }
+      ]
+    },
+    "Toolbar": {
+      "attrs": [
+        {
+          "name": "collapseContentDescription",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "collapseIcon",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "logo",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "logoDescription",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "navigationContentDescription",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "navigationIcon",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "overflowIcon",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "popupTheme",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "dark",
+            "light"
+          ],
+          "typeText": "`dark`, `light`",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "subtitle",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "title",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "subtitleTextColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "titleTextColor",
+          "aliases": [],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "titleMargin",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "titleMarginBottom",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "titleMarginTop",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "titleMarginStart",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Toolbar"
+        },
+        {
+          "name": "titleMarginEnd",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "Toolbar"
+        }
+      ]
+    },
+    "VideoView": {
+      "attrs": [
+        {
+          "name": "videoPath",
+          "aliases": [
+            "path",
+            "src"
+          ],
+          "type": "other",
+          "values": [
+            "@raw/name"
+          ],
+          "typeText": "本地路径或 `@raw/name`",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        },
+        {
+          "name": "controller",
+          "aliases": [
+            "mediaController",
+            "isControllerEnabled",
+            "controllerEnabled",
+            "enableController",
+            "isMediaControllerEnabled",
+            "mediaControllerEnabled",
+            "enableMediaController"
+          ],
+          "type": "other",
+          "values": [
+            "true",
+            "false",
+            "null"
+          ],
+          "typeText": "`true` 重置 MediaController, `false` 或 `null` 清除",
+          "summary": "",
+          "group": "SurfaceView 与 VideoView"
+        }
+      ]
+    },
+    "View": {
+      "attrs": [
+        {
+          "name": "id",
+          "aliases": [],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "视图 ID",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "width",
+          "aliases": [
+            "w",
+            "layout_width",
+            "layoutWidth"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸或布局尺寸",
+          "summary": "视图宽度",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "height",
+          "aliases": [
+            "h",
+            "layout_height",
+            "layoutHeight"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸或布局尺寸",
+          "summary": "视图高度",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "minWidth",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "最小宽度",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "minHeight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "最小高度",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "tag",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "Android View tag",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "contentDescription",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "无障碍内容描述",
+          "group": "标识与尺寸"
+        },
+        {
+          "name": "layout_gravity",
+          "aliases": [
+            "layoutGravity"
+          ],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "视图在父布局中的位置. 支持 LinearLayout, FrameLayout 及具有 `gravity` 布局参数字段的父布局",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_weight",
+          "aliases": [
+            "layoutWeight"
+          ],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "LinearLayout 权重",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_margin",
+          "aliases": [
+            "layoutMargin"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸列表",
+          "summary": "外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginLeft",
+          "aliases": [
+            "layoutMarginLeft"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "左外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginRight",
+          "aliases": [
+            "layoutMarginRight"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "右外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginTop",
+          "aliases": [
+            "layoutMarginTop"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "上外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginBottom",
+          "aliases": [
+            "layoutMarginBottom"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "下外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginStart",
+          "aliases": [
+            "layoutMarginStart"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "起始外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginEnd",
+          "aliases": [
+            "layoutMarginEnd"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "结束外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginVertical",
+          "aliases": [
+            "layoutMarginVertical"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "上下外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_marginHorizontal",
+          "aliases": [
+            "layoutMarginHorizontal"
+          ],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "起始和结束外边距",
+          "group": "父布局参数"
+        },
+        {
+          "name": "layout_alignParentBottom",
+          "aliases": [
+            "layoutAlignParentBottom"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignParentTop",
+          "aliases": [
+            "layoutAlignParentTop"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignParentLeft",
+          "aliases": [
+            "layoutAlignParentLeft"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignParentStart",
+          "aliases": [
+            "layoutAlignParentStart"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignParentRight",
+          "aliases": [
+            "layoutAlignParentRight"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignParentEnd",
+          "aliases": [
+            "layoutAlignParentEnd"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_centerHorizontal",
+          "aliases": [
+            "layoutCenterHorizontal"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_centerVertical",
+          "aliases": [
+            "layoutCenterVertical"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_centerInParent",
+          "aliases": [
+            "layoutCenterInParent"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_below",
+          "aliases": [
+            "layoutBelow"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_above",
+          "aliases": [
+            "layoutAbove"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_toLeftOf",
+          "aliases": [
+            "layoutToLeftOf"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_toRightOf",
+          "aliases": [
+            "layoutToRightOf"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignBottom",
+          "aliases": [
+            "layoutAlignBottom"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignTop",
+          "aliases": [
+            "layoutAlignTop"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignLeft",
+          "aliases": [
+            "layoutAlignLeft"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignStart",
+          "aliases": [
+            "layoutAlignStart"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignRight",
+          "aliases": [
+            "layoutAlignRight"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "layout_alignEnd",
+          "aliases": [
+            "layoutAlignEnd"
+          ],
+          "type": "id",
+          "values": [],
+          "typeText": "ID",
+          "summary": "",
+          "group": "RelativeLayout 子视图规则"
+        },
+        {
+          "name": "background",
+          "aliases": [
+            "bg"
+          ],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "背景, 支持网络图片",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "backgroundColor",
+          "aliases": [
+            "bgColor"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "纯色背景",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "backgroundTint",
+          "aliases": [
+            "bgTint"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "背景着色",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "backgroundTintMode",
+          "aliases": [
+            "bgTintMode"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "枚举",
+          "summary": "背景着色模式",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "foreground",
+          "aliases": [
+            "fg"
+          ],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "前景",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "foregroundGravity",
+          "aliases": [
+            "fgGravity"
+          ],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity",
+          "summary": "前景位置",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "foregroundTint",
+          "aliases": [
+            "fgTint"
+          ],
+          "type": "color",
+          "values": [],
+          "typeText": "颜色",
+          "summary": "前景着色",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "foregroundTintMode",
+          "aliases": [
+            "fgTintMode"
+          ],
+          "type": "other",
+          "values": [],
+          "typeText": "枚举",
+          "summary": "前景着色模式",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "padding",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸列表",
+          "summary": "四边内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "paddingLeft",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "指定方向内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "paddingRight",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "指定方向内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "paddingTop",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "指定方向内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "paddingBottom",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "指定方向内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "paddingStart",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "起始或结束内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "paddingEnd",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "起始或结束内边距",
+          "group": "背景, 前景与内边距"
+        },
+        {
+          "name": "alpha",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isClickable",
+          "aliases": [
+            "clickable"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isContextClickable",
+          "aliases": [
+            "contextClickable"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isLongClickable",
+          "aliases": [
+            "longClickable"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isFocusable",
+          "aliases": [
+            "focusable"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isFocusableInTouchMode",
+          "aliases": [
+            "focusableInTouchMode"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isDuplicateParentStateEnabled",
+          "aliases": [
+            "duplicateParentStateEnabled",
+            "duplicateParentState",
+            "enableDuplicateParentState"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "filterTouchesWhenObscured",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "fitsSystemWindows",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "forceHasOverlappingRendering",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isHapticFeedbackEnabled",
+          "aliases": [
+            "hapticFeedbackEnabled",
+            "enableHapticFeedback"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isScrollContainer",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "keepScreenOn",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isSaveEnabled",
+          "aliases": [
+            "saveEnabled",
+            "enableSave"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "isSoundEffectsEnabled",
+          "aliases": [
+            "soundEffectsEnabled",
+            "enableSoundEffects"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "visibility",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "visible",
+            "invisible",
+            "gone"
+          ],
+          "typeText": "`visible`, `invisible`, `gone`",
+          "summary": "",
+          "group": "状态与交互"
+        },
+        {
+          "name": "elevation",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "rotation",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "rotationX",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "rotationY",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "scaleX",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "scaleY",
+          "aliases": [],
+          "type": "float",
+          "values": [],
+          "typeText": "浮点数",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "transformPivotX",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "transformPivotY",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "translationX",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "translationY",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "translationZ",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "transitionName",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "drawingCacheQuality",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "auto",
+            "high",
+            "low"
+          ],
+          "typeText": "`auto`, `high`, `low`",
+          "summary": "",
+          "group": "变换与绘制"
+        },
+        {
+          "name": "isScrollbarFadingEnabled",
+          "aliases": [
+            "scrollbarFadingEnabled",
+            "fadeScrollbars",
+            "enableFadeScrollbars"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "fadingEdgeLength",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "requiresFadingEdge",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "horizontal",
+            "vertical"
+          ],
+          "typeText": "`horizontal`, `vertical`, 可用 `",
+          "summary": "` 组合",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollX",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollY",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollIndicators",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "bottom",
+            "end",
+            "left",
+            "none",
+            "right",
+            "start",
+            "top"
+          ],
+          "typeText": "`bottom`, `end`, `left`, `none`, `right`, `start`, `top`",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollbarDefaultDelayBeforeFade",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数, ms",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollbarFadeDuration",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数, ms",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollbarSize",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollbarStyle",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "insideInset",
+            "insideOverlay",
+            "outsideInset",
+            "outsideOverlay"
+          ],
+          "typeText": "`insideInset`, `insideOverlay`, `outsideInset`, `outsideOverlay`",
+          "summary": "",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "scrollbars",
+          "aliases": [],
+          "type": "other",
+          "values": [
+            "horizontal",
+            "vertical"
+          ],
+          "typeText": "`horizontal`, `vertical`, 可用 `",
+          "summary": "` 组合",
+          "group": "滚动与边缘"
+        },
+        {
+          "name": "gravity",
+          "aliases": [],
+          "type": "gravity",
+          "values": [],
+          "typeText": "Gravity. 仅当具体视图类提供 `setGravity(int)` 时生效",
+          "summary": "",
+          "group": "文本方向与无障碍"
+        },
+        {
+          "name": "importantForAccessibility",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "auto",
+            "no",
+            "noHideDescendants",
+            "yes"
+          ],
+          "typeText": "`auto`, `no`, `noHideDescendants`, `yes`",
+          "summary": "",
+          "group": "文本方向与无障碍"
+        },
+        {
+          "name": "layoutDirection",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "inherit",
+            "locale",
+            "ltr",
+            "rtl"
+          ],
+          "typeText": "`inherit`, `locale`, `ltr`, `rtl`",
+          "summary": "",
+          "group": "文本方向与无障碍"
+        },
+        {
+          "name": "textAlignment",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "center",
+            "gravity",
+            "inherit",
+            "textEnd",
+            "textStart",
+            "viewEnd",
+            "viewStart"
+          ],
+          "typeText": "`center`, `gravity`, `inherit`, `textEnd`, `textStart`, `viewEnd`, `viewStart`",
+          "summary": "",
+          "group": "文本方向与无障碍"
+        },
+        {
+          "name": "textDirection",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "anyRtl",
+            "firstStrong",
+            "firstStrongLtr",
+            "firstStrongRtl",
+            "inherit",
+            "locale",
+            "ltr",
+            "rtl"
+          ],
+          "typeText": "`anyRtl`, `firstStrong`, `firstStrongLtr`, `firstStrongRtl`, `inherit`, `locale`, `ltr`, `rtl`",
+          "summary": "",
+          "group": "文本方向与无障碍"
+        }
+      ]
+    },
+    "ViewAnimator": {
+      "attrs": [
+        {
+          "name": "animateFirstView",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "displayedChild",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数索引",
+          "summary": "",
+          "group": "ViewAnimator"
+        }
+      ]
+    },
+    "ViewFlipper": {
+      "attrs": [
+        {
+          "name": "isAutoStart",
+          "aliases": [
+            "autoStart"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "ViewAnimator"
+        },
+        {
+          "name": "flipInterval",
+          "aliases": [],
+          "type": "int",
+          "values": [],
+          "typeText": "整数, ms",
+          "summary": "",
+          "group": "ViewAnimator"
+        }
+      ]
+    },
+    "ViewGroup": {
+      "attrs": [
+        {
+          "name": "addStatesFromChildren",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "animateLayoutChanges",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean. 真值创建 `LayoutTransition`, 假值清除",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "clipChildren",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "clipToPadding",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "descendantFocusability",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "afterDescendants",
+            "beforeDescendants",
+            "blocksDescendants"
+          ],
+          "typeText": "`afterDescendants`, `beforeDescendants`, `blocksDescendants`",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "layoutMode",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "clipBounds",
+            "opticalBounds"
+          ],
+          "typeText": "`clipBounds`, `opticalBounds`",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "isMotionEventSplittingEnabled",
+          "aliases": [
+            "motionEventSplittingEnabled",
+            "enableMotionEventSplitting",
+            "splitMotionEvents"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": ""
+        },
+        {
+          "name": "persistentDrawingCache",
+          "aliases": [],
+          "type": "enum",
+          "values": [
+            "all",
+            "animation",
+            "none",
+            "scrolling"
+          ],
+          "typeText": "`all`, `animation`, `none`, `scrolling`",
+          "summary": "",
+          "group": ""
+        }
+      ]
+    },
+    "ViewPager": {
+      "attrs": [
+        {
+          "name": "pageMargin",
+          "aliases": [],
+          "type": "dimension",
+          "values": [],
+          "typeText": "尺寸",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "pageMarginDrawable",
+          "aliases": [],
+          "type": "drawable",
+          "values": [],
+          "typeText": "Drawable",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        },
+        {
+          "name": "titles",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "页面标题列表",
+          "summary": "",
+          "group": "ViewPager 与 TabLayout"
+        }
+      ]
+    },
+    "WebView": {
+      "attrs": [
+        {
+          "name": "url",
+          "aliases": [],
+          "type": "other",
+          "values": [],
+          "typeText": "URL 或本地文件路径",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "scale",
+          "aliases": [
+            "initialScale"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "enableNetwork",
+          "aliases": [
+            "networkAvailable"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "blockNetworkImage",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "blockNetworkLoads",
+          "aliases": [],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "enableBuiltInZoomControls",
+          "aliases": [
+            "builtInZoomControls"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "enableDatabase",
+          "aliases": [
+            "databaseEnabled",
+            "isDatabaseEnabled"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "fontSize",
+          "aliases": [
+            "defaultFontSize"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "fixedFontSize",
+          "aliases": [
+            "defaultFixedFontSize"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "textEncodingName",
+          "aliases": [
+            "defaultTextEncodingName"
+          ],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "jsAutoOpenWindows",
+          "aliases": [
+            "javaScriptAutoOpenWindows",
+            "javaScriptCanOpenWindowsAutomatically"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "enableJs",
+          "aliases": [
+            "enableJavaScript",
+            "javaScriptEnabled",
+            "isJavaScriptEnabled"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "autoLoadImages",
+          "aliases": [
+            "autoLoadsImages",
+            "loadsImagesAutomatically"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "minFontSize",
+          "aliases": [
+            "minimumFontSize"
+          ],
+          "type": "int",
+          "values": [],
+          "typeText": "整数",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "sansSerifFontFamily",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "serifFontFamily",
+          "aliases": [],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "fontFamily",
+          "aliases": [
+            "standardFontFamily"
+          ],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "multiWindows",
+          "aliases": [
+            "multipleWindows",
+            "supportMultipleWindows"
+          ],
+          "type": "boolean",
+          "values": [],
+          "typeText": "boolean",
+          "summary": "",
+          "group": "WebView"
+        },
+        {
+          "name": "userAgent",
+          "aliases": [
+            "userAgentString"
+          ],
+          "type": "string",
+          "values": [],
+          "typeText": "字符串",
+          "summary": "",
+          "group": "WebView"
+        }
+      ]
+    }
+  },
+  "shorthands": {
+    "above": "layout_above",
+    "align": "layout_gravity",
+    "alignBottom": "layout_alignBottom",
+    "alignEnd": "layout_alignEnd",
+    "alignLeft": "layout_alignLeft",
+    "alignParentBottom": "layout_alignParentBottom",
+    "alignParentEnd": "layout_alignParentEnd",
+    "alignParentLeft": "layout_alignParentLeft",
+    "alignParentRight": "layout_alignParentRight",
+    "alignParentStart": "layout_alignParentStart",
+    "alignParentTop": "layout_alignParentTop",
+    "alignRight": "layout_alignRight",
+    "alignStart": "layout_alignStart",
+    "alignTop": "layout_alignTop",
+    "below": "layout_below",
+    "centerHorizontal": "layout_centerHorizontal",
+    "centerInParent": "layout_centerInParent",
+    "centerVertical": "layout_centerVertical",
+    "h": "height",
+    "margin": "layout_margin",
+    "marginBottom": "layout_marginBottom",
+    "marginEnd": "layout_marginEnd",
+    "marginHorizontal": "layout_marginHorizontal",
+    "marginLeft": "layout_marginLeft",
+    "marginRight": "layout_marginRight",
+    "marginStart": "layout_marginStart",
+    "marginTop": "layout_marginTop",
+    "marginVertical": "layout_marginVertical",
+    "size": "textSize",
+    "toLeftOf": "layout_toLeftOf",
+    "toRightOf": "layout_toRightOf",
+    "w": "width"
+  },
+  "creationOnly": [
+    {
+      "tags": [
+        "*"
+      ],
+      "attrs": [
+        "style"
+      ],
+      "type": "other",
+      "values": [
+        "(Context, AttributeSet, int, int)"
+      ],
+      "summary": "应用样式资源. 类必须具有 `(Context, AttributeSet, int, int)` 构造方法"
+    },
+    {
+      "tags": [
+        "button",
+        "btn"
+      ],
+      "attrs": [
+        "isBorderless",
+        "isColored",
+        "isBorderlessColored",
+        "isColoredBorderless"
+      ],
+      "type": "boolean",
+      "values": [],
+      "summary": "boolean"
+    },
+    {
+      "tags": [
+        "progressbar"
+      ],
+      "attrs": [
+        "isHorizontal",
+        "horizontal"
+      ],
+      "type": "boolean",
+      "values": [],
+      "summary": "boolean"
+    },
+    {
+      "tags": [
+        "seekbar"
+      ],
+      "attrs": [
+        "isMaterial",
+        "materialStyle",
+        "isMaterialStyle"
+      ],
+      "type": "boolean",
+      "values": [],
+      "summary": "boolean"
+    },
+    {
+      "tags": [
+        "spinner"
+      ],
+      "attrs": [
+        "spinnerMode"
+      ],
+      "type": "enum",
+      "values": [
+        "dialog",
+        "dropdown"
+      ],
+      "summary": "`dialog`, `dropdown`"
+    }
+  ],
+  "unsupported": {
+    "DatePicker": [
+      "calendarTextColor",
+      "dayOfWeekBackground",
+      "dayOfWeekTextAppearance",
+      "endYear",
+      "headerBackground",
+      "headerDayOfMonthTextAppearance",
+      "headerMonthTextAppearance",
+      "headerYearTextAppearance",
+      "startYear",
+      "yearListItemTextAppearance",
+      "yearListSelectorColor"
+    ],
+    "ProgressBar": [
+      "animationResolution",
+      "indeterminateBehavior",
+      "indeterminateDuration",
+      "indeterminateOnly",
+      "interpolator",
+      "maxHeight",
+      "maxWidth",
+      "mirrorForRtl"
+    ],
+    "Spinner": [
+      "dropDownSelector"
+    ],
+    "TextSwitcher": [
+      "drawableEnd",
+      "drawableStart",
+      "editable",
+      "editorExtras",
+      "inputMethod"
+    ],
+    "TextView": [
+      "drawableEnd",
+      "drawableStart",
+      "editable",
+      "editorExtras",
+      "inputMethod"
+    ],
+    "View": [
+      "accessibilityLiveRegion",
+      "accessibilityTraversalAfter",
+      "accessibilityTraversalBefore",
+      "autofillHints",
+      "autofilledHighlight",
+      "defaultFocusHighlightEnabled",
+      "focusedByDefault",
+      "importantForAutofill",
+      "keyboardNavigationCluster",
+      "layerType",
+      "nextClusterForward",
+      "nextFocusDown",
+      "nextFocusForward",
+      "nextFocusLeft",
+      "nextFocusRight",
+      "nextFocusUp",
+      "onClick",
+      "paddingHorizontal",
+      "paddingVertical",
+      "scrollbarAlwaysDrawHorizontalTrack",
+      "scrollbarAlwaysDrawVerticalTrack",
+      "scrollbarThumbHorizontal",
+      "scrollbarThumbVertical",
+      "scrollbarTrackHorizontal",
+      "scrollbarTrackVertical",
+      "stateListAnimator",
+      "tooltipText"
+    ],
+    "ViewGroup": [
+      "layoutAnimation"
+    ]
+  },
+  "gravity": [
+    "left",
+    "start",
+    "textStart",
+    "top",
+    "right",
+    "end",
+    "textEnd",
+    "bottom",
+    "center_horizontal",
+    "center_vertical",
+    "center"
+  ],
+  "dimensionUnits": [
+    "px",
+    "dp",
+    "dip",
+    "sp",
+    "pt",
+    "in",
+    "mm"
+  ]
+}
