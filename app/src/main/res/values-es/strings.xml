@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">Editar un proyecto TSX en el diseñador requiere TypeScript Engine %1$s o posterior; está instalada la versión %2$s. El código fuente se muestra en solo lectura.</string>
     <string name="designer_tsx_needs_engine">Editar proyectos TSX requiere TypeScript Engine %1$s o posterior</string>
     <string name="designer_tsx_parser_unavailable">El analizador de TypeScript Engine no está disponible ahora (%1$s). El código fuente se muestra en solo lectura; inténtelo más tarde.</string>
+    <string name="designer_ui_preview_failed">El diseño falló en &lt;%1$s&gt;: %2$s</string>
+    <string name="designer_ui_preview_host_missing">La vista previa del diseño necesita AutoJs6, que no está instalado</string>
+    <string name="designer_ui_preview_host_old">La vista previa del diseño necesita una compilación de AutoJs6 con el servicio de vista previa ui (instalada: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 terminó la vista previa (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">El AutoJs6 instalado (%1$s) usa otro contrato de vista previa; actualiza AutoJs6 o este plugin</string>
+    <string name="designer_ui_preview_snapshot">Vista previa por instantánea; Android 11 o posterior incrusta el diseño en vivo</string>
+    <string name="designer_ui_preview_unavailable">El servicio de vista previa de AutoJs6 no está disponible ahora (%1$s)</string>
+    <string name="designer_ui_preview_waiting">Esperando a que AutoJs6 dibuje el diseño</string>
+    <string name="designer_ui_tab_problems">Problemas</string>
     <string name="designer_undo">Deshacer</string>
     <string name="designer_unknown_component">Este componente no está en el catálogo del contrato.</string>
     <string name="designer_value_expression">Expresión</string>

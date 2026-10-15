@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">TSX プロジェクトをデザイナーで編集するには TypeScript Engine %1$s 以降が必要です. インストールされているのは %2$s です. ソースを読み取り専用で表示しています.</string>
     <string name="designer_tsx_needs_engine">TSX プロジェクトの編集には TypeScript Engine %1$s 以降が必要です</string>
     <string name="designer_tsx_parser_unavailable">TypeScript Engine の解析サービスを現在利用できません (%1$s). ソースを読み取り専用で表示しています. しばらくしてから再試行してください.</string>
+    <string name="designer_ui_preview_failed">&lt;%1$s&gt; でレイアウトに失敗しました: %2$s</string>
+    <string name="designer_ui_preview_host_missing">レイアウトプレビューには AutoJs6 が必要ですが, インストールされていません</string>
+    <string name="designer_ui_preview_host_old">レイアウトプレビューには ui プレビューサービスを備えた AutoJs6 ビルドが必要です (インストール済み: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 がプレビューを終了しました (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">インストール済みの AutoJs6 (%1$s) は別のプレビュー契約を使用しています. AutoJs6 またはこのプラグインを更新してください</string>
+    <string name="designer_ui_preview_snapshot">スナップショットプレビュー; Android 11 以降ではライブレイアウトを埋め込みます</string>
+    <string name="designer_ui_preview_unavailable">AutoJs6 のプレビューサービスは現在利用できません (%1$s)</string>
+    <string name="designer_ui_preview_waiting">AutoJs6 がレイアウトを描画するのを待っています</string>
+    <string name="designer_ui_tab_problems">問題</string>
     <string name="designer_undo">元に戻す</string>
     <string name="designer_unknown_component">このコンポーネントはコントラクトのカタログにありません.</string>
     <string name="designer_value_expression">式</string>

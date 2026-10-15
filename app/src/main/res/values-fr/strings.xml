@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">Modifier un projet TSX dans le concepteur nécessite TypeScript Engine %1$s ou une version ultérieure; la version %2$s est installée. La source est affichée en lecture seule.</string>
     <string name="designer_tsx_needs_engine">Modifier des projets TSX nécessite TypeScript Engine %1$s ou une version ultérieure</string>
     <string name="designer_tsx_parser_unavailable">L\'analyseur de TypeScript Engine n\'est pas disponible pour le moment (%1$s). La source est affichée en lecture seule; réessayez plus tard.</string>
+    <string name="designer_ui_preview_failed">La mise en page a échoué à &lt;%1$s&gt;: %2$s</string>
+    <string name="designer_ui_preview_host_missing">L\'aperçu de la mise en page nécessite AutoJs6, qui n\'est pas installé</string>
+    <string name="designer_ui_preview_host_old">L\'aperçu de la mise en page nécessite une version d\'AutoJs6 dotée du service d\'aperçu ui (installée: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 a mis fin à l\'aperçu (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">L\'AutoJs6 installé (%1$s) utilise un autre contrat d\'aperçu; mettez à jour AutoJs6 ou ce plugin</string>
+    <string name="designer_ui_preview_snapshot">Aperçu par instantané; Android 11 ou ultérieur intègre la mise en page en direct</string>
+    <string name="designer_ui_preview_unavailable">Le service d\'aperçu d\'AutoJs6 n\'est pas disponible pour le moment (%1$s)</string>
+    <string name="designer_ui_preview_waiting">En attente du rendu de la mise en page par AutoJs6</string>
+    <string name="designer_ui_tab_problems">Problèmes</string>
     <string name="designer_undo">Annuler</string>
     <string name="designer_unknown_component">Ce composant ne figure pas dans le catalogue du contrat.</string>
     <string name="designer_value_expression">Expression</string>

@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">在設計器中編輯 TSX 專案需要 TypeScript Engine %1$s 或更新版本, 目前安裝的是 %2$s. 以下為唯讀原始碼.</string>
     <string name="designer_tsx_needs_engine">編輯 TSX 專案需要 TypeScript Engine %1$s 或更新版本</string>
     <string name="designer_tsx_parser_unavailable">TypeScript Engine 的解析服務暫時無法使用 (%1$s). 以下為唯讀原始碼, 請稍後重試.</string>
+    <string name="designer_ui_preview_failed">佈局在 &lt;%1$s&gt; 處失敗: %2$s</string>
+    <string name="designer_ui_preview_host_missing">佈局預覽需要 AutoJs6, 但尚未安裝</string>
+    <string name="designer_ui_preview_host_old">佈局預覽需要帶 ui 預覽服務的 AutoJs6 組建 (已安裝: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 結束了預覽 (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">已安裝的 AutoJs6 (%1$s) 使用另一版預覽契約, 請更新 AutoJs6 或本外掛</string>
+    <string name="designer_ui_preview_snapshot">快照預覽; Android 11 及以上會嵌入即時佈局</string>
+    <string name="designer_ui_preview_unavailable">AutoJs6 預覽服務目前無法使用 (%1$s)</string>
+    <string name="designer_ui_preview_waiting">正在等待 AutoJs6 繪製佈局</string>
+    <string name="designer_ui_tab_problems">問題</string>
     <string name="designer_undo">復原</string>
     <string name="designer_unknown_component">該元件不在契約目錄中.</string>
     <string name="designer_value_expression">運算式</string>

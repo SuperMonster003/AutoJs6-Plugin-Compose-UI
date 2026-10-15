@@ -72,11 +72,13 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryA
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptLauncher
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandaloneActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.NodeTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Severity
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DesignerParseError
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DocumentReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ReadResult
@@ -84,6 +86,13 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.par
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.CanvasBounds
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignCanvas
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignImages
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.UiPreviewClient
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.XmlCanvas
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.XmlPreviewFrames
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.XmlPreviewRequest
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.XmlPreviewValues
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.elementLabel
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.SandboxPreview
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentIo
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.DocumentSource
@@ -96,6 +105,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.autojs.plugin.compose.api.model.ThemeSpec
 
 /**
@@ -118,6 +128,12 @@ internal class DesignerActivity : StandaloneActivity() {
     private var session: DesignerSession? by mutableStateOf(null)
     /** The open document's editing state, once it is read (device performance tests drive it directly). */
     internal val currentSession: DesignerSession? get() = session
+    /** The editing state of a `"ui";` mode document (roadmap P10.3); exclusive with [session]. */
+    private var uiSession: UiDesignerSession? by mutableStateOf(null)
+    internal val currentUiSession: UiDesignerSession? get() = uiSession
+    /** The host preview client of the ui document, created with its session and closed with this screen. */
+    private var previewClient: UiPreviewClient? = null
+    internal val currentPreviewClient: UiPreviewClient? get() = previewClient
     private var parseError: DesignerParseError? by mutableStateOf(null)
     private var readFailed by mutableStateOf(false)
     /** A TSX document is being parsed by the TypeScript Engine (roadmap P9.2). */
@@ -158,6 +174,8 @@ internal class DesignerActivity : StandaloneActivity() {
 
     override fun onDestroy() {
         scope.cancel()
+        previewClient?.close()
+        previewClient = null
         if (::reader.isInitialized) reader.close()
         super.onDestroy()
     }
@@ -175,6 +193,17 @@ internal class DesignerActivity : StandaloneActivity() {
             when (result) {
                 is ReadResult.Parsed -> {
                     session = DesignerSession(result.document, syntax = reader)
+                    uiSession = null
+                    parseError = null
+                    readOnly = null
+                    baseline = script
+                }
+                is ReadResult.ParsedUi -> {
+                    // Roadmap P10.3: a ui-mode document gets its own session and a host preview client.
+                    session = null
+                    uiSession = UiDesignerSession(result.document)
+                    previewClient?.close()
+                    previewClient = UiPreviewClient(this, source.title)
                     parseError = null
                     readOnly = null
                     baseline = script
@@ -193,25 +222,35 @@ internal class DesignerActivity : StandaloneActivity() {
 
     override fun onResume() {
         super.onResume()
-        val current = session ?: return
+        val dirty = session?.dirty ?: uiSession?.dirty ?: return
         val onDisk = io.readOrNull(source) ?: return
         if (baseline == null || onDisk == baseline) return
-        if (!current.dirty) reloadFrom(current, onDisk) else externalChange = onDisk
+        if (!dirty) reloadFrom(onDisk) else externalChange = onDisk
     }
 
-    private fun reloadFrom(session: DesignerSession, script: String) {
+    private fun reloadFrom(script: String) {
         read(script) { result ->
-            // An unmappable or unreadable script from the other editor keeps the tree here; an explicit save decides.
-            if (result is ReadResult.Parsed) {
-                session.replace(result.document)
-                session.markSaved()
-                baseline = script
+            // An unmappable or unreadable script from the other editor, or one of the other kind, keeps the tree
+            // here; an explicit save decides.
+            val current = session
+            val ui = uiSession
+            when {
+                result is ReadResult.Parsed && current != null -> {
+                    current.replace(result.document)
+                    current.markSaved()
+                    baseline = script
+                }
+                result is ReadResult.ParsedUi && ui != null -> {
+                    ui.replace(result.document)
+                    baseline = script
+                }
             }
         }
     }
 
     override fun onStop() {
         session?.let { if (it.dirty) io.writeDraft(source, it.script()) }
+        uiSession?.let { if (it.dirty) io.writeDraft(source, it.script()) }
         super.onStop()
     }
 
@@ -219,8 +258,10 @@ internal class DesignerActivity : StandaloneActivity() {
     override fun Content(palette: StandalonePalette) {
         val error = parseError
         val current = session
+        val ui = uiSession
         val unavailable = readOnly
         when {
+            ui != null && !readFailed && error == null -> UiEditorScreen(ui, palette)
             current != null && !readFailed && error == null -> Editor(current, palette)
             loading -> LoadingScreen(palette)
             unavailable != null && !readFailed -> ReadOnlyScreen(unavailable, palette)
@@ -662,7 +703,7 @@ internal class DesignerActivity : StandaloneActivity() {
                                     session.replace(result.document)
                                     session.dirty = true
                                 }
-                                is ReadResult.Rejected -> io.clearDraft(source)
+                                is ReadResult.Rejected, is ReadResult.ParsedUi -> io.clearDraft(source)
                                 // The TSX parser is not available now; the draft stays for the next opening.
                                 is ReadResult.Unavailable -> Unit
                             }
@@ -717,7 +758,299 @@ internal class DesignerActivity : StandaloneActivity() {
                 title = { Text(stringResource(R.string.designer_external_changed_title)) },
                 text = { Text(stringResource(R.string.designer_external_changed_message)) },
                 confirmButton = {
-                    TextButton(onClick = { externalChange = null; reloadFrom(session, changed); io.clearDraft(source) }, modifier = Modifier.testTag("designer-external-reload")) { Text(stringResource(R.string.designer_reload)) }
+                    TextButton(onClick = { externalChange = null; reloadFrom(changed); io.clearDraft(source) }, modifier = Modifier.testTag("designer-external-reload")) { Text(stringResource(R.string.designer_reload)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { externalChange = null; baseline = changed }, modifier = Modifier.testTag("designer-external-keep")) { Text(stringResource(R.string.designer_keep_mine)) }
+                },
+            )
+        }
+    }
+
+    /**
+     * The editing screen of a `"ui";` mode project (roadmap P10.3): the host's preview on the XML canvas, the
+     * element outline and the problems list; save, drafts, undo / redo and the host hand-over work as for Compose
+     * projects. The inspector, the palette and the bindings panel follow in P10.4.
+     */
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun UiEditorScreen(session: UiDesignerSession, palette: StandalonePalette) {
+        val context = LocalContext.current
+        val scope = rememberCoroutineScope()
+        val snackbar = remember { SnackbarHostState() }
+        var tab by remember { mutableStateOf(0) }
+        var menuOpen by remember { mutableStateOf(false) }
+        var exitDialog by remember { mutableStateOf(false) }
+        var zoom by remember { mutableStateOf(1f) }
+        val savedText = stringResource(R.string.designer_saved)
+        val savedAsProject = stringResource(R.string.designer_external_readonly_saved)
+        val copied = stringResource(R.string.gallery_copied)
+        val missingHost = stringResource(R.string.gallery_run_missing_host)
+        val runFailed = stringResource(R.string.gallery_run_failed)
+        val hostMissing = stringResource(R.string.designer_host_missing)
+        val hostFailed = stringResource(R.string.designer_host_failed)
+        val exported = stringResource(R.string.designer_exported)
+        val exportFailed = stringResource(R.string.designer_export_failed)
+        val failedText = stringResource(R.string.designer_ui_preview_failed)
+        val errors = session.diagnostics.count { it.severity == Severity.ERROR }
+
+        // The host draws the layout (D46): one client per screen, bound while the screen lives; the session follows
+        // the canvas surface, and a loss is retried when the screen comes back.
+        val client = requireNotNull(previewClient)
+        DisposableEffect(client) { client.bind(); onDispose { } }
+        LaunchedEffect(appearance) { client.configure(appearance.dark, appearance.language) }
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        DisposableEffect(lifecycle, client) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) { if (client.status is UiPreviewClient.Status.Lost) client.retry() else client.ensureSession() }
+            }
+            lifecycle.addObserver(observer)
+            onDispose { lifecycle.removeObserver(observer) }
+        }
+        val evaluator = remember { DeclarationEvaluator() }
+        var request by remember { mutableStateOf<XmlPreviewRequest?>(null) }
+        LaunchedEffect(session.revision, session.fragment, session.bindingOverrides) {
+            val document = session.document
+            val fragment = session.fragment
+            val script = session.script()
+            val expressions = document.fragments.getOrNull(fragment)?.root?.descendants()?.flatMap { element ->
+                element.children.filterIsInstance<XmlNode.Expr>().map { XmlPreviewFrames.expressionOf(it.source) } +
+                    element.attrs.flatMap { attr -> attr.parts.orEmpty().filterIsInstance<AttrPart.Expr>().map { XmlPreviewFrames.expressionOf(it.source) } }
+            }?.toList().orEmpty()
+            val evaluated = if (DeclarationEvaluator.SUPPORTED) withContext(Dispatchers.Default) { evaluator.evaluate(script, expressions) } else DeclarationEvaluator.Result.EMPTY
+            val built = XmlPreviewFrames.build(document, fragment, XmlPreviewValues(evaluated.declarations, session.bindingOverrides, evaluated.expressions))
+            request = built
+            client.submit(built)
+        }
+        LaunchedEffect(client.frameRevision) { session.previewFrames = client.frameRevision }
+        LaunchedEffect(client.failure, client.diagnostics, request) {
+            val current = request
+            val failure = client.failure
+            val problems = ArrayList<String>()
+            var problemId: Int? = null
+            if (failure != null) {
+                problemId = current?.elementIdAt(failure.elementIndex)
+                problems += failedText.format(problemId?.let { session.document.element(it) }?.let(::elementLabel) ?: "?", failure.message)
+            }
+            client.diagnostics.forEach { diagnostic ->
+                val label = current?.elementIdAt(diagnostic.elementIndex)?.let { session.document.element(it) }?.let(::elementLabel) ?: "?"
+                problems += "<$label> " + (diagnostic.attrName?.let { "$it: " } ?: "") + diagnostic.message
+            }
+            current?.notes?.forEach { note -> problems += "<" + (session.document.element(note.elementId)?.let(::elementLabel) ?: "?") + "> " + note.message }
+            session.previewProblems = problems
+            session.problemElementId = problemId
+        }
+        val statusText: String? = when (val status = client.status) {
+            is UiPreviewClient.Status.Unavailable -> when (status.reason) {
+                UiPreviewClient.Reason.HOST_MISSING -> stringResource(R.string.designer_ui_preview_host_missing)
+                UiPreviewClient.Reason.HOST_TOO_OLD -> stringResource(R.string.designer_ui_preview_host_old, status.installedVersion ?: "?")
+                UiPreviewClient.Reason.CONTRACT_MISMATCH -> stringResource(R.string.designer_ui_preview_mismatch, status.installedVersion ?: "?")
+                UiPreviewClient.Reason.UNAVAILABLE -> stringResource(R.string.designer_ui_preview_unavailable, status.detail ?: status.installedVersion ?: "?")
+            }
+            is UiPreviewClient.Status.Lost -> stringResource(R.string.designer_ui_preview_lost, status.reason)
+            else -> when {
+                client.failure != null -> session.previewProblems.firstOrNull()
+                client.bounds.isEmpty() && client.snapshot == null -> stringResource(R.string.designer_ui_preview_waiting)
+                !client.embedded -> stringResource(R.string.designer_ui_preview_snapshot)
+                else -> null
+            }
+        }
+        val retry: (() -> Unit)? = when (client.status) {
+            is UiPreviewClient.Status.Lost, is UiPreviewClient.Status.Unavailable -> ({ client.retry() })
+            else -> null
+        }
+
+        fun save(announce: Boolean = true): Boolean {
+            val text = session.script()
+            val previous = source
+            val result = io.write(previous, text)
+            io.clearDraft(previous)
+            baseline = text
+            session.markSaved()
+            when (result) {
+                is DocumentIo.WriteResult.Saved -> if (announce) scope.launch { snackbar.showSnackbar(savedText) }
+                is DocumentIo.WriteResult.SavedAsProject -> {
+                    source = DocumentSource.Local(result.name)
+                    scope.launch { snackbar.showSnackbar(savedAsProject.format(result.name)) }
+                }
+            }
+            return true
+        }
+
+        fun sendToHost(intent: (Uri, Boolean) -> Intent) {
+            if (session.dirty) save()
+            val (uri, writable) = io.shareUri(source)
+            when (ScriptLauncher.start(context, intent(uri, writable))) {
+                ScriptLauncher.Result.STARTED -> Unit
+                ScriptLauncher.Result.HOST_MISSING -> scope.launch { snackbar.showSnackbar(hostMissing) }
+                ScriptLauncher.Result.FAILED -> scope.launch { snackbar.showSnackbar(hostFailed) }
+            }
+        }
+
+        val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ScriptLauncher.SCRIPT_MIME_TYPE)) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val ok = runCatching {
+                context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(session.script().toByteArray(StandardCharsets.UTF_8)) } != null
+            }.getOrDefault(false)
+            scope.launch { snackbar.showSnackbar(if (ok) exported else exportFailed) }
+        }
+
+        LaunchedEffect(session.revision) {
+            if (session.dirty) {
+                delay(1000)
+                if (session.dirty) io.writeDraft(source, session.script())
+            }
+        }
+        BackHandler(enabled = session.dirty) { exitDialog = true }
+
+        Scaffold(
+            containerColor = Color(palette.background),
+            snackbarHost = { SnackbarHost(snackbar) },
+            topBar = {
+                TopAppBar(
+                    title = { Text(source.title + if (session.dirty) " *" else "", fontSize = 16.sp, maxLines = 1) },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(palette.background), titleContentColor = Color(palette.text)),
+                    navigationIcon = {
+                        IconButton(onClick = { if (session.dirty) exitDialog = true else finish() }, modifier = Modifier.testTag("designer-back")) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color(palette.muted))
+                        }
+                    },
+                    actions = {
+                        TextButton(onClick = { session.undo() }, enabled = session.canUndo, modifier = Modifier.testTag("designer-undo")) { Text(stringResource(R.string.designer_undo)) }
+                        TextButton(onClick = { session.redo() }, enabled = session.canRedo, modifier = Modifier.testTag("designer-redo")) { Text(stringResource(R.string.designer_redo)) }
+                        IconButton(onClick = { save() }, modifier = Modifier.testTag("designer-save")) {
+                            Icon(Icons.Filled.Done, contentDescription = stringResource(R.string.designer_save), tint = Color(if (session.dirty) palette.accent else palette.muted))
+                        }
+                        Box {
+                            IconButton(onClick = { menuOpen = true }, modifier = Modifier.testTag("designer-menu")) {
+                                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.designer_host_options), tint = Color(palette.muted))
+                            }
+                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_issues_count, errors)) }, onClick = { menuOpen = false; tab = 1 }, modifier = Modifier.testTag("designer-menu-issues"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_zoom, if (zoom < 1f) "100%" else "75%")) }, onClick = { menuOpen = false; zoom = if (zoom < 1f) 1f else 0.75f })
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_copy_script)) }, onClick = {
+                                    menuOpen = false
+                                    if (ScriptLauncher.copy(context, source.title, session.script())) scope.launch { snackbar.showSnackbar(copied) }
+                                }, modifier = Modifier.testTag("designer-menu-copy"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.gallery_run)) }, onClick = {
+                                    menuOpen = false
+                                    when (ScriptLauncher.run(context, session.script())) {
+                                        ScriptLauncher.Result.STARTED -> Unit
+                                        ScriptLauncher.Result.HOST_MISSING -> scope.launch { snackbar.showSnackbar(missingHost) }
+                                        ScriptLauncher.Result.FAILED -> scope.launch { snackbar.showSnackbar(runFailed) }
+                                    }
+                                }, modifier = Modifier.testTag("designer-menu-run"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_open_in_host)) }, onClick = {
+                                    menuOpen = false
+                                    sendToHost { uri, writable -> ScriptLauncher.editIntent(uri, writable) }
+                                }, modifier = Modifier.testTag("designer-menu-edit-in-host"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_import_to_host)) }, onClick = {
+                                    menuOpen = false
+                                    sendToHost { uri, _ -> ScriptLauncher.importIntent(uri) }
+                                }, modifier = Modifier.testTag("designer-menu-import-to-host"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_export)) }, onClick = {
+                                    menuOpen = false
+                                    exporter.launch(source.title)
+                                }, modifier = Modifier.testTag("designer-menu-export"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_open_gallery)) }, onClick = { menuOpen = false; context.startActivity(Intent(context, GalleryActivity::class.java)) })
+                            }
+                        }
+                    },
+                )
+            },
+        ) { padding ->
+            val canvas: @Composable (Modifier) -> Unit = { placement ->
+                Box(placement.background(Color(palette.surfaceVariant)).testTag("designer-canvas")) {
+                    XmlCanvas(
+                        session = session,
+                        request = request,
+                        client = client,
+                        zoom = zoom,
+                        accent = Color(palette.accent),
+                        danger = Color(palette.danger),
+                        text = Color(palette.text),
+                        muted = Color(palette.muted),
+                        surface = Color(palette.background),
+                        statusText = statusText,
+                        retryLabel = stringResource(R.string.designer_retry),
+                        onRetry = retry,
+                        onSelect = { session.selectedId = it ?: session.selectedId },
+                        modifier = Modifier.fillMaxSize().padding(8.dp),
+                    )
+                }
+            }
+            val panels: @Composable (Modifier) -> Unit = { placement ->
+                Column(placement) {
+                    TabRow(selectedTabIndex = tab, containerColor = Color(palette.background), contentColor = Color(palette.text)) {
+                        Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.designer_tab_outline)) }, modifier = Modifier.testTag("designer-tab-outline"))
+                        Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.designer_ui_tab_problems)) }, modifier = Modifier.testTag("designer-tab-problems"))
+                    }
+                    when (tab) {
+                        0 -> XmlOutlinePanel(session, palette, Modifier.fillMaxWidth())
+                        else -> XmlProblemsPanel(session, palette, Modifier.fillMaxWidth())
+                    }
+                }
+            }
+            BoxWithConstraints(Modifier.fillMaxSize().padding(padding)) {
+                if (maxWidth > maxHeight) {
+                    Row(Modifier.fillMaxSize()) {
+                        canvas(Modifier.fillMaxHeight().weight(1.1f))
+                        panels(Modifier.fillMaxHeight().weight(0.9f))
+                    }
+                } else {
+                    Column(Modifier.fillMaxSize()) {
+                        canvas(Modifier.fillMaxWidth().weight(1.1f))
+                        panels(Modifier.fillMaxWidth().weight(0.9f))
+                    }
+                }
+            }
+        }
+        if (exitDialog) AlertDialog(
+            onDismissRequest = { exitDialog = false },
+            title = { Text(stringResource(R.string.designer_back_discard_title)) },
+            text = { Text(stringResource(R.string.designer_back_discard_message)) },
+            confirmButton = { TextButton(onClick = { save(); finish() }, modifier = Modifier.testTag("designer-exit-save")) { Text(stringResource(R.string.designer_save_exit)) } },
+            dismissButton = {
+                Row {
+                    TextButton(onClick = {
+                        session.dirty = false
+                        io.clearDraft(source)
+                        finish()
+                    }, modifier = Modifier.testTag("designer-exit-discard")) { Text(stringResource(R.string.designer_discard)) }
+                    TextButton(onClick = { exitDialog = false }) { Text(stringResource(R.string.designer_keep_editing)) }
+                }
+            },
+        )
+        pendingDraft?.let { draft ->
+            AlertDialog(
+                onDismissRequest = { },
+                title = { Text(stringResource(R.string.designer_draft_title)) },
+                text = { Text(stringResource(R.string.designer_draft_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        pendingDraft = null
+                        read(draft) { result ->
+                            when (result) {
+                                is ReadResult.ParsedUi -> {
+                                    session.replace(result.document)
+                                    session.dirty = true
+                                }
+                                is ReadResult.Parsed, is ReadResult.Rejected -> io.clearDraft(source)
+                                is ReadResult.Unavailable -> Unit
+                            }
+                        }
+                    }, modifier = Modifier.testTag("designer-draft-restore")) { Text(stringResource(R.string.designer_draft_restore)) }
+                },
+                dismissButton = { TextButton(onClick = { pendingDraft = null; io.clearDraft(source) }, modifier = Modifier.testTag("designer-draft-discard")) { Text(stringResource(R.string.designer_draft_discard)) } },
+            )
+        }
+        externalChange?.let { changed ->
+            AlertDialog(
+                onDismissRequest = { externalChange = null },
+                title = { Text(stringResource(R.string.designer_external_changed_title)) },
+                text = { Text(stringResource(R.string.designer_external_changed_message)) },
+                confirmButton = {
+                    TextButton(onClick = { externalChange = null; reloadFrom(changed); io.clearDraft(source) }, modifier = Modifier.testTag("designer-external-reload")) { Text(stringResource(R.string.designer_reload)) }
                 },
                 dismissButton = {
                     TextButton(onClick = { externalChange = null; baseline = changed }, modifier = Modifier.testTag("designer-external-keep")) { Text(stringResource(R.string.designer_keep_mine)) }

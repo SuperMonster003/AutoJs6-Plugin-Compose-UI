@@ -2,6 +2,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.pa
 
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 
 /** Syntax checks the inspector runs before it applies an edited handler. */
 internal interface SyntaxCheck {
@@ -12,6 +13,8 @@ internal interface SyntaxCheck {
 /** What reading a document gave. */
 internal sealed class ReadResult {
     data class Parsed(val document: DesignDocument) : ReadResult()
+    /** A `"ui";` mode script (roadmap P10): XML literals edited losslessly and previewed by the host. */
+    data class ParsedUi(val document: UiDocument) : ReadResult()
     /** The text parses but the designer cannot map it, or it has a syntax error. */
     data class Rejected(val error: DesignerParseError) : ReadResult()
     /**
@@ -40,7 +43,9 @@ internal class DocumentReader(
     fun readNow(text: String): ReadResult? {
         if (dialect != Dialect.JS) return null
         return try {
-            ReadResult.Parsed(ScriptReader().read(text))
+            // A script that starts with the "ui" directive and lays out XML is a ui-mode project (roadmap P10).
+            if (UiScriptReader.looksLikeUiScript(text)) ReadResult.ParsedUi(UiScriptReader().read(text))
+            else ReadResult.Parsed(ScriptReader().read(text))
         } catch (error: DesignerParseError) {
             ReadResult.Rejected(error)
         }

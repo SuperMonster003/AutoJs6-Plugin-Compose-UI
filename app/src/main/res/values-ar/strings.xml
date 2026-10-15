@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">يتطلب تحرير مشروع TSX في المصمم الإصدار TypeScript Engine %1$s أو أحدث, والإصدار المثبت هو %2$s. يعرض المصدر للقراءة فقط.</string>
     <string name="designer_tsx_needs_engine">يتطلب تحرير مشاريع TSX الإصدار TypeScript Engine %1$s أو أحدث</string>
     <string name="designer_tsx_parser_unavailable">خدمة التحليل في TypeScript Engine غير متاحة حاليا (%1$s). يعرض المصدر للقراءة فقط, أعد المحاولة لاحقا.</string>
+    <string name="designer_ui_preview_failed">فشل التخطيط عند &lt;%1$s&gt;: %2$s</string>
+    <string name="designer_ui_preview_host_missing">تحتاج معاينة التخطيط إلى AutoJs6, وهو غير مثبت</string>
+    <string name="designer_ui_preview_host_old">تحتاج معاينة التخطيط إلى إصدار من AutoJs6 يحتوي على خدمة معاينة ui (المثبت: %1$s)</string>
+    <string name="designer_ui_preview_lost">أنهى AutoJs6 المعاينة (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">يستخدم AutoJs6 المثبت (%1$s) عقد معاينة مختلفا, حدث AutoJs6 أو هذه الإضافة</string>
+    <string name="designer_ui_preview_snapshot">معاينة بلقطة, يدمج Android 11 والأحدث التخطيط الحي</string>
+    <string name="designer_ui_preview_unavailable">خدمة معاينة AutoJs6 غير متاحة حاليا (%1$s)</string>
+    <string name="designer_ui_preview_waiting">في انتظار أن يرسم AutoJs6 التخطيط</string>
+    <string name="designer_ui_tab_problems">المشاكل</string>
     <string name="designer_undo">تراجع</string>
     <string name="designer_unknown_component">هذا المكون غير موجود في فهرس العقد.</string>
     <string name="designer_value_expression">تعبير</string>

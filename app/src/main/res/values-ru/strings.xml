@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">Для редактирования TSX-проекта в дизайнере нужен TypeScript Engine %1$s или новее; установлена версия %2$s. Исходный текст показан только для чтения.</string>
     <string name="designer_tsx_needs_engine">Для редактирования TSX-проектов нужен TypeScript Engine %1$s или новее</string>
     <string name="designer_tsx_parser_unavailable">Служба разбора TypeScript Engine сейчас недоступна (%1$s). Исходный текст показан только для чтения; повторите попытку позже.</string>
+    <string name="designer_ui_preview_failed">Ошибка макета в &lt;%1$s&gt;: %2$s</string>
+    <string name="designer_ui_preview_host_missing">Для предпросмотра макета нужен AutoJs6, который не установлен</string>
+    <string name="designer_ui_preview_host_old">Для предпросмотра макета нужна сборка AutoJs6 со службой предпросмотра ui (установлено: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 завершил предпросмотр (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">Установленный AutoJs6 (%1$s) использует другой контракт предпросмотра; обновите AutoJs6 или этот плагин</string>
+    <string name="designer_ui_preview_snapshot">Предпросмотр снимком; Android 11 и новее встраивает живой макет</string>
+    <string name="designer_ui_preview_unavailable">Служба предпросмотра AutoJs6 сейчас недоступна (%1$s)</string>
+    <string name="designer_ui_preview_waiting">Ожидание, пока AutoJs6 нарисует макет</string>
+    <string name="designer_ui_tab_problems">Проблемы</string>
     <string name="designer_undo">Отменить</string>
     <string name="designer_unknown_component">Этого компонента нет в каталоге контракта.</string>
     <string name="designer_value_expression">Выражение</string>

@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">在设计器中编辑 TSX 工程需要 TypeScript Engine %1$s 或更高版本, 当前安装的是 %2$s. 以下为只读源码.</string>
     <string name="designer_tsx_needs_engine">编辑 TSX 工程需要 TypeScript Engine %1$s 或更高版本</string>
     <string name="designer_tsx_parser_unavailable">TypeScript Engine 的解析服务暂时不可用 (%1$s). 以下为只读源码, 请稍后重试.</string>
+    <string name="designer_ui_preview_failed">布局在 &lt;%1$s&gt; 处失败: %2$s</string>
+    <string name="designer_ui_preview_host_missing">布局预览需要 AutoJs6, 但尚未安装</string>
+    <string name="designer_ui_preview_host_old">布局预览需要带 ui 预览服务的 AutoJs6 构建 (已安装: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 结束了预览 (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">已安装的 AutoJs6 (%1$s) 使用另一版预览契约, 请更新 AutoJs6 或本插件</string>
+    <string name="designer_ui_preview_snapshot">快照预览; Android 11 及以上会嵌入实时布局</string>
+    <string name="designer_ui_preview_unavailable">AutoJs6 预览服务当前不可用 (%1$s)</string>
+    <string name="designer_ui_preview_waiting">正在等待 AutoJs6 绘制布局</string>
+    <string name="designer_ui_tab_problems">问题</string>
     <string name="designer_undo">撤销</string>
     <string name="designer_unknown_component">该组件不在契约目录中.</string>
     <string name="designer_value_expression">表达式</string>

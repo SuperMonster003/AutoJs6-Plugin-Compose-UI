@@ -140,6 +140,15 @@
     <string name="designer_tsx_engine_old">Editing a TSX project in the designer needs TypeScript Engine %1$s or later; version %2$s is installed. The source is shown read-only.</string>
     <string name="designer_tsx_needs_engine">Editing TSX projects needs TypeScript Engine %1$s or later</string>
     <string name="designer_tsx_parser_unavailable">The TypeScript Engine parser is not available right now (%1$s). The source is shown read-only; try again later.</string>
+    <string name="designer_ui_preview_failed">Layout failed at &lt;%1$s&gt;: %2$s</string>
+    <string name="designer_ui_preview_host_missing">The layout preview needs AutoJs6, which is not installed</string>
+    <string name="designer_ui_preview_host_old">The layout preview needs an AutoJs6 build with the ui preview service (installed: %1$s)</string>
+    <string name="designer_ui_preview_lost">AutoJs6 ended the preview (%1$s)</string>
+    <string name="designer_ui_preview_mismatch">The installed AutoJs6 (%1$s) uses another preview contract; update AutoJs6 or this plugin</string>
+    <string name="designer_ui_preview_snapshot">Snapshot preview; Android 11 or later embeds the live layout</string>
+    <string name="designer_ui_preview_unavailable">The AutoJs6 preview service is not available right now (%1$s)</string>
+    <string name="designer_ui_preview_waiting">Waiting for AutoJs6 to draw the layout</string>
+    <string name="designer_ui_tab_problems">Problems</string>
     <string name="designer_undo">Undo</string>
     <string name="designer_unknown_component">This component is not in the contract catalog.</string>
     <string name="designer_value_expression">Expression</string>
