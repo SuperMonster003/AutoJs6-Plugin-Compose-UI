@@ -123,13 +123,21 @@ enum class FragmentUsage {
 /**
  * One XML literal of the script. [boundTo] is the variable the literal is assigned to (`var layout = <...>`), null
  * when it is written inline; [layoutCallOffset] is the offset of the `ui.layout` call that uses it, for ordering.
+ * [stubOffset] (roadmap P10.4 / D52) is where a generated `ui.<id>.on(...)` stub goes, as an offset into the opaque
+ * segment that follows the literal: after the `ui.layout(...)` statement and the handler statements already written
+ * directly after it; -1 when the designer cannot place one. [stubIndent] is that statement's indentation.
  */
 data class XmlFragment(
     val root: XmlNode.Element,
     val usage: FragmentUsage = FragmentUsage.OTHER,
     val boundTo: String? = null,
     val layoutCallOffset: Int = -1,
+    val stubOffset: Int = -1,
+    val stubIndent: String = "",
 )
+
+/** A `ui.<id>.on('<event>', ...)` (or `ui.<id>.click(...)`) registration the script already contains. */
+data class UiHandler(val id: String, val event: String)
 
 sealed class UiSegment {
     /** Source text the designer does not interpret, in place. */
@@ -147,7 +155,12 @@ data class UiDocument(
     val nextId: Int,
     /** Tag names the script registers with `ui.registerWidget(name, ...)`; their attributes are the script's business. */
     val widgets: Set<String> = emptySet(),
+    /** Event handlers the script registers on elements by id (roadmap P10.4 / D52), so the inspector offers no second stub. */
+    val handlers: Set<UiHandler> = emptySet(),
 ) {
+    /** The ids (`id` attribute values written as plain text) of every element, for generating a fresh one. */
+    fun elementIds(): Set<String> = elements().mapNotNull { it.attr("id")?.takeUnless { attr -> attr.hasBinding || attr.hasExpr }?.value?.removePrefix("@+id/")?.removePrefix("@id/") }.toSet()
+
     val fragments: List<XmlFragment> get() = segments.filterIsInstance<UiSegment.Layout>().map { it.fragment }
     val root: XmlNode.Element? get() = fragments.getOrNull(rootFragment)?.root
 

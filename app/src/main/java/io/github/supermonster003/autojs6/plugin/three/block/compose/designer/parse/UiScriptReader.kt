@@ -2,6 +2,8 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.pa
 
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.FragmentUsage
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEvents
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiSegment
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlFragment
 import org.mozilla.javascript.CompilerEnvirons
@@ -11,12 +13,16 @@ import org.mozilla.javascript.Parser
 import org.mozilla.javascript.ast.Assignment
 import org.mozilla.javascript.ast.AstNode
 import org.mozilla.javascript.ast.AstRoot
+import org.mozilla.javascript.ast.Block
 import org.mozilla.javascript.ast.ErrorCollector
 import org.mozilla.javascript.ast.ExpressionStatement
 import org.mozilla.javascript.ast.FunctionCall
 import org.mozilla.javascript.ast.Name
 import org.mozilla.javascript.ast.ParseProblem
 import org.mozilla.javascript.ast.PropertyGet
+import org.mozilla.javascript.ast.ReturnStatement
+import org.mozilla.javascript.ast.Scope
+import org.mozilla.javascript.ast.ScriptNode
 import org.mozilla.javascript.ast.StringLiteral
 import org.mozilla.javascript.ast.VariableInitializer
 import org.mozilla.javascript.ast.XmlExpression
@@ -55,6 +61,7 @@ class UiScriptReader {
             val assigned = HashSet<String>()
             val layoutCalls = ArrayList<FunctionCall>()
             val widgets = LinkedHashSet<String>()
+            val handlers = LinkedHashSet<UiHandler>()
             root.visitAll { node ->
                 when (node) {
                     is XmlLiteral -> literals += literalOf(node)
@@ -62,6 +69,7 @@ class UiScriptReader {
                     is FunctionCall -> when {
                         isUiCall(node, "layout") -> layoutCalls += node
                         isUiCall(node, "registerWidget") -> (node.arguments.firstOrNull() as? StringLiteral)?.let { widgets += it.value }
+                        else -> handlerOf(node)?.let { handlers += it }
                     }
                 }
                 true
@@ -90,6 +98,14 @@ class UiScriptReader {
                 if (literal.usage == FragmentUsage.OTHER) {
                     literal.usage = FragmentUsage.LAYOUT
                     literal.layoutCallOffset = call.absolutePosition
+                    // Roadmap P10.4 / D52: handler stubs go after this statement and the handlers already behind it.
+                    statementOf(call)?.let { statement ->
+                        val end = handlersEndAfter(statement)
+                        if (end >= literal.end && literals.none { it !== literal && it.start >= literal.end && it.start < end }) {
+                            literal.stubOffset = end - literal.end
+                            literal.stubIndent = indentOf(statement.absolutePosition)
+                        }
+                    }
                 }
                 if (rootLiteral == null) rootLiteral = literal
             }
@@ -105,17 +121,71 @@ class UiScriptReader {
                 } catch (error: XmlCstError) {
                     fail(literal.start + error.offset, error.reason)
                 }
-                segments += UiSegment.Layout(XmlFragment(element, literal.usage, literal.boundTo, literal.layoutCallOffset))
+                segments += UiSegment.Layout(XmlFragment(element, literal.usage, literal.boundTo, literal.layoutCallOffset, literal.stubOffset, literal.stubIndent))
                 if (literal === rootLiteral) rootIndex = index
                 cursor = literal.end
             }
             if (cursor < source.length) segments += UiSegment.Opaque(source.substring(cursor))
-            return UiDocument(segments, rootIndex, nextId, widgets)
+            return UiDocument(segments, rootIndex, nextId, widgets, handlers)
         }
 
         private class Literal(val start: Int, val end: Int, val text: String, val exprs: List<XmlCst.ExprRange>, val boundTo: String?) {
             var usage = FragmentUsage.OTHER
             var layoutCallOffset = -1
+            var stubOffset = -1
+            var stubIndent = ""
+        }
+
+        /** The handler [call] registers (`ui.<id>.on('<event>', ...)` and the `click` / `longClick` shortcuts), or null. */
+        private fun handlerOf(call: FunctionCall): UiHandler? {
+            val target = call.target as? PropertyGet ?: return null
+            val receiver = target.target as? PropertyGet ?: return null
+            if ((receiver.target as? Name)?.identifier != "ui") return null
+            val id = receiver.property.identifier
+            return when (val method = target.property.identifier) {
+                "on", "once", "addListener", "prependListener", "prependOnceListener" -> (call.arguments.firstOrNull() as? StringLiteral)?.let { UiHandler(id, it.value) }
+                else -> UiEvents.ofShortcut(method)?.takeIf { call.arguments.isNotEmpty() }?.let { UiHandler(id, it) }
+            }
+        }
+
+        /**
+         * The statement holding [node]: the ancestor whose parent is the script, a function body or a block. An
+         * expression-bodied arrow function has no statement to append after, so null.
+         */
+        private fun statementOf(node: AstNode): AstNode? {
+            var current: AstNode = node
+            while (true) {
+                val parent = current.parent ?: return null
+                if (parent is AstRoot || parent is Block || (parent is Scope && parent !is ScriptNode)) {
+                    // After `return ui.layout(...)` nothing runs; such a layout gets no stubs.
+                    return current.takeUnless { it is ReturnStatement }
+                }
+                if (parent is ScriptNode) return null
+                current = parent
+            }
+        }
+
+        /** The end of [statement], extended over the handler statements that directly follow it in the same block. */
+        private fun handlersEndAfter(statement: AstNode): Int {
+            var end = statement.absolutePosition + statement.length
+            val parent = statement.parent ?: return end
+            val siblings = parent.toList()
+            val index = siblings.indexOf(statement)
+            if (index < 0) return end
+            for (i in index + 1 until siblings.size) {
+                val next = siblings[i] as? ExpressionStatement ?: break
+                val call = next.expression as? FunctionCall ?: break
+                if (handlerOf(call) == null) break
+                end = next.absolutePosition + next.length
+            }
+            return end
+        }
+
+        /** The whitespace that starts the line of [offset], when nothing but whitespace precedes [offset] on it. */
+        private fun indentOf(offset: Int): String {
+            val lineStart = source.lastIndexOf('\n', offset - 1) + 1
+            val prefix = source.substring(lineStart, offset)
+            return if (prefix.isBlank()) prefix else ""
         }
 
         private fun literalOf(node: XmlLiteral): Literal {

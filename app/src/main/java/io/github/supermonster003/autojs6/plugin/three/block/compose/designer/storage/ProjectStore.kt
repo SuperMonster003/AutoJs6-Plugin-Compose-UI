@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiScriptReader
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -15,7 +16,10 @@ import java.security.MessageDigest
  * Nothing here needs a storage permission; importing and exporting go through the system document picker.
  */
 internal class ProjectStore(context: Context) {
-    data class Project(val name: String, val file: File, val modifiedAt: Long)
+    /** What a project is, for the home list and the new-project dialog (roadmap P10.4): Compose JavaScript, Compose TSX, or a `"ui";` mode script. */
+    enum class Kind { JS, TSX, UI }
+
+    data class Project(val name: String, val file: File, val modifiedAt: Long, val kind: Kind = Kind.JS)
 
     /**
      * The document a project was imported from (roadmap P9.1, D45) and [baseline], the digest of the text both
@@ -34,8 +38,15 @@ internal class ProjectStore(context: Context) {
     fun list(): List<Project> {
         projectsDir.mkdirs()
         return (projectsDir.listFiles { file -> file.isFile && isValidName(file.name) } ?: emptyArray())
-            .map { Project(it.name, it, it.lastModified()) }
+            .map { Project(it.name, it, it.lastModified(), kindOf(it)) }
             .sortedWith(compareByDescending<Project> { it.modifiedAt }.thenBy { it.name })
+    }
+
+    /** The kind of [file] by its name and, for a `.js` script, its text (the `"ui"` directive with a `ui.layout` call). */
+    private fun kindOf(file: File): Kind = when {
+        file.name.endsWith(TSX_EXTENSION, ignoreCase = true) -> Kind.TSX
+        runCatching { UiScriptReader.looksLikeUiScript(file.readText(StandardCharsets.UTF_8)) }.getOrDefault(false) -> Kind.UI
+        else -> Kind.JS
     }
 
     fun exists(name: String): Boolean = file(name).isFile
@@ -223,6 +234,25 @@ internal class ProjectStore(context: Context) {
                         <compose.Text key='title' text='Hello' style='headlineSmall' />
                     </compose.Column>
                 );
+            });
+        """.trimIndent() + LINE_END
+
+        /**
+         * The starter of a ui (XML) project (roadmap P10.4): the `"ui"` directive, a layout with a text and a button,
+         * and one click handler the way the host's samples write them.
+         */
+        val UI_TEMPLATE: String = """
+            "ui";
+
+            ui.layout(
+                <vertical padding="16">
+                    <text id="title" text="Hello" textSize="24sp"/>
+                    <button id="ok" text="OK"/>
+                </vertical>
+            );
+
+            ui.ok.on('click', () => {
+                toast('OK');
             });
         """.trimIndent() + LINE_END
 

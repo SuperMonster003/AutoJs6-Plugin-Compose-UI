@@ -14,7 +14,8 @@ sealed class UiEditCommand {
 
     /**
      * Sets attribute [name] to the raw value [value] (entities already encoded); null removes it, [bare] writes a
-     * bare attribute (`<console global>`). A new attribute goes last; an existing one keeps its place and quote.
+     * bare attribute (`<console global>`). A new attribute goes last (a new `id` first, where the host's samples
+     * write it); an existing one keeps its place and quote.
      */
     data class SetAttr(val id: Int, val name: String, val value: String?, val bare: Boolean = false) : UiEditCommand() {
         override val mergeToken get() = Triple("attr", id, name)
@@ -22,12 +23,13 @@ sealed class UiEditCommand {
             val attrs = element.attrs.toMutableList()
             val index = attrs.indexOfFirst { it.name == name }
             val raw = value
+            fun add(attr: XmlAttr) = if (name == "id") attrs.add(0, attr) else attrs.add(attr)
             when {
                 raw == null && !bare -> if (index >= 0) attrs.removeAt(index) else return@mapElement element
-                bare -> if (index >= 0) attrs[index] = XmlAttr(name, null, null) else attrs += XmlAttr(name, null, null)
+                bare -> if (index >= 0) attrs[index] = XmlAttr(name, null, null) else add(XmlAttr(name, null, null))
                 raw == null -> return@mapElement element
                 index >= 0 -> attrs[index] = XmlAttr(name, XmlAttr.partsOf(raw), quoteFor(raw, attrs[index].quote))
-                else -> attrs += XmlAttr(name, XmlAttr.partsOf(raw), quoteFor(raw, null))
+                else -> add(XmlAttr(name, XmlAttr.partsOf(raw), quoteFor(raw, null)))
             }
             element.copy(attrs = attrs, startTagSource = null)
         }
@@ -85,6 +87,41 @@ sealed class UiEditCommand {
             val (removed, element) = UiLayoutEdits.remove(document, id)
             if (element == null) return document
             return UiLayoutEdits.insert(removed, toParentId, toIndex, element)
+        }
+    }
+
+    /**
+     * Appends a `ui.<id>.on('<event>', ...)` stub after the `ui.layout` statement of the element's fragment and the
+     * handlers already written there (roadmap P10.4 / D52, option (b)); [assignId] first gives the element that id
+     * when it has none. The stub is opaque script text afterwards: the designer neither shows nor edits it, and a
+     * handler the script already registers for the same id and event is not added twice.
+     */
+    data class AddHandlerStub(val id: Int, val event: UiEvents.Event, val assignId: String? = null) : UiEditCommand() {
+        override fun apply(document: UiDocument): UiDocument {
+            val fragmentIndex = document.fragmentOf(id)
+            if (document.fragments.getOrNull(fragmentIndex)?.stubOffset?.let { it < 0 } != false) return document
+            val current = if (assignId != null) SetAttr(id, "id", assignId).apply(document) else document
+            val element = current.element(id) ?: return document
+            val elementId = element.attr("id")?.takeUnless { it.hasBinding || it.hasExpr }?.value
+                ?.removePrefix("@+id/")?.removePrefix("@id/")?.takeIf { IDENTIFIER.matches(it) } ?: return document
+            val handler = UiHandler(elementId, event.name)
+            if (handler in current.handlers) return document
+            val segmentIndex = current.segments.indexOfFirst { it is UiSegment.Layout && it.fragment.root.id == element.descendantsRootId(current) }
+            val layout = current.segments.getOrNull(segmentIndex) as? UiSegment.Layout ?: return document
+            val next = current.segments.getOrNull(segmentIndex + 1) as? UiSegment.Opaque ?: return document
+            val offset = layout.fragment.stubOffset
+            if (offset !in 0..next.source.length) return document
+            val stub = UiEvents.stub(elementId, event, layout.fragment.stubIndent)
+            val segments = current.segments.toMutableList()
+            segments[segmentIndex] = layout.copy(fragment = layout.fragment.copy(stubOffset = offset + stub.length))
+            segments[segmentIndex + 1] = UiSegment.Opaque(next.source.substring(0, offset) + stub + next.source.substring(offset))
+            return current.copy(segments = segments, handlers = current.handlers + handler)
+        }
+
+        private fun XmlNode.Element.descendantsRootId(document: UiDocument): Int = document.fragments[document.fragmentOf(id)].root.id
+
+        private companion object {
+            val IDENTIFIER = Regex("""[A-Za-z_$][A-Za-z0-9_$]*""")
         }
     }
 }
