@@ -1,5 +1,6 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -32,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -314,11 +317,48 @@ internal fun XmlBindingsPanel(session: UiDesignerSession, palette: StandalonePal
  * and what the host reported while drawing (failures with their codes and positions, diagnostics by attribute).
  */
 @Composable
-internal fun XmlConsolePanel(client: UiPreviewClient, statusText: String?, palette: StandalonePalette, modifier: Modifier = Modifier) {
+internal fun XmlConsolePanel(client: UiPreviewClient, statusText: String?, interactive: Boolean, palette: StandalonePalette, modifier: Modifier = Modifier) {
     val failure = client.failure
     val diagnostics = client.diagnostics
+    // Roadmap P10.6: while the interactive preview runs the script, the tab is that script's console.
+    val lines = client.consoleLines
+    val list = rememberLazyListState()
+    LaunchedEffect(lines.size) { if (lines.isNotEmpty()) list.scrollToItem(lines.size - 1) }
     Column(modifier.fillMaxSize().testTag("designer-ui-console")) {
-        Text(stringResource(R.string.designer_ui_console_hint), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp))
+        Text(stringResource(if (interactive) R.string.designer_ui_console_run_hint else R.string.designer_ui_console_hint), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp))
+        if (interactive) {
+            val scriptError = client.scriptError
+            val lastExit = client.lastExit
+            Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                val status = when {
+                    scriptError != null -> stringResource(R.string.designer_sandbox_error, scriptError)
+                    client.running && client.runId == null -> stringResource(R.string.designer_ui_interact_starting)
+                    client.running -> stringResource(R.string.designer_ui_interact_running)
+                    lastExit != null -> stringResource(R.string.designer_ui_interact_exited, lastExit)
+                    else -> statusText ?: ""
+                }
+                Text(status, color = Color(if (scriptError != null) palette.danger else palette.muted), fontSize = 12.sp, modifier = Modifier.weight(1f).padding(vertical = 4.dp).testTag("designer-ui-console-status"))
+                if (lines.isNotEmpty()) TextButton(onClick = { client.clearConsole() }, modifier = Modifier.testTag("designer-ui-console-clear")) {
+                    Text(stringResource(R.string.designer_console_clear))
+                }
+            }
+            SelectionContainer {
+                LazyColumn(state = list, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
+                    if (lines.isEmpty()) item {
+                        Text(stringResource(R.string.designer_ui_console_run_empty), color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                    }
+                    items(lines) { line ->
+                        val color = when {
+                            line.level >= Log.ERROR -> palette.danger
+                            line.level == Log.WARN -> palette.accent
+                            else -> palette.text
+                        }
+                        Text(line.text, color = Color(color), fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
+                    }
+                }
+            }
+            return@Column
+        }
         val status = when (val current = client.status) {
             is UiPreviewClient.Status.Ready -> "AutoJs6 " + (current.hostVersionName ?: current.hostVersionCode.toString()) + (statusText?.let { " - $it" } ?: "")
             else -> statusText ?: current.javaClass.simpleName

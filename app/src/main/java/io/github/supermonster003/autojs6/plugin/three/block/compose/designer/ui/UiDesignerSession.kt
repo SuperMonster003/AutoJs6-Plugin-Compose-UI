@@ -65,6 +65,8 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
         private set
     /** The last handler stub added (`ui.<id>.on('<event>')`), for the editor to announce. */
     var lastHandlerStub: UiHandler? by mutableStateOf(null)
+    /** The interactive preview is on (roadmap P10.6): the host runs the script in the canvas; not part of the document. */
+    var interactive: Boolean by mutableStateOf(false)
 
     val canUndo: Boolean get() = history.canUndo
     val canRedo: Boolean get() = history.canRedo

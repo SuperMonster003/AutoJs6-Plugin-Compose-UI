@@ -810,8 +810,10 @@ internal class DesignerActivity : StandaloneActivity() {
         DisposableEffect(client) { client.bind(); onDispose { } }
         LaunchedEffect(appearance) { client.configure(appearance.dark, appearance.language) }
         val lifecycle = LocalLifecycleOwner.current.lifecycle
+        var visible by remember { mutableStateOf(true) }
         DisposableEffect(lifecycle, client) {
             val observer = LifecycleEventObserver { _, event ->
+                visible = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
                 if (event == Lifecycle.Event.ON_RESUME) { if (client.status is UiPreviewClient.Status.Lost) client.retry() else client.ensureSession() }
             }
             lifecycle.addObserver(observer)
@@ -836,6 +838,41 @@ internal class DesignerActivity : StandaloneActivity() {
             client.submit(built)
         }
         LaunchedEffect(client.frameRevision) { session.previewFrames = client.frameRevision }
+        // Roadmap P10.6: the interactive preview runs the whole script in the session's root as a real host script
+        // (contract v2, API 33+). It starts when the switch goes on (after the project's one-time confirmation), runs
+        // again once edits pause, stops while the designer is hidden or when the switch goes off, and never touches
+        // the document, the file or the draft; the held layout is sent again when it ends.
+        val interactiveSupported = client.embedded && client.scriptRunSupported
+        LaunchedEffect(session.interactive, interactiveSupported, visible, session.revision, client.sessionRevision) {
+            if (session.interactive && interactiveSupported && visible) {
+                client.setInteractiveMode(true)
+                if (client.runRevision > 0) delay(SANDBOX_RESTART_DELAY_MS)
+                client.runScript(session.script(), source.title)
+            } else {
+                client.setInteractiveMode(false)
+            }
+        }
+        var interactivePrompt by remember { mutableStateOf(false) }
+        val interactivePrefs = remember { context.applicationContext.getSharedPreferences(DESIGNER_PREFS, Context.MODE_PRIVATE) }
+        fun toggleInteractive() {
+            if (session.interactive) { session.interactive = false; return }
+            val confirmed = interactivePrefs.getStringSet(INTERACTIVE_CONFIRMED_KEY, null).orEmpty()
+            if (source.draftKey in confirmed) session.interactive = true else interactivePrompt = true
+        }
+        if (interactivePrompt) AlertDialog(
+            onDismissRequest = { interactivePrompt = false },
+            title = { Text(stringResource(R.string.designer_ui_interact_confirm_title)) },
+            text = { Text(stringResource(R.string.designer_ui_interact_confirm_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    interactivePrompt = false
+                    val confirmed = interactivePrefs.getStringSet(INTERACTIVE_CONFIRMED_KEY, null).orEmpty()
+                    interactivePrefs.edit().putStringSet(INTERACTIVE_CONFIRMED_KEY, confirmed + source.draftKey).apply()
+                    session.interactive = true
+                }, modifier = Modifier.testTag("designer-ui-interact-confirm")) { Text(stringResource(R.string.gallery_run)) }
+            },
+            dismissButton = { TextButton(onClick = { interactivePrompt = false }, modifier = Modifier.testTag("designer-ui-interact-cancel")) { Text(stringResource(R.string.designer_cancel)) } },
+        )
         LaunchedEffect(session.lastHandlerStub) {
             // Roadmap D52 (b): the stub went into the script; the body is written in an editor, not here.
             val stub = session.lastHandlerStub ?: return@LaunchedEffect
@@ -1040,23 +1077,68 @@ internal class DesignerActivity : StandaloneActivity() {
             },
         ) { padding ->
             val canvas: @Composable (Modifier) -> Unit = { placement ->
-                Box(placement.background(Color(palette.surfaceVariant)).testTag("designer-canvas")) {
-                    XmlCanvas(
-                        session = session,
-                        request = request,
-                        client = client,
-                        zoom = zoom,
-                        accent = Color(palette.accent),
-                        danger = Color(palette.danger),
-                        text = Color(palette.text),
-                        muted = Color(palette.muted),
-                        surface = Color(palette.background),
-                        statusText = statusText,
-                        retryLabel = stringResource(R.string.designer_retry),
-                        onRetry = retry,
-                        onSelect = { session.selectedId = it ?: session.selectedId },
-                        modifier = Modifier.fillMaxSize().padding(8.dp),
-                    )
+                Column(placement) {
+                    // Roadmap P10.6: the switch and the run's state sit above the canvas, where the on-top surface of the
+                    // interactive preview cannot cover them (nothing of this window shows over the canvas while it is on).
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        val running = client.running
+                        val runId = client.runId
+                        val scriptError = client.scriptError
+                        val lastExit = client.lastExit
+                        val ready = client.status as? UiPreviewClient.Status.Ready
+                        if (interactiveSupported) FilterChip(
+                            selected = session.interactive,
+                            onClick = { toggleInteractive() },
+                            label = { Text(stringResource(R.string.designer_preview_interact)) },
+                            // Shown while the host runs the script in the canvas.
+                            leadingIcon = if (!(session.interactive && running && runId != null)) null else {
+                                { Icon(Icons.Filled.PlayArrow, contentDescription = stringResource(R.string.designer_ui_interact_running), modifier = Modifier.size(18.dp).testTag("designer-ui-live")) }
+                            },
+                            modifier = Modifier.padding(end = 8.dp).testTag("designer-interact"),
+                        )
+                        val live = session.interactive && interactiveSupported
+                        val rowText: String? = when {
+                            !live -> when {
+                                interactiveSupported || ready == null -> null
+                                !client.pointerInteractiveAvailable -> stringResource(R.string.designer_ui_interact_needs_android)
+                                else -> stringResource(R.string.designer_ui_interact_needs_host, ready.hostVersionName ?: ready.hostVersionCode.toString())
+                            }
+                            ready == null -> statusText
+                            scriptError != null -> stringResource(R.string.designer_sandbox_error, scriptError)
+                            running && runId == null -> stringResource(R.string.designer_ui_interact_starting)
+                            running -> stringResource(if (client.imeAvailable) R.string.designer_ui_interact_running else R.string.designer_ui_interact_no_ime)
+                            lastExit != null -> stringResource(R.string.designer_ui_interact_exited, lastExit)
+                            else -> null
+                        }
+                        if (rowText != null) Text(
+                            rowText,
+                            color = Color(if (live && (scriptError != null || ready == null)) palette.danger else palette.muted),
+                            fontSize = 12.sp,
+                            maxLines = 2,
+                            modifier = Modifier.weight(1f).padding(vertical = 6.dp).clickable(enabled = live) {
+                                if (ready == null) retry?.invoke() else tab = UI_CONSOLE_TAB
+                            }.testTag(if (live && scriptError != null) "designer-ui-script-problem" else "designer-ui-interact-status"),
+                        )
+                    }
+                    Box(Modifier.fillMaxWidth().weight(1f).background(Color(palette.surfaceVariant)).testTag("designer-canvas")) {
+                        XmlCanvas(
+                            session = session,
+                            request = request,
+                            client = client,
+                            zoom = zoom,
+                            interactive = session.interactive && interactiveSupported,
+                            accent = Color(palette.accent),
+                            danger = Color(palette.danger),
+                            text = Color(palette.text),
+                            muted = Color(palette.muted),
+                            surface = Color(palette.background),
+                            statusText = statusText,
+                            retryLabel = stringResource(R.string.designer_retry),
+                            onRetry = retry,
+                            onSelect = { session.selectedId = it ?: session.selectedId },
+                            modifier = Modifier.fillMaxSize().padding(8.dp),
+                        )
+                    }
                 }
             }
             val panels: @Composable (Modifier) -> Unit = { placement ->
@@ -1073,7 +1155,7 @@ internal class DesignerActivity : StandaloneActivity() {
                         1 -> UiInspectorPanel(session, palette, Modifier.fillMaxWidth())
                         2 -> XmlBindingsPanel(session, palette, Modifier.fillMaxWidth())
                         UI_PROBLEMS_TAB -> XmlProblemsPanel(session, palette, Modifier.fillMaxWidth())
-                        else -> XmlConsolePanel(client, statusText, palette, Modifier.fillMaxWidth())
+                        else -> XmlConsolePanel(client, statusText, session.interactive && interactiveSupported, palette, Modifier.fillMaxWidth())
                     }
                 }
             }
@@ -1205,6 +1287,9 @@ internal class DesignerActivity : StandaloneActivity() {
         private const val UI_PROBLEMS_TAB = 3
         private const val UI_CONSOLE_TAB = 4
         private const val SANDBOX_RESTART_DELAY_MS = 400L
+        /** Designer-wide preferences: the projects whose interactive preview of a ui script was confirmed (P10.6). */
+        private const val DESIGNER_PREFS = "designer"
+        private const val INTERACTIVE_CONFIRMED_KEY = "ui-interactive-confirmed"
 
         fun intent(context: Context, projectName: String): Intent = Intent(context, DesignerActivity::class.java).putExtra(EXTRA_PROJECT, projectName)
 

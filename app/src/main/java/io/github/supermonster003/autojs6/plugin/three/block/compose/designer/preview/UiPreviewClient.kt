@@ -76,8 +76,47 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     /** A property-level problem of an applied frame. */
     data class Diagnostic(val code: String, val message: String, val elementIndex: Int, val attrName: String?)
 
+    /** One console entry of the running script (contract v2); [level] is an `android.util.Log` priority. */
+    data class ConsoleLine(val level: Int, val text: String)
+
+    /** Whether the host offers `runScript` (contract v2 on API 33+); known once the handshake is done. */
+    var scriptRunSupported: Boolean by mutableStateOf(false)
+        private set
+    /** A script run is going (from `runScript` until `onScriptExit`). */
+    var running: Boolean by mutableStateOf(false)
+        private set
+    var runId: String? by mutableStateOf(null)
+        private set
+    /** The running script's console, newest last; cleared when a run starts. */
+    var consoleLines: List<ConsoleLine> by mutableStateOf(emptyList())
+        private set
+    /** The last uncaught error of the run, or why it could not start. */
+    var scriptError: String? by mutableStateOf(null)
+        private set
+    /** Why the last run ended (a contract exit reason), null while none ended. */
+    var lastExit: String? by mutableStateOf(null)
+        private set
+    /** Counts script starts, so observers can wait for the next run. */
+    var runRevision: Long by mutableStateOf(0L)
+        private set
+    /** Counts created sessions, so observers can act once a session (again) exists. */
+    var sessionRevision: Long by mutableStateOf(0L)
+        private set
+    /**
+     * The interactive preview is on: the embedded tree takes the pointer, the script runs in the session's root
+     * and layouts are held back until the preview ends (they would replace the running script's content).
+     */
+    var interactive: Boolean by mutableStateOf(false)
+        private set
+    /** The host's contract version from the handshake (1 for a v1 host). */
+    private var hostContractVersion = Contract.BASE_VERSION
+
     val mode: String = if (Build.VERSION.SDK_INT >= Contract.MIN_API_EMBEDDED) Contract.MODE_EMBEDDED else Contract.MODE_SNAPSHOT
     val embedded: Boolean get() = mode == Contract.MODE_EMBEDDED
+    /** This Android can hand the pointer to the embedded tree (D50: API 33+); the host confirms it per session. */
+    val pointerInteractiveAvailable: Boolean = Build.VERSION.SDK_INT >= Contract.MIN_API_INTERACTIVE
+    /** This Android can give the embedded tree keyboard input (D50: API 35+). */
+    val imeAvailable: Boolean = Build.VERSION.SDK_INT >= Contract.MIN_API_IME
 
     var status: Status by mutableStateOf(Status.Idle)
         private set
@@ -113,6 +152,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     private var highlighted = -1
     private var pointerMode = Contract.POINTER_MODE_EDIT
     private var retriedCreate = false
+    /** A createSession round trip is in flight: a second request would make a second session (the host allows two). */
+    private var creating = false
     @Volatile private var closed = false
     /** Bumped whenever the session changes, so callbacks of an old session are ignored. */
     private var generation = 0
@@ -145,12 +186,45 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 if (sessionId != this@UiPreviewClient.sessionId) return@post
                 this@UiPreviewClient.sessionId = null
                 generation++
+                running = false
+                runId = null
                 status = Status.Lost(why)
             }
         }
 
         override fun onTap(sessionId: String, tap: Bundle) {
             /* Edit mode keeps the surface below the window, so taps reach the canvas overlay instead (P10.3). */
+        }
+
+        // Contract v2 (roadmap P10.6): the running script's console, errors and end.
+
+        override fun onConsole(sessionId: String, entry: Bundle) {
+            val line = ConsoleLine(entry.getInt(Contract.KEY_LEVEL, android.util.Log.INFO), entry.getString(Contract.KEY_TEXT).orEmpty())
+            main.post {
+                if (sessionId != this@UiPreviewClient.sessionId) return@post
+                val lines = consoleLines
+                consoleLines = (if (lines.size >= MAX_CONSOLE_LINES) lines.drop(lines.size - MAX_CONSOLE_LINES + 1) else lines) + line
+            }
+        }
+
+        override fun onScriptError(sessionId: String, error: Bundle) {
+            val message = error.getString(Contract.KEY_ERROR_MESSAGE).orEmpty()
+            val line = error.getInt(Contract.KEY_LINE, -1)
+            main.post {
+                if (sessionId != this@UiPreviewClient.sessionId) return@post
+                scriptError = if (line > 0) "$line: $message" else message
+            }
+        }
+
+        override fun onScriptExit(sessionId: String, exit: Bundle) {
+            val id = exit.getString(Contract.KEY_RUN_ID)
+            val reason = exit.getString(Contract.KEY_REASON) ?: "unknown"
+            main.post {
+                if (sessionId != this@UiPreviewClient.sessionId) return@post
+                if (id != null && runId != null && id != runId) return@post
+                running = false
+                lastExit = reason
+            }
         }
     }
 
@@ -160,6 +234,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         private const val TAG = "UiPreviewClient"
         const val DEBOUNCE_MS = 400L
         private const val CREATE_RETRY_DELAY_MS = 500L
+        private const val MAX_CONSOLE_LINES = 500
         private const val SNAPSHOT_DIRECTORY = "ui-preview"
 
         /** Why the host cannot preview without binding it: not installed, or without the service; null when it may. */
@@ -235,14 +310,18 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
 
     private fun handshake(remote: IUiPreviewService) {
         try {
-            if (remote.contractVersion != Contract.VERSION || remote.contractHash != Contract.HASH) {
+            // The frozen v1 base identifies the service; v2 (runScript) is announced through the preview info.
+            if (remote.contractVersion != Contract.BASE_VERSION || remote.contractHash != Contract.HASH_V1) {
                 main.post { unbind(); status = Status.Unavailable(Reason.CONTRACT_MISMATCH, installedHostVersion(context), null) }
                 return
             }
             val info = remote.previewInfo
+            val v2 = info.getInt(Contract.KEY_CONTRACT_VERSION, Contract.BASE_VERSION) >= Contract.VERSION && info.getString(Contract.KEY_CONTRACT_HASH) == Contract.HASH
             main.post {
                 if (closed) return@post
                 service = remote
+                hostContractVersion = if (v2) Contract.VERSION else Contract.BASE_VERSION
+                scriptRunSupported = v2 && info.getBoolean(Contract.KEY_SCRIPT_RUN_SUPPORTED, false) && embedded
                 status = Status.Ready(info.getString(Contract.KEY_HOST_VERSION_NAME), info.getLong(Contract.KEY_HOST_VERSION_CODE))
                 ensureSession()
             }
@@ -259,6 +338,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             unbind()
             sessionId = null
             generation++
+            running = false
+            runId = null
             status = Status.Lost("host")
         }
     }
@@ -332,15 +413,20 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         surface = null
     }
 
-    /** Creates the session when the service and the viewport are ready and no session exists. Main thread. */
+    /**
+     * Creates the session when the service and the viewport are ready and no session exists. While the host is
+     * creating one, later calls return; what changed meanwhile (the viewport, the night mode or locale) is
+     * applied once the session arrives. Main thread.
+     */
     fun ensureSession() {
-        if (closed || sessionId != null) return
+        if (closed || sessionId != null || creating) return
         val remote = service ?: run { bind(); return }
         if (surfaceWidth <= 0 || surfaceHeight <= 0) return
         val view = surface
         if (embedded && view == null) return
         val request = Bundle().apply {
-            putInt(Contract.KEY_CONTRACT_VERSION, Contract.VERSION)
+            // A v1 host accepts only its own version; a v2 host accepts both.
+            putInt(Contract.KEY_CONTRACT_VERSION, hostContractVersion)
             putString(Contract.KEY_MODE, mode)
             putInt(Contract.KEY_WIDTH_PX, surfaceWidth)
             putInt(Contract.KEY_HEIGHT_PX, surfaceHeight)
@@ -351,6 +437,11 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && embedded && view != null) Embedded.fill(this, view)
         }
         val myGeneration = ++generation
+        val requestedWidth = surfaceWidth
+        val requestedHeight = surfaceHeight
+        val requestedNight = nightMode
+        val requestedLocale = localeTag
+        creating = true
         bounds = emptyList()
         failure = null
         diagnostics = emptyList()
@@ -363,18 +454,23 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 null
             }
             main.post {
+                creating = false
                 if (closed || myGeneration != generation) {
                     // The screen closed (its worker is shut down) or restarted the session while the host was creating this one.
                     result?.getString(Contract.KEY_SESSION_ID)?.let { id ->
                         try { worker.execute { runCatching { remote.release(id) } } } catch (rejected: RejectedExecutionException) { Thread({ runCatching { remote.release(id) } }, "ui-preview-release").start() }
                     }
+                    // The restart that abandoned this one found a creation in flight: it gets its session now.
+                    if (!closed && sessionId == null && service != null) ensureSession()
                     return@post
                 }
                 val id = result?.getString(Contract.KEY_SESSION_ID)
+                val code = result?.getString(Contract.KEY_ERROR_CODE)
                 if (result == null) {
                     onHostGone()
-                } else if (id == null && result.getString(Contract.KEY_ERROR_CODE) == Contract.ERROR_TIMEOUT && !retriedCreate) {
-                    // A cold host (its first script engine) can outlive the host's wait once; the second attempt finds it warm.
+                } else if (id == null && (code == Contract.ERROR_TIMEOUT || code == Contract.ERROR_SESSION_LIMIT) && !retriedCreate) {
+                    // A cold host (its first script engine) can outlive the host's wait once; the second attempt finds it
+                    // warm. The host counts a session this client just released until its main thread gets to it.
                     retriedCreate = true
                     main.postDelayed({ ensureSession() }, CREATE_RETRY_DELAY_MS)
                 } else if (id == null) {
@@ -386,6 +482,17 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                     if (highlighted >= 0) call { it.setHighlight(id, highlighted) }
                     if (pointerMode != Contract.POINTER_MODE_EDIT) call { it.setPointerMode(id, pointerMode) }
                     scheduleFlush(resend = true)
+                    sessionRevision++
+                    // What changed while the host was creating: a configuration change needs a new session, a new
+                    // viewport size follows with a resize (the queued flush redraws a snapshot at that size).
+                    if (requestedNight != nightMode || requestedLocale != localeTag) {
+                        releaseSession()
+                        ensureSession()
+                    } else if (requestedWidth != surfaceWidth || requestedHeight != surfaceHeight) {
+                        val width = surfaceWidth
+                        val height = surfaceHeight
+                        call { remote -> remote.resize(id, width, height) }
+                    }
                 }
             }
         }
@@ -402,6 +509,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         val id = sessionId ?: return
         sessionId = null
         generation++
+        running = false
+        runId = null
         val remote = service ?: return
         try { worker.execute { runCatching { remote.release(id) } } } catch (rejected: RejectedExecutionException) { /* closed */ }
     }
@@ -416,6 +525,76 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         pointerMode = mode
         val id = sessionId ?: return
         call { it.setPointerMode(id, mode) }
+    }
+
+    // ------------------------------------------------------------------------------- interactive preview (v2)
+
+    /**
+     * Turns the interactive preview on or off (roadmap P10.6). On: the host passes the pointer to the embedded
+     * tree and layouts are held until the preview ends; the caller then starts the script with [runScript].
+     * Off: the running script is stopped, the pointer returns to the edit mode and the last layout is sent again,
+     * so the canvas shows the document once more. Main thread.
+     */
+    fun setInteractiveMode(active: Boolean) {
+        if (closed || interactive == active) return
+        interactive = active
+        if (active) {
+            setPointerMode(Contract.POINTER_MODE_INTERACTIVE)
+        } else {
+            stopScript()
+            setPointerMode(Contract.POINTER_MODE_EDIT)
+            scheduleFlush(resend = true)
+        }
+    }
+
+    /**
+     * Runs [text] (a whole `"ui"` mode script) in the session's root as a real host script (roadmap P10.6);
+     * a run still going is replaced. The console, errors and the end arrive as state. Main thread.
+     */
+    fun runScript(text: String, name: String) {
+        if (closed || !scriptRunSupported) return
+        val id = sessionId ?: return
+        consoleLines = emptyList()
+        scriptError = null
+        lastExit = null
+        running = true
+        runRevision++
+        val request = Bundle().apply {
+            putString(Contract.KEY_SCRIPT_TEXT, text)
+            putString(Contract.KEY_SCRIPT_NAME, name)
+        }
+        call(onResult = { result ->
+            main.post {
+                if (sessionId != id) return@post
+                if (result.getString(Contract.KEY_OUTCOME) == Contract.OUTCOME_APPLIED) {
+                    runId = result.getString(Contract.KEY_RUN_ID)
+                } else {
+                    running = false
+                    scriptError = result.getString(Contract.KEY_ERROR_MESSAGE) ?: result.getString(Contract.KEY_ERROR_CODE)
+                    lastExit = Contract.EXIT_ERROR
+                }
+            }
+        }) { remote -> remote.runScript(id, request) }
+    }
+
+    /** Stops the running script, if any; the layout preview can be sent again afterwards. Main thread. */
+    fun stopScript() {
+        val id = sessionId ?: return
+        if (!running && runId == null) return
+        running = false
+        runId = null
+        call { remote -> remote.stopScript(id) }
+    }
+
+    /** Sends the last layout again (after a script run ended, the root shows the script's content). Main thread. */
+    fun resendLayout() {
+        if (closed) return
+        scheduleFlush(resend = true)
+    }
+
+    /** Empties the running script's console; the next run empties it again. Main thread. */
+    fun clearConsole() {
+        consoleLines = emptyList()
     }
 
     // ------------------------------------------------------------------------------------------------- layouts
@@ -440,6 +619,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     private fun flush() {
         if (closed) return
         val request = pending ?: run { busy = false; return }
+        // The interactive preview owns the root: the layout waits (as pending) until the preview ends.
+        if (interactive) { busy = false; return }
         val id = sessionId
         val remote = service
         if (id == null || remote == null) {

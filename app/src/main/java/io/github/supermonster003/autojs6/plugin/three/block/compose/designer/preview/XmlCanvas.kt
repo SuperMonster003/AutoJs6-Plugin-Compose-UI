@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,11 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.
  * the deepest element under it by the host's bounds, a long press drags it to a container with the insertion line
  * of [DropPlacements], and the selection, the drop target and the element of a failed frame are drawn over the
  * surface. Until the host has drawn a frame the element tree is shown as text, with the preview's status.
+ *
+ * The interactive preview (roadmap P10.6, [interactive]) puts the surface on top of the window, the only way
+ * pointer input reaches the embedded tree (P10.0), so nothing of this window shows over the canvas then: the
+ * overlay and its gestures are gone and the status goes to the editor's row above the canvas. Changing the Z
+ * order needs a new surface, so the `SurfaceView` is recreated and the session re-attached.
  */
 @Composable
 internal fun XmlCanvas(
@@ -59,6 +65,7 @@ internal fun XmlCanvas(
     request: XmlPreviewRequest?,
     client: UiPreviewClient,
     zoom: Float,
+    interactive: Boolean,
     accent: Color,
     danger: Color,
     text: Color,
@@ -75,7 +82,8 @@ internal fun XmlCanvas(
     val measurer = rememberTextMeasurer()
     val labelStyle = TextStyle(fontSize = 10.sp, color = Color.White)
     val bounds = client.bounds
-    val hasFrame = if (client.embedded) bounds.isNotEmpty() else client.snapshot != null
+    // A running script draws its own content: the surface shows it whether or not bounds have arrived.
+    val hasFrame = interactive || if (client.embedded) bounds.isNotEmpty() else client.snapshot != null
     DisposableEffect(client) { onDispose { client.detachSurface() } }
 
     fun rectOf(bound: UiPreviewClient.Bound): Rect = Rect(bound.left * zoom, bound.top * zoom, bound.right * zoom, bound.bottom * zoom)
@@ -106,12 +114,13 @@ internal fun XmlCanvas(
         if (!client.embedded) LaunchedEffect(widthPx, heightPx) { client.resize(widthPx, heightPx) }
         Box(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).horizontalScroll(rememberScrollState())) {
             Box(Modifier.requiredSize(logicalWidth * zoom, logicalHeight * zoom).testTag("designer-xml-canvas-content")) {
-                if (client.embedded) {
+                if (client.embedded) key(interactive) {
                     AndroidView(
                         factory = { context ->
                             SurfaceView(context).also { view ->
-                                // Below the window: pointer input stays with this window's overlay, and the overlay draws over the surface.
-                                view.setZOrderOnTop(false)
+                                // Edit mode: below the window, so pointer input stays with this window's overlay, which draws over
+                                // the surface. Interactive preview: on top, so the pointer reaches the embedded tree (P10.0).
+                                view.setZOrderOnTop(interactive)
                                 view.holder.addCallback(object : SurfaceHolder.Callback {
                                     override fun surfaceCreated(holder: SurfaceHolder) { /* the size arrives with surfaceChanged */ }
                                     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) { client.attachSurface(view, width, height); client.resize(width, height) }
@@ -123,7 +132,7 @@ internal fun XmlCanvas(
                             scaleX = zoom
                             scaleY = zoom
                             transformOrigin = TransformOrigin(0f, 0f)
-                        }.testTag("designer-xml-surface"),
+                        }.testTag(if (interactive) "designer-xml-surface-live" else "designer-xml-surface"),
                     )
                 } else {
                     client.snapshot?.let { bitmap ->
@@ -142,7 +151,8 @@ internal fun XmlCanvas(
                         )
                     }
                 }
-                Box(
+                // The interactive preview has no overlay: the embedded tree owns the pointer and the surface covers the window.
+                if (!interactive) Box(
                     Modifier
                         .fillMaxSize()
                         .testTag("designer-xml-overlay")
@@ -197,7 +207,7 @@ internal fun XmlCanvas(
                 }
             }
         }
-        if (statusText != null) {
+        if (statusText != null && !interactive) {
             Column(
                 Modifier.align(Alignment.BottomStart).padding(12.dp).background(surface).padding(8.dp).testTag("designer-xml-status"),
             ) {
