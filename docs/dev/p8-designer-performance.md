@@ -142,3 +142,71 @@ On the Redmi 22120RN86C (API 33) of the 1.2.0 baseline, with the change (build 1
 
 The visibility times are the same test as the 1.2.0 row, so the two columns compare directly; the frame times
 were not collected before. The Sony G8441 was not measured again.
+
+## Second round (1.7.0, 2026-10-15)
+
+Collected with the same two opt-in test classes on the 1.7.0 debug build (sources of plugin commit c0acd05,
+build 174, with the androidTest APK of the same tree; the release 1.7.0 was restored on the phones afterwards).
+`DesignerPerformanceDeviceTest` gives the pipeline, open and visibility figures; `DesignerFramePerformanceDeviceTest`
+the frame and main-thread CPU figures (its "call to end of first frame" is the undo / redo call plus the first
+frame). The Redmi is the phone of the 1.2.0 baseline; its 1.3.0 figures (after the keyed-children fix) are the
+reference for the edit rows. The Xiaomi Pad (API 35, landscape, canvas and panels side by side) is new. The two
+emulators ran their measurements at the same time while four other emulators of other sessions were up, so
+their wall times are inflated and only recorded; the P8 note that emulator numbers are comparable only within one
+run still holds. Values are p50 / p90 in milliseconds, n = 10 (open: 8).
+
+| Measurement | Redmi, 1.2.0 / 1.3.0 reference | Redmi 22120RN86C, API 33 | Xiaomi Pad 23046RP50C, API 35 | AVD_API_24 x86 | AVD_API_33 x86_64 |
+| --- | --- | --- | --- | --- | --- |
+| Gallery read (56 scripts) | 33.5 / 40.3 | 33.0 / 41.9 | 11.1 / 15.7 | 73.5 / 184.2 | 44.9 / 74.5 |
+| Gallery validate | 13.5 / 16.3 | 12.5 / 14.2 | 6.1 / 6.7 | 34.9 / 136.8 | 16.4 / 34.2 |
+| Gallery preview frame | 17.6 / 20.4 | 19.8 / 22.7 | 6.1 / 8.4 | 66.9 / 105.2 | 25.5 / 55.9 |
+| Gallery write | 13.6 / 15.6 | 13.5 / 15.5 | 7.5 / 10.5 | 78.8 / 129.2 | 16.8 / 42.8 |
+| Large read (251 nodes) | 5.8 / 6.6 | 6.0 / 6.9 | 2.4 / 2.6 | 28.2 / 52.3 | 4.3 / 6.4 |
+| Large validate | 5.4 / 6.5 | 4.7 / 5.7 | 3.9 / 4.1 | 8.8 / 34.6 | 3.2 / 10.3 |
+| Large preview frame | 7.0 / 9.1 | 8.2 / 9.8 | 3.2 / 3.5 | 10.4 / 29.4 | 7.2 / 18.2 |
+| Large write | 4.4 / 5.7 | 4.2 / 4.6 | 3.7 / 3.9 | 6.0 / 41.8 | 3.2 / 3.8 |
+| Open NavigationBar example | 498.8 / 585.8 | 572.2 / 666.2 | 404.9 / 482.9 | 532.0 / 787.1 | 898.2 / 1197.0 |
+| Open 251-node document | 684.9 / 710.8 | 751.6 / 799.3 | 394.6 / 450.9 | 851.5 / 3819.6 | 1955.3 / 6716.0 |
+| Undo restores a row (visibility) | 305.6 / 358.9 | 336.0 / 378.5 | 174.0 / 192.1 | 280.6 / 578.4 | 489.6 / 1012.4 |
+| Redo removes a row (visibility) | 256.5 / 302.1 | 305.5 / 359.5 | 167.6 / 198.9 | 190.3 / 263.2 | 487.7 / 1231.6 |
+| Undo: call to end of first frame | 239.3 / 266.5 | 266.3 / 371.9 | 72.1 / 95.1 | not measured | 96.7 / 132.8 |
+| Undo: main thread CPU | 281.3 / 312.1 | 325.9 / 419.7 | 119.1 / 130.5 | 43.2 / 64.8 | 84.4 / 113.2 |
+| Redo: call to end of first frame | 251.1 / 270.4 | 290.1 / 369.4 | 76.7 / 93.4 | not measured | 100.9 / 145.1 |
+| Redo: main thread CPU | not measured | 317.2 / 424.5 | 127.0 / 146.1 | 44.4 / 68.2 | 85.2 / 134.9 |
+
+Reading the numbers:
+
+- On the Redmi every pipeline stage is within a few milliseconds of the 1.2.0 baseline (gallery read 41.9 vs 40.3
+  p90, large preview frame 9.8 vs 9.1), the opens are about 15 % slower (the editor gained the state and console
+  tabs, the UI project code and the interactive preview row since 1.2.0; 666 vs 586 and 799 vs 711 p90) and the
+  edit figures stay where the 1.3.0 fix put them (undo visibility 378.5 vs 358.9 p90, undo to first frame 371.9 vs
+  266.5 p90 with the same two frames per edit). Two rounds two days apart on the same phone agree within about
+  15 % at p50 on every row; the p90 of the frame rows spreads more (up to 40 % with 10 samples), which is
+  why the proposal below adds 50 % to p90 rather than to p50. This is the stability evidence the P8 note asked
+  for before a review line.
+- The Pad is faster than the Redmi on every row and shows the same shape.
+- The emulator rows are not comparable with their 1.2.0 columns (those were taken with one emulator running): the
+  API 24 gallery read is 184 vs 24 p90 and the API 33 large open reached 6.7 s because the host PC was saturated.
+
+Proposed review lines (not in force; the maintainer confirms them, as with the P5 lines in `AGENTS.md` section 14):
+the Redmi p90 of this round plus 50 %, rounded up to 5 ms, measured with the same test classes, document set and
+warm-up / sample counts on the same phone in portrait, otherwise idle. Emulators stay out of the review.
+
+| Measurement | Redmi p90 (1.7.0) | Proposed review line |
+| --- | --- | --- |
+| Gallery read (56 scripts) | 41.9 | 65 ms |
+| Gallery validate | 14.2 | 25 ms |
+| Gallery preview frame | 22.7 | 35 ms |
+| Gallery write | 15.5 | 25 ms |
+| Large read (251 nodes) | 6.9 | 15 ms |
+| Large validate | 5.7 | 10 ms |
+| Large preview frame | 9.8 | 15 ms |
+| Large write | 4.6 | 10 ms |
+| Open NavigationBar example | 666.2 | 1000 ms |
+| Open 251-node document | 799.3 | 1200 ms |
+| Undo restores a row (visibility) | 378.5 | 570 ms |
+| Redo removes a row (visibility) | 359.5 | 540 ms |
+| Undo: call to end of first frame | 371.9 | 560 ms |
+| Undo: main thread CPU | 419.7 | 630 ms |
+| Redo: call to end of first frame | 369.4 | 555 ms |
+| Redo: main thread CPU | 424.5 | 640 ms |
