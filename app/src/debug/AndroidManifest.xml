@@ -1,7 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Roadmap P10.0 spike only: the debug page binds the spike host (a debug build of AutoJs6 with a different id). -->
+    <queries>
+        <package android:name="org.autojs.autojs6.compose.spike" />
+    </queries>
+
     <application>
         <!-- Instrumentation fixture only; never packaged in the release plugin. -->
         <activity android:name=".renderer.RendererTestActivity" android:exported="false"
             android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+        <!-- Roadmap P10.0 spike page; exported so adb can start it, never packaged in the release plugin. -->
+        <activity android:name=".spike.UiPreviewSpikeActivity" android:exported="true"
+            android:configChanges="uiMode|orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.ThreeBlockCompose" />
     </application>
 </manifest>

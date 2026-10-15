@@ -285,7 +285,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 | P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
 | P9 | 设计器增强: 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 - 1.5.0 (D41) | 2026-10-13 维护者选定三个方向, Q12 - Q16 同日拍板 (D41 - D45); 1.2.0 发布基线 6db6da2. 1.3.0 (P9.1 全部, P9.3 第一步与模式切换) 同日完成并过本地 gate (build 129 源码, 证据 `docs/dev/p9-designer-evidence.md`), 未推送; 1.4.0 (P9.2 TSX 工程, 宿主 `fce22c83a6` 与 TypeScript Engine 0.7.0 `1e92487` 的解析契约) 同日完成并过本地 gate (证据 `docs/dev/p9-tsx-evidence.md`), 并作为首个公开发行版发布 (D7 再修订, GitHub Release `v1.4.0` 与官方索引 `b3085e8`); P9.3 第二步 (1.5.0) 由维护者于同日按 D43 立项, 2026-10-14 完成并过本地 gate (build 139 源码, 证据 `docs/dev/p9-sandbox-evidence.md`), 发布为 GitHub Release `v1.5.0` 并由官方索引 `8b095f6` 准入 |
-| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 全部条目未开始 |
+| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 同日完成 P10.0 spike (宿主分支 `spike/ui-preview-p10`, 插件 debug 页, 证据 `docs/dev/p10-spike-evidence.md`): 嵌入显示 API 30+, 触摸需表面置顶, 交互 (弹出层) API 33+, 输入法 API 35+, 快照 API 24 / 28 可行; P10.1 起未开始 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4. P9 依赖 1.2.0 本地 gate; 按 D41 先 P9.1 与 P9.3 第一步 (1.3.0), 再 P9.2 (1.4.0, 依赖宿主与 TypeScript Engine 的解析契约), P9.3 第二步在 1.4.0 后评估并依赖 P9.1 的弹层画布内绘制.
 
@@ -1035,7 +1035,7 @@ F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6
 
 ### Q18 - Q21 (P10 各阶段前): 文档页归属与命名, XML 工程的逻辑生成范围, 预览运行时在宿主中的可见性, 嵌入模式的输入法最低 API
 
-未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行.
+未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行. Q21 已有 P10.0 实测 (2026-10-15): 输入法只在 API 35+ 以 `InputTransferToken` 构造的嵌入窗口中可用, API 30 - 32 的弹出层会让宿主崩溃; 建议三级门禁 (显示 30+, 交互 33+, 输入法 35+).
 
 ---
 
@@ -1394,3 +1394,11 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 结论: 可行, 真实预览只能由宿主进程渲染并经 `SurfaceControlViewHost` 嵌入 (API 30+), 残余偏差 (无 Activity 窗口, 对话框 / 弹出层 / 输入法, 逻辑屏幕) 需明示; 插件内复刻 View 渲染排除. 以选择题向维护者确认四项方向 (预览架构, 脚本执行范围, API 24 - 29, 原样编辑粒度), 均选推荐项, 写入 D46 - D49 与 Q17.
 - 产出: `docs/dev/p10-ui-xml-designer-roadmap.md` (结论, 决策, 现状事实, 目标架构与残余偏差清单, 范围, 阶段总览 P10.0 - P10.7 (1.6.0 = 编辑 + 布局预览 + 快照, 1.7.0 = 交互预览), 逐项可勾选条目, 附录: 脚本子集与模型草案, 预览契约 v1 草案 (AIDL / 键 / 错误码 / 上限 / 安全), 属性目录生成规则, 待决 Q18 - Q21, 验证顺序与设备矩阵); 本文件阶段总览追加 P10 行. 全部条目未开始, 宿主侧无改动.
 - 未执行: 任何构建与设备验证 (纯文档会话); 文档的标点守卫经 `ApplicationTextPunctuationTest` 运行.
+
+### 2026-10-15 (续): P10.0 嵌入与快照 spike
+
+- 宿主以独立 worktree 建分支 `spike/ui-preview-p10` (提交 `c80736621f`, master `686f402e55`, `-PcomposeUiSpike=true` 独立包名): `UiPreviewHost` 承载接口与 `UI.kt` 的 `ui.layout` / `ui.inflate` 分流, Messenger 服务 `UiPreviewSpikeService` (SurfaceControlViewHost 会话 / 离屏快照 / 边界 / 重新附着 / 编辑模式拦截与高亮, API 30 / 35 / 37 三条构造路径), `ScriptEngineService.getScriptEngineManager()`; 三轮编译各约 7 分钟. 插件 debug 页 `spike/UiPreviewSpikeActivity` 与 debug Manifest 的 `<queries>`; 临时驱动脚本未入库.
+- 结论 (`docs/dev/p10-spike-evidence.md`): 嵌入显示 API 30 / 33 / 35 / 37 均可; 触摸只有 `setZOrderOnTop(true)` 时到达嵌入树, 因此编辑模式的拦截 / 命中 / 高亮改由宿主根容器做, 缩放在插件侧缩放 SurfaceView; 输入法仅 API 35+ (`InputTransferToken` 构造), 弹出层 API 33+ (API 30 崩溃宿主), `dialogs.alert` 为宿主悬浮窗 (HyperOS 需用户授权); 后台后恢复要重新索取 `SurfacePackage`; 预览执行必须是主线程 ui 模式语义; 快照 API 24 / 28 可行 (1032 x 448 往返 64 ms). 路线图 P10.0 五条勾选, 3.1 / 3.5 / 附录 B / Q21 据此修订.
+- 对照: 列表模板 `{{name}}` 的 ReferenceError 在真实 ui 模式与 Redmi 上的正式宿主 (官方示例 `列表控件.js`) 同样出现, 是宿主当前构建的问题, 已作为独立任务建议交给维护者.
+- 设备: AVD_API_30 / 33 (3-Maple Image 会话的实例, 误用约 30 分钟后已告知并卸载), 小米平板 968e9f18 / Redmi bek749scrwv4wo8h / G8441 BH900ASK9E (经该会话同意借用, 结束时卸载 spike 宿主并装回 1.5.1 release), 自建 AVD_API_24 只读实例与 AVD_API_37.1_16K. 宿主 worktree 提交后移除, 分支保留.
+- 未执行: 缩放态下的触摸命中, Toolbar 溢出菜单 (与 Spinner 同为 PopupWindow), 1080 x 1920 快照实测, 宿主侧 compose 设备矩阵 (本次不改宿主 master).

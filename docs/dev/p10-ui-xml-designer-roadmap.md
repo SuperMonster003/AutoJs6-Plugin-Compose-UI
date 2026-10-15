@@ -122,6 +122,8 @@ var x = <vertical><text id="txt" text="{{msg}}" size="32sp" /><text text="a {msg
 - 布局预览: 文档或预览值变化后 400 ms 内把 (xml, 绑定值) 发给宿主 (与沙箱重跑同节拍), 宿主重新 inflate 并回传边界; inflate 失败回传错误与元素先序号, 画布保留上一帧并在问题列表定位.
 - 交互预览 (1.7.0): 开关打开后 overlay 放行指针, 宿主以嵌入树为 `ui` 承载真实运行整份脚本; 控制台 / 错误 / 退出经回调进入设计器控制台标签页; 关闭开关或设计器不可见即停止.
 - 快照模式 (API 24 - 29): 同一客户端, 会话模式为 `snapshot`; 画布显示位图, 点选与边界同上, 不放行指针.
+- 表面与指针 (P10.0 结论): 画布的 `SurfaceView` 必须 `setZOrderOnTop(true)` 才能让系统把触摸路由到嵌入树, 插件的 Compose 画不到表面之上, 因此编辑模式的指针拦截, 命中与选中框由宿主根容器完成并经回调回传 (`setPointerMode` / `setHighlight` / `onTap`), 插件只保留画布外的 chrome; 画布缩放在插件侧缩放 SurfaceView (宿主按 1.5 倍密度重排时 AutoJs6 的尺寸解析不变), 命中按缩放换算.
+- 会话与表面 (P10.0 结论): 设计器进入后台时 `surfaceDestroyed`, 会话保留; 回到前台 `surfaceCreated` 后向宿主索取新的 `SurfacePackage` (`reattach`) 再 `setChildSurfacePackage`; 旋转与分栏只走 `resize`.
 
 ### 3.2 进程与类加载边界
 
@@ -154,8 +156,8 @@ app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; Ex
 | --- | --- |
 | `activity` 全局 | 布局预览: 不存在 (合成脚本无用户代码). 交互预览: `undefined`, 直接访问 `activity.*` 的脚本抛错并显示在控制台; `ui.finish` / `keepScreenOn` / `statusBarColor` 等窗口级 API 为空操作并打印一条警告 |
 | 生命周期事件 | `ui.emitter` 只发 `create`; 无 `resume` / `pause` / `back_pressed` / `activity_result` |
-| 对话框 | `dialogs.*` 没有 Activity 时走悬浮窗类型窗口 (需宿主悬浮窗权限), 显示在设计器之上而不是画布内 |
-| 弹出层 / 输入法 | Spinner 下拉, Toolbar 菜单, `<input>` 的输入法在嵌入树内的行为依 API 级别而异, P10.0 spike 逐项记录; 快照模式不可交互 |
+| 对话框 | `dialogs.*` 没有 Activity 时走悬浮窗类型窗口 (需宿主悬浮窗权限; HyperOS 等须由用户在系统设置授予, adb appops 不算), 显示在设计器之上而不是画布内 (spike: Redmi / API 33 模拟器显示, 小米平板 HyperOS 被拦截) |
+| 弹出层 / 输入法 | Spinner 下拉与 Toolbar 菜单 (PopupWindow) 在 API 33+ 正常, API 30 - 32 会让宿主进程崩溃 (`BadTokenException`), 因此交互预览要求 API 33+, 30 - 32 只做不放行指针的布局预览; `<input>` 的输入法只在 API 35+ (以 `InputTransferToken` 构造嵌入窗口) 可用, API 33 - 34 可获焦点但键盘不弹, 预览中提示; 快照模式不可交互 |
 | 窗口与屏幕 | 画布尺寸即逻辑屏幕 (与 compose 画布一致), 不是设备全屏; 无状态栏 / 导航栏 inset; 主题为 `ScriptTheme`, 夜间模式与语言跟随宿主配置 |
 | 绑定与数据 | 布局预览: `{{expr}}` 只对顶层字面量类声明求值, 其它显示原文并提示; `<list>` 项模板显示一项占位 (无数据源); 自定义控件 (`ui.registerWidget`) 显示为未知标签占位. 交互预览全部生效 |
 | 副作用 | 布局预览无; 交互预览与运行相同 (文件, 网络, 无障碍, 悬浮窗均按脚本权限真实发生) |
@@ -175,7 +177,7 @@ app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; Ex
 
 | 阶段 | 内容 | 落点 | 目标版本 | 依赖 |
 | --- | --- | --- | --- | --- |
-| P10.0 | 嵌入与快照 spike: 在 AVD_API_30 / API 24 实例与一台真机上验证 SCVH 的触摸, 弹出层, 输入法, 密度缩放, 位图快照与边界回传; 结论回填本文 | 宿主 (spike 分支) + 插件 (临时测试页) | 无发布 | 无 |
+| P10.0 | 嵌入与快照 spike: 在 AVD_API_30 / API 24 实例与一台真机上验证 SCVH 的触摸, 弹出层, 输入法, 密度缩放, 位图快照与边界回传; 结论回填本文 | 宿主 (spike 分支) + 插件 (临时测试页) | 无发布 | 无发布 (完成, 2026-10-15) | 无 |
 | P10.1 | XML 文档模型, 容错词法层, 读取 / 无损写回, 命令, 校验与目录生成器 | 插件 | 1.6.0 | 无 |
 | P10.2 | 预览契约 v1, 宿主预览服务 (布局预览: 嵌入 + 快照), `ui` 模块的承载抽象 | 宿主 | 宿主构建 (提交号待回填) | P10.0 |
 | P10.3 | 预览客户端, XML 画布 (SurfaceView + overlay / 快照), 点选与拖放, 问题定位 | 插件 | 1.6.0 | P10.1, P10.2 |
@@ -192,11 +194,16 @@ app/.../execution/                ScriptExecuteActivity 实现 UiContentHost; Ex
 
 ### P10.0 嵌入与快照 spike (无发布)
 
-- [ ] (宿主) spike 服务: 临时 `Service` (PLUGIN 权限) 接收 `hostToken` / `displayId` / 尺寸, 用 `SurfaceControlViewHost` 承载一个以 `ContextThemeWrapper(appContext, R.style.ScriptTheme)` 创建的 `FrameLayout`, 以合成脚本 `"ui"; ui.layout(xml)` 经真实 `ScriptRuntime` inflate 一段含 `<input>`, `<spinner>`, `<toolbar>` 菜单, `<list>`, `<webview>`, `<button>` 的布局, 返回 `SurfacePackage`.
-- [ ] (插件) 临时测试页 (仅 debug source set): `AndroidView(SurfaceView)` + `setChildSurfacePackage`, 上层 Compose overlay 可切换拦截 / 放行指针; 记录 `surfaceCreated / Changed / Destroyed` 与会话的对应.
-- [ ] (测试) 在 AVD_API_30, API 33 Redmi, API 35 Xiaomi Pad 逐项记录: 按钮点击到达宿主; `<input>` 获得焦点并弹出输入法; Spinner 下拉与 Toolbar 溢出菜单能否弹出 (弹出位置, 是否被裁切); `dialogs.alert` 的窗口归属; 画布缩放两种做法 (SurfaceView `scaleX / scaleY` vs 宿主以 `createConfigurationContext(densityDpi * zoom)` 重排) 的视觉与命中结果; 夜间模式切换后 `notifyConfigurationChanged` (API 33+) 的效果; 设计器进入后台 / 旋转 / 被杀时宿主会话的释放.
-- [ ] (测试) 快照模式: 在 AVD_API_24 实例 (Nexus 5 尺寸) 与 G8441 (API 28) 上, 宿主对离屏 View 树 `measure(EXACTLY) / layout / draw` 到 ARGB_8888 位图并写入调用方 fd (原始像素 + 边界 JSON), 记录 `<list>` 有无项目, `<webview>` / `<video>` 的占位, 一张 1080 x 1920 位图的生成与传输耗时.
-- [ ] (宿主 + 插件) 结论回填本文 3.5 节与附录 B 的上限 (最大会话数, 最大尺寸, 快照像素上限, 边界 JSON 上限), 决定缩放做法与 IME 可用的最低 API; 若 SCVH 在 API 30 - 32 上不能承载输入法, 嵌入模式在这些 API 上对 `<input>` 显示 "需要 Android 13 才能在预览中输入" 的提示而不降级为快照.
+- [x] (宿主) spike 服务: 临时 `Service` (PLUGIN 权限) 接收 `hostToken` / `displayId` / 尺寸, 用 `SurfaceControlViewHost` 承载一个以 `ContextThemeWrapper(appContext, R.style.ScriptTheme)` 创建的 `FrameLayout`, 以合成脚本 `"ui"; ui.layout(xml)` 经真实 `ScriptRuntime` inflate 一段含 `<input>`, `<spinner>`, `<toolbar>` 菜单, `<list>`, `<webview>`, `<button>` 的布局, 返回 `SurfacePackage`.
+  证据 (2026-10-15): 宿主分支 `spike/ui-preview-p10` (`UiPreviewHost` 承载接口 + `UI.kt` 的 `layout` / `inflate` 分流约 30 行, Messenger 服务 `UiPreviewSpikeService`); 脚本以主线程 `LoopBasedJavaScriptEngine.execute` 运行 (非主线程时 WebView 调用抛错, 列表绑定同样), 根容器套 `ScriptTheme` 的 `windowBackground`, 边界经包装的 `afterCreateView` 以 DOM 先序号回传. 详见 `docs/dev/p10-spike-evidence.md`.
+- [x] (插件) 临时测试页 (仅 debug source set): `AndroidView(SurfaceView)` + `setChildSurfacePackage`, 上层 Compose overlay 可切换拦截 / 放行指针; 记录 `surfaceCreated / Changed / Destroyed` 与会话的对应.
+  证据 (2026-10-15): `app/src/debug/.../spike/UiPreviewSpikeActivity.kt` (Messenger 客户端, `AndroidView(SurfaceView)` + overlay, 模式 / 拦截 / 置顶 / 缩放 / 密度 / 夜间 / 视口开关, 快照显示); `surfaceCreated / Changed / Destroyed` 分别对应 会话附着 (首次) 或重新索取 `SurfacePackage` (恢复), `resize`, 保留会话.
+- [x] (测试) 在 AVD_API_30, API 33 Redmi, API 35 Xiaomi Pad 逐项记录: 按钮点击到达宿主; `<input>` 获得焦点并弹出输入法; Spinner 下拉与 Toolbar 溢出菜单能否弹出 (弹出位置, 是否被裁切); `dialogs.alert` 的窗口归属; 画布缩放两种做法 (SurfaceView `scaleX / scaleY` vs 宿主以 `createConfigurationContext(densityDpi * zoom)` 重排) 的视觉与命中结果; 夜间模式切换后 `notifyConfigurationChanged` (API 33+) 的效果; 设计器进入后台 / 旋转 / 被杀时宿主会话的释放.
+  证据 (2026-10-15, AVD_API_30 / AVD_API_33 / Redmi API 33 / Xiaomi Pad API 35 / AVD_API_37): 触摸只在 `SurfaceView.setZOrderOnTop(true)` 时到达嵌入树; 输入法只在 API 35+ 以 `InputTransferToken` 构造时弹出 (API 30 / 33 输入框可获焦点但 `canReceiveKeys=false`); Spinner 弹出层 API 33 / 35 / 37 正常, API 30 让宿主进程 `BadTokenException` 崩溃; `dialogs.alert` 为宿主悬浮窗类型窗口, HyperOS 需用户在系统设置授予; 缩放: SurfaceView 缩放生效, 宿主改密度重排尺寸不变; 夜间与系统深色切换无崩溃无变化 (`ScriptTheme` 只有浅色); 后台后恢复须重新索取 `SurfacePackage`, 旋转走 `resize`, 杀进程后会话释放. 结果表见 `docs/dev/p10-spike-evidence.md`.
+- [x] (测试) 快照模式: 在 AVD_API_24 实例 (Nexus 5 尺寸) 与 G8441 (API 28) 上, 宿主对离屏 View 树 `measure(EXACTLY) / layout / draw` 到 ARGB_8888 位图并写入调用方 fd (原始像素 + 边界 JSON), 记录 `<list>` 有无项目, `<webview>` / `<video>` 的占位, 一张 1080 x 1920 位图的生成与传输耗时.
+  证据 (2026-10-15): AVD_API_24 1032 x 448 (1.85 MB 原始像素) 宿主绘制 44 ms, 往返 64 ms; G8441 (API 28, 横屏 1152 x 90) 绘制 131 ms, 往返 139 ms; 位图经调用方 fd 写入并以 SHA-256 核对, 边界同嵌入模式; `<list>` 显示模板项 (绑定报错见证据第 3 节), `<webview>` 占位未单独验证 (视口不足).
+- [x] (宿主 + 插件) 结论回填本文 3.5 节与附录 B 的上限 (最大会话数, 最大尺寸, 快照像素上限, 边界 JSON 上限), 决定缩放做法与 IME 可用的最低 API; 若 SCVH 在 API 30 - 32 上不能承载输入法, 嵌入模式在这些 API 上对 `<input>` 显示 "需要 Android 13 才能在预览中输入" 的提示而不降级为快照.
+  证据 (2026-10-15): 本文 3.1 / 3.5 / 附录 B / Q21 已按 spike 结论修订 (表面置顶, 宿主侧拦截与高亮, 重新附着, 版本门禁: 嵌入显示 30+, 交互 33+, 输入法 35+, 快照 24 - 29); 缩放做法定为插件侧 SurfaceView 缩放.
 
 ### P10.1 XML 文档模型与无损往返 (插件, 1.6.0)
 
@@ -324,12 +331,16 @@ interface IUiPreviewService {
     Bundle setLayout(String sessionId, in Bundle layout, in ParcelFileDescriptor output);   // output 可为 null; snapshot 必填
     Bundle resize(String sessionId, int widthPx, int heightPx); // (embedded) relayout 并重新发送 SurfacePackage 若重建
     void release(String sessionId);
+    Bundle reattach(String sessionId);                      // (embedded) 客户端表面重建后: 同一层级的新 SurfacePackage
+    void setPointerMode(String sessionId, int mode);        // 0 = 编辑 (根容器拦截指针并回报 onTap / onDrag), 1 = 交互 (放行, 仅 API 33+)
+    void setHighlight(String sessionId, int elementIndex);  // 宿主在根容器上画选中框, -1 清除
     // v2 (1.7.0, 只追加): Bundle runScript(String sessionId, in Bundle request); void stopScript(String sessionId);
 }
 oneway interface IUiPreviewCallback {
     void onBounds(String sessionId, in Bundle bounds);          // 内联 JSON 或 fd 长度 + SHA-256
     void onLayoutFailed(String sessionId, in Bundle failure);   // 错误码, 消息, 元素先序号, 属性名 (可选)
     void onSessionLost(String sessionId, in Bundle reason);
+    void onTap(String sessionId, in Bundle tap);                // 编辑模式: x, y, 最深命中的元素先序号与类名; 后续追加 onLongPress / onDrag
     // v2: onConsole, onScriptError, onScriptExit
 }
 ```
@@ -355,7 +366,7 @@ oneway interface IUiPreviewCallback {
 
 ### B.4 上限 (初值, P10.0 回填)
 
-每客户端会话 2; 尺寸 <= 4096 x 4096 px; XML <= 256 K chars; 绑定 JSON <= 64 K chars; 边界条目 <= 5000 (超过经 fd); 快照 <= 4096 x 4096 像素 (64 MiB 原始); 单次 inflate <= 5 s; `setLayout` 请求去抖由客户端负责, 服务对同一会话串行处理并丢弃排队中的旧请求.
+每客户端会话 2; 尺寸 <= 4096 x 4096 px; XML <= 256 K chars; 绑定 JSON <= 64 K chars; 边界条目 <= 5000 (超过经 fd); 快照 <= 4096 x 4096 像素 (64 MiB 原始); 单次 inflate <= 5 s; `setLayout` 请求去抖由客户端负责, 服务对同一会话串行处理并丢弃排队中的旧请求. P10.0 实测: 首帧 (含引擎创建) 0.5 - 1.2 s, 再次运行 0.2 s, 边界在布局后约 0.2 s 回传; 1032 x 448 快照 (1.85 MB) 绘制 44 ms, 往返 64 ms (API 24 x86 模拟器), 1080 x 1920 按像素数估算约 0.2 - 0.3 s, 快照只按视口尺寸生成.
 
 ### B.5 安全
 
@@ -393,6 +404,8 @@ Compose 工程有 D37 (事件处理函数桩, state 绑定自动声明). XML 工
 ### Q21 (P10.0 后): 嵌入模式的输入法最低 API
 
 若 spike 显示 API 30 - 32 的嵌入树不能承载输入法: (a) 这些 API 的 `<input>` 在预览中提示并禁用输入; (b) 整个嵌入模式要求 API 33+, 30 - 32 用快照; 建议 (a).
+
+**P10.0 结论 (2026-10-15, 待拍板)**: 实测 API 30 / 33 的嵌入树不能承载输入法 (`canReceiveKeys=false`), API 35 (小米平板) 与 API 37 (模拟器) 以 `InputTransferToken` 构造后可以; 另外 API 30 - 32 的弹出层会让宿主进程崩溃. 建议改为三级门禁: 嵌入显示与布局预览 API 30+; 交互预览 (放行指针) API 33+; 预览中的输入法 API 35+, API 33 - 34 的 `<input>` 按 (a) 提示并禁用输入; API 24 - 29 快照.
 
 ---
 
