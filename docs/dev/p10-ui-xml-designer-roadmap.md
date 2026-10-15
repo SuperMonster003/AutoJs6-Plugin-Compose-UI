@@ -26,6 +26,7 @@
 | D48 | API 24 - 29: 位图快照预览 | 宿主侧把 inflate 后的 View 树 measure / layout / draw 为位图, 连同节点边界经调用方拥有的文件描述符传回; 画布显示快照并支持点选, 不可交互; 交互改用 "发送到 AutoJs6 运行". 预览服务多一种 `snapshot` 会话模式, 契约同一份 |
 | D49 | 原样编辑: 无损 | XML 字面量以带位置的具体语法树保存: 空白, 注释, 属性顺序, 引号与 `{expr}` 片段全部保留; 编辑以定位替换写回, 未触碰的字节不变; 新插入的元素按相邻元素的缩进生成. 不采用 Compose 工程的 "解析 / 生成不动点" 规范化格式 |
 | D50 | 预览的版本门禁 (2026-10-15, Q21) | 三级: 嵌入显示与布局预览 API 30+ (`SurfaceControlViewHost`); 交互预览 (放行指针) API 33+ (API 30 - 32 的弹出层会让宿主进程崩溃); 预览中的输入法 API 35+ 且以 `InputTransferToken` 构造嵌入窗口, API 33 - 34 的 `<input>` 在预览中提示并禁用输入; API 24 - 29 位图快照 (D48) |
+| D51 | 预览运行时的可见性 (2026-10-15, Q20) | 维护者确认 P10.2 的实施形态 (建议 (b)): 预览运行时经 `ScriptEngineService.execute` 注册为 `UiPreviewScriptExecution`, 以客户端 `label` 出现在宿主运行列表, 宿主侧停止即释放会话 (`onSessionLost(stopped)`); 不新增旁路. 宿主 changelog 的多语言翻译由维护者后期统一处理 |
 
 由 D46 - D49 派生的硬约束:
 
