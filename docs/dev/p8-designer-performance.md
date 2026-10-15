@@ -210,3 +210,26 @@ warm-up / sample counts on the same phone in portrait, otherwise idle. Emulators
 | Undo: main thread CPU | 419.7 | 630 ms |
 | Redo: call to end of first frame | 369.4 | 555 ms |
 | Redo: main thread CPU | 424.5 | 640 ms |
+
+## Round 2026-10-15 (22120RN86C, API 33, build 174, judged)
+
+Appended by `.python/verify_designer_performance.py`; review before committing.
+
+| Measurement | p50 / p90 (ms) | Review line |
+| --- | --- | --- |
+| Gallery read (56 scripts) | 34.4 / 38.1 | 65 ms |
+| Gallery validate | 12.8 / 13.9 | 25 ms |
+| Gallery preview frame | 20.5 / 21.9 | 35 ms |
+| Gallery write | 13.5 / 14.0 | 25 ms |
+| Large read (251 nodes) | 5.6 / 6.0 | 15 ms |
+| Large validate | 4.7 / 5.1 | 10 ms |
+| Large preview frame | 8.2 / 8.3 | 15 ms |
+| Large write | 4.2 / 5.0 | 10 ms |
+| Open NavigationBar example | 574.3 / 637.6 | 1000 ms |
+| Open 251-node document | 751.9 / 785.9 | 1200 ms |
+| Undo restores a row (visibility) | 313.5 / 354.7 | 570 ms |
+| Redo removes a row (visibility) | 305.9 / 372.5 | 540 ms |
+| Undo: call to end of first frame | 310.2 / 393.9 | 560 ms |
+| Undo: main thread CPU | 356.3 / 437.9 | 630 ms |
+| Redo: call to end of first frame | 235.7 / 257.3 | 555 ms |
+| Redo: main thread CPU | 275.7 / 310.0 | 640 ms |

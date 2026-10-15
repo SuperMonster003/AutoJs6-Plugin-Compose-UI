@@ -42,6 +42,8 @@ jobs:
           python3 .python/verify_apk_classpath.py app/build/outputs/apk/debug/*.apk
           # The shrunk release APK must reference nothing the plugin's own process cannot load (host contract excepted).
           python3 .python/verify_apk_classpath.py --shrunk app/build/outputs/apk/release/*.apk
+          # The device scripts' pure-Python parts (review-line parsing and comparison, P11.1).
+          python3 -m unittest discover -s .python/tests
 
       - name: Upload debug, release, and test APKs
         uses: actions/upload-artifact@v7

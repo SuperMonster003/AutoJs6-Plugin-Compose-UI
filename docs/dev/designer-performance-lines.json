@@ -1,0 +1,24 @@
+{
+  "description": "Designer performance review lines (roadmap P11.1, decision D54): the Redmi 22120RN86C p90 of the 1.7.0 second round in docs/dev/p8-designer-performance.md plus 50 %, rounded up to 5 ms. Only a run on the device model below is judged; other devices are recorded. Measured with DesignerPerformanceDeviceTest and DesignerFramePerformanceDeviceTest (-e designerPerformance true) by .python/verify_designer_performance.py.",
+  "rule": "p90 * 1.5 rounded up to 5 ms",
+  "device_model": "22120RN86C",
+  "source": "1.7.0 second round, 2026-10-15, plugin commit c0acd05 (build 174 sources), Redmi 22120RN86C portrait, otherwise idle",
+  "lines": [
+    {"key": "gallery_read", "title": "Gallery read (56 scripts)", "p90_ms": 41.9, "line_ms": 65},
+    {"key": "gallery_validate", "title": "Gallery validate", "p90_ms": 14.2, "line_ms": 25},
+    {"key": "gallery_frame", "title": "Gallery preview frame", "p90_ms": 22.7, "line_ms": 35},
+    {"key": "gallery_write", "title": "Gallery write", "p90_ms": 15.5, "line_ms": 25},
+    {"key": "large_read", "title": "Large read (251 nodes)", "p90_ms": 6.9, "line_ms": 15},
+    {"key": "large_validate", "title": "Large validate", "p90_ms": 5.7, "line_ms": 10},
+    {"key": "large_frame", "title": "Large preview frame", "p90_ms": 9.8, "line_ms": 15},
+    {"key": "large_write", "title": "Large write", "p90_ms": 4.6, "line_ms": 10},
+    {"key": "open_NavigationBar", "title": "Open NavigationBar example", "p90_ms": 666.2, "line_ms": 1000},
+    {"key": "open_Large", "title": "Open 251-node document", "p90_ms": 799.3, "line_ms": 1200},
+    {"key": "undo_restores_row", "title": "Undo restores a row (visibility)", "p90_ms": 378.5, "line_ms": 570},
+    {"key": "redo_removes_row", "title": "Redo removes a row (visibility)", "p90_ms": 359.5, "line_ms": 540},
+    {"key": "undo_to_first_frame", "title": "Undo: call to end of first frame", "p90_ms": 371.9, "line_ms": 560},
+    {"key": "undo_main_cpu", "title": "Undo: main thread CPU", "p90_ms": 419.7, "line_ms": 630},
+    {"key": "redo_to_first_frame", "title": "Redo: call to end of first frame", "p90_ms": 369.4, "line_ms": 555},
+    {"key": "redo_main_cpu", "title": "Redo: main thread CPU", "p90_ms": 424.5, "line_ms": 640}
+  ]
+}
