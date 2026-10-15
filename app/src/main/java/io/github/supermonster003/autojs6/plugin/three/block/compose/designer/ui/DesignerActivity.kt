@@ -1154,7 +1154,7 @@ internal class DesignerActivity : StandaloneActivity() {
                         0 -> XmlOutlinePanel(session, palette, Modifier.fillMaxWidth())
                         1 -> UiInspectorPanel(session, palette, Modifier.fillMaxWidth())
                         2 -> XmlBindingsPanel(session, palette, Modifier.fillMaxWidth())
-                        UI_PROBLEMS_TAB -> XmlProblemsPanel(session, palette, Modifier.fillMaxWidth())
+                        UI_PROBLEMS_TAB -> XmlProblemsPanel(session, palette, session.interactive && interactiveSupported, Modifier.fillMaxWidth())
                         else -> XmlConsolePanel(client, statusText, session.interactive && interactiveSupported, palette, Modifier.fillMaxWidth())
                     }
                 }

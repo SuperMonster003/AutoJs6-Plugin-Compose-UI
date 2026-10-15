@@ -1,5 +1,9 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
+import android.app.Activity
+import android.app.Instrumentation
+import android.content.Intent
+import android.content.IntentFilter
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
@@ -17,6 +21,8 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferenceKind
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
@@ -36,7 +42,8 @@ import java.nio.charset.StandardCharsets
  * service: the palette inserts a tag, the inspector edits its id and text, saving changes only those lines and
  * reopening shows the same tree with no draft left; outline moves, undo / redo and delete; binding overrides
  * that touch only the canvas; an event stub appended to the script (roadmap D52); an unmappable script's error
- * position; and every bundled host sample opening without a parse error.
+ * position; every bundled host sample opening without a parse error; and the script's preview differences listed
+ * after the problems without being counted (roadmap P11.2).
  */
 @RunWith(AndroidJUnit4::class)
 internal class UiDesignerDeviceTest {
@@ -173,6 +180,55 @@ internal class UiDesignerDeviceTest {
             repeat(3) { scenario.onActivity { it.currentUiSession!!.undo() } }
             rule.waitForIdle()
             assertEquals(ProjectStore.UI_TEMPLATE, scenario.session().script())
+        }
+    }
+
+    @Test
+    fun previewDifferencesAreListedAsInformationAndNotCounted() {
+        val source = "\"ui\";\nui.layout(\n    <vertical>\n        <button id=\"ok\" text=\"OK\"/>\n    </vertical>\n);\nui.statusBarColor('#000000');\nui.ok.on('click', () => dialogs.alert('Hi'));\n"
+        val name = project("differences", source)
+        launch(name).use { scenario ->
+            assertEquals(listOf(PreviewDifferenceKind.WINDOW_COLOR to 7, PreviewDifferenceKind.DIALOGS to 8), scenario.session().visibleDifferences.map { it.kind to it.line })
+            lateinit var issues: String
+            lateinit var header: String
+            lateinit var colorText: String
+            lateinit var dialogsText: String
+            scenario.onActivity {
+                issues = it.getString(R.string.designer_issues_count, 0)
+                header = it.getString(R.string.designer_ui_diff_header_layout)
+                colorText = it.getString(R.string.designer_ui_diff_window_color, "ui.statusBarColor")
+                dialogsText = it.getString(R.string.designer_ui_diff_dialogs)
+            }
+            // The menu counts errors only: two differences, zero problems.
+            rule.onNodeWithTag("designer-menu").performClick()
+            rule.onNodeWithTag("designer-menu-issues").assert(hasText(issues))
+            rule.onNodeWithTag("designer-menu-issues").performClick()
+            rule.waitForIdle()
+            val list = rule.onNodeWithTag("designer-xml-problems")
+            list.performScrollToNode(hasTestTag("designer-ui-diff-header"))
+            rule.onNodeWithTag("designer-ui-diff-header").assert(hasText(header))
+            val color = hasTestTag("designer-ui-diff") and hasText("ui.statusBarColor", substring = true)
+            list.performScrollToNode(color)
+            rule.onNode(color).assert(hasText(colorText, substring = true))
+            val dialogs = hasTestTag("designer-ui-diff") and hasText("dialogs.alert", substring = true)
+            list.performScrollToNode(dialogs)
+            rule.onNode(dialogs).assert(hasText(dialogsText, substring = true))
+            // A tap hands the documentation section to a browser; the monitor answers instead of launching one.
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val browser = IntentFilter(Intent.ACTION_VIEW).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                addDataScheme("https")
+                addDataAuthority("docs.autojs6.com", null)
+            }
+            val monitor = instrumentation.addMonitor(browser, Instrumentation.ActivityResult(Activity.RESULT_CANCELED, null), true)
+            try {
+                rule.onNode(dialogs).performClick()
+                rule.waitUntil(5_000) { monitor.hits == 1 }
+            } finally {
+                instrumentation.removeMonitor(monitor)
+            }
+            assertEquals(0, scenario.session().diagnostics.size)
+            assertFalse(scenario.session().dirty)
         }
     }
 

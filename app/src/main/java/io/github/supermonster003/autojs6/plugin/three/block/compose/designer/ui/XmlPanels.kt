@@ -1,6 +1,9 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -48,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -59,6 +63,9 @@ import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.FragmentUsage
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifference
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferenceKind
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferences
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Severity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
@@ -219,11 +226,18 @@ private fun applyXmlDrop(session: UiDesignerSession, dragged: Int, targetId: Int
     if (moved) session.selectedId = dragged
 }
 
-/** The validator's diagnostics and the preview's problems; a tap on an element's entry selects it. */
+/**
+ * The validator's diagnostics and the preview's problems, then the script's preview differences (roadmap P11.2 /
+ * D55: informational, by line, not counted as problems); a tap on an element's entry selects it, a tap on a
+ * difference opens the documentation. [scriptRunning]: the interactive preview runs the script now.
+ */
 @Composable
-internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePalette, modifier: Modifier = Modifier) {
+internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePalette, scriptRunning: Boolean, modifier: Modifier = Modifier) {
     val diagnostics = session.diagnostics
     val problems = session.previewProblems
+    val differences = session.visibleDifferences
+    val context = LocalContext.current
+    val docsUnavailable = stringResource(R.string.designer_ui_diff_docs_unavailable)
     LazyColumn(modifier = modifier.fillMaxSize().testTag("designer-xml-problems"), contentPadding = PaddingValues(bottom = AddButtonClearance)) {
         if (diagnostics.isEmpty() && problems.isEmpty()) item {
             Text(stringResource(R.string.designer_no_issues), color = Color(palette.muted), fontSize = 13.sp, modifier = Modifier.padding(16.dp))
@@ -249,7 +263,48 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
                 )
             }
         }
+        if (differences.isNotEmpty()) {
+            item {
+                Text(
+                    stringResource(if (scriptRunning) R.string.designer_ui_diff_header_running else R.string.designer_ui_diff_header_layout),
+                    color = Color(palette.muted),
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp).testTag("designer-ui-diff-header"),
+                )
+            }
+            items(differences) { difference ->
+                Column(
+                    Modifier.fillMaxWidth().clickable {
+                        val opened = runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(PreviewDifferences.DOCS_URL)).addCategory(Intent.CATEGORY_BROWSABLE)) }.isSuccess
+                        if (!opened) Toast.makeText(context, docsUnavailable, Toast.LENGTH_SHORT).show()
+                    }.padding(horizontal = 16.dp, vertical = 6.dp).testTag("designer-ui-diff"),
+                ) {
+                    Text(
+                        "i " + stringResource(R.string.designer_ui_diff_line, difference.line) + "  " + difference.api,
+                        color = Color(palette.muted),
+                        fontSize = 12.sp,
+                        fontFamily = FontFamily.Monospace,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(differenceText(difference), color = Color(palette.text), fontSize = 13.sp)
+                }
+            }
+        }
     }
+}
+
+/** The sentence that explains [difference] (one per kind; the window functions name themselves). */
+@Composable
+private fun differenceText(difference: PreviewDifference): String = when (difference.kind) {
+    PreviewDifferenceKind.ACTIVITY -> stringResource(R.string.designer_ui_diff_activity)
+    PreviewDifferenceKind.LIFECYCLE -> stringResource(R.string.designer_ui_diff_lifecycle)
+    PreviewDifferenceKind.ACTIVITY_EVENTS -> stringResource(R.string.designer_ui_diff_activity_events)
+    PreviewDifferenceKind.WINDOW_COLOR -> stringResource(R.string.designer_ui_diff_window_color, difference.api)
+    PreviewDifferenceKind.WINDOW_NO_OP -> stringResource(R.string.designer_ui_diff_window_no_op, difference.api)
+    PreviewDifferenceKind.DIALOGS -> stringResource(R.string.designer_ui_diff_dialogs)
+    PreviewDifferenceKind.BUSY_WAIT -> stringResource(R.string.designer_ui_diff_busy_wait)
+    PreviewDifferenceKind.THREADS -> stringResource(R.string.designer_ui_diff_threads)
 }
 
 /**

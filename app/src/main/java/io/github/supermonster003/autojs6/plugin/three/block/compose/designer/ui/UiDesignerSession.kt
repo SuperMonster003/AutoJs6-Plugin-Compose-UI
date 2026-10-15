@@ -7,6 +7,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.UiScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Diagnostic
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifference
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferences
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
@@ -16,6 +19,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiValidator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.PreviewDifferenceScanner
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DropPlacements
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.LayoutAxis
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
@@ -23,7 +27,8 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.san
 /**
  * The editing state of one open `"ui"` mode project (roadmap P10.3 / P10.4): the undo history over the
  * [UiDocument], the selection, the fragment shown on the canvas, the canvas drag state, the validator's
- * diagnostics and the preview's problems. Views observe its Compose state; all mutations go through commands.
+ * diagnostics, the preview's problems and the script's preview differences (roadmap P11.2). Views observe its
+ * Compose state; all mutations go through commands.
  */
 internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = UiCatalog.load()) {
     private val history = UiEditHistory(initial)
@@ -61,8 +66,13 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
     /** Why a declaration (by name, or "" for the whole script) could not be evaluated. */
     var declarationFailures: Map<String, String> by mutableStateOf(emptyMap())
     /** The names of the script's value-like top-level declarations, offered as `{{ }}` binding targets. */
-    var declaredNames: List<String> by mutableStateOf(declaredNamesOf(initial))
+    var declaredNames: List<String> by mutableStateOf(declaredNamesOf(UiScriptWriter.write(initial)))
         private set
+    /** The lines of the script that behave differently in the preview (roadmap P11.2 / D55), before host filtering. */
+    var differences: List<PreviewDifference> by mutableStateOf(PreviewDifferenceScanner.scan(UiScriptWriter.write(initial)))
+        private set
+    /** What the preview host announces beyond contract v2; each capability hides the differences it closes. */
+    var hostCapabilities: Set<PreviewCapability> by mutableStateOf(emptySet())
     /** The last handler stub added (`ui.<id>.on('<event>')`), for the editor to announce. */
     var lastHandlerStub: UiHandler? by mutableStateOf(null)
     /** The interactive preview is on (roadmap P10.6): the host runs the script in the canvas; not part of the document. */
@@ -71,6 +81,8 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
     val canUndo: Boolean get() = history.canUndo
     val canRedo: Boolean get() = history.canRedo
     val selected: XmlNode.Element? get() = selectedId?.let { document.element(it) }
+    /** The differences the issues list shows: informational, never counted as problems. */
+    val visibleDifferences: List<PreviewDifference> get() = PreviewDifferences.visible(differences, hostCapabilities)
     val root: XmlNode.Element? get() = document.fragments.getOrNull(fragment)?.root
 
     fun execute(command: UiEditCommand, merge: Boolean = true): Boolean {
@@ -112,7 +124,9 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
         if (fragment !in document.fragments.indices) fragment = document.rootFragment.coerceAtLeast(0)
         if (selectedId != null && document.element(selectedId!!) == null) selectedId = root?.id
         diagnostics = validator.validate(document)
-        declaredNames = declaredNamesOf(document)
+        val script = UiScriptWriter.write(document)
+        declaredNames = declaredNamesOf(script)
+        differences = PreviewDifferenceScanner.scan(script)
     }
 
     /**
@@ -189,8 +203,8 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
         return execute(UiEditCommand.MoveElement(id, parentId, index.coerceIn(0, count)), merge = false)
     }
 
-    private fun declaredNamesOf(document: UiDocument): List<String> =
-        try { DeclarationEvaluator.declarationsOf(UiScriptWriter.write(document)).map { it.name } } catch (error: RuntimeException) { emptyList() }
+    private fun declaredNamesOf(script: String): List<String> =
+        try { DeclarationEvaluator.declarationsOf(script).map { it.name } } catch (error: RuntimeException) { emptyList() }
 
     /** Whether [tag] takes element children, by the catalog; registered widgets and unknown tags take none. */
     fun isContainer(element: XmlNode.Element): Boolean {
