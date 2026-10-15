@@ -101,7 +101,7 @@
     <string name="designer_save_exit">儲存並離開</string>
     <string name="designer_saved">已儲存</string>
     <string name="designer_section_events">事件</string>
-    <string name="designer_section_key">Key</string>
+    <string name="designer_section_key">鍵</string>
     <string name="designer_section_modifiers">修飾鏈</string>
     <string name="designer_section_props">屬性</string>
     <string name="designer_section_shortcuts">快捷屬性</string>

@@ -6,9 +6,10 @@
 
 # v1.5.1
 
-###### 2026/10/14
+###### 2026/10/15
 
 * `Correction` Le plugin pouvait se fermer de manière inattendue quand un nouveau champ de texte apparaissait sur le canevas du concepteur, par exemple en insérant un champ de texte depuis la palette de composants, quand annuler / rétablir faisait réapparaître un champ de texte, ou quand un script de l'aperçu interactif en affichait un (depuis 1.4.0); ces champs de texte s'affichent maintenant normalement
+* `Correction` Compléter les traductions du titre de clé dans l'inspecteur du concepteur
 
 # v1.5.0
 

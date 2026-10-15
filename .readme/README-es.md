@@ -229,9 +229,10 @@ Los hitos, las decisiones de diseño y los criterios de aceptacion se registran 
 
 #### v1.5.1
 
-_2026/10/14_
+_2026/10/15_
 
 - `Correccion` El complemento podía cerrarse de forma inesperada cuando aparecía un nuevo campo de texto en el lienzo del diseñador, por ejemplo al insertar un campo de texto desde la paleta de componentes, cuando deshacer / rehacer volvía a mostrar un campo de texto, o cuando un script de la vista previa interactiva mostraba uno (desde 1.4.0); ahora estos campos de texto aparecen con normalidad
+- `Correccion` Completar las traducciones del encabezado de clave en el inspector del diseñador
 
 #### v1.5.0
 

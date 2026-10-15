@@ -101,7 +101,7 @@
     <string name="designer_save_exit">Guardar y salir</string>
     <string name="designer_saved">Guardado</string>
     <string name="designer_section_events">Eventos</string>
-    <string name="designer_section_key">Key</string>
+    <string name="designer_section_key">Clave</string>
     <string name="designer_section_modifiers">Cadena de modificadores</string>
     <string name="designer_section_props">Propiedades</string>
     <string name="designer_section_shortcuts">Propiedades abreviadas</string>

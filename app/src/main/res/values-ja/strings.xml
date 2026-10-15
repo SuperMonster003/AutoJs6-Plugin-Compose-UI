@@ -101,7 +101,7 @@
     <string name="designer_save_exit">保存して閉じる</string>
     <string name="designer_saved">保存しました</string>
     <string name="designer_section_events">イベント</string>
-    <string name="designer_section_key">Key</string>
+    <string name="designer_section_key">キー</string>
     <string name="designer_section_modifiers">修飾子チェーン</string>
     <string name="designer_section_props">プロパティ</string>
     <string name="designer_section_shortcuts">ショートカットプロパティ</string>

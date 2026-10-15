@@ -101,7 +101,7 @@
     <string name="designer_save_exit">Enregistrer et quitter</string>
     <string name="designer_saved">Enregistré</string>
     <string name="designer_section_events">Événements</string>
-    <string name="designer_section_key">Key</string>
+    <string name="designer_section_key">Clé</string>
     <string name="designer_section_modifiers">Chaîne de modificateurs</string>
     <string name="designer_section_props">Propriétés</string>
     <string name="designer_section_shortcuts">Propriétés raccourcies</string>
