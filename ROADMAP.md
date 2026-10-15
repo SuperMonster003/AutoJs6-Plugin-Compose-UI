@@ -67,6 +67,10 @@
 | D43 | 交互预览 (2026-10-13, Q14) | 先做预览状态面板 (不执行脚本, 只临时改变预览中的 state 值); 插件内沙箱执行在 1.4.0 之后评估, 立项前单独拍板并修订 D8 / D35; 不做由宿主真实运行脚本的实时预览协议. 2026-10-13 维护者于 1.4.0 发布后按路线图方案立项第二步 (1.5.0), D8 / D35 同日修订 |
 | D44 | 图片与 AndroidView 预览 (2026-10-13, Q15) | Image: `@drawable/name` 经宿主包 Context 读取; 本地文件由用户为每个工程授予一个图片目录 (系统文件选择器的目录树, 持久授权), 相对路径在该目录下解析; 不申请运行时权限, 网络地址与宿主一致地拒绝. AndroidView 保持不可从组件面板插入, 脚本中已有的照常保留, 占位显示 `view` 表达式源码 |
 | D45 | 导入来源同步 (2026-10-13, Q16) | 导入时取持久授权并记录来源 (改名时迁移); 编辑页菜单提供 "写回来源" 与 "从来源重新导入", 以内容基线检测来源侧修改并询问; 不在保存时自动写回 |
+| D46 | ui 模式工程的预览架构 (2026-10-15, Q17) | 设计器可打开 `"ui";` 模式脚本 (E4X XML 布局); 预览由宿主新增的 Binder 预览服务 (PLUGIN 权限, 契约模块 `plugin-api/ui-preview-api`) 在宿主进程以真实 `DynamicLayoutInflater` + `ScriptRuntime` 渲染, 经 `SurfaceControlViewHost` 嵌入设计器画布 (API 30+), 可交互, 宿主回传节点边界供点选; 不在插件内复刻 View 渲染, 不以外置运行替代画布预览. 详见 `docs/dev/p10-ui-xml-designer-roadmap.md` |
+| D47 | ui 模式预览的脚本执行 (2026-10-15) | 两级: "布局预览" 默认且实时, 宿主只运行常量合成脚本 `"ui"; ui.layout(xml)`, `{{expr}}` 的值由插件沙箱对顶层字面量类声明求值后随请求传入, 用户代码不在宿主运行; "交互预览" (1.7.0) 为显式开关, 宿主以嵌入树为 `ui` 承载真实运行整份脚本, 等价于 "运行", 有副作用, 设计器不可见时停止 |
+| D48 | API 24 - 29 的 ui 模式预览 (2026-10-15) | 位图快照: 宿主把 inflate 后的 View 树离屏 measure / layout / draw 为 ARGB_8888 位图, 连同节点边界经调用方拥有的 fd 传回; 画布显示快照并支持点选, 不可交互; 同一契约的 `snapshot` 会话模式 |
+| D49 | ui 模式工程的原样编辑 (2026-10-15) | 无损: XML 字面量以带位置的具体语法树保存 (空白, 注释, 属性顺序, 引号, `{expr}` 片段), 编辑以定位替换写回, 未触碰字节不变, 新元素按相邻缩进生成; 不采用 Compose 工程的规范化不动点格式 |
 
 由 D2 / D9 / D10 派生的硬约束:
 
@@ -281,6 +285,7 @@ docs/dev/compose-ui-plugin-protocol-v1.md
 | P7 | 1.1.0 候选: TSX, 与旧 ui 混合, `compose.dialog`, 宽集组件, 组件画廊, 细粒度更新 | 1.1.0 | F.1 - F.6 已全部完成本地实现与门禁 (F.5 经维护者 2026-10-08 排期并修订 D8 后实施) |
 | P8 | 1.2.0 可视化设计器: 契约 / Rhino 打包, 模型与往返, 设计器界面, 存储与宿主衔接, 文档与 gate | 1.2.0 | 2026-10-13 需求拍板 (D33 - D40, 修订 D8 / D26 / D32), Q8 - Q11 已拍板; 同日完成 P8.0 改名 (修订 D1), P8.1 依赖边界, P8.2 模型 / 解析 / 生成, P8.3 设计器界面, P8.4 存储 / 宿主衔接 (含宿主编辑器入口) 与 P8.5 文档 / changelog / 本地 gate (证据 `docs/dev/p8-designer-evidence.md`); 1.2.0 本地 gate 已完成, 远端步骤遵守 D7 |
 | P9 | 设计器增强: 画布与预览精度, TSX 工程, 设计器内交互预览 | 1.3.0 - 1.5.0 (D41) | 2026-10-13 维护者选定三个方向, Q12 - Q16 同日拍板 (D41 - D45); 1.2.0 发布基线 6db6da2. 1.3.0 (P9.1 全部, P9.3 第一步与模式切换) 同日完成并过本地 gate (build 129 源码, 证据 `docs/dev/p9-designer-evidence.md`), 未推送; 1.4.0 (P9.2 TSX 工程, 宿主 `fce22c83a6` 与 TypeScript Engine 0.7.0 `1e92487` 的解析契约) 同日完成并过本地 gate (证据 `docs/dev/p9-tsx-evidence.md`), 并作为首个公开发行版发布 (D7 再修订, GitHub Release `v1.4.0` 与官方索引 `b3085e8`); P9.3 第二步 (1.5.0) 由维护者于同日按 D43 立项, 2026-10-14 完成并过本地 gate (build 139 源码, 证据 `docs/dev/p9-sandbox-evidence.md`), 发布为 GitHub Release `v1.5.0` 并由官方索引 `8b095f6` 准入 |
+| P10 | ui 模式 (XML / E4X) 工程: 无损文档模型与往返, 宿主内嵌真实预览 (布局预览 + 交互预览), API 24 - 29 快照; 专门路线图 `docs/dev/p10-ui-xml-designer-roadmap.md` | 1.6.0 - 1.7.0 | 2026-10-15 可行性评估完成, 维护者同日拍板 D46 - D49 (Q17), Q18 - Q21 待各阶段前拍板; 全部条目未开始 |
 
 依赖关系: P0.2 的结论决定 D10 / D11 是否调整 (P0.3); P1 依赖 P0.3; P2 与 P3 可在 P1.1 契约冻结后并行 (P2 先于 P3.3 的端到端验收); P4 - P6 依赖 P2 / P3; P7 依赖 1.0.0 gate; P8 依赖 P7 全部完成 (1.1.0 本地 gate), P8.2 / P8.3 依赖 P8.1, P8.4 依赖 P8.2, P8.5 依赖 P8.1 - P8.4. P9 依赖 1.2.0 本地 gate; 按 D41 先 P9.1 与 P9.3 第一步 (1.3.0), 再 P9.2 (1.4.0, 依赖宿主与 TypeScript Engine 的解析契约), P9.3 第二步在 1.4.0 后评估并依赖 P9.1 的弹层画布内绘制.
 
@@ -1022,6 +1027,16 @@ F.1 TSX, F.2 与旧 ui 混合, F.3 `compose.dialog`, F.4 宽集, F.5 画廊, F.6
 
 原选项: (a) 手动: 菜单 "写回来源" / "从来源重新导入", 检测来源侧修改并询问; (b) 每次保存时自动同时写回来源; (c) 不做, 保持复制式导入. 建议 (a).
 
+### Q17 (P10 前): ui 模式工程的预览架构, 脚本执行, 低版本与原样编辑
+
+**已拍板 (2026-10-15)**: 四题均按建议 (D46 - D49): 宿主内嵌预览服务; 布局预览 + 交互预览两级; API 24 - 29 位图快照; 无损原样编辑. 详细选项与理由见 `docs/dev/p10-ui-xml-designer-roadmap.md` 第 0 - 1 节.
+
+原选项: 架构 (a) 宿主服务 + `SurfaceControlViewHost` 嵌入 / (b) 外置实时运行 (宿主 Activity, 编辑后自动重跑) / (c) 两者都做; 执行 (a) 两级 / (b) 只布局预览 / (c) 只真实运行; 低版本 (a) 快照 / (b) 只编辑不预览 / (c) 不开放 ui 工程; 原样编辑 (a) 无损 / (b) 规范化. 建议全部 (a).
+
+### Q18 - Q21 (P10 各阶段前): 文档页归属与命名, XML 工程的逻辑生成范围, 预览运行时在宿主中的可见性, 嵌入模式的输入法最低 API
+
+未拍板, 选项与建议见 `docs/dev/p10-ui-xml-designer-roadmap.md` 附录 D; 拍板结论回填该文件并在此追加一行.
+
 ---
 
 ## 附录 E: 证据等级, 设备池与退路
@@ -1372,3 +1387,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 修复: `CanvasControllers.bind` 在写入新帧的同一组合步骤中先绑定输入框与 Snackbar 宿主 (与宿主渲染器先绑定再发布帧一致), 文字同步仍在 effect 中. 新增设备测试 `DesignerDeviceTest.textFieldsInsertedAndRemovedOnTheCanvasDrawRightAway` 与 `DesignerSandboxDeviceTest.aFieldTheScriptAddsAndRemovesIsDrawnRightAway`, 修复前在 AVD_API_30 上均复现 `NODE_DETACHED`, 修复后通过; QV770340J7 上以 adb 按用户操作对照: 1.5.0 release 插入第一个 TextField 即闪退, 1.5.1 release 插入两个, 撤销, 重做均无崩溃, 临时工程已删除 (经 3-Maple Image 会话协调使用该设备).
 - 1.5.1 (build 144) 本地 gate 与体积见 `docs/dev/p9-sandbox-evidence.md` 的 1.5.1 一节: release 5617018 B / 96186 引用, 在复核线 6177215 B / 105804 之内.
 - 发布: `35d8cf3` / `a9b8b91` 推送后 CI 全部通过 (单元测试与 APK, API 24 与 API 35 全套 instrumentation); GitHub Release `v1.5.1` (tag = `a9b8b91`, APK 5617018 B, SHA-256 `9b4c9b26...`, 与 `SHA256SUMS`), 最终 APK 在 QV770340J7 上再跑一次对照脚本通过; 官方索引 `953b610` 准入 (manifest 144).
+
+### 2026-10-15: P10 ui 模式 (XML) 工程的可行性评估与专门路线图
+
+- 维护者提出让设计器也能原样编辑并真实预览传统 `"ui";` 模式脚本 (E4X XML 布局). 调研 (E0): 宿主 `ui.layout` 链路 (`UI.kt` -> `XmlConverter` -> `DynamicLayoutInflater` 108 个 inflater, 全部持有 `ScriptRuntime`; `{{}}` 在应用属性时于脚本作用域 `eval`) 只存在于宿主进程并依赖 appcompat / Material; 宿主 Rhino 分支与插件 slim jar 对 `{{msg}}` 保留原文, 只把 `{expr}` 当 E4X 表达式 (以 JDK 25 实测 shell 与 `Parser` 片段); SDK `api-versions.xml` 确认 `SurfaceControlViewHost` / `SurfaceView.setChildSurfacePackage` 自 API 30; 文档站 `uiAttributes.md` 361 行属性表与 `ui.md` 约 50 个标签可生成设计器目录; 宿主示例目录有 52 个 ui 模式脚本可作语料.
+- 结论: 可行, 真实预览只能由宿主进程渲染并经 `SurfaceControlViewHost` 嵌入 (API 30+), 残余偏差 (无 Activity 窗口, 对话框 / 弹出层 / 输入法, 逻辑屏幕) 需明示; 插件内复刻 View 渲染排除. 以选择题向维护者确认四项方向 (预览架构, 脚本执行范围, API 24 - 29, 原样编辑粒度), 均选推荐项, 写入 D46 - D49 与 Q17.
+- 产出: `docs/dev/p10-ui-xml-designer-roadmap.md` (结论, 决策, 现状事实, 目标架构与残余偏差清单, 范围, 阶段总览 P10.0 - P10.7 (1.6.0 = 编辑 + 布局预览 + 快照, 1.7.0 = 交互预览), 逐项可勾选条目, 附录: 脚本子集与模型草案, 预览契约 v1 草案 (AIDL / 键 / 错误码 / 上限 / 安全), 属性目录生成规则, 待决 Q18 - Q21, 验证顺序与设备矩阵); 本文件阶段总览追加 P10 行. 全部条目未开始, 宿主侧无改动.
+- 未执行: 任何构建与设备验证 (纯文档会话); 文档的标点守卫经 `ApplicationTextPunctuationTest` 运行.
