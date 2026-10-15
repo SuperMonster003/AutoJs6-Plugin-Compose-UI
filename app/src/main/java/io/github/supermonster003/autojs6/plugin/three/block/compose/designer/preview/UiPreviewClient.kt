@@ -348,7 +348,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             putString(Contract.KEY_LOCALE_TAG, localeTag)
             putString(Contract.KEY_LABEL, label)
             putLong(Contract.KEY_CLIENT_VERSION_CODE, clientVersionCode())
-            if (embedded && view != null) Embedded.fill(this, view)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && embedded && view != null) Embedded.fill(this, view)
         }
         val myGeneration = ++generation
         bounds = emptyList()
@@ -364,7 +364,10 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             }
             main.post {
                 if (closed || myGeneration != generation) {
-                    result?.getString(Contract.KEY_SESSION_ID)?.let { id -> worker.execute { runCatching { remote.release(id) } } }
+                    // The screen closed (its worker is shut down) or restarted the session while the host was creating this one.
+                    result?.getString(Contract.KEY_SESSION_ID)?.let { id ->
+                        try { worker.execute { runCatching { remote.release(id) } } } catch (rejected: RejectedExecutionException) { Thread({ runCatching { remote.release(id) } }, "ui-preview-release").start() }
+                    }
                     return@post
                 }
                 val id = result?.getString(Contract.KEY_SESSION_ID)
@@ -379,7 +382,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 } else {
                     retriedCreate = false
                     sessionId = id
-                    if (embedded) surface?.let { Embedded.attach(it, result) }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && embedded) surface?.let { Embedded.attach(it, result) }
                     if (highlighted >= 0) call { it.setHighlight(id, highlighted) }
                     if (pointerMode != Contract.POINTER_MODE_EDIT) call { it.setPointerMode(id, pointerMode) }
                     scheduleFlush(resend = true)
@@ -392,7 +395,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         val id = sessionId ?: return
         val view = surface ?: return
         if (!embedded) return
-        call(onResult = { reattached -> main.post { if (sessionId == id && surface === view) Embedded.attach(view, reattached) } }) { remote -> remote.reattach(id) }
+        call(onResult = { reattached -> main.post { if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && sessionId == id && surface === view) Embedded.attach(view, reattached) } }) { remote -> remote.reattach(id) }
     }
 
     fun releaseSession() {
@@ -471,6 +474,15 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             Log.w(TAG, "setLayout failed", error); null
         } catch (error: SecurityException) {
             Log.w(TAG, "setLayout refused", error); null
+        } catch (error: RuntimeException) {
+            // Binder rethrows a few of the host's unchecked exceptions here (a view that throws while the host
+            // measures the layout); that is a failed frame, not the designer's end.
+            Log.w(TAG, "setLayout threw in the host", error)
+            Bundle().apply {
+                putString(Contract.KEY_OUTCOME, Contract.OUTCOME_FAILED)
+                putString(Contract.KEY_ERROR_CODE, Contract.ERROR_INFLATE_FAILED)
+                putString(Contract.KEY_ERROR_MESSAGE, error.message ?: error.javaClass.simpleName)
+            }
         } finally {
             runCatching { output?.close() }
         }
@@ -517,7 +529,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         val remote = service ?: return
         try {
             worker.execute {
-                val result = try { block(remote) } catch (error: DeadObjectException) { onHostGone(); null } catch (error: RemoteException) { null } catch (error: SecurityException) { null }
+                val result = try { block(remote) } catch (error: DeadObjectException) { onHostGone(); null } catch (error: RemoteException) { null } catch (error: RuntimeException) { Log.w(TAG, "the host threw", error); null }
                 if (result != null && onResult != null) onResult(result)
             }
         } catch (rejected: RejectedExecutionException) {
