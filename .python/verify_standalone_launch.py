@@ -191,6 +191,11 @@ def main() -> None:
         # The prefixes of the sandbox's problem line on the canvas (before the message).
         "stopped": resource_string(args.strings, "designer_sandbox_stopped").split("%1$s")[0],
         "error": resource_string(args.strings, "designer_sandbox_error").split("%1$s")[0],
+        # Roadmap P10.4: the project kind chip of a ui (XML) project and the preview status texts of its canvas.
+        "ui": resource_string(args.strings, "designer_ui_language_ui"),
+        "ui_host_missing": resource_string(args.strings, "designer_ui_preview_host_missing"),
+        "ui_waiting": resource_string(args.strings, "designer_ui_preview_waiting"),
+        "ui_snapshot": resource_string(args.strings, "designer_ui_preview_snapshot"),
     }
 
     api = adb.shell("getprop ro.build.version.sdk").strip()
@@ -225,7 +230,8 @@ def main() -> None:
     if crashes:
         raise SystemExit("the plugin process crashed:\n" + "\n".join(crashes))
     sandbox = "ran" if labels["sandbox"] else "skipped(api<26)"
-    print(f"STANDALONE_LAUNCH_OK api={api} component={gallery_component} pid={pid} entry={entry_label} settings=opened designer=opened sandbox={sandbox} apk={args.apk.name}")
+    print(f"STANDALONE_LAUNCH_OK api={api} component={gallery_component} pid={pid} entry={entry_label} settings=opened designer=opened sandbox={sandbox} "
+          f"ui_designer=opened ui_preview={labels.get('ui_status', '?')} apk={args.apk.name}")
 
 
 def walk(adb: Adb, settings_label: str, copy_label: str, gallery_label: str, labels: dict[str, str]) -> tuple[str, int, str]:
@@ -274,8 +280,13 @@ def hide_keyboard(adb: Adb) -> None:
         time.sleep(0.5)
 
 
-def create_project(adb: Adb, labels: dict[str, str], stem: str) -> str:
-    """Create a project named <stem>-<time> from the home and wait until the editor shows its template."""
+def create_project(adb: Adb, labels: dict[str, str], stem: str, kind: str | None = None, expect: str = TEMPLATE_TEXT) -> str:
+    """Create a project named <stem>-<time> from the home and wait until the editor shows [expect].
+
+    [kind] names the label of a project kind chip to tap first (roadmap P10.4: "ui" for a ui (XML) project);
+    the default chip makes a Compose JavaScript project. [expect] is the text that proves the editor read the
+    template: the Text on the Compose canvas, or an outline row of the ui project.
+    """
     project = f"{stem}-{int(time.time())}"
     new_action, _ = find_node(adb, "the new project action", lambda n: (n.get("content-desc") or "").strip() == labels["new"], clickable=True)
     tap(adb, new_action)
@@ -284,11 +295,14 @@ def create_project(adb: Adb, labels: dict[str, str], stem: str) -> str:
     time.sleep(0.5)
     adb.shell(f"input text {project}")
     hide_keyboard(adb)
+    if kind is not None:
+        chip, _ = find_node(adb, f"the {kind} project kind chip", lambda n: (n.get("text") or "").strip() == labels[kind], clickable=True)
+        tap(adb, chip)
     create, _ = find_node(adb, "the create button", lambda n: (n.get("text") or "").strip() == labels["create"], clickable=True)
     tap(adb, create)
     wait_for("the designer editor", lambda: (lambda t: t if t and expand(t[0]) == expand(DESIGNER_ACTIVITY) else None)(top_activity(adb)))
-    # The template's Text must come out of the parser and the real renderer inside the release build.
-    find_node(adb, "the template text on the design canvas", lambda n: (n.get("text") or "").strip() == TEMPLATE_TEXT)
+    # The template must come out of the parser (and, for a Compose project, the real renderer) inside the release build.
+    find_node(adb, f"the template's {expect!r} in the editor", lambda n: (n.get("text") or "").strip() == expect)
     return f"{project}.js"
 
 
@@ -300,6 +314,37 @@ def open_and_delete_project(adb: Adb, labels: dict[str, str]) -> None:
     time.sleep(1.0)
     adb.shell("input keyevent KEYCODE_BACK")
     wait_for("the designer home after leaving the editor", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
+    delete_project(adb, labels, file_name)
+    open_and_delete_ui_project(adb, labels)
+
+
+UI_TEMPLATE_ROW = "button #ok"
+
+
+def open_and_delete_ui_project(adb: Adb, labels: dict[str, str]) -> None:
+    """Roadmap P10.4: create a ui (XML) project, wait for its outline (the Rhino parser and the XML reader in the
+    release build), note what the canvas shows (the host's first frame, or why there is none), then delete it."""
+    file_name = create_project(adb, labels, "standalone-check-ui", kind="ui", expect=UI_TEMPLATE_ROW)
+    status = "frame"
+    deadline = time.time() + 20.0
+    while time.time() < deadline:
+        texts = {(n.get("text") or "").strip() for n in ui_tree(adb).iter("node") if n.get("package") == PACKAGE}
+        if labels["ui_host_missing"] in texts:
+            status = "host_missing"
+            break
+        if labels["ui_snapshot"] in texts:
+            status = "snapshot"
+            break
+        if labels["ui_waiting"] not in texts:
+            # Neither a status text nor the waiting line: the host drew the layout (embedded surfaces hold no text).
+            break
+        time.sleep(1.0)
+    else:
+        status = "waiting"
+    labels["ui_status"] = status
+    time.sleep(1.0)
+    adb.shell("input keyevent KEYCODE_BACK")
+    wait_for("the designer home after leaving the ui editor", lambda: (lambda t: t if t and t[0].startswith(GALLERY) else None)(top_activity(adb)))
     delete_project(adb, labels, file_name)
 
 

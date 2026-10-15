@@ -1,15 +1,18 @@
-"""Prove that a designer draft survives the plugin process being killed (roadmap P8.3 / D40) over adb.
+"""Prove that a designer draft survives the plugin process being killed (roadmap P8.3 / D40, P10.4) over adb.
 
 DesignerDeviceTest covers draft recovery with a pre-written draft file, because an instrumented test runs
 inside the very process it would have to kill. This check drives the installed plugin the way a user would:
-it creates a project from the designer home, inserts a Button from the component palette, sends the editor
-to the background with HOME (the editor writes its draft in onStop), kills the background process with
-`am kill` and starts the plugin again from its launcher alias. Android restores the task, so the editor
-comes back in a new process (a launcher that starts a fresh task shows the home instead, and the project
-is opened from its row). The draft dialog must appear, restoring it must bring the Button back onto the canvas, and the project file itself must still be
-the unedited template. The edit is then discarded and the project deleted.
+it creates a project from the designer home, inserts a component from the palette, sends the editor to the
+background with HOME (the editor writes its draft in onStop), kills the background process with `am kill` and
+starts the plugin again from its launcher alias. Android restores the task, so the editor comes back in a new
+process (a launcher that starts a fresh task shows the home instead, and the project is opened from its row).
+The draft dialog must appear, restoring it must bring the inserted component back, and the project file itself
+must still be the unedited template. The edit is then discarded and the project deleted.
 
-usage: verify_designer_recovery.py --apk <apk> [--serial <serial>] [--uninstall] [--strings <values/strings.xml>]
+The check runs once for a Compose project (a Button on the real-renderer canvas) and once for a ui (XML)
+project (a `button` row in the outline, roadmap P10.4); `--kind` limits it to one of them.
+
+usage: verify_designer_recovery.py --apk <apk> [--serial <serial>] [--kind compose|ui|both] [--uninstall] [--strings <values/strings.xml>]
 """
 import argparse
 import re
@@ -22,7 +25,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import verify_standalone_launch as launch  # noqa: E402
 
 PACKAGE = launch.PACKAGE
-INSERTED = "Button"
+
+# What each kind creates, inserts and expects: the palette entry, the text that proves the insertion, the
+# text that proves the unedited template, and the project kind chip (None for the default Compose project).
+KINDS = {
+    "compose": {"stem": "recovery-check", "inserted": "Button", "template": launch.TEMPLATE_TEXT, "chip": None},
+    "ui": {"stem": "recovery-check-ui", "inserted": "button", "template": launch.UI_TEMPLATE_ROW, "chip": "ui"},
+}
 
 
 def start_from_launcher(adb: launch.Adb, restored_editor: bool = False) -> str:
@@ -76,8 +85,8 @@ def insert_from_palette(adb: launch.Adb, add_label: str, component: str) -> None
             if row is not None:
                 rows.append((node.get("text").strip(), bounds(row)))
         target = next((box for text, box in rows if text == component), None)
+        full = max((bottom - top for _, (_, top, _, bottom) in rows), default=0)
         if target is not None:
-            full = max(bottom - top for _, (_, top, _, bottom) in rows)
             left, top, right, bottom = target
             if bottom - top >= full * 0.9:
                 adb.shell(f"input tap {(left + right) // 2} {(top + bottom) // 2}")
@@ -91,8 +100,18 @@ def insert_from_palette(adb: launch.Adb, add_label: str, component: str) -> None
             adb.shell(f"input swipe {(left + right) // 2} {start} {(left + right) // 2} {start + (full * 2 if down else -full * 2)} 800")
             time.sleep(1.0)
             continue
-        # A slow drag scrolls without a fling, so the list is at rest when the next dump finds the entry.
-        adb.shell(f"input swipe {width // 2} {height * 5 // 6} {width // 2} {height // 6} 1200")
+        # A slow drag scrolls without a fling, so the list is at rest when the next dump finds the entry. It moves
+        # by half of the rows' visible span: a longer drag (the sheet shows about a thousand pixels on a 2400 px
+        # screen) skips entries between two dumps and the loop never sees them.
+        if rows:
+            tops = [top for _, (_, top, _, _) in rows]
+            bottoms = [bottom for _, (_, _, _, bottom) in rows]
+            span = max(bottoms) - min(tops)
+            start = max(bottoms) - full // 2
+            end = max(start - span // 2, min(tops) + full // 2)
+            adb.shell(f"input swipe {width // 2} {start} {width // 2} {end} 1000")
+        else:
+            adb.shell(f"input swipe {width // 2} {height * 2 // 3} {width // 2} {height // 3} 1000")
         time.sleep(1.0)
     raise SystemExit(f"the palette entry {component} did not come into view")
 
@@ -102,33 +121,18 @@ def bounds(node) -> tuple[int, int, int, int]:
     return left, top, right, bottom
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--apk", type=Path, required=True)
-    parser.add_argument("--serial")
-    parser.add_argument("--uninstall", action="store_true", help="remove the plugin from the device afterwards")
-    parser.add_argument("--strings", type=Path, default=Path(__file__).resolve().parent.parent / "app/src/main/res/values/strings.xml",
-                        help="strings.xml of the language the plugin shows (it follows the AutoJs6 language by default)")
-    args = parser.parse_args()
-    adb = launch.Adb(args.serial)
-    label = lambda name: launch.resource_string(args.strings, name)  # noqa: E731
-    labels = {"new": label("designer_new_project"), "create": label("designer_create"), "delete": label("designer_delete_project")}
-
-    api = adb.shell("getprop ro.build.version.sdk").strip()
-    install = adb.install(args.apk)
-    if "Success" not in install:
-        raise SystemExit(f"install failed:\n{install}")
-    adb.shell(f"am force-stop {PACKAGE}", check=False)
-    adb.shell("input keyevent KEYCODE_WAKEUP", check=False)
-    adb.shell("wm dismiss-keyguard", check=False)
-    adb.run("logcat", "-c", check=False)
-
+def run_once(adb: launch.Adb, label, labels: dict[str, str], kind: str) -> dict[str, object]:
+    """One create / insert / kill / restore / discard cycle for [kind]; returns what to report."""
+    spec = KINDS[kind]
+    inserted = spec["inserted"]
     file_name = None
     try:
         start_from_launcher(adb)
-        file_name = launch.create_project(adb, labels, "recovery-check")
-        insert_from_palette(adb, label("designer_add_component"), INSERTED)
-        launch.wait_for(f"the inserted {INSERTED} on the canvas", lambda: text_on_screen(adb, INSERTED))
+        file_name = launch.create_project(adb, labels, spec["stem"], kind=spec["chip"], expect=spec["template"])
+        insert_from_palette(adb, label("designer_add_component"), inserted)
+        # The palette sheet closes after the pick; its own entry must not count as the inserted component.
+        time.sleep(1.5)
+        launch.wait_for(f"the inserted {inserted} in the editor", lambda: text_on_screen(adb, inserted))
 
         # HOME stops the editor, which writes the draft; the process is then a background process.
         killed = plugin_pid(adb)
@@ -140,7 +144,16 @@ def main() -> None:
             if plugin_pid(adb) is None:
                 break
         else:
-            raise SystemExit(f"am kill left the plugin process alive (pid {plugin_pid(adb)})")
+            # Android 7 keeps the app just left as the "previous app" (adj 700), which `am kill` spares. The
+            # low-memory killer would still take it, and a signal from run-as (a debuggable build) or from a
+            # rooted adbd ends the process the same way for the task that Android then restores.
+            for command in (f"run-as {PACKAGE} kill -9 {killed}", f"kill -9 {killed}", f"su 0 kill -9 {killed}"):
+                adb.shell(command, check=False)
+                time.sleep(1.0)
+                if plugin_pid(adb) is None:
+                    break
+            else:
+                raise SystemExit(f"am kill left the plugin process alive (pid {plugin_pid(adb)}) and no signal could end it")
 
         reopened = start_from_launcher(adb, restored_editor=True)
         restarted = plugin_pid(adb)
@@ -152,7 +165,7 @@ def main() -> None:
         launch.find_node(adb, "the draft dialog", lambda n: (n.get("text") or "").strip() == label("designer_draft_title"))
         restore, _ = launch.find_node(adb, "the restore draft button", lambda n: (n.get("text") or "").strip() == label("designer_draft_restore"), clickable=True)
         launch.tap(adb, restore)
-        launch.wait_for(f"the restored {INSERTED} on the canvas", lambda: text_on_screen(adb, INSERTED))
+        launch.wait_for(f"the restored {inserted} in the editor", lambda: text_on_screen(adb, inserted))
 
         # The draft is not a save: leaving with "Discard" keeps the template on disk.
         adb.shell("input keyevent KEYCODE_BACK")
@@ -162,18 +175,50 @@ def main() -> None:
         launch.wait_for("the designer home after discarding", lambda: (lambda t: t if t and t[0].startswith(launch.GALLERY) else None)(launch.top_activity(adb)))
         row, _ = launch.find_node(adb, f"the row of {file_name}", lambda n: (n.get("text") or "").strip() == file_name, clickable=True)
         launch.tap(adb, row)
-        launch.wait_for("the template text after reopening", lambda: text_on_screen(adb, launch.TEMPLATE_TEXT))
-        if text_on_screen(adb, INSERTED) or text_on_screen(adb, label("designer_draft_title")):
+        launch.wait_for("the template after reopening", lambda: text_on_screen(adb, spec["template"]))
+        if text_on_screen(adb, inserted) or text_on_screen(adb, label("designer_draft_title")):
             raise SystemExit("the discarded draft came back or reached the project file")
         adb.shell("input keyevent KEYCODE_BACK")
         launch.wait_for("the designer home after reopening", lambda: (lambda t: t if t and t[0].startswith(launch.GALLERY) else None)(launch.top_activity(adb)))
         launch.delete_project(adb, labels, file_name)
         file_name = None
-        crashes = launch.crash_lines(adb)
     except SystemExit as failure:
         crashes = launch.crash_lines(adb)
         detail = ("\nthe plugin process crashed:\n" + "\n".join(crashes)) if crashes else ""
-        raise SystemExit(f"{failure}{detail}" + (f"\nthe project {file_name} may be left on the device" if file_name else "")) from None
+        raise SystemExit(f"[{kind}] {failure}{detail}" + (f"\nthe project {file_name} may be left on the device" if file_name else "")) from None
+    finally:
+        adb.shell(f"am force-stop {PACKAGE}", check=False)
+    return {"killed": killed, "restarted": restarted, "reopened": "editor" if not reopened.startswith(launch.GALLERY) else "home", "inserted": inserted}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--apk", type=Path, required=True)
+    parser.add_argument("--serial")
+    parser.add_argument("--kind", choices=["compose", "ui", "both"], default="both", help="which project kind to drive (default: both)")
+    parser.add_argument("--uninstall", action="store_true", help="remove the plugin from the device afterwards")
+    parser.add_argument("--strings", type=Path, default=Path(__file__).resolve().parent.parent / "app/src/main/res/values/strings.xml",
+                        help="strings.xml of the language the plugin shows (it follows the AutoJs6 language by default)")
+    args = parser.parse_args()
+    adb = launch.Adb(args.serial)
+    label = lambda name: launch.resource_string(args.strings, name)  # noqa: E731
+    labels = {"new": label("designer_new_project"), "create": label("designer_create"), "delete": label("designer_delete_project"), "ui": label("designer_ui_language_ui")}
+
+    api = adb.shell("getprop ro.build.version.sdk").strip()
+    install = adb.install(args.apk)
+    if "Success" not in install:
+        raise SystemExit(f"install failed:\n{install}")
+    adb.shell(f"am force-stop {PACKAGE}", check=False)
+    adb.shell("input keyevent KEYCODE_WAKEUP", check=False)
+    adb.shell("wm dismiss-keyguard", check=False)
+    adb.run("logcat", "-c", check=False)
+
+    kinds = ["compose", "ui"] if args.kind == "both" else [args.kind]
+    results = {}
+    try:
+        for kind in kinds:
+            results[kind] = run_once(adb, label, labels, kind)
+        crashes = launch.crash_lines(adb)
     finally:
         adb.shell(f"am force-stop {PACKAGE}", check=False)
         adb.shell(f"rm -f {launch.UI_DUMP}", check=False)
@@ -183,7 +228,8 @@ def main() -> None:
     crashes = [line for line in crashes if "FATAL EXCEPTION" in line]
     if crashes:
         raise SystemExit("the plugin process crashed:\n" + "\n".join(crashes))
-    print(f"DESIGNER_RECOVERY_OK api={api} killed_pid={killed} restarted_pid={restarted} reopened={'editor' if not reopened.startswith(launch.GALLERY) else 'home'} inserted={INSERTED} apk={args.apk.name}")
+    summary = " ".join(f"{kind}=killed:{r['killed']},restarted:{r['restarted']},reopened:{r['reopened']},inserted:{r['inserted']}" for kind, r in results.items())
+    print(f"DESIGNER_RECOVERY_OK api={api} {summary} apk={args.apk.name}")
 
 
 if __name__ == "__main__":

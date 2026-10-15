@@ -351,6 +351,10 @@ android {
     sourceSets.named("main") {
         kotlin.directories += "src/main/java"
     }
+    // Roadmap P10.4: the device tests open the twelve host ui samples that UiScriptRoundTripTest reads (one copy).
+    sourceSets.named("androidTest") {
+        resources.directories += "src/test/resources/ui-samples"
+    }
 
     // No ABI splits on purpose (roadmap D22): the only native code is the ~10 KB androidx graphics-path helper
     // that Compose ui-graphics brings for every ABI (see nativeAbis / allowedNativeLibraries above), so splitting
