@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
@@ -142,6 +144,14 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                             modifier = Modifier.fillMaxWidth().clickable { startActivity(DesignerActivity.intent(context, project.name)) }
                                 .padding(start = 24.dp, end = 8.dp, top = 14.dp, bottom = 14.dp).testTag("home-project-${project.name}"),
                         ) {
+                            // Roadmap P10.4: the kind of each project at a glance (Compose JavaScript, Compose TSX, ui XML).
+                            Text(
+                                project.kind.name,
+                                color = Color(palette.muted),
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                modifier = Modifier.width(36.dp).testTag("home-kind-${project.name}"),
+                            )
                             Column(Modifier.weight(1f)) {
                                 Text(project.name, color = Color(palette.text), fontSize = 16.sp)
                                 Text(
@@ -160,9 +170,9 @@ internal class DesignerHomeActivity : StandaloneActivity() {
         }
         if (creating) {
             var name by remember { mutableStateOf("") }
-            // Roadmap P9.2: a new project is a JavaScript or a TSX script.
-            var tsx by remember { mutableStateOf(false) }
-            val engineMissing = remember(tsx) { tsx && !TsxParserClient.hasParserService(context) }
+            // Roadmap P9.2 / P10.4: a new project is a Compose JavaScript script, a Compose TSX script, or a ui (XML) script.
+            var kind by remember { mutableStateOf(ProjectStore.Kind.JS) }
+            val engineMissing = remember(kind) { kind == ProjectStore.Kind.TSX && !TsxParserClient.hasParserService(context) }
             val invalid = stringResource(R.string.designer_name_invalid)
             AlertDialog(
                 onDismissRequest = { creating = false },
@@ -172,8 +182,9 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                         OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(stringResource(R.string.designer_project_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("home-project-name"))
                         Text(stringResource(R.string.designer_project_language), color = Color(palette.muted), fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
                         Row {
-                            FilterChip(selected = !tsx, onClick = { tsx = false }, label = { Text(stringResource(R.string.designer_language_javascript)) }, modifier = Modifier.padding(end = 8.dp).testTag("home-language-js"))
-                            FilterChip(selected = tsx, onClick = { tsx = true }, label = { Text(stringResource(R.string.designer_language_tsx)) }, modifier = Modifier.testTag("home-language-tsx"))
+                            FilterChip(selected = kind == ProjectStore.Kind.JS, onClick = { kind = ProjectStore.Kind.JS }, label = { Text(stringResource(R.string.designer_language_javascript)) }, modifier = Modifier.padding(end = 8.dp).testTag("home-language-js"))
+                            FilterChip(selected = kind == ProjectStore.Kind.TSX, onClick = { kind = ProjectStore.Kind.TSX }, label = { Text(stringResource(R.string.designer_language_tsx)) }, modifier = Modifier.padding(end = 8.dp).testTag("home-language-tsx"))
+                            FilterChip(selected = kind == ProjectStore.Kind.UI, onClick = { kind = ProjectStore.Kind.UI }, label = { Text(stringResource(R.string.designer_ui_language_ui)) }, modifier = Modifier.testTag("home-language-ui"))
                         }
                         if (engineMissing) {
                             Text(stringResource(R.string.designer_tsx_needs_engine, TsxParserClient.MIN_VERSION_NAME), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.testTag("home-tsx-hint"))
@@ -182,14 +193,18 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        val extension = if (tsx) ProjectStore.TSX_EXTENSION else ProjectStore.EXTENSION
+                        val extension = if (kind == ProjectStore.Kind.TSX) ProjectStore.TSX_EXTENSION else ProjectStore.EXTENSION
                         val stem = name.trim().removeSuffix(extension)
                         if (stem.isNotEmpty() && !ProjectStore.isValidName(stem + extension)) {
                             scope.launch { snackbar.showSnackbar(invalid) }
                             return@TextButton
                         }
                         creating = false
-                        val project = if (tsx) store.create(stem, ProjectStore.TSX_TEMPLATE, extension) else store.create(stem)
+                        val project = when (kind) {
+                            ProjectStore.Kind.TSX -> store.create(stem, ProjectStore.TSX_TEMPLATE, extension)
+                            ProjectStore.Kind.UI -> store.create(stem, ProjectStore.UI_TEMPLATE)
+                            ProjectStore.Kind.JS -> store.create(stem)
+                        }
                         listRevision++
                         startActivity(DesignerActivity.intent(context, project.name))
                     }, modifier = Modifier.testTag("home-create")) { Text(stringResource(R.string.designer_create)) }

@@ -11,10 +11,14 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditHistory
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEvents
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiValidator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DropPlacements
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.LayoutAxis
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
 
 /**
  * The editing state of one open `"ui"` mode project (roadmap P10.3 / P10.4): the undo history over the
@@ -50,6 +54,17 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
         private set
     /** Counts the frames the canvas received from the host; device tests wait on it. */
     var previewFrames: Long by mutableStateOf(0L)
+    /** The `{{ }}` names the fragment on the canvas uses, in order of first use (from the last preview request). */
+    var bindingNames: List<String> by mutableStateOf(emptyList())
+    /** The script's value-like top-level declarations as the preview evaluated them (JSON text by name). */
+    var previewDeclarations: Map<String, String> by mutableStateOf(emptyMap())
+    /** Why a declaration (by name, or "" for the whole script) could not be evaluated. */
+    var declarationFailures: Map<String, String> by mutableStateOf(emptyMap())
+    /** The names of the script's value-like top-level declarations, offered as `{{ }}` binding targets. */
+    var declaredNames: List<String> by mutableStateOf(declaredNamesOf(initial))
+        private set
+    /** The last handler stub added (`ui.<id>.on('<event>')`), for the editor to announce. */
+    var lastHandlerStub: UiHandler? by mutableStateOf(null)
 
     val canUndo: Boolean get() = history.canUndo
     val canRedo: Boolean get() = history.canRedo
@@ -95,7 +110,85 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
         if (fragment !in document.fragments.indices) fragment = document.rootFragment.coerceAtLeast(0)
         if (selectedId != null && document.element(selectedId!!) == null) selectedId = root?.id
         diagnostics = validator.validate(document)
+        declaredNames = declaredNamesOf(document)
     }
+
+    /**
+     * Inserts a palette template (roadmap P10.4): as the last child of the selected container, else after the
+     * selected element among its siblings; the new element is selected.
+     */
+    fun insert(tag: String): Boolean {
+        val template = UiTemplates.create(tag)
+        val target = selected ?: root ?: return false
+        val before = document.nextId
+        val inserted = if (isContainer(target)) {
+            execute(UiEditCommand.InsertElement(target.id, target.elementChildren.size, template), merge = false)
+        } else {
+            val placement = document.parentOf(target.id) ?: return false
+            val parent = document.element(placement.parentId) ?: return false
+            val index = parent.elementChildren.indexOfFirst { it.id == target.id }
+            execute(UiEditCommand.InsertElement(parent.id, index + 1, template), merge = false)
+        }
+        if (inserted) selectedId = before
+        return inserted
+    }
+
+    /** The view class the validator checks [tag] against (a catalog tag or a class name), or null for unknown tags. */
+    fun viewClassOf(tag: String): String? = validator.resolve(tag)?.viewClass
+
+    /** Whether handler stubs can be appended for [element]: its fragment is passed to `ui.layout` as a statement. */
+    fun canAddHandlers(element: XmlNode.Element): Boolean = document.fragments.getOrNull(document.fragmentOf(element.id))?.stubOffset?.let { it >= 0 } == true
+
+    /** The plain-text id of [element] (`ui.<id>`), or null when it has none or it is bound / computed. */
+    fun scriptIdOf(element: XmlNode.Element): String? =
+        element.attr("id")?.takeUnless { it.hasBinding || it.hasExpr }?.value?.removePrefix("@+id/")?.removePrefix("@id/")?.takeIf { it.isNotEmpty() }
+
+    /** The events the script already handles for [element], by its id. */
+    fun handledEvents(element: XmlNode.Element): Set<String> {
+        val id = scriptIdOf(element) ?: return emptySet()
+        return document.handlers.filter { it.id == id }.map { it.event }.toSet()
+    }
+
+    /**
+     * Appends a `ui.<id>.on('<event>', ...)` stub for [element] (roadmap D52, option (b)), giving the element a fresh
+     * id (`<tag>1`, `<tag>2`, ...) first when it has none; one undo step.
+     */
+    fun addHandler(element: XmlNode.Element, event: UiEvents.Event): Boolean {
+        if (!canAddHandlers(element)) return false
+        val existing = scriptIdOf(element)
+        val assign = if (existing == null) freshId(element.tag) else null
+        val id = existing ?: assign ?: return false
+        val added = execute(UiEditCommand.AddHandlerStub(element.id, event, assign), merge = false)
+        if (added) lastHandlerStub = UiHandler(id, event.name)
+        return added
+    }
+
+    private fun freshId(tag: String): String {
+        val taken = document.elementIds()
+        val stem = tag.filter { it.isLetterOrDigit() || it == '_' }.ifEmpty { "view" }
+        var counter = 1
+        while ("$stem$counter" in taken) counter++
+        return "$stem$counter"
+    }
+
+    /** Moves [id] into [containerId] as its last element child (outline drop onto a container). */
+    fun moveInto(id: Int, containerId: Int): Boolean {
+        if (!canDropInto(id, containerId)) return false
+        val container = document.element(containerId) ?: return false
+        val count = container.elementChildren.count { it.id != id }
+        return execute(UiEditCommand.MoveElement(id, containerId, count), merge = false)
+    }
+
+    /** Moves [id] to be the [index]-th element child of [parentId] (counted without the moved element). */
+    fun moveTo(id: Int, parentId: Int, index: Int): Boolean {
+        if (!canDropInto(id, parentId)) return false
+        val parent = document.element(parentId) ?: return false
+        val count = parent.elementChildren.count { it.id != id }
+        return execute(UiEditCommand.MoveElement(id, parentId, index.coerceIn(0, count)), merge = false)
+    }
+
+    private fun declaredNamesOf(document: UiDocument): List<String> =
+        try { DeclarationEvaluator.declarationsOf(UiScriptWriter.write(document)).map { it.name } } catch (error: RuntimeException) { emptyList() }
 
     /** Whether [tag] takes element children, by the catalog; registered widgets and unknown tags take none. */
     fun isContainer(element: XmlNode.Element): Boolean {

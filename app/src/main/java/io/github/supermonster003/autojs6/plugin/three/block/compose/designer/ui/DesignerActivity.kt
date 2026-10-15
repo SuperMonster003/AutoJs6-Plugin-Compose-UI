@@ -768,9 +768,10 @@ internal class DesignerActivity : StandaloneActivity() {
     }
 
     /**
-     * The editing screen of a `"ui";` mode project (roadmap P10.3): the host's preview on the XML canvas, the
-     * element outline and the problems list; save, drafts, undo / redo and the host hand-over work as for Compose
-     * projects. The inspector, the palette and the bindings panel follow in P10.4.
+     * The editing screen of a `"ui";` mode project (roadmap P10.3 / P10.4): the host's preview on the XML canvas, the
+     * element outline, the attribute inspector (with handler stubs, roadmap D52), the bindings panel, the problems
+     * list and the preview console; the palette inserts catalog tags; save, drafts, undo / redo, source sync and
+     * the host hand-over work as for Compose projects.
      */
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -792,6 +793,15 @@ internal class DesignerActivity : StandaloneActivity() {
         val exported = stringResource(R.string.designer_exported)
         val exportFailed = stringResource(R.string.designer_export_failed)
         val failedText = stringResource(R.string.designer_ui_preview_failed)
+        val insertFailed = stringResource(R.string.designer_insert_failed)
+        val sourceWritten = stringResource(R.string.designer_source_written)
+        val sourceWriteFailed = stringResource(R.string.designer_source_write_failed)
+        val sourceReimported = stringResource(R.string.designer_source_reimported)
+        val sourceParseFailed = stringResource(R.string.designer_source_parse_failed)
+        val handlerAdded = stringResource(R.string.designer_ui_handler_added)
+        var paletteOpen by remember { mutableStateOf(false) }
+        var syncPrompt by remember { mutableStateOf<SyncPrompt?>(null) }
+        var relinkAction by remember { mutableStateOf<SyncAction?>(null) }
         val errors = session.diagnostics.count { it.severity == Severity.ERROR }
 
         // The host draws the layout (D46): one client per screen, bound while the screen lives; the session follows
@@ -820,9 +830,18 @@ internal class DesignerActivity : StandaloneActivity() {
             val evaluated = if (DeclarationEvaluator.SUPPORTED) withContext(Dispatchers.Default) { evaluator.evaluate(script, expressions) } else DeclarationEvaluator.Result.EMPTY
             val built = XmlPreviewFrames.build(document, fragment, XmlPreviewValues(evaluated.declarations, session.bindingOverrides, evaluated.expressions))
             request = built
+            session.bindingNames = built.bindingNames
+            session.previewDeclarations = evaluated.declarations
+            session.declarationFailures = evaluated.failures
             client.submit(built)
         }
         LaunchedEffect(client.frameRevision) { session.previewFrames = client.frameRevision }
+        LaunchedEffect(session.lastHandlerStub) {
+            // Roadmap D52 (b): the stub went into the script; the body is written in an editor, not here.
+            val stub = session.lastHandlerStub ?: return@LaunchedEffect
+            session.lastHandlerStub = null
+            snackbar.showSnackbar(handlerAdded.format(stub.id, stub.event))
+        }
         LaunchedEffect(client.failure, client.diagnostics, request) {
             val current = request
             val failure = client.failure
@@ -887,6 +906,51 @@ internal class DesignerActivity : StandaloneActivity() {
             }
         }
 
+        // Roadmap P9.1 / D45, shared with Compose projects: an imported project syncs with its source only on request.
+        fun writeBack(name: String, confirmed: Boolean) {
+            if (session.dirty) save(announce = false)
+            when (val state = sync.state(name)) {
+                SourceSync.State.None -> Unit
+                is SourceSync.State.Unavailable -> syncPrompt = SyncPrompt.Unavailable(SyncAction.WRITE_BACK)
+                is SourceSync.State.Ready -> if (state.sourceChanged && !confirmed) syncPrompt = SyncPrompt.Overwrite else {
+                    val written = sync.writeBack(name, session.script())
+                    scope.launch { snackbar.showSnackbar(if (written) sourceWritten else sourceWriteFailed) }
+                }
+            }
+        }
+
+        fun reimport(name: String, confirmed: Boolean) {
+            when (val state = sync.state(name)) {
+                SourceSync.State.None -> Unit
+                is SourceSync.State.Unavailable -> syncPrompt = SyncPrompt.Unavailable(SyncAction.REIMPORT)
+                is SourceSync.State.Ready -> if ((state.projectChanged || session.dirty) && !confirmed) syncPrompt = SyncPrompt.Replace else {
+                    read(state.sourceText) { result ->
+                        if (result !is ReadResult.ParsedUi) {
+                            scope.launch { snackbar.showSnackbar(sourceParseFailed) }
+                        } else {
+                            session.replace(result.document)
+                            sync.reimported(name, state.sourceText)
+                            baseline = state.sourceText
+                            io.clearDraft(source)
+                            scope.launch { snackbar.showSnackbar(sourceReimported) }
+                        }
+                    }
+                }
+            }
+        }
+
+        val relinker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            val action = relinkAction
+            relinkAction = null
+            val name = (source as? DocumentSource.Local)?.name
+            if (uri == null || action == null || name == null) return@rememberLauncherForActivityResult
+            sync.relink(name, uri)
+            when (action) {
+                SyncAction.WRITE_BACK -> writeBack(name, confirmed = false)
+                SyncAction.REIMPORT -> reimport(name, confirmed = false)
+            }
+        }
+
         val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ScriptLauncher.SCRIPT_MIME_TYPE)) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
             val ok = runCatching {
@@ -926,7 +990,7 @@ internal class DesignerActivity : StandaloneActivity() {
                                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.designer_host_options), tint = Color(palette.muted))
                             }
                             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_issues_count, errors)) }, onClick = { menuOpen = false; tab = 1 }, modifier = Modifier.testTag("designer-menu-issues"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_issues_count, errors)) }, onClick = { menuOpen = false; tab = UI_PROBLEMS_TAB }, modifier = Modifier.testTag("designer-menu-issues"))
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_zoom, if (zoom < 1f) "100%" else "75%")) }, onClick = { menuOpen = false; zoom = if (zoom < 1f) 1f else 0.75f })
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_copy_script)) }, onClick = {
                                     menuOpen = false
@@ -952,11 +1016,27 @@ internal class DesignerActivity : StandaloneActivity() {
                                     menuOpen = false
                                     exporter.launch(source.title)
                                 }, modifier = Modifier.testTag("designer-menu-export"))
+                                val linked = (source as? DocumentSource.Local)?.name?.takeIf { menuOpen && store.sourceOf(it) != null }
+                                if (linked != null) {
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.designer_source_write_back)) }, onClick = {
+                                        menuOpen = false
+                                        writeBack(linked, confirmed = false)
+                                    }, modifier = Modifier.testTag("designer-menu-write-back"))
+                                    DropdownMenuItem(text = { Text(stringResource(R.string.designer_source_reimport)) }, onClick = {
+                                        menuOpen = false
+                                        reimport(linked, confirmed = false)
+                                    }, modifier = Modifier.testTag("designer-menu-reimport"))
+                                }
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_open_gallery)) }, onClick = { menuOpen = false; context.startActivity(Intent(context, GalleryActivity::class.java)) })
                             }
                         }
                     },
                 )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = { paletteOpen = true }, modifier = Modifier.testTag("designer-add")) {
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.designer_add_component))
+                }
             },
         ) { padding ->
             val canvas: @Composable (Modifier) -> Unit = { placement ->
@@ -982,12 +1062,18 @@ internal class DesignerActivity : StandaloneActivity() {
             val panels: @Composable (Modifier) -> Unit = { placement ->
                 Column(placement) {
                     TabRow(selectedTabIndex = tab, containerColor = Color(palette.background), contentColor = Color(palette.text)) {
-                        Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.designer_tab_outline)) }, modifier = Modifier.testTag("designer-tab-outline"))
-                        Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.designer_ui_tab_problems)) }, modifier = Modifier.testTag("designer-tab-problems"))
+                        Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(stringResource(R.string.designer_tab_outline), fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.testTag("designer-tab-outline"))
+                        Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(stringResource(R.string.designer_tab_inspector), fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.testTag("designer-tab-inspector"))
+                        Tab(selected = tab == 2, onClick = { tab = 2 }, text = { Text(stringResource(R.string.designer_ui_tab_bindings), fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.testTag("designer-tab-bindings"))
+                        Tab(selected = tab == UI_PROBLEMS_TAB, onClick = { tab = UI_PROBLEMS_TAB }, text = { Text(stringResource(R.string.designer_ui_tab_problems), fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.testTag("designer-tab-problems"))
+                        Tab(selected = tab == UI_CONSOLE_TAB, onClick = { tab = UI_CONSOLE_TAB }, text = { Text(stringResource(R.string.designer_tab_console), fontSize = 12.sp, maxLines = 1) }, modifier = Modifier.testTag("designer-tab-console"))
                     }
                     when (tab) {
                         0 -> XmlOutlinePanel(session, palette, Modifier.fillMaxWidth())
-                        else -> XmlProblemsPanel(session, palette, Modifier.fillMaxWidth())
+                        1 -> UiInspectorPanel(session, palette, Modifier.fillMaxWidth())
+                        2 -> XmlBindingsPanel(session, palette, Modifier.fillMaxWidth())
+                        UI_PROBLEMS_TAB -> XmlProblemsPanel(session, palette, Modifier.fillMaxWidth())
+                        else -> XmlConsolePanel(client, statusText, palette, Modifier.fillMaxWidth())
                     }
                 }
             }
@@ -1044,6 +1130,49 @@ internal class DesignerActivity : StandaloneActivity() {
                 dismissButton = { TextButton(onClick = { pendingDraft = null; io.clearDraft(source) }, modifier = Modifier.testTag("designer-draft-discard")) { Text(stringResource(R.string.designer_draft_discard)) } },
             )
         }
+        if (paletteOpen) UiPalette(session.catalog, palette, onPick = { tag ->
+            paletteOpen = false
+            if (!session.insert(tag)) scope.launch { snackbar.showSnackbar(insertFailed) }
+        }, onDismiss = { paletteOpen = false })
+        val linkedName = (source as? DocumentSource.Local)?.name
+        when (val prompt = syncPrompt) {
+            null -> Unit
+            SyncPrompt.Overwrite -> AlertDialog(
+                onDismissRequest = { syncPrompt = null },
+                title = { Text(stringResource(R.string.designer_source_changed_title)) },
+                text = { Text(stringResource(R.string.designer_source_changed_message)) },
+                confirmButton = {
+                    TextButton(onClick = { syncPrompt = null; linkedName?.let { writeBack(it, confirmed = true) } }, modifier = Modifier.testTag("designer-source-overwrite")) {
+                        Text(stringResource(R.string.designer_source_overwrite))
+                    }
+                },
+                dismissButton = { TextButton(onClick = { syncPrompt = null }) { Text(stringResource(R.string.designer_cancel)) } },
+            )
+            SyncPrompt.Replace -> AlertDialog(
+                onDismissRequest = { syncPrompt = null },
+                title = { Text(stringResource(R.string.designer_source_replace_title)) },
+                text = { Text(stringResource(R.string.designer_source_replace_message)) },
+                confirmButton = {
+                    TextButton(onClick = { syncPrompt = null; linkedName?.let { reimport(it, confirmed = true) } }, modifier = Modifier.testTag("designer-source-replace")) {
+                        Text(stringResource(R.string.designer_source_replace))
+                    }
+                },
+                dismissButton = { TextButton(onClick = { syncPrompt = null }) { Text(stringResource(R.string.designer_cancel)) } },
+            )
+            is SyncPrompt.Unavailable -> AlertDialog(
+                onDismissRequest = { syncPrompt = null },
+                title = { Text(stringResource(R.string.designer_source_unavailable_title)) },
+                text = { Text(stringResource(R.string.designer_source_unavailable_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        syncPrompt = null
+                        relinkAction = prompt.action
+                        relinker.launch(ProjectStore.SCRIPT_DOCUMENT_TYPES)
+                    }, modifier = Modifier.testTag("designer-source-pick-again")) { Text(stringResource(R.string.designer_source_pick_again)) }
+                },
+                dismissButton = { TextButton(onClick = { syncPrompt = null }) { Text(stringResource(R.string.designer_cancel)) } },
+            )
+        }
         externalChange?.let { changed ->
             AlertDialog(
                 onDismissRequest = { externalChange = null },
@@ -1073,6 +1202,8 @@ internal class DesignerActivity : StandaloneActivity() {
     companion object {
         const val EXTRA_PROJECT = "project"
         private const val CONSOLE_TAB = 3
+        private const val UI_PROBLEMS_TAB = 3
+        private const val UI_CONSOLE_TAB = 4
         private const val SANDBOX_RESTART_DELAY_MS = 400L
 
         fun intent(context: Context, projectName: String): Intent = Intent(context, DesignerActivity::class.java).putExtra(EXTRA_PROJECT, projectName)
