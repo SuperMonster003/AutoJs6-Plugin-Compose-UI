@@ -28,6 +28,7 @@
 | D50 | 预览的版本门禁 (2026-10-15, Q21) | 三级: 嵌入显示与布局预览 API 30+ (`SurfaceControlViewHost`); 交互预览 (放行指针) API 33+ (API 30 - 32 的弹出层会让宿主进程崩溃); 预览中的输入法 API 35+ 且以 `InputTransferToken` 构造嵌入窗口, API 33 - 34 的 `<input>` 在预览中提示并禁用输入; API 24 - 29 位图快照 (D48) |
 | D51 | 预览运行时的可见性 (2026-10-15, Q20) | 维护者确认 P10.2 的实施形态 (建议 (b)): 预览运行时经 `ScriptEngineService.execute` 注册为 `UiPreviewScriptExecution`, 以客户端 `label` 出现在宿主运行列表, 宿主侧停止即释放会话 (`onSessionLost(stopped)`); 不新增旁路. 宿主 changelog 的多语言翻译由维护者后期统一处理 |
 | D52 | XML 工程的逻辑生成范围 (2026-10-15, Q19) | 按建议 (b): 设计器只为选中元素一键追加 `ui.<id>.on('<event>', (...) => { // TODO });` 桩, 位置是该片段所属 `ui.layout(...)` 语句之后 (紧随已有的 `ui.<x>.on(...)` / `.click(...)` 语句, 保持添加顺序), 元素没有 `id` 时同一步补 `<tag>n`; 桩写入后即为不透明源码, 设计器不展示也不改写, 正文在脚本编辑器中写; 脚本已注册的同 id 同事件不再追加; 只能为以语句形式传给 `ui.layout` 的字面量 (直接或经一个变量) 追加, `return ui.layout(...)` 与表达式体箭头函数不提供. 不做 (c) 从绑定值面板新增顶层声明, 绑定值面板只做画布覆盖; 设计器从不改写已有源码 (D49 边界不变) |
+| D53 | 文档页归属与命名 (2026-10-15, Q18) | 按建议: 指南页保持 `api/composeDesigner.md`, 标题改为 "3-Block Compose 设计器 (Compose 与 UI 工程)", 新增 "UI (XML) 工程" 一章, `api/ui.md` 加一处链接; 工程类型的用户可见名称为 "UI (XML) 工程" (新建对话框的 chip 写 "UI (XML)", 首页徽标 `UI`) |
 
 由 D46 - D49 派生的硬约束:
 
@@ -429,6 +430,8 @@ oneway interface IUiPreviewCallback {
 ### Q18 (P10.5 前): 文档页归属与命名
 
 设计器指南页目前为 `api/composeDesigner.md`, 工程类型扩展后页名与标题 ("3-Block Compose 设计器") 是否保留; 新建对话框中工程类型的用户可见名称 ("UI (XML) 工程" / "传统 ui 工程" / "XML 布局工程"). 建议: 页名不变, 标题改为 "3-Block Compose 设计器 (Compose 与 UI 工程)", 新增一章; 工程类型名 "UI (XML) 工程".
+
+**已拍板 (2026-10-15, D53)**: 按建议实施, 见 P10.5.
 
 ### Q19 (P10.4 前): XML 工程的逻辑生成范围
 

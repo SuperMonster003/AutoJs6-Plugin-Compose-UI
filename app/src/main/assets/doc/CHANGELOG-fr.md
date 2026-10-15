@@ -4,6 +4,17 @@
 
 ******
 
+# v1.6.0
+
+###### 2026/10/15
+
+* `Indication` Le concepteur gagne les projets UI (XML): les scripts classiques en mode "ui" (mises en page XML E4X) peuvent être ouverts et modifiés, le canevas étant dessiné par AutoJs6. L'aperçu de mise en page nécessite une version d'AutoJs6 6.8.0 contenant le service d'aperçu (commit hôte 306a8f7834 ou ultérieur); à partir d'Android 11 (API 30) le canevas intègre les vues réelles dessinées par AutoJs6, les versions plus anciennes affichent un instantané bitmap; sans le service le projet reste modifiable et le canevas en indique la raison
+* `Nouveaute` Le concepteur prend en charge les projets UI (XML): choisissez "UI (XML)" à la création d'un projet, ou importez un script en mode "ui" ou ouvrez-en un depuis l'éditeur AutoJs6 / un gestionnaire de fichiers et il est lu comme projet UI; la liste de l'accueil marque chaque projet JS / TSX / UI. Les mises en page XML du script sont conservées sous forme d'arbre syntaxique avec positions: les parties non touchées (espaces, commentaires, ordre des attributs, guillemets, {expressions}) sont préservées octet par octet, seuls les balises ouvrantes modifiées, le texte et les éléments nouvellement insérés sont réécrits; les autres littéraux XML du script peuvent aussi être placés sur le canevas
+* `Nouveaute` L'éditeur de projet UI: plan (repli, monter / descendre, supprimer, glisser par appui long, sélecteur quand il y a plusieurs mises en page), tiroir de propriétés (balise, id, contenu textuel, attributs déjà définis et attributs du catalogue groupés par classe View, états texte / liaison `{{ }}` / {expression}, attributs sans valeur, nom d'attribut libre), palette de composants (les 48 balises de la documentation par catégorie avec attributs par défaut), panneau des liaisons (valeurs évaluées des noms `{{ }}` et remplacements qui ne touchent que le canevas), liste des problèmes (vérifiée contre le catalogue de balises et d'attributs du site de documentation) et console (ce qu'AutoJs6 a signalé en dessinant la mise en page); enregistrer, récupération de brouillon, synchronisation de la source, exécuter, ouvrir dans l'éditeur AutoJs6, importer dans le répertoire de scripts AutoJs6, copier et exporter fonctionnent aussi pour les projets UI
+* `Nouveaute` Le canevas d'un projet UI est dessiné par AutoJs6 (aperçu de mise en page): le plugin transmet le fragment XML et les valeurs de liaison au service d'aperçu d'AutoJs6, qui crée des vues réelles avec son gonfleur de mise en page du mode ui et les dessine sur le canevas sans exécuter le script du projet; la sélection et le glisser fonctionnent sur le canevas comme d'habitude, et une image en échec désigne l'élément fautif; l'exécution d'aperçu apparaît sous le nom "3-Block Compose preview" dans la liste des scripts en cours d'AutoJs6 et peut y être arrêtée
+* `Nouveaute` Le tiroir de propriétés d'un projet UI ajoute des événements à l'élément sélectionné: un gabarit de gestionnaire `ui.<id>.on('événement', ...)` est ajouté après l'appel ui.layout (un élément sans id en reçoit un), et son corps s'écrit dans l'éditeur de script; les événements déjà enregistrés par le script apparaissent comme "Géré dans le script"
+* `Dependance` Ajout de l'artefact de contrat ui-preview-api.aar (contrat d'aperçu de mise en page ui d'AutoJs6 v1), par lequel le concepteur demande à AutoJs6 de dessiner le canevas des projets UI
+
 # v1.5.1
 
 ###### 2026/10/15

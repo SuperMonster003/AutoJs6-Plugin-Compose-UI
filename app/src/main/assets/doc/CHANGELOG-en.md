@@ -4,6 +4,17 @@
 
 ******
 
+# v1.6.0
+
+###### 2026/10/15
+
+* `Hint` The designer gains UI (XML) projects: classic "ui" mode scripts (E4X XML layouts) can be opened and edited, with the canvas drawn by AutoJs6. The layout preview needs an AutoJs6 6.8.0 build that contains the preview service (host commit 306a8f7834 or later); from Android 11 (API 30) the canvas embeds the real views AutoJs6 draws, older versions show a bitmap snapshot; without the service the project can still be edited and the canvas says why
+* `Feature` The designer supports UI (XML) projects: pick "UI (XML)" when creating a project, or import a "ui" mode script or open one from the AutoJs6 editor / a file manager and it is read as a UI project; the home list marks each project JS / TSX / UI. The XML layouts of the script are kept as a syntax tree with positions: untouched parts (whitespace, comments, attribute order, quotes, {expressions}) are preserved byte for byte, and only edited start tags, text and newly inserted elements are rewritten; the script's other XML literals can be switched onto the canvas as well
+* `Feature` The UI project editor: outline (collapse, move up / down, delete, long-press drag, a switcher when there are several layouts), property drawer (tag, id, text content, the attributes already set and the catalog attributes grouped by View class, text / `{{ }}` binding / {expression} states, bare attributes, any attribute name), component palette (the documentation's 48 tags by category with default attributes), bindings panel (the evaluated values of `{{ }}` names and overrides that touch only the canvas), problems list (checked against the documentation site's tag and attribute catalog) and console (what AutoJs6 reported while drawing the layout); save, draft recovery, source sync, run, open in the AutoJs6 editor, import into the AutoJs6 script directory, copy and export work for UI projects too
+* `Feature` The canvas of a UI project is drawn by AutoJs6 (layout preview): the plugin hands the XML fragment and the binding values to the AutoJs6 preview service, AutoJs6 creates real views with its ui mode layout inflater and draws them back onto the canvas without running the project's script; selection and drag work on the canvas as usual, and a failed frame points at the element at fault; the preview runtime shows up as "3-Block Compose preview" in the AutoJs6 running list and can be stopped there
+* `Feature` The property drawer of a UI project adds events to the selected element: a `ui.<id>.on('event', ...)` handler stub is appended after the ui.layout call (an element without an id gets one), and the body is written in the script editor; events the script already registers show as "Handled in the script"
+* `Dependency` Add the ui-preview-api.aar contract artifact (AutoJs6 ui layout preview contract v1), through which the designer asks AutoJs6 to draw the canvas of UI projects
+
 # v1.5.1
 
 ###### 2026/10/15

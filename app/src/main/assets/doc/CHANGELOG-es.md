@@ -4,6 +4,17 @@
 
 ******
 
+# v1.6.0
+
+###### 2026/10/15
+
+* `Aviso` El diseñador incorpora proyectos UI (XML): los scripts clásicos en modo "ui" (diseños XML E4X) pueden abrirse y editarse, con el lienzo dibujado por AutoJs6. La vista previa de diseño necesita una compilación de AutoJs6 6.8.0 que contenga el servicio de vista previa (commit del host 306a8f7834 o posterior); desde Android 11 (API 30) el lienzo incrusta las vistas reales que dibuja AutoJs6, las versiones anteriores muestran una instantánea de mapa de bits; sin el servicio el proyecto sigue siendo editable y el lienzo indica el motivo
+* `Novedad` El diseñador admite proyectos UI (XML): elige "UI (XML)" al crear un proyecto, o importa un script en modo "ui" o ábrelo desde el editor de AutoJs6 / un gestor de archivos y se lee como proyecto UI; la lista de inicio marca cada proyecto como JS / TSX / UI. Los diseños XML del script se conservan como un árbol sintáctico con posiciones: las partes no tocadas (espacios, comentarios, orden de atributos, comillas, {expresiones}) se preservan byte a byte y solo se reescriben las etiquetas de apertura editadas, el texto y los elementos recién insertados; los demás literales XML del script también pueden llevarse al lienzo
+* `Novedad` El editor de proyectos UI: esquema (contraer, subir / bajar, eliminar, arrastrar con pulsación larga, selector cuando hay varios diseños), cajón de propiedades (etiqueta, id, contenido de texto, atributos ya definidos y atributos del catálogo agrupados por clase View, estados texto / enlace `{{ }}` / {expresión}, atributos sin valor, cualquier nombre de atributo), paleta de componentes (las 48 etiquetas de la documentación por categoría con atributos predeterminados), panel de enlaces (valores evaluados de los nombres `{{ }}` y sustituciones que solo afectan al lienzo), lista de problemas (comprobada con el catálogo de etiquetas y atributos del sitio de documentación) y consola (lo que AutoJs6 informó al dibujar el diseño); guardar, recuperación de borradores, sincronización con el origen, ejecutar, abrir en el editor de AutoJs6, importar al directorio de scripts de AutoJs6, copiar y exportar funcionan también con los proyectos UI
+* `Novedad` El lienzo de un proyecto UI lo dibuja AutoJs6 (vista previa de diseño): el complemento entrega el fragmento XML y los valores de enlace al servicio de vista previa de AutoJs6, que crea vistas reales con su inflador de diseños del modo ui y las dibuja en el lienzo sin ejecutar el script del proyecto; la selección y el arrastre funcionan en el lienzo como siempre, y un fotograma fallido señala el elemento culpable; el tiempo de ejecución de vista previa aparece como "3-Block Compose preview" en la lista de ejecución de AutoJs6 y puede detenerse allí
+* `Novedad` El cajón de propiedades de un proyecto UI añade eventos al elemento seleccionado: se anexa un esqueleto de controlador `ui.<id>.on('evento', ...)` después de la llamada a ui.layout (un elemento sin id recibe uno) y su cuerpo se escribe en el editor de scripts; los eventos que el script ya registra aparecen como "Gestionado en el script"
+* `Dependencia` Añade el artefacto de contrato ui-preview-api.aar (contrato de vista previa de diseños ui de AutoJs6 v1), con el que el diseñador pide a AutoJs6 que dibuje el lienzo de los proyectos UI
+
 # v1.5.1
 
 ###### 2026/10/15
