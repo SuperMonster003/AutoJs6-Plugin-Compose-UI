@@ -120,9 +120,12 @@
 
 ### P11.1 设计器性能复核线 (插件, 1.8.0)
 
-- [ ] (插件) `docs/dev/designer-performance-lines.json`: 16 项的 `key` / `line_ms` / `source` (1.7.0 第二轮 Redmi p90 加 50% 取整: 画廊读 65, 校验 25, 预览帧 35, 写 25; 大文档读 15, 校验 10, 预览帧 15, 写 10; 打开最大示例 1000, 打开 251 节点 1200; 撤销可见 570, 重做可见 540; 撤销首帧 560, 撤销主线程 CPU 630, 重做首帧 555, 重做主线程 CPU 640); `AGENTS.md` 第 14 节加同一表与 "只以 Redmi 为准, 其它设备只记录" 的说明.
-- [ ] (插件) `.python/verify_designer_performance.py` (3.1 节): 安装, 跑两个测试类, 解析 `DESIGNER_PERF`, 逐项比对, `--record` 追加表; `--serial` 非 Redmi 时 `RECORD_ONLY`; JVM 单测 `test_verify_designer_performance.py` 覆盖解析与比对 (假数据).
-- [ ] (测试) 在 Redmi 上执行一次完整比对 (1.8.0 的 debug 包), 结果写入性能文档 "第三轮" 表并记录脚本输出; 超线项按第 14 节处理.
+- [x] (插件) `docs/dev/designer-performance-lines.json`: 16 项的 `key` / `line_ms` / `source` (1.7.0 第二轮 Redmi p90 加 50% 取整: 画廊读 65, 校验 25, 预览帧 35, 写 25; 大文档读 15, 校验 10, 预览帧 15, 写 10; 打开最大示例 1000, 打开 251 节点 1200; 撤销可见 570, 重做可见 540; 撤销首帧 560, 撤销主线程 CPU 630, 重做首帧 555, 重做主线程 CPU 640); `AGENTS.md` 第 14 节加同一表与 "只以 Redmi 为准, 其它设备只记录" 的说明.
+  证据 (2026-10-15): `docs/dev/designer-performance-lines.json` (`device_model` 22120RN86C, 规则与来源, 16 项各带 `p90_ms` 与 `line_ms`); 单测 `test_the_committed_lines_file_is_consistent` 按 D54 规则重新算每项并与文件比对; `AGENTS.md` 第 14 节加复核线段落与六行汇总表, 验证顺序加 `python -m unittest discover -s .python/tests` 与脚本命令.
+- [x] (插件) `.python/verify_designer_performance.py` (3.1 节): 安装, 跑两个测试类, 解析 `DESIGNER_PERF`, 逐项比对, `--record` 追加表; `--serial` 非 Redmi 时 `RECORD_ONLY`; JVM 单测 `test_verify_designer_performance.py` 覆盖解析与比对 (假数据).
+  证据 (2026-10-15): 脚本复用 `verify_standalone_launch.Adb`, 16 MB 日志缓冲, 按类运行并按 kind 检查 `DESIGNER_PERF` 行, 缺失的 kind 以 `类#方法` 单独复跑, 失败 / 跳过 (`-e designerPerformance` 未生效) / 未结束都以 `SystemExit` 报出; 判定只在 `ro.product.model` 等于线文件的 `device_model` 时进行, 否则 `DESIGNER_PERF_RECORD_ONLY`; `--record` 以 "Round <日期> (<型号>, API, build, judged / recorded only)" 标题追加 p50 / p90 表到性能文档; `--restore` 以 `install -r -d` 装回发行包并卸载测试包 (真机不卸载插件, 保住设计器工程). 单测 `.python/tests/test_verify_designer_performance.py` 5 项 (解析分组与数值, 线文件一致性, 判定 PASS / OVER / MISSING, 非判定设备只记录, 记录表), `python -m unittest discover -s .python/tests` 通过; CI `build.yml` 的单元测试作业加同一命令.
+- [x] (测试) 在 Redmi 上执行一次完整比对 (1.8.0 的 debug 包), 结果写入性能文档 "第三轮" 表并记录脚本输出; 超线项按第 14 节处理.
+  证据 (2026-10-15): 脚本在 Redmi 22120RN86C (API 33, debug build 174, 竖屏, 空闲) 首次比对 16 项全部 PASS (`DESIGNER_PERF_OK`; 例如画廊读 p90 38.1 对线 65, 打开 251 节点文档 785.9 对 1200, 撤销到首帧 393.9 对 560, 重做主线程 CPU 310.0 对 640), `--record` 追加的 "Round 2026-10-15 (22120RN86C, API 33, build 174, judged)" 表已入库, `--restore` 装回 1.7.0 发行包并移除测试包; 1.8.0 的版本号尚未提升 (P11.4 才升), 本次用的是 1.7.0 源码树的 debug 包 (build 174 的构建, 与当前应用源码相同); 1.8.0 gate 时再跑一次.
 
 ### P11.2 预览差异明示 (插件, 1.8.0)
 
