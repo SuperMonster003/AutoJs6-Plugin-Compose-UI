@@ -5,6 +5,22 @@
   "changelog_label_improvement": "Improvement",
   "changelog_label_dependency": "Dependency",
   "$data": {
+    "v1.7.0": {
+      "released_date": "2026/10/15",
+      "hint": [
+        "The interactive preview of UI (XML) projects now has AutoJs6 run the whole script for real (needs an AutoJs6 6.8.0 build with preview contract v2, host commit 4c332c2053 or later, and Android 13 or later): the script's side effects are the same as when run in AutoJs6, and each project asks once before the switch goes on; where the conditions are not met the row above the canvas says why and \"Run in AutoJs6\" remains"
+      ],
+      "feature": [
+        "Interactive preview of UI (XML) projects: with the \"Interact\" switch above the canvas on, AutoJs6 runs the whole script as a ui mode run, the canvas shows the script's ui.layout and takes taps and touches directly, and event handlers, {{ }} bindings, timers and the other modules run with the script's real logic; the script runs again about 0.4 s after edits, stops when the switch goes off, the designer goes to the background or the editor closes, and the canvas returns to the layout preview; the document, the project file and the draft are never changed. On Android 13 - 14 input fields in the canvas take no keyboard input, from Android 15 they do",
+        "During the interactive preview the console tab of a UI project shows the output of the script AutoJs6 runs (colored by level), the run's state and its exit reason; when the script fails, the error (with its line) shows above the canvas and a tap opens the console; the run appears under the project's file name in the AutoJs6 running list and can be stopped from there"
+      ],
+      "fix": [
+        "The designer sometimes showed \"The AutoJs6 preview service is not available right now (at most 2 sessions per client)\" when opening a UI project: while the canvas size changed twice before the layout settled, the plugin created the preview session in AutoJs6 twice and hit the per-client session limit; now one session is created at a time and the size or appearance that changed meanwhile is applied afterwards"
+      ],
+      "dependency": [
+        "Upgrade the ui-preview-api.aar contract artifact to ui preview contract v2 (appends, after v1, the interfaces to run and stop a script and the console / error / exit callbacks; AutoJs6 builds with v1 only still provide the layout preview)"
+      ]
+    },
     "v1.6.0": {
       "released_date": "2026/10/15",
       "hint": [

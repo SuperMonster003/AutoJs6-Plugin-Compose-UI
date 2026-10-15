@@ -4,6 +4,16 @@
 
 ******
 
+# v1.7.0
+
+###### 2026/10/15
+
+* `Aviso` La vista previa interactiva de los proyectos UI (XML) ahora hace que AutoJs6 ejecute todo el script de verdad (requiere una compilación de AutoJs6 6.8.0 con el contrato de vista previa v2, commit del host 4c332c2053 o posterior, y Android 13 o posterior): los efectos secundarios del script son los mismos que al ejecutarlo en AutoJs6, y cada proyecto pregunta una vez antes de activar el interruptor; si no se cumplen las condiciones, la fila sobre el lienzo explica el motivo y queda "Ejecutar en AutoJs6"
+* `Novedad` Vista previa interactiva de los proyectos UI (XML): con el interruptor "Interactuar" sobre el lienzo activado, AutoJs6 ejecuta todo el script como una ejecución en modo ui, el lienzo muestra el ui.layout del script y recibe los toques directamente, y los controladores de eventos, los enlaces {{ }}, los temporizadores y los demás módulos se ejecutan con la lógica real del script; el script vuelve a ejecutarse unos 0.4 s después de editar, se detiene al apagar el interruptor, al pasar el diseñador a segundo plano o al cerrar el editor, y el lienzo vuelve a la vista previa de diseño; el documento, el archivo del proyecto y el borrador nunca cambian. En Android 13 - 14 los campos de entrada del lienzo no reciben teclado, desde Android 15 sí
+* `Novedad` Durante la vista previa interactiva, la pestaña de consola de un proyecto UI muestra la salida del script que ejecuta AutoJs6 (coloreada por nivel), el estado de la ejecución y su motivo de finalización; si el script falla, el error (con su línea) aparece sobre el lienzo y un toque abre la consola; la ejecución aparece con el nombre del archivo del proyecto en la lista de ejecución de AutoJs6 y puede detenerse desde allí
+* `Correccion` El diseñador mostraba a veces "El servicio de vista previa de AutoJs6 no está disponible ahora (at most 2 sessions per client)" al abrir un proyecto UI: cuando el tamaño del lienzo cambiaba dos veces antes de asentarse el diseño, el complemento creaba dos veces la sesión de vista previa en AutoJs6 y alcanzaba el límite de sesiones por cliente; ahora se crea una sesión a la vez y el tamaño o la apariencia que cambió mientras tanto se aplica después
+* `Dependencia` Actualiza el artefacto de contrato ui-preview-api.aar al contrato de vista previa ui v2 (añade, después de v1, las interfaces para ejecutar y detener un script y las devoluciones de llamada de consola / error / fin; las compilaciones de AutoJs6 con solo v1 siguen ofreciendo la vista previa de diseño)
+
 # v1.6.0
 
 ###### 2026/10/15

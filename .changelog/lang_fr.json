@@ -5,6 +5,22 @@
   "changelog_label_improvement": "Amelioration",
   "changelog_label_dependency": "Dependance",
   "$data": {
+    "v1.7.0": {
+      "released_date": "2026/10/15",
+      "hint": [
+        "L'aperçu interactif des projets UI (XML) fait maintenant exécuter tout le script par AutoJs6 pour de vrai (nécessite une version d'AutoJs6 6.8.0 avec le contrat d'aperçu v2, commit hôte 4c332c2053 ou ultérieur, et Android 13 ou ultérieur): les effets secondaires du script sont les mêmes qu'en l'exécutant dans AutoJs6, et chaque projet demande confirmation une fois avant d'activer l'interrupteur; si les conditions ne sont pas remplies, la ligne au-dessus du canevas en indique la raison et \"Exécuter dans AutoJs6\" reste disponible"
+      ],
+      "feature": [
+        "Aperçu interactif des projets UI (XML): l'interrupteur \"Interagir\" au-dessus du canevas activé, AutoJs6 exécute tout le script comme une exécution en mode ui, le canevas affiche le ui.layout du script et reçoit directement les touches, et les gestionnaires d'événements, les liaisons {{ }}, les minuteurs et les autres modules s'exécutent avec la logique réelle du script; le script est relancé environ 0.4 s après une modification, s'arrête quand l'interrupteur est désactivé, que le concepteur passe en arrière-plan ou que l'éditeur se ferme, et le canevas revient à l'aperçu de mise en page; le document, le fichier du projet et le brouillon ne sont jamais modifiés. Sous Android 13 - 14 les champs de saisie du canevas ne reçoivent pas le clavier, à partir d'Android 15 oui",
+        "Pendant l'aperçu interactif, l'onglet console d'un projet UI affiche la sortie du script exécuté par AutoJs6 (colorée par niveau), l'état de l'exécution et sa raison de fin; quand le script échoue, l'erreur (avec sa ligne) s'affiche au-dessus du canevas et une touche ouvre la console; l'exécution apparaît sous le nom du fichier du projet dans la liste des scripts en cours d'AutoJs6 et peut y être arrêtée"
+      ],
+      "fix": [
+        "Le concepteur affichait parfois \"Le service d'aperçu d'AutoJs6 n'est pas disponible pour le moment (at most 2 sessions per client)\" à l'ouverture d'un projet UI: quand la taille du canevas changeait deux fois avant que la mise en page se stabilise, le plugin créait deux fois la session d'aperçu dans AutoJs6 et atteignait la limite de sessions par client; désormais une seule session est créée à la fois et la taille ou l'apparence modifiée entre-temps est appliquée ensuite"
+      ],
+      "dependency": [
+        "Mise à niveau de l'artefact de contrat ui-preview-api.aar vers le contrat d'aperçu ui v2 (ajoute, après v1, les interfaces pour exécuter et arrêter un script et les rappels console / erreur / fin; les versions d'AutoJs6 avec le seul v1 fournissent toujours l'aperçu de mise en page)"
+      ]
+    },
     "v1.6.0": {
       "released_date": "2026/10/15",
       "hint": [
