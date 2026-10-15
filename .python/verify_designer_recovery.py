@@ -102,12 +102,14 @@ def insert_from_palette(adb: launch.Adb, add_label: str, component: str) -> None
             continue
         # A slow drag scrolls without a fling, so the list is at rest when the next dump finds the entry. It moves
         # by half of the rows' visible span: a longer drag (the sheet shows about a thousand pixels on a 2400 px
-        # screen) skips entries between two dumps and the loop never sees them.
+        # screen) skips entries between two dumps and the loop never sees them. The finger goes down above the
+        # bottom tenth of the screen: with gesture navigation (the API 33 AVD) a drag that starts in the bottom
+        # inset is the system's home gesture, which closes the sheet instead of scrolling it.
         if rows:
             tops = [top for _, (_, top, _, _) in rows]
             bottoms = [bottom for _, (_, _, _, bottom) in rows]
             span = max(bottoms) - min(tops)
-            start = max(bottoms) - full // 2
+            start = min(max(bottoms) - full // 2, height - max(full, height // 10))
             end = max(start - span // 2, min(tops) + full // 2)
             adb.shell(f"input swipe {width // 2} {start} {width // 2} {end} 1000")
         else:
