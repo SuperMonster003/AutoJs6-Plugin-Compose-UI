@@ -230,7 +230,9 @@ class SandboxEngineTest {
 
     @Test
     fun listExampleReordersByKeyAndScrollsThroughTheRef() {
-        val engine = engine()
+        // The test is about identities, not speed: a cold JVM on a slow CI runner can take longer than the preview's
+        // three seconds to build 1000 items (2026-10-16, run 38890301577), so the wall clock gets room here.
+        val engine = engine(SandboxLimits(millis = 30_000L))
         val first = engine.load(example("list.js"), "list.js").tree()
         val list = first.byTag("list-items")
         assertEquals(1000, list.children.size)
