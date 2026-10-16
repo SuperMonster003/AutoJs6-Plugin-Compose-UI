@@ -101,10 +101,19 @@ internal class DesignerHomeActivity : StandaloneActivity() {
         var deleting by remember { mutableStateOf<ProjectStore.Project?>(null) }
         var menuOpen by remember { mutableStateOf(false) }
         val importFailed = stringResource(R.string.designer_import_failed)
+        val noScript = stringResource(R.string.designer_import_no_script)
+        fun opened(imported: Result<ProjectStore.Project>) {
+            imported.onSuccess { project -> listRevision++; startActivity(DesignerActivity.intent(context, project.name)) }
+                .onFailure { error -> scope.launch { snackbar.showSnackbar(if (error is ProjectStore.NoScriptException) noScript else importFailed) } }
+        }
         val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
-            val imported = runCatching { store.import(contentResolver, uri) }.getOrNull()
-            if (imported == null) scope.launch { snackbar.showSnackbar(importFailed) } else { listRevision++; startActivity(DesignerActivity.intent(context, imported.name)) }
+            opened(runCatching { store.import(contentResolver, uri) })
+        }
+        // Roadmap P11.3 / D62: a folder (with main.js) becomes a folder project.
+        val folderImporter = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            opened(runCatching { store.importTree(contentResolver, uri) })
         }
         Scaffold(
             containerColor = Color(palette.background),
@@ -129,6 +138,10 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                                     menuOpen = false
                                     importer.launch(ProjectStore.SCRIPT_DOCUMENT_TYPES)
                                 }, modifier = Modifier.testTag("home-import"))
+                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_import_folder)) }, onClick = {
+                                    menuOpen = false
+                                    folderImporter.launch(null)
+                                }, modifier = Modifier.testTag("home-import-folder"))
                             }
                         }
                     },

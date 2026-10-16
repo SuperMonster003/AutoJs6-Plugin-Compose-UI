@@ -68,7 +68,9 @@
     <string name="designer_image_folder">Image folder</string>
     <string name="designer_image_folder_set">Relative image paths now resolve in %1$s</string>
     <string name="designer_import_failed">The file could not be imported.</string>
-    <string name="designer_import_project">Import script</string>
+    <string name="designer_import_folder">Import folder</string>
+    <string name="designer_import_no_script">No main.js or single script was found to import.</string>
+    <string name="designer_import_project">Import script or zip</string>
     <string name="designer_import_to_host">Import into AutoJs6 scripts</string>
     <string name="designer_insert_failed">The selected node cannot take this component here.</string>
     <string name="designer_issues">Validation</string>

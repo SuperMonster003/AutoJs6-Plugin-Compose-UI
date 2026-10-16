@@ -68,7 +68,9 @@
     <string name="designer_image_folder">Carpeta de imágenes</string>
     <string name="designer_image_folder_set">Las rutas de imagen relativas ahora se buscan en %1$s</string>
     <string name="designer_import_failed">No se pudo importar el archivo.</string>
-    <string name="designer_import_project">Importar script</string>
+    <string name="designer_import_folder">Importar carpeta</string>
+    <string name="designer_import_no_script">No se encontró un main.js ni un único script para importar.</string>
+    <string name="designer_import_project">Importar script o zip</string>
     <string name="designer_import_to_host">Importar a los scripts de AutoJs6</string>
     <string name="designer_insert_failed">El nodo seleccionado no admite este componente aquí.</string>
     <string name="designer_issues">Validación</string>

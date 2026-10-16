@@ -4,13 +4,17 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiScriptReader
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
+import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.util.zip.ZipInputStream
 
 /**
  * Designer projects are script files in the plugin's private storage (roadmap D39): `projects/` holds the
@@ -24,6 +28,9 @@ import java.security.MessageDigest
  */
 internal class ProjectStore(private val base: File) {
     constructor(context: Context) : this(File(context.filesDir, "designer"))
+
+    /** An imported zip or folder holds neither `main.js` nor exactly one top-level script (roadmap P11.3 / D62). */
+    class NoScriptException : IllegalArgumentException("No $MAIN_SCRIPT or single script to import")
 
     /** What a project is, for the home list and the new-project dialog (roadmap P10.4): Compose JavaScript, Compose TSX, or a `"ui";` mode script. */
     enum class Kind { JS, TSX, UI }
@@ -260,11 +267,125 @@ internal class ProjectStore(private val base: File) {
         val displayName = resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) cursor.getString(0) else null
         } ?: uri.lastPathSegment ?: "imported.js"
+        // Roadmap P11.3 / D62: a zip is a folder project (or a single script) and keeps no link to where it came from.
+        if (displayName.endsWith(ZIP_EXTENSION, ignoreCase = true) || resolver.getType(uri) == ZIP_MIME_TYPE) {
+            val stem = stemOf(displayName.substringAfterLast('/').removeSuffix(ZIP_EXTENSION).removeSuffix(ZIP_EXTENSION.uppercase()), "imported")
+            return resolver.openInputStream(uri)?.use { importArchive(stem, it) } ?: throw IllegalStateException("Cannot read $uri")
+        }
         val text = resolver.openInputStream(uri)?.use { it.readBytes().toString(StandardCharsets.UTF_8) }
             ?: throw IllegalStateException("Cannot read $uri")
         val stem = stemOf(displayName.substringAfterLast('/').substringBeforeLast('.'), "imported")
         keepAccess(resolver, uri)
         return create(stem, text, extensionFor(displayName)).also { recordSource(it.name, Source(uri, digest(text))) }
+    }
+
+    /**
+     * Imports the files of the document tree [treeUri] (a folder picked through the system picker, roadmap P11.3 /
+     * D62) like a zip ([importFiles]); nothing is linked back to the folder.
+     */
+    fun importTree(resolver: ContentResolver, treeUri: Uri): Project {
+        val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+        val files = LinkedHashMap<String, ByteArray>()
+        var total = 0L
+        fun walk(documentId: String, prefix: String) {
+            val children = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId)
+            val columns = arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE)
+            resolver.query(children, columns, null, null, null)?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    val id = cursor.getString(0)
+                    val name = cursor.getString(1) ?: continue
+                    if (name.startsWith(".")) continue
+                    val path = prefix + name
+                    if (cursor.getString(2) == DocumentsContract.Document.MIME_TYPE_DIR) {
+                        walk(id, "$path/")
+                    } else {
+                        require(isArchivePath(path)) { "Unsafe file name: $path" }
+                        val bytes = resolver.openInputStream(DocumentsContract.buildDocumentUriUsingTree(treeUri, id))?.use { it.readBytes() }
+                            ?: throw IllegalStateException("Cannot read $path")
+                        total += bytes.size
+                        require(files.size < MAX_IMPORT_ENTRIES && total <= MAX_IMPORT_BYTES) { "The folder is too large to import" }
+                        files[path] = bytes
+                    }
+                }
+            }
+        }
+        walk(rootId, "")
+        val displayName = resolver.query(DocumentsContract.buildDocumentUriUsingTree(treeUri, rootId), arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) cursor.getString(0) else null
+        } ?: rootId.substringAfterLast(':').substringAfterLast('/')
+        return importFiles(stemOf(displayName, "imported"), files)
+    }
+
+    /** Imports the zip [input] ([importFiles]); an entry that would leave the project, or a zip over the limits, rejects it whole. */
+    fun importArchive(baseName: String, input: InputStream): Project {
+        val files = LinkedHashMap<String, ByteArray>()
+        var total = 0L
+        ZipInputStream(input).use { zip ->
+            while (true) {
+                val entry = zip.nextEntry ?: break
+                val path = entry.name.trimEnd('/')
+                if (entry.isDirectory || path.isEmpty()) continue
+                require(isArchivePath(path)) { "Unsafe zip entry: ${entry.name}" }
+                val out = ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val read = zip.read(buffer)
+                    if (read < 0) break
+                    total += read
+                    require(total <= MAX_IMPORT_BYTES) { "The zip is too large to import" }
+                    out.write(buffer, 0, read)
+                }
+                require(files.size < MAX_IMPORT_ENTRIES) { "The zip has too many files" }
+                files[path] = out.toByteArray()
+            }
+        }
+        return importFiles(baseName, files)
+    }
+
+    /**
+     * Creates a project from imported files by `/`-separated path (roadmap P11.3 / D62, appendix B): with `main.js`
+     * at the top (or inside the one folder everything is in) a folder project, with its `project.json` added when
+     * missing; a lone script a single-file project; the one top-level `.js` among other files the folder project's
+     * `main.js`. Anything else (no script, several) is refused. Hidden and macOS bookkeeping files are dropped.
+     */
+    fun importFiles(baseName: String, imported: Map<String, ByteArray>): Project {
+        var files = imported.filterKeys { path -> path.split('/').none { it.startsWith(".") || it == "__MACOSX" } }
+        if (MAIN_SCRIPT !in files) {
+            val tops = files.keys.map { it.substringBefore('/') }.toSet()
+            if (tops.size == 1 && files.keys.all { '/' in it }) {
+                val prefix = tops.single() + "/"
+                files = files.mapKeys { (path, _) -> path.removePrefix(prefix) }
+            }
+        }
+        if (MAIN_SCRIPT !in files) {
+            val scripts = files.keys.filter { '/' !in it && EXTENSIONS.any { extension -> it.endsWith(extension) } }
+            if (scripts.size != 1) throw NoScriptException()
+            val script = scripts.single()
+            if (files.size == 1) return create(baseName, files.getValue(script).toString(StandardCharsets.UTF_8), extensionFor(script))
+            require(script.endsWith(EXTENSION)) { "A folder project runs $MAIN_SCRIPT: $script" }
+            files = files.mapKeys { (path, _) -> if (path == script) MAIN_SCRIPT else path }
+        }
+        projectsDir.mkdirs()
+        val stem = stemOf(baseName.trim(), "imported")
+        var folder = stem
+        var counter = 2
+        while (File(projectsDir, folder).exists()) folder = "$stem-${counter++}"
+        val name = folder + "/" + MAIN_SCRIPT
+        for (path in files.keys) require(path == MAIN_SCRIPT || layoutFile(name, path) != null) { "Unsafe file name: $path" }
+        val dir = File(projectsDir, folder)
+        check(dir.mkdirs()) { "Could not create $folder" }
+        try {
+            for ((path, bytes) in files) {
+                val target = File(dir, path)
+                target.parentFile?.mkdirs()
+                target.writeBytes(bytes)
+            }
+            writeProjectConfig(dir, stem)
+        } catch (error: IOException) {
+            dir.deleteRecursively()
+            throw error
+        }
+        return Project(name, file(name), folderModifiedAt(dir), kindOf(file(name)))
     }
 
     /** The document a project was imported from, when it was imported through the picker. */
@@ -348,6 +469,15 @@ internal class ProjectStore(private val base: File) {
         const val MAIN_SCRIPT = "main.js"
         /** AutoJs6's project file in a folder project (roadmap D63). */
         const val PROJECT_CONFIG = "project.json"
+        /** Folder projects are exported and imported as zips (roadmap D62). */
+        const val ZIP_EXTENSION = ".zip"
+        const val ZIP_MIME_TYPE = "application/zip"
+        private const val MAX_IMPORT_ENTRIES = 4_096
+        private const val MAX_IMPORT_BYTES = 128L * 1024L * 1024L
+
+        /** A relative `/`-separated path that stays inside the project: no root, drive, backslash, `.` or `..` part. */
+        fun isArchivePath(path: String): Boolean =
+            path.isNotEmpty() && !path.startsWith("/") && '\\' !in path && ':' !in path && path.split('/').all { it.isNotEmpty() && it != "." && it != ".." }
         private const val LAYOUT_DRAFTS_SUFFIX = ".files"
         /** TSX projects (roadmap P9.2 / D42), read and written through the TypeScript Engine parser. */
         const val TSX_EXTENSION = ".tsx"
@@ -463,7 +593,7 @@ internal class ProjectStore(private val base: File) {
         }
 
         /** Types offered by the document picker when importing or relinking a script (any file as the last resort). */
-        val SCRIPT_DOCUMENT_TYPES = arrayOf("application/javascript", "text/javascript", "application/x-javascript", "text/typescript", "text/plain", "*/*")
+        val SCRIPT_DOCUMENT_TYPES = arrayOf("application/javascript", "text/javascript", "application/x-javascript", "text/typescript", "text/plain", "application/zip", "*/*")
         /** A tab never occurs in a Uri string, so it separates the Uri from the baseline digest. */
         private const val FIELD_SEPARATOR = "\t"
         private const val LINE_END = "\n"

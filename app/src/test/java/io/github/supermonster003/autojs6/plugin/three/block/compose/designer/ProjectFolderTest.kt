@@ -168,6 +168,58 @@ class ProjectFolderTest {
         assertFalse(File(store.projectsDir, "bad").exists())
     }
 
+    private fun zip(vararg entries: Pair<String, String>): ByteArray {
+        val bytes = java.io.ByteArrayOutputStream()
+        java.util.zip.ZipOutputStream(bytes).use { zip ->
+            for ((path, text) in entries) {
+                zip.putNextEntry(java.util.zip.ZipEntry(path))
+                zip.write(text.toByteArray())
+                zip.closeEntry()
+            }
+        }
+        return bytes.toByteArray()
+    }
+
+    @Test
+    fun `a zip with main js on top becomes a folder project as it is`() {
+        val store = store()
+        val config = "{\"name\": \"kept\", \"main\": \"main.js\"}"
+        val project = store.importArchive("Login", zip("main.js" to "\"ui\";\n", "layout.xml" to "<frame/>", "res/values/strings.xml" to "<resources/>", "project.json" to config).inputStream())
+        assertEquals("Login/main.js", project.name)
+        val dir = store.projectDir(project.name)!!
+        assertEquals("<frame/>", File(dir, "layout.xml").readText())
+        assertEquals("<resources/>", File(dir, "res/values/strings.xml").readText())
+        assertEquals(config, File(dir, "project.json").readText())
+    }
+
+    @Test
+    fun `a zip of one folder is unwrapped and a lone script is renamed main js`() {
+        val store = store()
+        val wrapped = store.importArchive("demo", zip("demo/main.js" to "a", "demo/layout.xml" to "<a/>", "__MACOSX/demo/._main.js" to "x", "demo/.DS_Store" to "x").inputStream())
+        assertEquals("demo/main.js", wrapped.name)
+        assertEquals(setOf("main.js", "layout.xml", "project.json"), store.projectDir(wrapped.name)!!.list()!!.toSet())
+
+        val renamed = store.importArchive("app", zip("app.js" to "\"ui\";", "layout.xml" to "<a/>").inputStream())
+        assertEquals("app/main.js", renamed.name)
+        assertEquals("\"ui\";", store.read(renamed.name))
+        assertTrue(File(store.projectDir(renamed.name), "project.json").isFile)
+
+        val single = store.importArchive("one", zip("tool.tsx" to "compose").inputStream())
+        assertEquals("one.tsx", single.name)
+        assertFalse(single.folder)
+    }
+
+    @Test
+    fun `unsafe or scriptless zips are refused and leave nothing behind`() {
+        val store = store()
+        assertThrows(IllegalArgumentException::class.java) { store.importArchive("evil", zip("main.js" to "a", "../escape.js" to "b").inputStream()) }
+        assertThrows(IllegalArgumentException::class.java) { store.importArchive("evil", zip("main.js" to "a", "/abs.xml" to "b").inputStream()) }
+        assertThrows(ProjectStore.NoScriptException::class.java) { store.importArchive("none", zip("layout.xml" to "<a/>").inputStream()) }
+        assertThrows(ProjectStore.NoScriptException::class.java) { store.importArchive("two", zip("a.js" to "a", "b.js" to "b", "layout.xml" to "<a/>").inputStream()) }
+        assertTrue(store.list().isEmpty())
+        assertFalse(File(temp.root, "escape.js").exists())
+    }
+
     @Test
     fun `a folder project keeps its form when renamed`() {
         val store = store()

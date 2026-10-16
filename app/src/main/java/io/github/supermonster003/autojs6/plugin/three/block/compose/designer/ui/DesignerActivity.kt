@@ -1047,6 +1047,15 @@ internal class DesignerActivity : StandaloneActivity() {
             }.getOrDefault(false)
             scope.launch { snackbar.showSnackbar(if (ok) exported else exportFailed) }
         }
+        // Roadmap P11.3 / D62: a document with layout files (a folder project) is exported as one zip, main.js on top.
+        val zipExporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ProjectStore.ZIP_MIME_TYPE)) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val ok = runCatching {
+                val archive = io.exportArchive(source, session.script(), session.files()) ?: return@runCatching false
+                context.contentResolver.openOutputStream(uri, "wt")?.use { out -> archive.inputStream().use { it.copyTo(out) } } != null
+            }.getOrDefault(false)
+            scope.launch { snackbar.showSnackbar(if (ok) exported else exportFailed) }
+        }
 
         LaunchedEffect(session.revision) {
             if (session.dirty) {
@@ -1103,7 +1112,13 @@ internal class DesignerActivity : StandaloneActivity() {
                                 }, modifier = Modifier.testTag("designer-menu-import-to-host"))
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_export)) }, onClick = {
                                     menuOpen = false
-                                    exporter.launch(source.title)
+                                    val folder = (source as? DocumentSource.Local)?.name?.let(ProjectStore::isFolderName) == true
+                                    if (folder || session.document.files.isNotEmpty()) {
+                                        if (session.dirty) save(announce = false)
+                                        zipExporter.launch(ProjectStore.displayNameOf((source as? DocumentSource.Local)?.name ?: source.title).substringBeforeLast(".js") + ProjectStore.ZIP_EXTENSION)
+                                    } else {
+                                        exporter.launch(source.title)
+                                    }
                                 }, modifier = Modifier.testTag("designer-menu-export"))
                                 val linked = (source as? DocumentSource.Local)?.name?.takeIf { menuOpen && store.sourceOf(it) != null }
                                 if (linked != null) {

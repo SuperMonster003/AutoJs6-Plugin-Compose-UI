@@ -68,7 +68,9 @@
     <string name="designer_image_folder">이미지 폴더</string>
     <string name="designer_image_folder_set">상대 이미지 경로를 이제 %1$s 에서 찾습니다</string>
     <string name="designer_import_failed">파일을 가져올 수 없습니다.</string>
-    <string name="designer_import_project">스크립트 가져오기</string>
+    <string name="designer_import_folder">폴더 가져오기</string>
+    <string name="designer_import_no_script">가져올 main.js 또는 단일 스크립트를 찾을 수 없습니다.</string>
+    <string name="designer_import_project">스크립트 또는 zip 가져오기</string>
     <string name="designer_import_to_host">AutoJs6 스크립트 폴더로 가져오기</string>
     <string name="designer_insert_failed">선택한 노드에는 이 구성 요소를 넣을 수 없습니다.</string>
     <string name="designer_issues">검증 결과</string>

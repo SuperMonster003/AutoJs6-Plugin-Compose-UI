@@ -68,7 +68,9 @@
     <string name="designer_image_folder">画像フォルダー</string>
     <string name="designer_image_folder_set">相対的な画像パスは %1$s から探すようになりました</string>
     <string name="designer_import_failed">ファイルをインポートできませんでした.</string>
-    <string name="designer_import_project">スクリプトをインポート</string>
+    <string name="designer_import_folder">フォルダをインポート</string>
+    <string name="designer_import_no_script">インポートできる main.js または単一のスクリプトが見つかりません.</string>
+    <string name="designer_import_project">スクリプトまたは zip をインポート</string>
     <string name="designer_import_to_host">AutoJs6 のスクリプトフォルダーに取り込む</string>
     <string name="designer_insert_failed">選択中のノードにはこのコンポーネントを置けません.</string>
     <string name="designer_issues">検証結果</string>

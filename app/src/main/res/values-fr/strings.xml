@@ -68,7 +68,9 @@
     <string name="designer_image_folder">Dossier d\'images</string>
     <string name="designer_image_folder_set">Les chemins d\'images relatifs sont désormais cherchés dans %1$s</string>
     <string name="designer_import_failed">Le fichier n\'a pas pu être importé.</string>
-    <string name="designer_import_project">Importer un script</string>
+    <string name="designer_import_folder">Importer un dossier</string>
+    <string name="designer_import_no_script">Aucun main.js ni script unique à importer n\'a été trouvé.</string>
+    <string name="designer_import_project">Importer un script ou un zip</string>
     <string name="designer_import_to_host">Importer dans les scripts AutoJs6</string>
     <string name="designer_insert_failed">Le nœud sélectionné ne peut pas recevoir ce composant ici.</string>
     <string name="designer_issues">Validation</string>

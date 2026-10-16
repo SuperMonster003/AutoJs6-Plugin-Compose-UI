@@ -68,7 +68,9 @@
     <string name="designer_image_folder">Папка изображений</string>
     <string name="designer_image_folder_set">Относительные пути изображений теперь ищутся в %1$s</string>
     <string name="designer_import_failed">Не удалось импортировать файл.</string>
-    <string name="designer_import_project">Импортировать скрипт</string>
+    <string name="designer_import_folder">Импортировать папку</string>
+    <string name="designer_import_no_script">Не найден main.js или единственный скрипт для импорта.</string>
+    <string name="designer_import_project">Импортировать скрипт или zip</string>
     <string name="designer_import_to_host">Импортировать в скрипты AutoJs6</string>
     <string name="designer_insert_failed">Выбранный узел не может принять этот компонент здесь.</string>
     <string name="designer_issues">Проверка</string>

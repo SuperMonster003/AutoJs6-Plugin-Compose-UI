@@ -68,7 +68,9 @@
     <string name="designer_image_folder">图片目录</string>
     <string name="designer_image_folder_set">相对图片路径现在在 %1$s 中查找</string>
     <string name="designer_import_failed">无法导入该文件.</string>
-    <string name="designer_import_project">导入脚本</string>
+    <string name="designer_import_folder">导入文件夹</string>
+    <string name="designer_import_no_script">没有找到可导入的 main.js 或唯一的脚本.</string>
+    <string name="designer_import_project">导入脚本或 zip</string>
     <string name="designer_import_to_host">导入 AutoJs6 脚本目录</string>
     <string name="designer_insert_failed">选中的节点无法在此处放入该组件.</string>
     <string name="designer_issues">校验结果</string>

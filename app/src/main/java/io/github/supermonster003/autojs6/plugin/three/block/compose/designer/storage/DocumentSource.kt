@@ -41,6 +41,11 @@ internal sealed class DocumentSource {
 
 /** Reads and writes a [DocumentSource]; the activity never touches files or resolvers directly. */
 internal class DocumentIo(private val context: Context, private val store: ProjectStore) {
+    private companion object {
+        const val EXPORT_DIRECTORY = "designer-export"
+        const val EXPORT_ARCHIVE = "export"
+    }
+
     sealed class WriteResult {
         /** Written in place. */
         object Saved : WriteResult()
@@ -159,6 +164,23 @@ internal class DocumentIo(private val context: Context, private val store: Proje
         } else {
             null
         }
+    }
+
+    /**
+     * The zip a document with layout files is exported as (roadmap P11.3 / D62): its folder's files (a folder project
+     * whole, the `res/` directory beside a file Uri) with [script] as `main.js` and the current [files], plus a
+     * `project.json` when there is none; null when it cannot be made (over the limits).
+     */
+    fun exportArchive(source: DocumentSource, script: String, files: Map<String, String>): File? {
+        val root = projectRootOf(source)
+        val texts = LinkedHashMap(files)
+        texts[ProjectStore.MAIN_SCRIPT] = script
+        val name = when (source) {
+            is DocumentSource.Local -> ProjectStore.displayNameOf(source.name).removeSuffix(ProjectStore.EXTENSION)
+            is DocumentSource.External -> source.displayName.substringBeforeLast('.')
+        }
+        if (root == null || !root.whole || !File(root.dir, ProjectStore.PROJECT_CONFIG).isFile) texts[ProjectStore.PROJECT_CONFIG] = ProjectStore.projectConfigOf(name)
+        return ProjectArchives(File(context.cacheDir, EXPORT_DIRECTORY)).archive(EXPORT_ARCHIVE, root, texts)?.file
     }
 
     /** The script's path inside a project zip: `main.js` of a folder project, else the script's file name. */
