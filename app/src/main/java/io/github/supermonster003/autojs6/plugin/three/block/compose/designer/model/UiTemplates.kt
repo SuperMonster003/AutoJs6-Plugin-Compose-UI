@@ -45,6 +45,49 @@ object UiTemplates {
         else -> element(tag)
     }
 
+    /** The palette of a native Android XML fragment (roadmap P11.3 / D67): common view classes, by the same categories. */
+    val NATIVE_CATEGORIES = listOf(
+        Category("layout", listOf("LinearLayout", "FrameLayout", "RelativeLayout", "ScrollView", "HorizontalScrollView", "androidx.constraintlayout.widget.ConstraintLayout", "androidx.cardview.widget.CardView")),
+        Category("text", listOf("TextView")),
+        Category("button", listOf("Button", "ImageButton", "com.google.android.material.button.MaterialButton")),
+        Category("input", listOf("EditText")),
+        Category("choice", listOf("CheckBox", "RadioGroup", "RadioButton", "Switch", "ToggleButton", "Spinner")),
+        Category("progress", listOf("ProgressBar", "SeekBar", "RatingBar")),
+        Category("image", listOf("ImageView")),
+        Category("list", listOf("ListView", "androidx.recyclerview.widget.RecyclerView")),
+        Category("other", listOf("Space", "View", "WebView")),
+    )
+
+    /** A fresh native element of [tag] (a view class) with its layout size and a few defaults. */
+    fun createNative(tag: String): XmlNode.Element {
+        fun native(vararg extra: Pair<String, String>, width: String = WRAP, height: String = WRAP) =
+            element(tag, "android:layout_width" to width, "android:layout_height" to height, *extra)
+        return when (tag) {
+            "LinearLayout" -> native("android:orientation" to "vertical", width = MATCH)
+            "FrameLayout", "RelativeLayout", "ScrollView", "HorizontalScrollView", "androidx.constraintlayout.widget.ConstraintLayout", "androidx.cardview.widget.CardView" -> native(width = MATCH)
+            "TextView" -> native("android:text" to "Text")
+            "Button", "com.google.android.material.button.MaterialButton" -> native("android:text" to "Button")
+            "EditText" -> native("android:hint" to "Input", width = MATCH)
+            "CheckBox" -> native("android:text" to "Checkbox")
+            "RadioButton" -> native("android:text" to "Radio")
+            "RadioGroup" -> native().copy(children = listOf(
+                element("RadioButton", "android:layout_width" to WRAP, "android:layout_height" to WRAP, "android:text" to "Option 1", "android:checked" to "true"),
+                element("RadioButton", "android:layout_width" to WRAP, "android:layout_height" to WRAP, "android:text" to "Option 2"),
+            ))
+            "Switch" -> native("android:text" to "Switch")
+            "SeekBar" -> native("android:max" to "100", "android:progress" to "50", width = MATCH)
+            "RatingBar" -> native("android:numStars" to "5", "android:rating" to "3")
+            "ImageView", "ImageButton" -> native(width = "48dp", height = "48dp")
+            "ListView", "androidx.recyclerview.widget.RecyclerView", "WebView" -> native(width = MATCH, height = "200dp")
+            "Space" -> native(height = "8dp")
+            "View" -> native(width = MATCH, height = "1dp")
+            else -> native()
+        }
+    }
+
+    private const val MATCH = "match_parent"
+    private const val WRAP = "wrap_content"
+
     private fun element(tag: String, vararg attrs: Pair<String, String>): XmlNode.Element =
         XmlNode.Element(0, tag, attrs = attrs.map { (name, value) -> XmlAttr.literal(name, value) })
 }

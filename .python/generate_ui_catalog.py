@@ -5,13 +5,21 @@ Reads api/ui.md (the built-in tag table) and api/uiAttributes.md (the attribute 
 explicitly named AutoJs6-Documentation checkout and writes app/src/main/resources/designer-ui/catalog.json.
 The view class inheritance chains and the palette categories are kept in this script; the documentation is
 the only source of tags, attributes, aliases, value types and the unsupported lists. --check reports drift.
+
+With --android <AutoJs6 checkout> (roadmap P11.3) it also writes catalog-android.json, the native Android XML
+catalog, from the host's attribute table and device coverage snapshot (see build_android); the class hierarchy is
+read from the Android SDK (--sdk) and the Gradle cache (--gradle-home) the way the host's table generator reads it.
 """
 
 import argparse
+import hashlib
+import io
 import json
+import os
 import re
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 OUTPUT = Path(__file__).resolve().parents[1] / "app/src/main/resources/designer-ui/catalog.json"
@@ -421,33 +429,152 @@ def full_chain(name: str) -> list[str]:
     return chain
 
 
+ANDROID_OUTPUT = OUTPUT.parent / "catalog-android.json"
+# Coverage categories (the host's android_attrs_coverage.py) -> what the catalog tells the designer.
+ANDROID_STATES = {"handler": "set", "setter": "set", "params": "set", "design": "design", "unsupported": "unsupported", "api": "api"}
+
+
+def build_android(host: Path, sdk: Path, gradle_home: Path) -> dict:
+    """The native Android XML catalog (roadmap P11.3, D56 as revised by D65): what the host's inflater actually does
+    with each `android:` / `app:` attribute, from the host's attribute table (app/src/main/assets/ui/android-attrs.json)
+    and its device coverage snapshot (app/src/androidTest/assets/ui/android-attrs-coverage.json). Each view class
+    lists the attributes it adds ("set", "unsupported", "design", with ":<api>" when newer than API 24) and its
+    nearest catalog ancestor; `layouts` does the same for layout parameters; `tags` maps every public View class the
+    inflater can create (simple names for android.widget / android.view / android.webkit) to its nearest catalog
+    class. The class hierarchy is read from the same android.jar and AARs as the host's table generator."""
+    table_bytes = (host / "app/src/main/assets/ui/android-attrs.json").read_bytes()
+    coverage_bytes = (host / "app/src/androidTest/assets/ui/android-attrs-coverage.json").read_bytes()
+    table = json.loads(table_bytes)
+    coverage = json.loads(coverage_bytes)
+    sys.path.insert(0, str(host / ".python"))
+    import generate_android_attrs as host_attrs  # noqa: E402 - the host's table generator, for the class hierarchy
+
+    supers: dict[str, str | None] = {}
+    public: set[str] = set()
+    platform = sdk / "platforms" / host_attrs.SDK_LEVELS[-1][1] / "android.jar"
+    with zipfile.ZipFile(platform) as jar:
+        android_classes = host_attrs.class_names(jar, host_attrs.ANDROID_PACKAGES)
+        host_attrs.read_supers(jar, supers, public)
+    library_classes: list[str] = []
+    for group, artifact, version in host_attrs.AARS:
+        with zipfile.ZipFile(host_attrs.find_aar(gradle_home, group, artifact, version)) as archive:
+            with zipfile.ZipFile(io.BytesIO(archive.read("classes.jar"))) as jar:
+                library_classes += host_attrs.class_names(jar)
+                host_attrs.read_supers(jar, supers, public)
+
+    def nearest(name: str, known: set[str], include_self: bool) -> str | None:
+        cursor = name if include_self else supers.get(name)
+        while cursor is not None and cursor not in known:
+            cursor = supers.get(cursor)
+        return cursor
+
+    since: dict[str, dict[str, int]] = {}
+    for class_key, styleable_keys in table["classes"].items():
+        for key in styleable_keys:
+            namespace = key.split(":", 1)[0]
+            for member, api in table["styleables"][key].items():
+                attr = member if ":" in member else f"{namespace}:{member}"
+                since.setdefault(class_key, {})[attr] = max(api, 24)
+
+    def entries(section: dict, suffix: str) -> dict:
+        known = set(section)
+        out = {}
+        for name in sorted(section):
+            attrs = {}
+            for category, names in section[name].items():
+                state = ANDROID_STATES[category]
+                for attr in names:
+                    api = since.get(name + suffix, {}).get(attr, 24)
+                    attrs[attr] = state if api <= 24 else f"{state}:{api}"
+            out[name] = {"parent": nearest(name, known, include_self=False), "attrs": dict(sorted(attrs.items()))}
+        return out
+
+    views = entries(coverage["views"], "")
+    layouts = entries(coverage["layouts"], "#layout")
+    known_views = set(views)
+    tags: dict[str, str] = {}
+    for name in android_classes + library_classes:
+        if "$" in name or name not in public or not host_attrs.extends(name, "android.view.View", supers):
+            continue
+        target = nearest(name, known_views, include_self=True)
+        if target is None:
+            continue
+        simple = name.rsplit(".", 1)[1]
+        key = simple if name in android_classes else name
+        if key in tags and key == simple:
+            # android.view.* and android.widget.* share no simple names the inflater can create; keep the widget one.
+            if not name.startswith("android.widget."):
+                continue
+        tags[key] = target
+    used = sorted({attr for entry in list(views.values()) + list(layouts.values()) for attr in entry["attrs"]})
+    defs = {}
+    for attr in used:
+        namespace, name = attr.split(":", 1)
+        definition = table["attrs"].get(namespace, {}).get(name) or {}
+        entry: dict = {"f": definition.get("f", [])}
+        if definition.get("e"):
+            entry["e"] = sorted(definition["e"], key=lambda key: (definition["e"][key], key))
+        if definition.get("g"):
+            entry["g"] = sorted(definition["g"], key=lambda key: (definition["g"][key], key))
+        defs[attr] = entry
+    return {
+        "schemaVersion": 1,
+        "table": hashlib.sha256(table_bytes).hexdigest()[:16],
+        "coverage": hashlib.sha256(coverage_bytes).hexdigest()[:16],
+        "coverageApi": coverage["api"],
+        "views": views,
+        "layouts": layouts,
+        "tags": dict(sorted(tags.items())),
+        "defs": defs,
+    }
+
+
 def render(catalog: dict) -> str:
     return json.dumps(catalog, ensure_ascii=False, indent=2) + "\n"
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--docs", required=True, type=Path, help="Explicit AutoJs6-Documentation checkout path")
-    parser.add_argument("--check", action="store_true", help="Compare the generated catalog with the committed file")
+    parser.add_argument("--docs", type=Path, help="Explicit AutoJs6-Documentation checkout path: the ui catalog")
+    parser.add_argument("--android", type=Path, help="Explicit AutoJs6 checkout path: the native Android XML catalog (roadmap P11.3)")
+    parser.add_argument("--sdk", type=Path, default=os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT"), help="Android SDK root (with --android)")
+    parser.add_argument("--gradle-home", type=Path, default=Path(os.environ.get("GRADLE_USER_HOME") or Path.home() / ".gradle"), help="Gradle user home (with --android)")
+    parser.add_argument("--check", action="store_true", help="Compare the generated catalogs with the committed files")
     args = parser.parse_args()
+    if args.docs is None and args.android is None:
+        parser.error("--docs and / or --android is required")
+    outputs = []
     try:
-        text = render(build(args.docs.resolve()))
+        if args.docs is not None:
+            outputs.append((OUTPUT, render(build(args.docs.resolve()))))
+        if args.android is not None:
+            if args.sdk is None:
+                parser.error("--sdk is required with --android (or set ANDROID_HOME)")
+            outputs.append((ANDROID_OUTPUT, render(build_android(args.android.resolve(), Path(args.sdk), Path(args.gradle_home)))))
     except (OSError, ValueError, KeyError, IndexError) as error:
         print(f"ui catalog: {error}", file=sys.stderr)
         return 1
-    if args.check:
-        current = OUTPUT.read_text(encoding="utf-8") if OUTPUT.is_file() else ""
-        if current != text:
-            print(f"ui catalog: {OUTPUT} differs from the documentation", file=sys.stderr)
-            return 1
-        print("ui catalog: checked")
-        return 0
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(text, encoding="utf-8")
-    catalog = json.loads(text)
-    attrs = sum(len(entry["attrs"]) for entry in catalog["classes"].values())
-    print(f"ui catalog: {len(catalog['tags'])} tags, {attrs} attributes in {len(catalog['classes'])} classes, docs {catalog['docsCommit']}")
-    return 0
+    status = 0
+    for output, text in outputs:
+        if args.check:
+            current = output.read_text(encoding="utf-8") if output.is_file() else ""
+            if current != text:
+                print(f"ui catalog: {output} differs from its sources", file=sys.stderr)
+                status = 1
+            else:
+                print(f"ui catalog: {output.name} checked")
+            continue
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8")
+        catalog = json.loads(text)
+        if output == OUTPUT:
+            attrs = sum(len(entry["attrs"]) for entry in catalog["classes"].values())
+            print(f"ui catalog: {len(catalog['tags'])} tags, {attrs} attributes in {len(catalog['classes'])} classes, docs {catalog['docsCommit']}")
+        else:
+            attrs = sum(len(entry["attrs"]) for entry in catalog["views"].values())
+            params = sum(len(entry["attrs"]) for entry in catalog["layouts"].values())
+            print(f"android catalog: {len(catalog['views'])} classes, {attrs} attributes, {params} layout parameters, {len(catalog['tags'])} tags")
+    return status
 
 
 if __name__ == "__main__":

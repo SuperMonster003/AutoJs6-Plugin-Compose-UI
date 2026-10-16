@@ -32,8 +32,9 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 /** The component palette of a ui (XML) project (roadmap P10.4): the catalog's tags by the documentation's categories. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun UiPalette(catalog: UiCatalog, palette: StandalonePalette, onPick: (String) -> Unit, onDismiss: () -> Unit) {
-    val categories = remember(catalog) { UiTemplates.categories(catalog) }
+internal fun UiPalette(catalog: UiCatalog, palette: StandalonePalette, native: Boolean = false, onPick: (String) -> Unit, onDismiss: () -> Unit) {
+    // Roadmap P11.3: a native Android XML fragment gets view classes instead of AutoJs6 tags.
+    val categories = remember(catalog, native) { if (native) UiTemplates.NATIVE_CATEGORIES else UiTemplates.categories(catalog) }
     ModalBottomSheet(onDismissRequest = onDismiss, containerColor = Color(palette.surface)) {
         LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 520.dp).padding(horizontal = 16.dp).testTag("designer-palette")) {
             categories.forEach { category ->
@@ -42,8 +43,8 @@ internal fun UiPalette(catalog: UiCatalog, palette: StandalonePalette, onPick: (
                 }
                 items(category.tags, key = { it }) { tag ->
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().clickable { onPick(tag) }.padding(vertical = 10.dp).testTag("designer-palette-$tag")) {
-                        Text(tag, color = Color(palette.text), fontSize = 15.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
-                        Text(catalog.tag(tag)?.viewClass.orEmpty(), color = Color(palette.muted), fontSize = 12.sp)
+                        Text(if (native) tag.substringAfterLast('.') else tag, color = Color(palette.text), fontSize = 15.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+                        Text(if (native) tag.substringBeforeLast('.', "") else catalog.tag(tag)?.viewClass.orEmpty(), color = Color(palette.muted), fontSize = 12.sp)
                     }
                     HorizontalDivider(color = Color(palette.divider))
                 }

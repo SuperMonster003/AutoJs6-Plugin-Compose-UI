@@ -4,9 +4,11 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mo
  * Checks a [UiDocument] against the [UiCatalog] (roadmap P10.1): unknown tags, unknown or unsupported attributes,
  * value formats, RelativeLayout rules outside a relative parent, list templates, duplicate ids and empty bindings.
  * Values with `{{ }}` bindings or `{expr}` parts are not type checked. Elements with namespaced attributes
- * (`xmlns:android`, `android:text`) are Android layouts the host inflates as written and are left alone.
+ * (`xmlns:android`, `android:text`) in an AutoJs6 fragment are left alone; a native Android XML fragment (roadmap
+ * P11.3, [UiDocument.isNative]) is checked against the [UiAndroidCatalog]: the namespace, the attribute (a layout
+ * parameter against the parent), whether the host can set it, and its value format.
  */
-class UiValidator(private val catalog: UiCatalog = UiCatalog.load()) {
+class UiValidator(private val catalog: UiCatalog = UiCatalog.load(), private val android: UiAndroidCatalog = UiAndroidCatalog.load()) {
 
     /** The catalog tag or the view class a class-name tag maps to; [known] is false when the class is a guess. */
     data class Resolved(val viewClass: String, val tag: UiCatalog.Tag?, val known: Boolean)
@@ -21,7 +23,9 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load()) {
     fun validate(document: UiDocument): List<Diagnostic> {
         val diagnostics = ArrayList<Diagnostic>()
         val ids = HashMap<String, MutableList<Int>>()
-        for (fragment in document.fragments) validate(fragment.root, null, diagnostics, ids, document.widgets)
+        for (fragment in document.fragments) {
+            if (document.isNative(fragment)) validateNative(fragment.root, null, diagnostics, ids) else validate(fragment.root, null, diagnostics, ids, document.widgets)
+        }
         ids.forEach { (id, owners) -> if (owners.size > 1) owners.forEach { diagnostics += Diagnostic(it, "id", Severity.ERROR, "Duplicate id \"$id\"") } }
         return diagnostics
     }
@@ -66,6 +70,63 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load()) {
             }
         }
         for (child in elementChildren) validate(child, element, out, ids, widgets)
+    }
+
+    /** The catalog class of a native element: its tag, or the `class` of a `<view>`; null for an unknown or special tag. */
+    fun nativeClassOf(element: XmlNode.Element): String? =
+        if (element.tag == "view") element.attr("class")?.value?.let(android::classOf) else android.classOf(element.tag)
+
+    private fun validateNative(element: XmlNode.Element, parentClass: String?, out: MutableList<Diagnostic>, ids: MutableMap<String, MutableList<Int>>) {
+        element.idName()?.let { id -> ids.getOrPut(id) { ArrayList() } += element.id }
+        val special = element.tag in NATIVE_SPECIAL_TAGS
+        val className = nativeClassOf(element)
+        if (!special && className == null) {
+            out += Diagnostic(element.id, null, Severity.WARNING, "<${element.tag}> is not a view class AutoJs6 knows; its attributes are not checked")
+        }
+        if (!special) for (attr in element.attrs) {
+            val name = attr.name
+            if (name.startsWith("xmlns") || name.startsWith("tools:") || name in NATIVE_PLAIN_ATTRS) continue
+            if (':' !in name) {
+                out += Diagnostic(element.id, name, Severity.WARNING, "$name has no android: or app: prefix; Android XML ignores it")
+                continue
+            }
+            if (name.substringBefore(':') !in NATIVE_NAMESPACES) continue
+            val layoutParam = UiAndroidCatalog.isLayoutParam(name)
+            val spec = android.attr(className, parentClass, name)
+            when {
+                spec == null && (className != null || layoutParam) -> out += Diagnostic(
+                    element.id, name, Severity.WARNING,
+                    if (layoutParam) "$name is not a layout parameter of the parent; the host ignores it" else "Unknown attribute $name on <${element.tag}>; the host ignores it",
+                )
+                spec?.state == UiAndroidCatalog.State.UNSUPPORTED -> out += Diagnostic(element.id, name, Severity.WARNING, "AutoJs6 cannot set $name on <${element.tag}>; it is ignored")
+                spec?.state == UiAndroidCatalog.State.SET -> validateNativeValue(element, attr, spec, out)
+            }
+        }
+        // The children of <merge> join the parent of the <include> that pulls it in, unknown here.
+        val childParent = if (element.tag == "merge") null else className
+        for (child in element.elementChildren) validateNative(child, childParent, out, ids)
+    }
+
+    private fun validateNativeValue(element: XmlNode.Element, attr: XmlAttr, spec: UiAndroidCatalog.Attr, out: MutableList<Diagnostic>) {
+        if (attr.isBare || attr.hasBinding || attr.hasExpr) return
+        val value = XmlEntities.decode(attr.value).trim()
+        val formats = spec.formats.toSet()
+        if (value.startsWith("@") || value.startsWith("?") || formats.isEmpty() || "string" in formats) return
+        val matches = formats.any { format ->
+            when (format) {
+                "boolean" -> value == "true" || value == "false"
+                "integer" -> INT.matches(value) || HEX_INT.matches(value)
+                "float" -> NUMBER.matches(value)
+                "dimension" -> DIMENSION.matches(value)
+                "fraction" -> FRACTION.matches(value)
+                "color" -> COLOR_HEX.matches(value)
+                "enum" -> value in spec.enums
+                "flag" -> value.split('|').all { it.trim() in spec.flags }
+                "reference" -> false
+                else -> true
+            }
+        }
+        if (!matches) out += Diagnostic(element.id, attr.name, Severity.ERROR, "${attr.name}=\"$value\" expects ${spec.formats.joinToString(" or ")}")
     }
 
     private fun validateValue(element: XmlNode.Element, attr: XmlAttr, entry: UiCatalog.Attr?, out: MutableList<Diagnostic>) {
@@ -118,5 +179,12 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load()) {
         val ID = Regex("""(@\+?id/)?[A-Za-z_][A-Za-z0-9_]*""")
         val WHITESPACE = Regex("""\s+""")
         val SIZE_WORDS = setOf("wrap_content", "match_parent", "fill_parent", "auto", "*")
+        val HEX_INT = Regex("""0x[0-9a-fA-F]+""")
+        val FRACTION = Regex("""-?\d+(\.\d+)?%p?""")
+        /** Tags LayoutInflater handles itself: their attributes are not a view's. */
+        val NATIVE_SPECIAL_TAGS = setOf("include", "merge", "fragment", "requestFocus", "tag", "blink")
+        /** Unprefixed attributes Android XML reads itself (`style`, `<view class>`, `<include layout>`). */
+        val NATIVE_PLAIN_ATTRS = setOf("style", "class", "layout")
+        val NATIVE_NAMESPACES = setOf("android", "app")
     }
 }

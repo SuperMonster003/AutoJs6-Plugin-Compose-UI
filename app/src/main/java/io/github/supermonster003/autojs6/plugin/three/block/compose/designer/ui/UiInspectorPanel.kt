@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiAndroidCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEvents
@@ -51,6 +52,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlAttr
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlEntities
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.idName
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.elementLabel
 
 /** One attribute group of the inspector: the attributes of one class of the element's chain, nearest class first. */
@@ -66,6 +68,22 @@ internal fun uiAttrGroups(catalog: UiCatalog, viewClass: String?, element: XmlNo
     return catalog.attrsFor(viewClass).filter { it.name !in set && it.aliases.none { alias -> alias in set } }
         .groupBy { it.ownerClass }.map { (owner, attrs) -> UiAttrGroup(owner, attrs) }
         .sortedBy { group -> catalog.chain(viewClass).indexOf(group.owner).let { if (it < 0) Int.MAX_VALUE else it } }
+}
+
+/**
+ * The attributes the native catalog has for [element] (roadmap P11.3) that are not set on it and that the host sets:
+ * those of its view class chain by class (nearest first), then its parent's layout parameters as one group.
+ */
+internal fun nativeAttrGroups(session: UiDesignerSession, element: XmlNode.Element): List<UiAttrGroup> {
+    val android = session.android
+    val set = element.attrs.map { it.name }.toSet() + "android:id"
+    val className = session.nativeClassOf(element)
+    val own = className?.let(android::attrsFor).orEmpty().filter { it.state == UiAndroidCatalog.State.SET && it.name !in set }
+        .groupBy { it.ownerClass }.map { (owner, attrs) -> UiAttrGroup(UiAndroidCatalog.shortName(owner), attrs.map(android::toUiAttr)) }
+    val parent = session.nativeParentClassOf(element)
+    val params = android.layoutParamsFor(parent).filter { it.state == UiAndroidCatalog.State.SET && it.name !in set }
+    val layout = if (params.isEmpty()) emptyList() else listOf(UiAttrGroup(UiAndroidCatalog.shortName(parent ?: "android.view.ViewGroup") + " layout", params.map(android::toUiAttr)))
+    return layout + own
 }
 
 /**
@@ -88,19 +106,30 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
         val widget = element.tag in session.document.widgets
         val viewClass = tag?.viewClass ?: session.viewClassOf(element.tag)
         val namespaced = element.attrs.any { it.name.startsWith("xmlns") || ':' in it.name }
+        // Roadmap P11.3: an element of a native Android XML fragment is edited with the native catalog.
+        val native = session.document.isNative(element.id)
         // Tag
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp)) {
-            TagPicker(element.tag, catalog, palette, Modifier.weight(1f)) { picked -> session.execute(UiEditCommand.SetTag(element.id, picked), merge = false) }
+            if (native) {
+                Text("<${element.tag}>", color = Color(palette.text), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f).padding(vertical = 8.dp).testTag("designer-ui-tag"))
+            } else {
+                TagPicker(element.tag, catalog, palette, Modifier.weight(1f)) { picked -> session.execute(UiEditCommand.SetTag(element.id, picked), merge = false) }
+            }
             Text(elementLabel(element), color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
         }
-        if (tag == null && !widget && viewClass == null) {
+        if (!native && tag == null && !widget && viewClass == null) {
             Text(stringResource(R.string.designer_ui_unknown_tag), color = Color(palette.danger), fontSize = 13.sp)
         }
-        // id
-        UiSectionTitle("id", palette)
-        val idAttr = element.attr("id")
-        UiTextField(idAttr?.let { XmlEntities.decode(it.value) } ?: "", "id", palette, Modifier.testTag("designer-ui-id"), monospace = true, onSeal = { session.seal() }) { text ->
-            session.execute(UiEditCommand.SetAttr(element.id, "id", text.trim().takeIf { it.isNotEmpty() }?.let { XmlEntities.encodeAttribute(it, '"') }))
+        // id: AutoJs6's id="x", or android:id="@+id/x" in native XML
+        UiSectionTitle(if (native) "android:id" else "id", palette)
+        val idText = if (native) element.idName().orEmpty() else element.attr("id")?.let { XmlEntities.decode(it.value) } ?: ""
+        UiTextField(idText, "id", palette, Modifier.testTag("designer-ui-id"), monospace = true, onSeal = { session.seal() }) { text ->
+            val id = text.trim().takeIf { it.isNotEmpty() }
+            if (native) {
+                session.execute(UiEditCommand.SetAttr(element.id, "android:id", id?.let { XmlEntities.encodeAttribute("@+id/" + it.removePrefix("@+id/").removePrefix("@id/"), '"') }))
+            } else {
+                session.execute(UiEditCommand.SetAttr(element.id, "id", id?.let { XmlEntities.encodeAttribute(it, '"') }))
+            }
         }
         // Text content: elements without element children (`<text>Hello</text>`), unless they are empty containers.
         val textContent = element.textContent
@@ -112,16 +141,16 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
         }
         // Set attributes
         UiSectionTitle(stringResource(R.string.designer_ui_attr_set), palette)
-        val setAttrs = element.attrs.filter { it.name != "id" }
+        val setAttrs = element.attrs.filter { it.name != "id" && !(native && it.name == "android:id") }
         if (setAttrs.isEmpty()) Text(stringResource(R.string.designer_ui_attr_none), color = Color(palette.muted), fontSize = 12.sp)
         setAttrs.forEach { attr ->
-            val spec = viewClass?.let { catalog.attr(it, attr.name) }
+            val spec = if (native) session.nativeAttr(element, attr.name) else viewClass?.let { catalog.attr(it, attr.name) }
             AttrRow(session, element, attr.name, attr, spec, catalog, palette)
         }
         // Catalog attributes by class
-        if (!namespaced && !widget) {
+        if (native || (!namespaced && !widget)) {
             val expanded = remember(element.id, element.tag) { mutableStateMapOf<String, Boolean>() }
-            val groups = uiAttrGroups(catalog, viewClass, element)
+            val groups = if (native) nativeAttrGroups(session, element) else uiAttrGroups(catalog, viewClass, element)
             groups.forEachIndexed { index, group ->
                 val open = expanded[group.owner] ?: (index == 0)
                 Row(
@@ -146,7 +175,7 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
             TextButton(onClick = {
                 val name = newName.trim()
                 if (name.isEmpty() || element.attr(name) != null) return@TextButton
-                val spec = viewClass?.let { catalog.attr(it, name) }
+                val spec = if (native) session.nativeAttr(element, name) else viewClass?.let { catalog.attr(it, name) }
                 session.execute(UiEditCommand.SetAttr(element.id, name, defaultValue(spec)), merge = false)
                 newName = ""
             }, modifier = Modifier.testTag("designer-ui-attr-add")) { Text(stringResource(R.string.designer_add)) }

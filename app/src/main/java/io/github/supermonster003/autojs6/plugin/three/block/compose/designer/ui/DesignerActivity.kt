@@ -1311,7 +1311,7 @@ internal class DesignerActivity : StandaloneActivity() {
                 dismissButton = { TextButton(onClick = { pendingDraft = null; io.clearDraft(source) }, modifier = Modifier.testTag("designer-draft-discard")) { Text(stringResource(R.string.designer_draft_discard)) } },
             )
         }
-        if (paletteOpen) UiPalette(session.catalog, palette, onPick = { tag ->
+        if (paletteOpen) UiPalette(session.catalog, palette, native = session.nativeFragment, onPick = { tag ->
             paletteOpen = false
             if (!session.insert(tag)) scope.launch { snackbar.showSnackbar(insertFailed) }
         }, onDismiss = { paletteOpen = false })

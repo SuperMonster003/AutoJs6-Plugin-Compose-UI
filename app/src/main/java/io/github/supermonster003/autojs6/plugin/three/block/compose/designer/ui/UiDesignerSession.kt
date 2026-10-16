@@ -11,6 +11,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifference
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferences
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiAndroidCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
@@ -41,6 +42,8 @@ internal class UiDesignerSession(
 ) {
     private val history = UiEditHistory(initial)
     private val validator = UiValidator(catalog)
+    /** The native Android XML catalog (roadmap P11.3): the attributes of elements in native fragments. */
+    val android: UiAndroidCatalog = UiAndroidCatalog.load()
     private var savedFiles: Map<String, String> = savedFiles
 
     var document: UiDocument by mutableStateOf(initial)
@@ -162,8 +165,9 @@ internal class UiDesignerSession(
      * selected element among its siblings; the new element is selected.
      */
     fun insert(tag: String): Boolean {
-        val template = UiTemplates.create(tag)
         val target = selected ?: root ?: return false
+        // Roadmap P11.3: a native Android XML fragment takes view classes with android: attributes.
+        val template = if (document.isNative(target.id)) UiTemplates.createNative(tag) else UiTemplates.create(tag)
         val before = document.nextId
         val inserted = if (isContainer(target)) {
             execute(UiEditCommand.InsertElement(target.id, target.elementChildren.size, template), merge = false)
@@ -176,6 +180,20 @@ internal class UiDesignerSession(
         if (inserted) selectedId = before
         return inserted
     }
+
+    /** Whether the fragment on the canvas is native Android XML (roadmap P11.3): the palette offers view classes then. */
+    val nativeFragment: Boolean get() = document.fragments.getOrNull(fragment)?.let(document::isNative) == true
+
+    /** The native catalog class of [element] (roadmap P11.3), or null for an unknown or special tag. */
+    fun nativeClassOf(element: XmlNode.Element): String? = validator.nativeClassOf(element)
+
+    /** The native catalog class of [element]'s parent, whose layout parameters it takes; null at the root or under `<merge>`. */
+    fun nativeParentClassOf(element: XmlNode.Element): String? =
+        document.parentOf(element.id)?.let { document.element(it.parentId) }?.takeIf { it.tag != "merge" }?.let(validator::nativeClassOf)
+
+    /** The native attribute [name] of [element] for the inspector's editors, or null when the catalog does not know it. */
+    fun nativeAttr(element: XmlNode.Element, name: String): UiCatalog.Attr? =
+        android.attr(nativeClassOf(element), nativeParentClassOf(element), name)?.let(android::toUiAttr)
 
     /** The view class the validator checks [tag] against (a catalog tag or a class name), or null for unknown tags. */
     fun viewClassOf(tag: String): String? = validator.resolve(tag)?.viewClass
