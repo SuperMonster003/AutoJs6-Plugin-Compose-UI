@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">Sortie du script exécuté dans AutoJs6 pour l\'aperçu interactif.</string>
     <string name="designer_ui_diff_activity">L\'aperçu n\'a pas d\'Activity, donc activity n\'y est pas disponible: cette ligne échoue lorsqu\'elle s\'exécute dans l\'aperçu.</string>
     <string name="designer_ui_diff_activity_events">L\'aperçu n\'a pas d\'Activity, donc ui.emitter y vaut null et cette ligne échoue; les événements d\'Activity comme activity_result et le menu d\'options ne se produisent que lorsque le script s\'exécute dans AutoJs6.</string>
+    <string name="designer_ui_diff_activity_events_v4">Dans l\'aperçu, ui.emitter ne reçoit que create, resume, pause et back_pressed; les autres événements d\'Activity comme activity_result et le menu d\'options ne se produisent que lorsque le script s\'exécute dans AutoJs6.</string>
     <string name="designer_ui_diff_busy_wait">Cette boucle infinie s\'exécute sur le thread principal d\'AutoJs6, comme lors d\'une vraie exécution: dans l\'aperçu, elle bloque AutoJs6 et le concepteur ne peut pas l\'arrêter. Exécutez ce genre de boucle dans threads.start(...).</string>
     <string name="designer_ui_diff_dialogs">Sans Activity, les boîtes de dialogue s\'ouvrent en fenêtres flottantes au-dessus du concepteur plutôt que dans le canevas, et seulement si AutoJs6 est autorisé à s\'afficher par-dessus les autres applications.</string>
     <string name="designer_ui_diff_docs_unavailable">Aucune application ne peut ouvrir la documentation</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">Mise en page %1$d</string>
     <string name="designer_ui_fragment_root">Mise en page %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">ui.%1$s.on(\'%2$s\') a été ajouté après la mise en page; écrivez son corps dans le script.</string>
+    <string name="designer_ui_interact_back">Touche Retour</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6 a arrêté le script: il a occupé le thread principal plus de %1$d s</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6 a arrêté le script: il a occupé le thread principal plus de %1$d s (ligne %2$d)</string>
     <string name="designer_ui_interact_confirm_message">L\'aperçu interactif exécute tout ce script dans AutoJs6, exactement comme la commande Exécuter, avec tous ses effets secondaires (fichiers, réseau, actions sur l\'appareil). Son ui.layout remplit le canevas; le document et le fichier restent inchangés. Le script s\'arrête quand l\'interrupteur est désactivé ou que le concepteur est quitté.</string>
+    <string name="designer_ui_interact_confirm_message_v4">L\'aperçu interactif exécute tout ce script dans AutoJs6, exactement comme la commande Exécuter, avec tous ses effets secondaires (fichiers, réseau, actions sur l\'appareil). Son ui.layout remplit le canevas; le document et le fichier restent inchangés. Le script s\'arrête quand l\'interrupteur est désactivé ou que l\'éditeur est fermé; tant que le concepteur est en arrière-plan, le script reçoit pause, puis resume au retour, comme une application.</string>
     <string name="designer_ui_interact_confirm_title">Exécuter le script dans l\'aperçu?</string>
     <string name="designer_ui_interact_exited">Le script s\'est terminé (%1$s)</string>
     <string name="designer_ui_interact_needs_android">L\'aperçu interactif nécessite Android 13 ou une version ultérieure; utilisez \"Exécuter dans AutoJs6\" pour essayer le script</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">Certains lanceurs ajoutent un fond ou un masque. La transparence peut ne pas être conservée.</string>
     <string name="plugin_description">Affiche les interfaces déclarées par les scripts avec Jetpack Compose et Material 3</string>
     <string name="settings_appearance">Apparence</string>
+    <string name="settings_busy_wait_limit">Limite d\'occupation du thread principal</string>
+    <string name="settings_busy_wait_limit_default">Par défaut</string>
+    <string name="settings_busy_wait_limit_message">Si, dans l\'aperçu interactif d\'un projet UI (XML), un script occupe le thread principal d\'AutoJs6 plus longtemps que cette durée, comme une boucle infinie, AutoJs6 l\'arrête et le concepteur indique la ligne. Les versions plus anciennes d\'AutoJs6 ignorent ce réglage.</string>
+    <string name="settings_busy_wait_limit_value">%1$d s</string>
+    <string name="settings_designer">Concepteur</string>
     <string name="settings_error">Lecture ou enregistrement impossible. Vérifiez les limites et réessayez. Arrêtez les tâches actives avant d\'effacer les données.</string>
     <string name="settings_title">Paramètres</string>
     <string name="theme_picker_custom">Couleur personnalisée</string>

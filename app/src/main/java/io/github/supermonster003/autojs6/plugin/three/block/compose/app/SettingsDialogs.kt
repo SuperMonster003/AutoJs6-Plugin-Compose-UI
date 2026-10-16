@@ -63,10 +63,14 @@ internal fun ConfirmedChoiceDialog(
     palette: StandalonePalette,
     tag: String,
     onDismiss: () -> Unit,
+    message: String? = null,
     onConfirm: (Int) -> Unit,
 ) {
     var draft by remember(selected) { mutableIntStateOf(selected) }
     SettingsDialog(title, palette, tag, onDismiss, confirmEnabled = true, onConfirm = { onConfirm(draft) }) {
+        message?.let {
+            Text(it, color = Color(palette.muted), fontSize = 14.sp, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp).testTag("$tag-message"))
+        }
         options.forEachIndexed { index, option ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,

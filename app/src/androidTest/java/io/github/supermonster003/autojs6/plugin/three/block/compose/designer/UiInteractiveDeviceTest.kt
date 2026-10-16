@@ -1,5 +1,6 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
+import android.graphics.Rect
 import android.os.Build
 import android.os.SystemClock
 import android.view.InputDevice
@@ -15,6 +16,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.InteractivePreviewSettings
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.UiPreviewClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.DesignerActivity
@@ -23,6 +26,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
@@ -36,6 +40,11 @@ import org.junit.runner.RunWith
  * error shows above the canvas, hiding the designer stops the script and showing it runs it again, and turning the
  * switch off stops it; the document, the file and the draft are untouched throughout. Skipped below API 33 and on a
  * host without `runScript`.
+ *
+ * Roadmap P11.6 (preview contract v4, skipped on older hosts): the script's dialog shows inside the canvas and its
+ * button works, the back key button goes to the dialog first and otherwise ends the run with `exit`, hiding and
+ * showing the designer send pause / resume while the run (and its counter) goes on, and a busy main thread ends the
+ * run within the limit of the settings page while the designer stays usable. On a v4 host the v2 hide test is skipped.
  */
 @RunWith(AndroidJUnit4::class)
 internal class UiInteractiveDeviceTest {
@@ -53,7 +62,10 @@ internal class UiInteractiveDeviceTest {
         context.getSharedPreferences("designer", android.content.Context.MODE_PRIVATE).edit().remove("ui-interactive-confirmed").apply()
     }
 
-    @After fun remove() { created.forEach { store.delete(it) } }
+    @After fun remove() {
+        created.forEach { store.delete(it) }
+        context.getSharedPreferences(InteractivePreviewSettings.PREFERENCES, android.content.Context.MODE_PRIVATE).edit().remove("ui-busy-wait-limit-seconds").commit()
+    }
 
     private val counter = "\"ui\";\nui.layout(\n    <vertical>\n        <button id=\"b\" w=\"*\" h=\"*\" text=\"count 0\"/>\n    </vertical>\n);\nvar n = 0;\nconsole.log(\"started\");\nui.b.on(\"click\", () => {\n    n++;\n    ui.b.setText(\"count \" + n);\n    console.log(\"clicked \" + n);\n});\n"
 
@@ -163,6 +175,7 @@ internal class UiInteractiveDeviceTest {
         val name = project("lifecycle", counter)
         launch(name).use { scenario ->
             val client = scenario.v2Client()
+            assumeFalse("a v4 host pauses the run instead (see the lifecycle test)", client.lifecycleSupported)
             rule.onNodeWithTag("designer-interact").performClick()
             rule.onNodeWithTag("designer-ui-interact-confirm").performClick()
             rule.waitUntil(30_000) { client.running && client.runId != null }
@@ -192,5 +205,148 @@ internal class UiInteractiveDeviceTest {
             assertFalse(client.running)
         }
         assertFalse(store.draftFile(name).exists())
+    }
+
+    // ------------------------------------------------------------------------------------- contract v4 (P11.6)
+
+    /** Waits for the v2 handshake, then skips the test when the host does not deliver lifecycle events (contract v4). */
+    private fun ActivityScenario<DesignerActivity>.v4Client(): UiPreviewClient {
+        val client = v2Client()
+        assumeTrue("the installed AutoJs6 does not serve preview contract v4", client.lifecycleSupported)
+        return client
+    }
+
+    private fun ActivityScenario<DesignerActivity>.startInteractive(client: UiPreviewClient) {
+        rule.onNodeWithTag("designer-interact").performClick()
+        rule.onNodeWithTag("designer-ui-interact-confirm").performClick()
+        rule.waitUntil(30_000) { client.running && client.runId != null }
+    }
+
+    private fun waitForConsole(client: UiPreviewClient, text: String, timeoutMs: Long = 15_000) =
+        rule.waitUntil(timeoutMs) { client.consoleLines.any { it.text.contains(text) } }
+
+    private fun ActivityScenario<DesignerActivity>.surfaceOnScreen(): Rect {
+        val bounds = rule.onNodeWithTag("designer-xml-surface-live").fetchSemanticsNode().boundsInWindow
+        val location = IntArray(2)
+        onActivity { it.window.decorView.getLocationOnScreen(location) }
+        return Rect(location[0] + bounds.left.toInt(), location[1] + bounds.top.toInt(), location[0] + bounds.right.toInt(), location[1] + bounds.bottom.toInt())
+    }
+
+    /**
+     * The first dialog reports where its button is in the host's root (the embedded tree is not part of this window's
+     * accessibility tree), so the test can tap it through the canvas; the button then asks again with dialogs.confirm.
+     */
+    private val asking = "\"ui\";\nui.layout(\n    <vertical>\n        <button id=\"b\" w=\"*\" h=\"*\" text=\"ask\"/>\n    </vertical>\n);\n" +
+        "function ask() {\n    dialogs.confirm(\"Confirm title\", \"Confirm body\", (ok) => console.log(\"confirmed \" + ok));\n}\n" +
+        "console.log(\"started\");\nvar built = dialogs.build({ title: \"Built title\", content: \"Built body\", positive: \"Yes\" });\n" +
+        "built.on(\"positive\", () => console.log(\"positive pressed\"));\nbuilt.show();\n" +
+        "setTimeout(() => {\n    let button = built.getActionButton(Packages.com.afollestad.materialdialogs.DialogAction.POSITIVE);\n" +
+        "    let at = java.lang.reflect.Array.newInstance(java.lang.Integer.TYPE, 2);\n    button.getLocationInWindow(at);\n" +
+        "    console.log(\"positive at \" + [at[0], at[1], button.getWidth(), button.getHeight(), built.isShowing()].join(\",\"));\n}, 500);\n" +
+        "ui.b.on(\"click\", ask);\n"
+
+    @Test
+    fun theScriptsDialogShowsInTheCanvasAndTakesTheBackKey() {
+        val name = project("dialog", asking)
+        launch(name).use { scenario ->
+            val client = scenario.v4Client()
+            scenario.startInteractive(client)
+            waitForConsole(client, "started")
+            // The dialog lies inside the canvas: its button has a place in the host's root, and a tap there reaches it.
+            waitForConsole(client, "positive at ")
+            val (x, y, width, height, showing) = client.consoleLines.first { it.text.contains("positive at ") }.text.substringAfter("positive at ").split(",")
+            assertEquals("true", showing.trim())
+            val surface = scenario.surfaceOnScreen()
+            val button = Rect(surface.left + x.toInt(), surface.top + y.toInt(), surface.left + x.toInt() + width.toInt(), surface.top + y.toInt() + height.toInt())
+            assertTrue("button $button is not inside the canvas $surface", width.toInt() > 0 && height.toInt() > 0 && surface.contains(button))
+            rule.waitUntil(15_000) {
+                if (client.consoleLines.none { it.text.contains("positive pressed") }) tapOnScreen(button.exactCenterX(), button.exactCenterY())
+                SystemClock.sleep(500)
+                client.consoleLines.any { it.text.contains("positive pressed") }
+            }
+            // The button asks with dialogs.confirm; that dialog takes the back key: it is cancelled, the key counts as
+            // consumed and the run goes on.
+            rule.waitUntil(15_000) {
+                if (client.consoleLines.none { it.text.contains("confirmed") } && client.lastLifecycle == null) {
+                    scenario.tapLiveSurfaceCenter()
+                    SystemClock.sleep(800)
+                    rule.onNodeWithTag("designer-ui-back").performClick()
+                }
+                SystemClock.sleep(500)
+                client.lastLifecycle != null
+            }
+            assertEquals(UiPreviewClient.LifecycleHandled(UiPreviewContract.LIFECYCLE_BACK_PRESSED, true), client.lastLifecycle)
+            waitForConsole(client, "confirmed false")
+            SystemClock.sleep(500)
+            assertTrue(client.running)
+            assertEquals(null, client.lastExit)
+        }
+        assertEquals(asking, store.read(name))
+        assertFalse(store.draftFile(name).exists())
+    }
+
+    @Test
+    fun theBackKeyEndsARunWithoutAHandlerAndPausingKeepsTheRun() {
+        val handled = counter + "ui.emitter.on(\"pause\", () => console.log(\"paused at \" + n));\n" +
+            "ui.emitter.on(\"resume\", () => console.log(\"resumed at \" + n));\n"
+        val name = project("pause", handled)
+        launch(name).use { scenario ->
+            val client = scenario.v4Client()
+            scenario.startInteractive(client)
+            waitForConsole(client, "started")
+            val firstRun = client.runRevision
+            rule.waitUntil(15_000) {
+                if (client.consoleLines.none { it.text.contains("clicked") }) scenario.tapLiveSurfaceCenter()
+                SystemClock.sleep(500)
+                client.consoleLines.any { it.text.contains("clicked 1") }
+            }
+            // Hidden and shown again: the same run gets pause and resume, and its counter is still 1.
+            scenario.moveToState(Lifecycle.State.CREATED)
+            waitForConsole(client, "paused at 1")
+            assertTrue(client.running)
+            scenario.moveToState(Lifecycle.State.RESUMED)
+            waitForConsole(client, "resumed at 1")
+            assertEquals(firstRun, client.runRevision)
+            assertEquals(1, client.consoleLines.count { it.text.contains("started") })
+            rule.waitUntil(15_000) {
+                if (client.consoleLines.none { it.text.contains("clicked 2") }) scenario.tapLiveSurfaceCenter()
+                SystemClock.sleep(500)
+                client.consoleLines.any { it.text.contains("clicked 2") }
+            }
+            // No handler consumes the back key: the run ends with exit, as finishing the Activity would.
+            rule.onNodeWithTag("designer-ui-back").performClick()
+            rule.waitUntil(15_000) { !client.running && client.lastExit == UiPreviewContract.EXIT_SCRIPT }
+            assertEquals(UiPreviewClient.LifecycleHandled(UiPreviewContract.LIFECYCLE_BACK_PRESSED, false), client.lastLifecycle)
+            rule.waitUntil(5_000) { rule.onAllNodesWithTag("designer-ui-back").fetchSemanticsNodes().isEmpty() }
+            assertTagContains("designer-ui-interact-status", UiPreviewContract.EXIT_SCRIPT)
+        }
+        assertEquals(handled, store.read(name))
+        assertFalse(store.draftFile(name).exists())
+    }
+
+    @Test
+    fun aBusyMainThreadEndsTheRunWithinTheSettingsLimit() {
+        assertTrue(InteractivePreviewSettings.setBusyWaitLimitSeconds(context, 1))
+        val busy = "\"ui\";\nui.layout(\n    <frame>\n        <text text=\"busy\"/>\n    </frame>\n);\nconsole.log(\"spinning\");\nwhile (true) {\n}\n"
+        val name = project("busy", busy)
+        launch(name).use { scenario ->
+            val client = scenario.v4Client()
+            val startedAt = SystemClock.uptimeMillis()
+            scenario.startInteractive(client)
+            rule.waitUntil(15_000) { client.lastExit == UiPreviewContract.EXIT_ERROR }
+            assertTrue("the run took ${SystemClock.uptimeMillis() - startedAt} ms", SystemClock.uptimeMillis() - startedAt < 10_000)
+            val wait = requireNotNull(client.busyWait)
+            assertEquals(1_000L, wait.limitMs)
+            assertTrue(wait.elapsedMs >= 1_000L)
+            assertTrue("line ${wait.line}", wait.line in 8..9)
+            rule.waitUntil(5_000) { rule.onAllNodesWithTag("designer-ui-script-problem").fetchSemanticsNodes().isNotEmpty() }
+            val expected = scenario.activity().getString(R.string.designer_ui_interact_busy_wait_line, 1, wait.line)
+            assertEquals(expected, textOf("designer-ui-script-problem"))
+            // The designer stays usable: the switch goes off and the canvas shows the layout preview again.
+            rule.onNodeWithTag("designer-interact").performClick()
+            rule.waitUntil(15_000) { rule.onAllNodesWithTag("designer-xml-surface").fetchSemanticsNodes().isNotEmpty() }
+            assertFalse(requireNotNull(scenario.activity().currentUiSession).interactive)
+        }
+        assertEquals(busy, store.read(name))
     }
 }

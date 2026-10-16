@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">대화형 미리보기로 AutoJs6에서 실행 중인 스크립트의 출력입니다.</string>
     <string name="designer_ui_diff_activity">미리보기에는 Activity가 없어 activity를 사용할 수 없습니다: 이 줄은 미리보기에서 실행되면 오류가 납니다.</string>
     <string name="designer_ui_diff_activity_events">미리보기에는 Activity가 없어 ui.emitter가 null이므로 이 줄은 오류가 납니다. activity_result나 옵션 메뉴 같은 Activity 이벤트는 AutoJs6에서 실행할 때만 발생합니다.</string>
+    <string name="designer_ui_diff_activity_events_v4">미리보기의 ui.emitter는 create, resume, pause, back_pressed만 받습니다. activity_result나 옵션 메뉴 같은 다른 Activity 이벤트는 AutoJs6에서 실행할 때만 발생합니다.</string>
     <string name="designer_ui_diff_busy_wait">이 무한 루프는 실제 실행과 마찬가지로 AutoJs6의 메인 스레드에서 실행됩니다: 미리보기에서는 AutoJs6가 멈추고 디자이너도 이를 중지할 수 없습니다. 이런 루프는 threads.start(...) 안에서 실행하세요.</string>
     <string name="designer_ui_diff_dialogs">Activity가 없으면 대화상자는 캔버스 안이 아니라 디자이너 위에 플로팅 창으로 열리며, AutoJs6에 다른 앱 위에 표시할 권한이 있을 때만 나타납니다.</string>
     <string name="designer_ui_diff_docs_unavailable">문서를 열 수 있는 앱이 없습니다</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">레이아웃 %1$d</string>
     <string name="designer_ui_fragment_root">레이아웃 %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">레이아웃 뒤에 ui.%1$s.on(\'%2$s\') 을 덧붙였습니다. 처리 내용은 스크립트에서 작성하세요.</string>
+    <string name="designer_ui_interact_back">뒤로 키</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6가 스크립트를 중지했습니다: 메인 스레드를 %1$d초 넘게 점유했습니다</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6가 스크립트를 중지했습니다: 메인 스레드를 %1$d초 넘게 점유했습니다 (%2$d번째 줄)</string>
     <string name="designer_ui_interact_confirm_message">대화형 미리보기는 이 스크립트 전체를 실행 명령과 똑같이 AutoJs6에서 실행하며, 파일, 네트워크, 기기 조작 등 모든 부작용이 그대로 발생합니다. ui.layout은 캔버스에 표시되고 문서와 파일은 바뀌지 않습니다. 스위치를 끄거나 디자이너를 떠나면 스크립트가 중지됩니다.</string>
+    <string name="designer_ui_interact_confirm_message_v4">대화형 미리보기는 이 스크립트 전체를 실행 명령과 똑같이 AutoJs6에서 실행하며, 파일, 네트워크, 기기 조작 등 모든 부작용이 그대로 발생합니다. ui.layout은 캔버스에 표시되고 문서와 파일은 바뀌지 않습니다. 스위치를 끄거나 편집 화면을 닫으면 스크립트가 중지되며, 디자이너가 백그라운드에 있는 동안 스크립트는 앱처럼 pause를 받고 돌아오면 resume을 받습니다.</string>
     <string name="designer_ui_interact_confirm_title">미리보기에서 스크립트를 실행할까요?</string>
     <string name="designer_ui_interact_exited">스크립트가 종료되었습니다 (%1$s)</string>
     <string name="designer_ui_interact_needs_android">대화형 미리보기에는 Android 13 이상이 필요합니다. 스크립트를 시험하려면 \"AutoJs6에서 실행\"을 사용하세요</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">일부 런처는 배경이나 마스크를 추가하므로 투명도가 유지되지 않을 수 있습니다.</string>
     <string name="plugin_description">스크립트가 선언한 UI를 Jetpack Compose와 Material 3로 렌더링</string>
     <string name="settings_appearance">모양</string>
+    <string name="settings_busy_wait_limit">메인 스레드 점유 한도</string>
+    <string name="settings_busy_wait_limit_default">기본값</string>
+    <string name="settings_busy_wait_limit_message">UI (XML) 프로젝트의 대화형 미리보기에서 스크립트가 무한 루프처럼 이 시간보다 오래 AutoJs6의 메인 스레드를 점유하면 AutoJs6가 스크립트를 중지하고 디자이너가 해당 줄을 표시합니다. 이전 AutoJs6 빌드는 이 설정을 무시합니다.</string>
+    <string name="settings_busy_wait_limit_value">%1$d초</string>
+    <string name="settings_designer">디자이너</string>
     <string name="settings_error">설정을 읽거나 저장할 수 없습니다. 제한을 확인하고 다시 시도하세요. 데이터를 지우기 전에 실행 중인 작업을 중지하세요.</string>
     <string name="settings_title">설정</string>
     <string name="theme_picker_custom">사용자 지정 색상</string>

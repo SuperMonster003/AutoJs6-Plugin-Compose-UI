@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">Output of the script running in AutoJs6 for the interactive preview.</string>
     <string name="designer_ui_diff_activity">The preview has no Activity, so activity is not available there: this line throws when it runs in the preview.</string>
     <string name="designer_ui_diff_activity_events">The preview has no Activity, so ui.emitter is null there and this line throws; Activity events such as activity_result and the options menu occur only when the script runs in AutoJs6.</string>
+    <string name="designer_ui_diff_activity_events_v4">In the preview, ui.emitter only gets create, resume, pause and back_pressed; Activity events such as activity_result and the options menu occur only when the script runs in AutoJs6.</string>
     <string name="designer_ui_diff_busy_wait">This endless loop runs on AutoJs6\'s main thread, as in a real run: in the preview it freezes AutoJs6 and the designer cannot stop it. Run such loops in threads.start(...).</string>
     <string name="designer_ui_diff_dialogs">Without an Activity, dialogs open as floating windows above the designer instead of inside the canvas, and only if AutoJs6 may display over other apps.</string>
     <string name="designer_ui_diff_docs_unavailable">No app can open the documentation</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">Layout %1$d</string>
     <string name="designer_ui_fragment_root">Layout %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">Added ui.%1$s.on(\'%2$s\') after the layout; write its body in the script.</string>
+    <string name="designer_ui_interact_back">Back key</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6 stopped the script: it kept the main thread busy for more than %1$d s</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6 stopped the script: it kept the main thread busy for more than %1$d s (line %2$d)</string>
     <string name="designer_ui_interact_confirm_message">The interactive preview runs this whole script in AutoJs6, exactly like the Run command, with every side effect it has (files, network, device actions). Its ui.layout fills the canvas; the document and the file stay unchanged. The script stops when the switch goes off or the designer is left.</string>
+    <string name="designer_ui_interact_confirm_message_v4">The interactive preview runs this whole script in AutoJs6, exactly like the Run command, with every side effect it has (files, network, device actions). Its ui.layout fills the canvas; the document and the file stay unchanged. The script stops when the switch goes off or the editor closes; while the designer is in the background the script gets pause, and resume when it comes back, like an app.</string>
     <string name="designer_ui_interact_confirm_title">Run the script in the preview?</string>
     <string name="designer_ui_interact_exited">The script ended (%1$s)</string>
     <string name="designer_ui_interact_needs_android">The interactive preview needs Android 13 or later; use Run in AutoJs6 to try the script</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">Some launchers add their own background or mask, so transparency may not be preserved.</string>
     <string name="plugin_description">Renders script-declared user interfaces with Jetpack Compose and Material 3</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="settings_busy_wait_limit">Busy main thread limit</string>
+    <string name="settings_busy_wait_limit_default">Default</string>
+    <string name="settings_busy_wait_limit_message">When a script in the interactive preview of a UI (XML) project keeps AutoJs6\'s main thread busy for longer than this, as an endless loop does, AutoJs6 stops it and the designer shows the line. Older AutoJs6 builds ignore this setting.</string>
+    <string name="settings_busy_wait_limit_value">%1$d s</string>
+    <string name="settings_designer">Designer</string>
     <string name="settings_error">Unable to read or save settings. Check the limits and try again. Stop active tasks before clearing data.</string>
     <string name="settings_title">Settings</string>
     <string name="theme_picker_custom">Custom color</string>

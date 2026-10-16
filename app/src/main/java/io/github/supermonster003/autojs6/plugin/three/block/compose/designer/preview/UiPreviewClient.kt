@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import io.github.supermonster003.autojs6.plugin.three.block.compose.ThreeBlockComposePlugin
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
 import org.autojs.plugin.ui.preview.IUiPreviewCallback
 import org.autojs.plugin.ui.preview.IUiPreviewService
@@ -79,6 +80,12 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     /** One console entry of the running script (contract v2); [level] is an `android.util.Log` priority. */
     data class ConsoleLine(val level: Int, val text: String)
 
+    /** The host stopped a run whose script kept its main thread busy beyond [limitMs] at [line] (-1 unknown) (contract v4). */
+    data class BusyWait(val line: Int, val elapsedMs: Long, val limitMs: Long)
+
+    /** A lifecycle event of `sendLifecycle` reached the run (contract v4); [consumed] matters for `back_pressed` only. */
+    data class LifecycleHandled(val event: String, val consumed: Boolean)
+
     /** Whether the host offers `runScript` (contract v2 on API 33+); known once the handshake is done. */
     var scriptRunSupported: Boolean by mutableStateOf(false)
         private set
@@ -88,6 +95,19 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
      */
     var resourcesSupported: Boolean by mutableStateOf(false)
         private set
+    /**
+     * What the host does for script runs beyond contract v3 (roadmap P11.5 / P11.6): announced by a v4 host, empty for
+     * older hosts and where runs are not supported; known once the handshake is done.
+     */
+    var capabilities: Set<PreviewCapability> by mutableStateOf(emptySet())
+        private set
+    /** The host delivers pause / resume / back_pressed to `ui.emitter` of a run (contract v4). */
+    val lifecycleSupported: Boolean get() = PreviewCapability.LIFECYCLE_EVENTS in capabilities
+    /**
+     * How long a run may keep the host's main thread busy, sent with each run to a host that takes it (contract v4);
+     * the designer sets it from the settings page. Main thread.
+     */
+    var busyWaitLimitMs: Long = Contract.DEFAULT_BUSY_WAIT_LIMIT_MS
     /** A script run is going (from `runScript` until `onScriptExit`). */
     var running: Boolean by mutableStateOf(false)
         private set
@@ -98,6 +118,15 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         private set
     /** The last uncaught error of the run, or why it could not start. */
     var scriptError: String? by mutableStateOf(null)
+        private set
+    /**
+     * The busy wait that ended the run (contract v4: the host's limit stopped a script that kept its main thread busy),
+     * or null; [scriptError] then holds the host's own wording, which the designer replaces with its localized one.
+     */
+    var busyWait: BusyWait? by mutableStateOf(null)
+        private set
+    /** The last lifecycle event the host delivered to the run and whether a handler or a dialog consumed it (contract v4). */
+    var lastLifecycle: LifecycleHandled? by mutableStateOf(null)
         private set
     /** Why the last run ended (a contract exit reason), null while none ended. */
     var lastExit: String? by mutableStateOf(null)
@@ -116,6 +145,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         private set
     /** The host's contract version from the handshake (1 for a v1 host). */
     private var hostContractVersion = Contract.BASE_VERSION
+    /** The busy-wait limit the current run was started with. */
+    private var runBusyWaitLimitMs = Contract.DEFAULT_BUSY_WAIT_LIMIT_MS
     /**
      * Where the document's files are (roadmap P11.3): sent with layouts and runs as zips once the host takes them
      * (contract v3); null for a document without a folder (a single-file private project, a content Uri).
@@ -224,9 +255,13 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         override fun onScriptError(sessionId: String, error: Bundle) {
             val message = error.getString(Contract.KEY_ERROR_MESSAGE).orEmpty()
             val line = error.getInt(Contract.KEY_LINE, -1)
+            // Contract v4: the busy-wait limit ended the run; the code says so, the time is how long the thread was busy.
+            val busy = error.getString(Contract.KEY_ERROR_CODE) == Contract.ERROR_BUSY_WAIT
+            val elapsed = error.getLong(Contract.KEY_ELAPSED_MS, 0L)
             main.post {
                 if (sessionId != this@UiPreviewClient.sessionId) return@post
                 scriptError = if (line > 0) "$line: $message" else message
+                busyWait = if (busy) BusyWait(line, elapsed, runBusyWaitLimitMs) else null
             }
         }
 
@@ -238,6 +273,18 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 if (id != null && runId != null && id != runId) return@post
                 running = false
                 lastExit = reason
+            }
+        }
+
+        // Contract v4 (roadmap P11.5 / P11.6): a lifecycle event of sendLifecycle reached the run.
+
+        override fun onLifecycleHandled(sessionId: String, result: Bundle) {
+            val id = result.getString(Contract.KEY_RUN_ID)
+            val handled = LifecycleHandled(result.getString(Contract.KEY_LIFECYCLE_EVENT).orEmpty(), result.getBoolean(Contract.KEY_CONSUMED, false))
+            main.post {
+                if (sessionId != this@UiPreviewClient.sessionId) return@post
+                if (id != null && runId != null && id != runId) return@post
+                lastLifecycle = handled
             }
         }
     }
@@ -267,6 +314,18 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         } catch (error: PackageManager.NameNotFoundException) {
             null
         }
+
+        /** The capabilities a v4 host announces through the flags of its preview info ([flag] reads one, false when absent). */
+        internal fun capabilitiesOf(flag: (String, Boolean) -> Boolean): Set<PreviewCapability> = buildSet {
+            if (flag(Contract.KEY_DIALOGS_IN_CANVAS, false)) add(PreviewCapability.DIALOGS_IN_CANVAS)
+            if (flag(Contract.KEY_LIFECYCLE_EVENTS, false)) add(PreviewCapability.LIFECYCLE_EVENTS)
+            if (flag(Contract.KEY_BUSY_WAIT_LIMIT_SUPPORTED, false)) add(PreviewCapability.BUSY_WAIT_LIMIT)
+            if (flag(Contract.KEY_WINDOW_FUNCTIONS_VISIBLE, false)) add(PreviewCapability.WINDOW_FUNCTIONS_VISIBLE)
+        }
+
+        /** [seconds] of the designer's setting as the host's limit, kept within the contract's range. */
+        fun busyWaitLimitOf(seconds: Int): Long =
+            (seconds * 1_000L).coerceIn(Contract.MIN_BUSY_WAIT_LIMIT_MS, Contract.MAX_BUSY_WAIT_LIMIT_MS)
 
         internal fun parseBounds(json: String): List<Bound> {
             val list = JsonText.parse(json) as? List<*> ?: return emptyList()
@@ -332,21 +391,27 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 return
             }
             val info = remote.previewInfo
-            // v3 (project resources, P11.H1) is listed with its hash; the info's own identity keys stay at v2 (runScript).
+            // v3 (project resources, P11.H1) and v4 (lifecycle events, P11.5) are listed with their hashes; the info's own
+            // identity keys stay at v2 (runScript).
             val versions = info.getIntArray(Contract.KEY_SUPPORTED_CONTRACT_VERSIONS)
             val hashes = info.getStringArray(Contract.KEY_CONTRACT_HASHES)
-            val v3 = versions != null && hashes != null && versions.indices.any { versions[it] == Contract.VERSION && hashes.getOrNull(it) == Contract.HASH }
+            fun serves(version: Int, hash: String) = versions != null && hashes != null && versions.indices.any { versions[it] == version && hashes.getOrNull(it) == hash }
+            val v4 = serves(Contract.VERSION, Contract.HASH)
+            val v3 = v4 || serves(Contract.VERSION_V3, Contract.HASH_V3)
             val v2 = v3 || info.getInt(Contract.KEY_CONTRACT_VERSION, Contract.BASE_VERSION) >= Contract.VERSION_V2 && info.getString(Contract.KEY_CONTRACT_HASH) == Contract.HASH_V2
+            val announced = if (!v4) emptySet() else capabilitiesOf(info::getBoolean)
             main.post {
                 if (closed) return@post
                 service = remote
                 hostContractVersion = when {
-                    v3 -> Contract.VERSION
+                    v4 -> Contract.VERSION
+                    v3 -> Contract.VERSION_V3
                     v2 -> Contract.VERSION_V2
                     else -> Contract.BASE_VERSION
                 }
                 resourcesSupported = v3 && info.getBoolean(Contract.KEY_RESOURCES_SUPPORTED, false)
                 scriptRunSupported = v2 && info.getBoolean(Contract.KEY_SCRIPT_RUN_SUPPORTED, false) && embedded
+                capabilities = if (scriptRunSupported) announced else emptySet()
                 status = Status.Ready(info.getString(Contract.KEY_HOST_VERSION_NAME), info.getLong(Contract.KEY_HOST_VERSION_CODE))
                 ensureSession()
             }
@@ -581,12 +646,18 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         val id = sessionId ?: return
         consoleLines = emptyList()
         scriptError = null
+        busyWait = null
+        lastLifecycle = null
         lastExit = null
         running = true
         runRevision++
+        val limit = busyWaitLimitMs
+        runBusyWaitLimitMs = limit
         val request = Bundle().apply {
             putString(Contract.KEY_SCRIPT_TEXT, text)
             putString(Contract.KEY_SCRIPT_NAME, name)
+            // Contract v4: older hosts would ignore the key, but it is only sent to a host that takes it.
+            if (PreviewCapability.BUSY_WAIT_LIMIT in capabilities) putLong(Contract.KEY_BUSY_WAIT_LIMIT_MS, limit)
         }
         call(onResult = { result ->
             main.post {
@@ -618,6 +689,19 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 runCatching { project?.close() }
             }
         }
+    }
+
+    /**
+     * Sends [event] (`pause`, `resume` or `back_pressed` of [Contract.LIFECYCLE_EVENTS]) to the running script (contract
+     * v4, roadmap P11.6): `ui.emitter` gets it as from an Activity, and an unconsumed back key ends the run with `exit`.
+     * Does nothing without a run or with a host that does not deliver lifecycle events. Main thread.
+     */
+    fun sendLifecycle(event: String) {
+        if (closed || !lifecycleSupported || !running || runId == null) return
+        val id = sessionId ?: return
+        val request = Bundle().apply { putString(Contract.KEY_LIFECYCLE_EVENT, event) }
+        // NOT_RUNNING (the run ended meanwhile) needs no handling: onScriptExit tells.
+        call { remote -> remote.sendLifecycle(id, request) }
     }
 
     /** Stops the running script, if any; the layout preview can be sent again afterwards. Main thread. */
@@ -678,7 +762,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             putString(Contract.KEY_XML, request.xml)
             putString(Contract.KEY_BINDINGS_JSON, request.bindingsJson)
             // Roadmap P11.3: the script's ui.useAndroidLayout mode (contract v3); automatic when absent.
-            if (hostContractVersion >= Contract.VERSION) request.androidLayout?.let { putBoolean(Contract.KEY_ANDROID_LAYOUT, it) }
+            if (hostContractVersion >= Contract.VERSION_V3) request.androidLayout?.let { putBoolean(Contract.KEY_ANDROID_LAYOUT, it) }
         }
         worker.execute { apply(remote, id, myGeneration, layout, request, surfaceWidth, surfaceHeight) }
     }

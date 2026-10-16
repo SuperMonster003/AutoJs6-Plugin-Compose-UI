@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">交互预览中在 AutoJs6 运行的脚本的输出.</string>
     <string name="designer_ui_diff_activity">预览中没有 Activity, activity 不可用: 这一行在预览中运行时会出错.</string>
     <string name="designer_ui_diff_activity_events">预览中没有 Activity, ui.emitter 为 null, 这一行会出错; activity_result 与选项菜单等 Activity 事件只在 AutoJs6 中运行时发生.</string>
+    <string name="designer_ui_diff_activity_events_v4">预览中的 ui.emitter 只会收到 create, resume, pause 与 back_pressed; activity_result 与选项菜单等其它 Activity 事件只在 AutoJs6 中运行时发生.</string>
     <string name="designer_ui_diff_busy_wait">这个无限循环与真实运行一样在 AutoJs6 的主线程执行: 在预览中会卡住 AutoJs6, 设计器也无法停止它. 请把这类循环放进 threads.start(...).</string>
     <string name="designer_ui_diff_dialogs">没有 Activity 时, 对话框以悬浮窗显示在设计器之上而不是画布内, 并且需要 AutoJs6 拥有显示在其他应用上层的权限.</string>
     <string name="designer_ui_diff_docs_unavailable">没有可以打开文档的应用</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">布局 %1$d</string>
     <string name="designer_ui_fragment_root">布局 %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">已在布局之后追加 ui.%1$s.on(\'%2$s\'), 请在脚本中编写处理逻辑.</string>
+    <string name="designer_ui_interact_back">返回键</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6 停止了脚本: 它占用主线程超过 %1$d 秒</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6 停止了脚本: 它占用主线程超过 %1$d 秒 (第 %2$d 行)</string>
     <string name="designer_ui_interact_confirm_message">交互预览会在 AutoJs6 中完整运行这份脚本, 与运行命令相同, 脚本的全部副作用 (文件, 网络, 设备操作) 都会发生. 它的 ui.layout 会显示在画布上; 文档与文件保持不变. 关闭开关或离开设计器时脚本停止.</string>
+    <string name="designer_ui_interact_confirm_message_v4">交互预览会在 AutoJs6 中完整运行这份脚本, 与运行命令相同, 脚本的全部副作用 (文件, 网络, 设备操作) 都会发生. 它的 ui.layout 会显示在画布上; 文档与文件保持不变. 关闭开关或关闭编辑页时脚本停止; 设计器在后台时脚本会像应用一样收到 pause, 回到前台时收到 resume.</string>
     <string name="designer_ui_interact_confirm_title">在预览中运行脚本?</string>
     <string name="designer_ui_interact_exited">脚本已结束 (%1$s)</string>
     <string name="designer_ui_interact_needs_android">交互预览需要 Android 13 或更高版本; 请用 \"在 AutoJs6 中运行\" 试这份脚本</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">部分启动器会自行添加背景或遮罩, 透明效果可能无法保留.</string>
     <string name="plugin_description">以 Jetpack Compose 与 Material 3 渲染脚本声明的界面</string>
     <string name="settings_appearance">外观</string>
+    <string name="settings_busy_wait_limit">主线程占用上限</string>
+    <string name="settings_busy_wait_limit_default">默认</string>
+    <string name="settings_busy_wait_limit_message">UI (XML) 工程的交互预览中, 脚本持续占用 AutoJs6 主线程超过该时长 (例如无限循环) 时, AutoJs6 会停止它, 设计器显示所在行. 较旧的 AutoJs6 构建会忽略此设置.</string>
+    <string name="settings_busy_wait_limit_value">%1$d 秒</string>
+    <string name="settings_designer">设计器</string>
     <string name="settings_error">无法读取或保存设置. 请检查限制后重试. 清除数据前请先停止运行中的任务.</string>
     <string name="settings_title">设置</string>
     <string name="theme_picker_custom">自定义颜色</string>

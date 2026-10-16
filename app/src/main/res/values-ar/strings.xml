@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">مخرجات السكربت الذي يعمل في AutoJs6 للمعاينة التفاعلية.</string>
     <string name="designer_ui_diff_activity">لا تحتوي المعاينة على Activity, لذا فإن activity غير متاح فيها: هذا السطر يفشل عند تشغيله في المعاينة.</string>
     <string name="designer_ui_diff_activity_events">لا تحتوي المعاينة على Activity, لذا فإن ui.emitter فيها null وهذا السطر يفشل; أحداث Activity مثل activity_result وقائمة الخيارات لا تحدث إلا عند تشغيل السكربت في AutoJs6.</string>
+    <string name="designer_ui_diff_activity_events_v4">في المعاينة لا يتلقى ui.emitter إلا create و resume و pause و back_pressed; أحداث Activity الأخرى مثل activity_result وقائمة الخيارات لا تحدث إلا عند تشغيل السكربت في AutoJs6.</string>
     <string name="designer_ui_diff_busy_wait">تعمل هذه الحلقة اللانهائية على الخيط الرئيسي في AutoJs6 كما في التشغيل الحقيقي: في المعاينة تجمد AutoJs6 ولا يستطيع المصمم إيقافها. شغّل مثل هذه الحلقات داخل threads.start(...).</string>
     <string name="designer_ui_diff_dialogs">بدون Activity تفتح مربعات الحوار كنوافذ عائمة فوق المصمم بدلا من داخل اللوحة, وفقط إذا كان AutoJs6 مسموحا له بالظهور فوق التطبيقات الأخرى.</string>
     <string name="designer_ui_diff_docs_unavailable">لا يوجد تطبيق يمكنه فتح الوثائق</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">التخطيط %1$d</string>
     <string name="designer_ui_fragment_root">التخطيط %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">تمت إضافة ui.%1$s.on(\'%2$s\') بعد التخطيط; اكتب جسمه في البرنامج النصي.</string>
+    <string name="designer_ui_interact_back">مفتاح الرجوع</string>
+    <string name="designer_ui_interact_busy_wait">أوقف AutoJs6 السكربت: شغل الخيط الرئيسي أكثر من %1$d ث</string>
+    <string name="designer_ui_interact_busy_wait_line">أوقف AutoJs6 السكربت: شغل الخيط الرئيسي أكثر من %1$d ث (السطر %2$d)</string>
     <string name="designer_ui_interact_confirm_message">تشغّل المعاينة التفاعلية هذا السكربت بالكامل في AutoJs6 تماما مثل أمر التشغيل, مع كل آثاره الجانبية (الملفات, الشبكة, إجراءات الجهاز). يملأ ui.layout الخاص به اللوحة; ولا يتغير المستند ولا الملف. يتوقف السكربت عند إيقاف المفتاح أو مغادرة المصمم.</string>
+    <string name="designer_ui_interact_confirm_message_v4">تشغّل المعاينة التفاعلية هذا السكربت بالكامل في AutoJs6 تماما مثل أمر التشغيل, مع كل آثاره الجانبية (الملفات, الشبكة, إجراءات الجهاز). يملأ ui.layout الخاص به اللوحة; ولا يتغير المستند ولا الملف. يتوقف السكربت عند إيقاف المفتاح أو إغلاق المحرر; وأثناء وجود المصمم في الخلفية يتلقى السكربت pause ثم resume عند العودة, مثل التطبيق.</string>
     <string name="designer_ui_interact_confirm_title">تشغيل السكربت في المعاينة?</string>
     <string name="designer_ui_interact_exited">انتهى السكربت (%1$s)</string>
     <string name="designer_ui_interact_needs_android">تحتاج المعاينة التفاعلية إلى Android 13 أو أحدث; استخدم \"تشغيل في AutoJs6\" لتجربة السكربت</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">قد تضيف بعض المشغلات خلفية أو قناعا, لذلك قد لا يتم الحفاظ على الشفافية.</string>
     <string name="plugin_description">يعرض الواجهات التي تعلنها السكربتات باستخدام Jetpack Compose و Material 3</string>
     <string name="settings_appearance">المظهر</string>
+    <string name="settings_busy_wait_limit">حد انشغال الخيط الرئيسي</string>
+    <string name="settings_busy_wait_limit_default">افتراضي</string>
+    <string name="settings_busy_wait_limit_message">إذا شغل سكربت في المعاينة التفاعلية لمشروع UI (XML) الخيط الرئيسي في AutoJs6 مدة أطول من هذه, كما تفعل الحلقة اللانهائية, يوقفه AutoJs6 ويعرض المصمم السطر. تتجاهل إصدارات AutoJs6 الأقدم هذا الإعداد.</string>
+    <string name="settings_busy_wait_limit_value">%1$d ث</string>
+    <string name="settings_designer">المصمم</string>
     <string name="settings_error">تعذرت قراءة الإعدادات أو حفظها. تحقق من الحدود وأعد المحاولة. أوقف المهام النشطة قبل مسح البيانات.</string>
     <string name="settings_title">الإعدادات</string>
     <string name="theme_picker_custom">لون مخصص</string>

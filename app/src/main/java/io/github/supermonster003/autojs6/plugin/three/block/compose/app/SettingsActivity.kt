@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -63,7 +64,7 @@ import kotlinx.coroutines.launch
  * AutoJs6 by default, every picker edits a draft and only an explicit confirmation persists a value.
  */
 internal class SettingsActivity : StandaloneActivity() {
-    private enum class Dialog { LANGUAGE, DARK_MODE, THEME_COLOR, LAUNCHER_ICON }
+    private enum class Dialog { LANGUAGE, DARK_MODE, THEME_COLOR, LAUNCHER_ICON, BUSY_WAIT_LIMIT }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -74,6 +75,7 @@ internal class SettingsActivity : StandaloneActivity() {
         var revision by remember { mutableIntStateOf(0) }
         val preferences = remember(revision) { AppearancePreferences.read(context) }
         val iconMode = remember(revision) { LauncherIcons.current(context) }
+        val busyWaitLimit = remember(revision) { InteractivePreviewSettings.busyWaitLimitSeconds(context) }
         var dialog by remember { mutableStateOf<Dialog?>(null) }
         val saveError = stringResource(R.string.settings_error)
         val iconApplied = stringResource(R.string.launcher_icon_applied_note)
@@ -110,6 +112,14 @@ internal class SettingsActivity : StandaloneActivity() {
                     Icons.Filled.Star, palette, "settings-color",
                 ) { dialog = Dialog.THEME_COLOR }
                 SettingsRow(stringResource(R.string.launcher_icon_title), stringResource(iconLabel(iconMode)), Icons.Filled.Home, palette, "settings-icon", divider = false) { dialog = Dialog.LAUNCHER_ICON }
+                Spacer(Modifier.height(8.dp))
+                // Roadmap P11.6: the designer's interactive preview.
+                GroupTitle(stringResource(R.string.settings_designer), palette)
+                SettingsRow(
+                    stringResource(R.string.settings_busy_wait_limit),
+                    stringResource(R.string.settings_busy_wait_limit_value, busyWaitLimit),
+                    Icons.Filled.Warning, palette, "settings-busy-wait", divider = false,
+                ) { dialog = Dialog.BUSY_WAIT_LIMIT }
                 Spacer(Modifier.height(8.dp))
                 GroupTitle(stringResource(R.string.about_title), palette)
                 SettingsRow(
@@ -169,6 +179,27 @@ internal class SettingsActivity : StandaloneActivity() {
                 val result = runCatching { LauncherIcons.select(context, LauncherIconMode.entries[index]) }
                 scope.launch { snackbar.showSnackbar(if (result.isSuccess) iconApplied else iconFailed) }
                 if (result.isSuccess) { revision++; dialog = null }
+            }
+            Dialog.BUSY_WAIT_LIMIT -> ConfirmedChoiceDialog(
+                title = stringResource(R.string.settings_busy_wait_limit),
+                message = stringResource(R.string.settings_busy_wait_limit_message),
+                options = InteractivePreviewSettings.BUSY_WAIT_LIMIT_CHOICES.map { seconds ->
+                    SettingsChoice(
+                        stringResource(R.string.settings_busy_wait_limit_value, seconds),
+                        if (seconds == InteractivePreviewSettings.DEFAULT_BUSY_WAIT_LIMIT_SECONDS) stringResource(R.string.settings_busy_wait_limit_default) else null,
+                    )
+                },
+                selected = InteractivePreviewSettings.BUSY_WAIT_LIMIT_CHOICES.indexOf(busyWaitLimit).coerceAtLeast(0),
+                palette = palette,
+                tag = "dialog-busy-wait",
+                onDismiss = { dialog = null },
+            ) { index ->
+                if (InteractivePreviewSettings.setBusyWaitLimitSeconds(context, InteractivePreviewSettings.BUSY_WAIT_LIMIT_CHOICES[index])) {
+                    revision++
+                    dialog = null
+                } else {
+                    scope.launch { snackbar.showSnackbar(saveError) }
+                }
             }
             null -> Unit
         }

@@ -22,8 +22,10 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferenceKind
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.UiPreviewClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.DesignerActivity
@@ -185,21 +187,44 @@ internal class UiDesignerDeviceTest {
 
     @Test
     fun previewDifferencesAreListedAsInformationAndNotCounted() {
-        val source = "\"ui\";\nui.layout(\n    <vertical>\n        <button id=\"ok\" text=\"OK\"/>\n    </vertical>\n);\nui.statusBarColor('#000000');\nui.ok.on('click', () => dialogs.alert('Hi'));\n"
+        val source = "\"ui\";\nui.layout(\n    <vertical>\n        <button id=\"ok\" text=\"OK\"/>\n    </vertical>\n);\nui.statusBarColor('#000000');\n" +
+            "ui.ok.on('click', () => dialogs.alert('Hi'));\nui.ok.on('long_click', () => ui.finish());\nui.emitter.on('options_item_selected', () => {});\n"
         val name = project("differences", source)
         launch(name).use { scenario ->
-            assertEquals(listOf(PreviewDifferenceKind.WINDOW_COLOR to 7, PreviewDifferenceKind.DIALOGS to 8), scenario.session().visibleDifferences.map { it.kind to it.line })
+            // What the installed host announces decides which differences stay listed (roadmap P11.6): wait for the
+            // handshake first; a v4 host closes the window colors and the dialogs, no host closes ui.finish or the other
+            // Activity events.
+            lateinit var client: UiPreviewClient
+            scenario.onActivity { client = requireNotNull(it.currentPreviewClient) }
+            rule.waitUntil(30_000) { client.status is UiPreviewClient.Status.Ready || client.status is UiPreviewClient.Status.Unavailable }
+            rule.waitForIdle()
+            val capabilities = scenario.session().hostCapabilities
+            assertEquals(client.capabilities, capabilities)
+            val expected = buildList {
+                if (PreviewCapability.WINDOW_FUNCTIONS_VISIBLE !in capabilities) add(PreviewDifferenceKind.WINDOW_COLOR to 7)
+                if (PreviewCapability.DIALOGS_IN_CANVAS !in capabilities) add(PreviewDifferenceKind.DIALOGS to 8)
+                add(PreviewDifferenceKind.WINDOW_NO_OP to 9)
+                add(PreviewDifferenceKind.ACTIVITY_EVENTS to 10)
+            }
+            assertEquals(expected, scenario.session().visibleDifferences.map { it.kind to it.line })
             lateinit var issues: String
             lateinit var header: String
             lateinit var colorText: String
             lateinit var dialogsText: String
+            lateinit var finishText: String
+            lateinit var eventsText: String
             scenario.onActivity {
                 issues = it.getString(R.string.designer_issues_count, 0)
                 header = it.getString(R.string.designer_ui_diff_header_layout)
                 colorText = it.getString(R.string.designer_ui_diff_window_color, "ui.statusBarColor")
                 dialogsText = it.getString(R.string.designer_ui_diff_dialogs)
+                finishText = it.getString(R.string.designer_ui_diff_window_no_op, "ui.finish")
+                // With a v4 host ui.emitter exists in the preview, so its other events just do not happen.
+                eventsText = it.getString(
+                    if (PreviewCapability.LIFECYCLE_EVENTS in capabilities) R.string.designer_ui_diff_activity_events_v4 else R.string.designer_ui_diff_activity_events,
+                )
             }
-            // The menu counts errors only: two differences, zero problems.
+            // The menu counts errors only: the differences, zero problems.
             rule.onNodeWithTag("designer-menu").performClick()
             rule.onNodeWithTag("designer-menu-issues").assert(hasText(issues))
             rule.onNodeWithTag("designer-menu-issues").performClick()
@@ -207,12 +232,22 @@ internal class UiDesignerDeviceTest {
             val list = rule.onNodeWithTag("designer-xml-problems")
             list.performScrollToNode(hasTestTag("designer-ui-diff-header"))
             rule.onNodeWithTag("designer-ui-diff-header").assert(hasText(header))
-            val color = hasTestTag("designer-ui-diff") and hasText("ui.statusBarColor", substring = true)
-            list.performScrollToNode(color)
-            rule.onNode(color).assert(hasText(colorText, substring = true))
-            val dialogs = hasTestTag("designer-ui-diff") and hasText("dialogs.alert", substring = true)
-            list.performScrollToNode(dialogs)
-            rule.onNode(dialogs).assert(hasText(dialogsText, substring = true))
+            if (PreviewCapability.WINDOW_FUNCTIONS_VISIBLE !in capabilities) {
+                val color = hasTestTag("designer-ui-diff") and hasText("ui.statusBarColor", substring = true)
+                list.performScrollToNode(color)
+                rule.onNode(color).assert(hasText(colorText, substring = true))
+            }
+            if (PreviewCapability.DIALOGS_IN_CANVAS !in capabilities) {
+                val dialogs = hasTestTag("designer-ui-diff") and hasText("dialogs.alert", substring = true)
+                list.performScrollToNode(dialogs)
+                rule.onNode(dialogs).assert(hasText(dialogsText, substring = true))
+            }
+            val events = hasTestTag("designer-ui-diff") and hasText("ui.emitter", substring = true)
+            list.performScrollToNode(events)
+            rule.onNode(events).assert(hasText(eventsText, substring = true))
+            val finish = hasTestTag("designer-ui-diff") and hasText("ui.finish", substring = true)
+            list.performScrollToNode(finish)
+            rule.onNode(finish).assert(hasText(finishText, substring = true))
             // A tap hands the documentation section to a browser; the monitor answers instead of launching one.
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val browser = IntentFilter(Intent.ACTION_VIEW).apply {
@@ -222,7 +257,7 @@ internal class UiDesignerDeviceTest {
             }
             val monitor = instrumentation.addMonitor(browser, Instrumentation.ActivityResult(Activity.RESULT_CANCELED, null), true)
             try {
-                rule.onNode(dialogs).performClick()
+                rule.onNode(finish).performClick()
                 rule.waitUntil(5_000) { monitor.hits == 1 }
             } finally {
                 instrumentation.removeMonitor(monitor)

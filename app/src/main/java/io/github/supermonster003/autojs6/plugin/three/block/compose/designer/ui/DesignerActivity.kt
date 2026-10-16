@@ -72,6 +72,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryActivity
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.InteractivePreviewSettings
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptLauncher
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandaloneActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
@@ -111,6 +112,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.autojs.plugin.compose.api.model.ThemeSpec
+import org.autojs.plugin.ui.preview.UiPreviewContract
 
 /**
  * The editing screen (roadmap P8.3 / D36 / D40): the real-renderer canvas on top, an outline / inspector
@@ -897,16 +899,25 @@ internal class DesignerActivity : StandaloneActivity() {
         // (contract v2, API 33+). It starts when the switch goes on (after the project's one-time confirmation), runs
         // again once edits pause, stops while the designer is hidden or when the switch goes off, and never touches
         // the document, the file or the draft; the held layout is sent again when it ends.
+        // Roadmap P11.6: a host that delivers lifecycle events (contract v4) keeps the run while the designer is hidden and
+        // gets pause / resume instead, like an app sent to the background; older hosts stop it and run it again.
         val interactiveSupported = client.embedded && client.scriptRunSupported
-        LaunchedEffect(session.interactive, interactiveSupported, visible, session.revision, client.sessionRevision) {
-            if (session.interactive && interactiveSupported && visible) {
+        val lifecycleSupported = client.lifecycleSupported
+        LaunchedEffect(session.interactive, interactiveSupported, lifecycleSupported || visible, session.revision, client.sessionRevision) {
+            if (session.interactive && interactiveSupported && (lifecycleSupported || visible)) {
                 client.setInteractiveMode(true)
                 if (client.runRevision > 0) delay(SANDBOX_RESTART_DELAY_MS)
+                client.busyWaitLimitMs = UiPreviewClient.busyWaitLimitOf(InteractivePreviewSettings.busyWaitLimitSeconds(context))
                 client.runScript(session.script(), source.title, session.files())
             } else {
                 client.setInteractiveMode(false)
             }
         }
+        LaunchedEffect(visible, lifecycleSupported) {
+            if (lifecycleSupported && session.interactive) client.sendLifecycle(if (visible) UiPreviewContract.LIFECYCLE_RESUME else UiPreviewContract.LIFECYCLE_PAUSE)
+        }
+        // The differences a v4 host closes leave the problems tab (roadmap P11.2 prepared the filter).
+        LaunchedEffect(client.capabilities) { session.hostCapabilities = client.capabilities }
         var interactivePrompt by remember { mutableStateOf(false) }
         val interactivePrefs = remember { context.applicationContext.getSharedPreferences(DESIGNER_PREFS, Context.MODE_PRIVATE) }
         fun toggleInteractive() {
@@ -917,7 +928,7 @@ internal class DesignerActivity : StandaloneActivity() {
         if (interactivePrompt) AlertDialog(
             onDismissRequest = { interactivePrompt = false },
             title = { Text(stringResource(R.string.designer_ui_interact_confirm_title)) },
-            text = { Text(stringResource(R.string.designer_ui_interact_confirm_message)) },
+            text = { Text(stringResource(if (lifecycleSupported) R.string.designer_ui_interact_confirm_message_v4 else R.string.designer_ui_interact_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     interactivePrompt = false
@@ -1239,6 +1250,13 @@ internal class DesignerActivity : StandaloneActivity() {
                             modifier = Modifier.padding(end = 8.dp).testTag("designer-interact"),
                         )
                         val live = session.interactive && interactiveSupported
+                        // Roadmap P11.6: the back key of the script's screen (contract v4), shown while the script runs.
+                        if (live && running && runId != null && lifecycleSupported) IconButton(
+                            onClick = { client.sendLifecycle(UiPreviewContract.LIFECYCLE_BACK_PRESSED) },
+                            modifier = Modifier.size(40.dp).testTag("designer-ui-back"),
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.designer_ui_interact_back), tint = Color(palette.text))
+                        }
                         val rowText: String? = when {
                             !live -> when {
                                 interactiveSupported || ready == null -> null
@@ -1246,7 +1264,7 @@ internal class DesignerActivity : StandaloneActivity() {
                                 else -> stringResource(R.string.designer_ui_interact_needs_host, ready.hostVersionName ?: ready.hostVersionCode.toString())
                             }
                             ready == null -> statusText
-                            scriptError != null -> stringResource(R.string.designer_sandbox_error, scriptError)
+                            scriptError != null -> scriptErrorText(client)
                             running && runId == null -> stringResource(R.string.designer_ui_interact_starting)
                             running -> stringResource(if (client.imeAvailable) R.string.designer_ui_interact_running else R.string.designer_ui_interact_no_ime)
                             lastExit != null -> stringResource(R.string.designer_ui_interact_exited, lastExit)

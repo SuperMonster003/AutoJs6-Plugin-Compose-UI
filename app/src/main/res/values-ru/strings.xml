@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">Вывод скрипта, запущенного в AutoJs6 для интерактивного предпросмотра.</string>
     <string name="designer_ui_diff_activity">В предпросмотре нет Activity, поэтому activity там недоступен: эта строка вызывает ошибку при выполнении в предпросмотре.</string>
     <string name="designer_ui_diff_activity_events">В предпросмотре нет Activity, поэтому ui.emitter там равен null и эта строка вызывает ошибку; события Activity, такие как activity_result и меню параметров, возникают только при запуске скрипта в AutoJs6.</string>
+    <string name="designer_ui_diff_activity_events_v4">В предпросмотре ui.emitter получает только create, resume, pause и back_pressed; другие события Activity, такие как activity_result и меню параметров, возникают только при запуске скрипта в AutoJs6.</string>
     <string name="designer_ui_diff_busy_wait">Этот бесконечный цикл выполняется в главном потоке AutoJs6, как и при обычном запуске: в предпросмотре он блокирует AutoJs6, и дизайнер не может его остановить. Выполняйте такие циклы внутри threads.start(...).</string>
     <string name="designer_ui_diff_dialogs">Без Activity диалоги открываются плавающими окнами поверх дизайнера, а не внутри холста, и только если AutoJs6 разрешено показываться поверх других приложений.</string>
     <string name="designer_ui_diff_docs_unavailable">Нет приложения, которое может открыть документацию</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">Макет %1$d</string>
     <string name="designer_ui_fragment_root">Макет %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">После макета добавлено ui.%1$s.on(\'%2$s\'); напишите его тело в скрипте.</string>
+    <string name="designer_ui_interact_back">Кнопка Назад</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6 остановил скрипт: он занимал главный поток дольше %1$d с</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6 остановил скрипт: он занимал главный поток дольше %1$d с (строка %2$d)</string>
     <string name="designer_ui_interact_confirm_message">Интерактивный предпросмотр запускает весь этот скрипт в AutoJs6 так же, как команда запуска, со всеми его побочными эффектами (файлы, сеть, действия с устройством). Его ui.layout заполняет холст; документ и файл не меняются. Скрипт останавливается, когда переключатель выключается или вы покидаете дизайнер.</string>
+    <string name="designer_ui_interact_confirm_message_v4">Интерактивный предпросмотр запускает весь этот скрипт в AutoJs6 так же, как команда запуска, со всеми его побочными эффектами (файлы, сеть, действия с устройством). Его ui.layout заполняет холст; документ и файл не меняются. Скрипт останавливается, когда переключатель выключается или редактор закрывается; пока дизайнер в фоне, скрипт, как приложение, получает pause, а при возвращении resume.</string>
     <string name="designer_ui_interact_confirm_title">Запустить скрипт в предпросмотре?</string>
     <string name="designer_ui_interact_exited">Скрипт завершился (%1$s)</string>
     <string name="designer_ui_interact_needs_android">Интерактивному предпросмотру нужен Android 13 или новее; чтобы опробовать скрипт, используйте \"Запустить в AutoJs6\"</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">Некоторые лаунчеры добавляют фон или маску, поэтому прозрачность может не сохраниться.</string>
     <string name="plugin_description">Отрисовывает объявленный скриптом интерфейс средствами Jetpack Compose и Material 3</string>
     <string name="settings_appearance">Оформление</string>
+    <string name="settings_busy_wait_limit">Предел занятости главного потока</string>
+    <string name="settings_busy_wait_limit_default">По умолчанию</string>
+    <string name="settings_busy_wait_limit_message">Если в интерактивном предпросмотре проекта UI (XML) скрипт занимает главный поток AutoJs6 дольше этого времени, как бесконечный цикл, AutoJs6 останавливает его, а дизайнер показывает строку. Старые сборки AutoJs6 игнорируют эту настройку.</string>
+    <string name="settings_busy_wait_limit_value">%1$d с</string>
+    <string name="settings_designer">Дизайнер</string>
     <string name="settings_error">Не удалось прочитать или сохранить настройки. Проверьте ограничения и повторите. Перед очисткой данных остановите активные задачи.</string>
     <string name="settings_title">Настройки</string>
     <string name="theme_picker_custom">Свой цвет</string>

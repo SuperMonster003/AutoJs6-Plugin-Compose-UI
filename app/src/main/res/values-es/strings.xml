@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">Salida del script que se ejecuta en AutoJs6 para la vista previa interactiva.</string>
     <string name="designer_ui_diff_activity">La vista previa no tiene Activity, así que activity no está disponible: esta línea falla cuando se ejecuta en la vista previa.</string>
     <string name="designer_ui_diff_activity_events">La vista previa no tiene Activity, así que ui.emitter es null y esta línea falla; los eventos de Activity como activity_result y el menú de opciones solo ocurren al ejecutar el script en AutoJs6.</string>
+    <string name="designer_ui_diff_activity_events_v4">En la vista previa, ui.emitter solo recibe create, resume, pause y back_pressed; los demás eventos de Activity, como activity_result y el menú de opciones, solo ocurren al ejecutar el script en AutoJs6.</string>
     <string name="designer_ui_diff_busy_wait">Este bucle infinito se ejecuta en el hilo principal de AutoJs6, igual que en una ejecución real: en la vista previa bloquea AutoJs6 y el diseñador no puede detenerlo. Ejecuta estos bucles dentro de threads.start(...).</string>
     <string name="designer_ui_diff_dialogs">Sin Activity, los diálogos se abren como ventanas flotantes sobre el diseñador en lugar de dentro del lienzo, y solo si AutoJs6 tiene permiso para mostrarse sobre otras apps.</string>
     <string name="designer_ui_diff_docs_unavailable">Ninguna app puede abrir la documentación</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">Diseño %1$d</string>
     <string name="designer_ui_fragment_root">Diseño %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">Se añadió ui.%1$s.on(\'%2$s\') después del diseño; escribe su cuerpo en el script.</string>
+    <string name="designer_ui_interact_back">Tecla Atrás</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6 detuvo el script: mantuvo ocupado el hilo principal más de %1$d s</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6 detuvo el script: mantuvo ocupado el hilo principal más de %1$d s (línea %2$d)</string>
     <string name="designer_ui_interact_confirm_message">La vista previa interactiva ejecuta todo este script en AutoJs6, igual que el comando Ejecutar, con todos sus efectos secundarios (archivos, red, acciones en el dispositivo). Su ui.layout llena el lienzo; el documento y el archivo no cambian. El script se detiene al apagar el interruptor o salir del diseñador.</string>
+    <string name="designer_ui_interact_confirm_message_v4">La vista previa interactiva ejecuta todo este script en AutoJs6, igual que el comando Ejecutar, con todos sus efectos secundarios (archivos, red, acciones en el dispositivo). Su ui.layout llena el lienzo; el documento y el archivo no cambian. El script se detiene al apagar el interruptor o cerrar el editor; mientras el diseñador está en segundo plano, el script recibe pause y, al volver, resume, como una app.</string>
     <string name="designer_ui_interact_confirm_title">Ejecutar el script en la vista previa?</string>
     <string name="designer_ui_interact_exited">El script terminó (%1$s)</string>
     <string name="designer_ui_interact_needs_android">La vista previa interactiva necesita Android 13 o posterior; usa \"Ejecutar en AutoJs6\" para probar el script</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">Algunos lanzadores agregan un fondo o una máscara. Puede que no se conserve la transparencia.</string>
     <string name="plugin_description">Renderiza interfaces declaradas por scripts con Jetpack Compose y Material 3</string>
     <string name="settings_appearance">Apariencia</string>
+    <string name="settings_busy_wait_limit">Límite de ocupación del hilo principal</string>
+    <string name="settings_busy_wait_limit_default">Predeterminado</string>
+    <string name="settings_busy_wait_limit_message">Si en la vista previa interactiva de un proyecto UI (XML) un script mantiene ocupado el hilo principal de AutoJs6 más tiempo que este, como hace un bucle infinito, AutoJs6 lo detiene y el diseñador muestra la línea. Las compilaciones anteriores de AutoJs6 ignoran este ajuste.</string>
+    <string name="settings_busy_wait_limit_value">%1$d s</string>
+    <string name="settings_designer">Diseñador</string>
     <string name="settings_error">No se pueden leer o guardar los ajustes. Revise los límites y reintente. Detenga las tareas activas antes de borrar datos.</string>
     <string name="settings_title">Ajustes</string>
     <string name="theme_picker_custom">Color personalizado</string>

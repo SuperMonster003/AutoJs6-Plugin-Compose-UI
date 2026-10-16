@@ -187,6 +187,7 @@
     <string name="designer_ui_console_run_hint">インタラクティブプレビューで AutoJs6 が実行しているスクリプトの出力.</string>
     <string name="designer_ui_diff_activity">プレビューには Activity がないため, activity は使えません: この行はプレビューで実行されるとエラーになります.</string>
     <string name="designer_ui_diff_activity_events">プレビューには Activity がないため, ui.emitter は null で, この行はエラーになります. activity_result やオプションメニューなどの Activity イベントは AutoJs6 で実行したときだけ発生します.</string>
+    <string name="designer_ui_diff_activity_events_v4">プレビューの ui.emitter が受け取るのは create, resume, pause, back_pressed だけです. activity_result やオプションメニューなどほかの Activity イベントは AutoJs6 で実行したときだけ発生します.</string>
     <string name="designer_ui_diff_busy_wait">この無限ループは実際の実行と同じく AutoJs6 のメインスレッドで動きます: プレビューでは AutoJs6 が固まり, デザイナーからも止められません. このようなループは threads.start(...) の中で実行してください.</string>
     <string name="designer_ui_diff_dialogs">Activity がないため, ダイアログはキャンバス内ではなくデザイナーの上にフローティングウィンドウとして表示され, AutoJs6 に他のアプリの上への表示が許可されている場合に限られます.</string>
     <string name="designer_ui_diff_docs_unavailable">ドキュメントを開けるアプリがありません</string>
@@ -203,7 +204,11 @@
     <string name="designer_ui_fragment">レイアウト %1$d</string>
     <string name="designer_ui_fragment_root">レイアウト %1$d (ui.layout)</string>
     <string name="designer_ui_handler_added">レイアウトの後に ui.%1$s.on(\'%2$s\') を追記しました. 処理の本体はスクリプトで書いてください.</string>
+    <string name="designer_ui_interact_back">戻るキー</string>
+    <string name="designer_ui_interact_busy_wait">AutoJs6 がスクリプトを停止しました: メインスレッドを %1$d 秒を超えて占有しました</string>
+    <string name="designer_ui_interact_busy_wait_line">AutoJs6 がスクリプトを停止しました: メインスレッドを %1$d 秒を超えて占有しました (%2$d 行目)</string>
     <string name="designer_ui_interact_confirm_message">インタラクティブプレビューは, このスクリプト全体を実行コマンドと同じように AutoJs6 で実行します. ファイル, ネットワーク, デバイス操作などの副作用もすべて発生します. ui.layout はキャンバスに表示され, ドキュメントとファイルは変更されません. スイッチをオフにするか, デザイナーを離れるとスクリプトは停止します.</string>
+    <string name="designer_ui_interact_confirm_message_v4">インタラクティブプレビューは, このスクリプト全体を実行コマンドと同じように AutoJs6 で実行します. ファイル, ネットワーク, デバイス操作などの副作用もすべて発生します. ui.layout はキャンバスに表示され, ドキュメントとファイルは変更されません. スイッチをオフにするか編集画面を閉じるとスクリプトは停止します. デザイナーがバックグラウンドにある間, スクリプトはアプリと同じく pause を受け取り, 戻ると resume を受け取ります.</string>
     <string name="designer_ui_interact_confirm_title">プレビューでスクリプトを実行しますか?</string>
     <string name="designer_ui_interact_exited">スクリプトは終了しました (%1$s)</string>
     <string name="designer_ui_interact_needs_android">インタラクティブプレビューには Android 13 以降が必要です. スクリプトを試すには \"AutoJs6 で実行\" を使ってください</string>
@@ -267,6 +272,11 @@
     <string name="launcher_icon_transparent_note">ランチャーが背景やマスクを追加する場合, 透明な背景は維持されないことがあります.</string>
     <string name="plugin_description">スクリプトが宣言した UI を Jetpack Compose と Material 3 で描画</string>
     <string name="settings_appearance">外観</string>
+    <string name="settings_busy_wait_limit">メインスレッド占有の上限</string>
+    <string name="settings_busy_wait_limit_default">デフォルト</string>
+    <string name="settings_busy_wait_limit_message">UI (XML) プロジェクトのインタラクティブプレビューで, スクリプトが無限ループなどでこの時間を超えて AutoJs6 のメインスレッドを占有すると, AutoJs6 がスクリプトを停止し, デザイナーがその行を表示します. 古い AutoJs6 ビルドはこの設定を無視します.</string>
+    <string name="settings_busy_wait_limit_value">%1$d 秒</string>
+    <string name="settings_designer">デザイナー</string>
     <string name="settings_error">設定を読み込みまたは保存できません. 制限を確認して再試行してください. データ消去前に実行中のタスクを停止してください.</string>
     <string name="settings_title">設定</string>
     <string name="theme_picker_custom">カスタム色</string>

@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.FragmentUsage
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifference
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferenceKind
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferences
@@ -449,24 +450,42 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text(differenceText(difference), color = Color(palette.text), fontSize = 13.sp)
+                    Text(differenceText(difference, PreviewCapability.LIFECYCLE_EVENTS in session.hostCapabilities), color = Color(palette.text), fontSize = 13.sp)
                 }
             }
         }
     }
 }
 
-/** The sentence that explains [difference] (one per kind; the window functions name themselves). */
+/**
+ * The sentence that explains [difference] (one per kind; the window functions name themselves). With [lifecycle] (a v4
+ * host, roadmap P11.6) `ui.emitter` exists in the preview, so its other events do not happen rather than throw.
+ */
 @Composable
-private fun differenceText(difference: PreviewDifference): String = when (difference.kind) {
+private fun differenceText(difference: PreviewDifference, lifecycle: Boolean): String = when (difference.kind) {
     PreviewDifferenceKind.ACTIVITY -> stringResource(R.string.designer_ui_diff_activity)
     PreviewDifferenceKind.LIFECYCLE -> stringResource(R.string.designer_ui_diff_lifecycle)
-    PreviewDifferenceKind.ACTIVITY_EVENTS -> stringResource(R.string.designer_ui_diff_activity_events)
+    PreviewDifferenceKind.ACTIVITY_EVENTS -> stringResource(if (lifecycle) R.string.designer_ui_diff_activity_events_v4 else R.string.designer_ui_diff_activity_events)
     PreviewDifferenceKind.WINDOW_COLOR -> stringResource(R.string.designer_ui_diff_window_color, difference.api)
     PreviewDifferenceKind.WINDOW_NO_OP -> stringResource(R.string.designer_ui_diff_window_no_op, difference.api)
     PreviewDifferenceKind.DIALOGS -> stringResource(R.string.designer_ui_diff_dialogs)
     PreviewDifferenceKind.BUSY_WAIT -> stringResource(R.string.designer_ui_diff_busy_wait)
     PreviewDifferenceKind.THREADS -> stringResource(R.string.designer_ui_diff_threads)
+}
+
+/**
+ * What to show for the run's last error: the busy-wait limit in the designer's words (contract v4, roadmap P11.6),
+ * otherwise the host's message with its line. Call only when [UiPreviewClient.scriptError] is set.
+ */
+@Composable
+internal fun scriptErrorText(client: UiPreviewClient): String {
+    val busy = client.busyWait
+    val seconds = ((busy?.limitMs ?: 0L) / 1000L).toInt()
+    return when {
+        busy == null -> stringResource(R.string.designer_sandbox_error, client.scriptError.orEmpty())
+        busy.line > 0 -> stringResource(R.string.designer_ui_interact_busy_wait_line, seconds, busy.line)
+        else -> stringResource(R.string.designer_ui_interact_busy_wait, seconds)
+    }
 }
 
 /**
@@ -548,7 +567,7 @@ internal fun XmlConsolePanel(client: UiPreviewClient, statusText: String?, inter
             val lastExit = client.lastExit
             Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                 val status = when {
-                    scriptError != null -> stringResource(R.string.designer_sandbox_error, scriptError)
+                    scriptError != null -> scriptErrorText(client)
                     client.running && client.runId == null -> stringResource(R.string.designer_ui_interact_starting)
                     client.running -> stringResource(R.string.designer_ui_interact_running)
                     lastExit != null -> stringResource(R.string.designer_ui_interact_exited, lastExit)
