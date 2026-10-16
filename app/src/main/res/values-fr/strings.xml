@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">Touche Retour</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 a arrêté le script: il a occupé le thread principal plus de %1$d s</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 a arrêté le script: il a occupé le thread principal plus de %1$d s (ligne %2$d)</string>
+    <string name="designer_ui_interact_compile_failed">Le script TSX ne compile pas: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">Le script TSX ne compile pas (ligne %1$d): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine compile le script TSX</string>
     <string name="designer_ui_interact_confirm_message">L\'aperçu interactif exécute tout ce script dans AutoJs6, exactement comme la commande Exécuter, avec tous ses effets secondaires (fichiers, réseau, actions sur l\'appareil). Son ui.layout remplit le canevas; le document et le fichier restent inchangés. Le script s\'arrête quand l\'interrupteur est désactivé ou que le concepteur est quitté.</string>
     <string name="designer_ui_interact_confirm_message_v4">L\'aperçu interactif exécute tout ce script dans AutoJs6, exactement comme la commande Exécuter, avec tous ses effets secondaires (fichiers, réseau, actions sur l\'appareil). Son ui.layout remplit le canevas; le document et le fichier restent inchangés. Le script s\'arrête quand l\'interrupteur est désactivé ou que l\'éditeur est fermé; tant que le concepteur est en arrière-plan, le script reçoit pause, puis resume au retour, comme une application.</string>
     <string name="designer_ui_interact_confirm_title">Exécuter le script dans l\'aperçu?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">Le script s\'exécute; avant Android 15, l\'aperçu ne reçoit pas la saisie au clavier</string>
     <string name="designer_ui_interact_running">Le script s\'exécute dans AutoJs6</string>
     <string name="designer_ui_interact_starting">Démarrage du script dans AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_engine">Exécuter des scripts TSX dans l\'aperçu interactif nécessite le plugin TypeScript Engine; utilisez Exécuter pour essayer le script dans AutoJs6</string>
     <string name="designer_ui_interact_tsx_needs_host">Cet AutoJs6 n\'exécute pas encore de scripts TSX dans l\'aperçu interactif; utilisez Exécuter pour essayer le script dans AutoJs6</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">Dans le script</string>

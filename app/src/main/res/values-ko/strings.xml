@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">뒤로 키</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6가 스크립트를 중지했습니다: 메인 스레드를 %1$d초 넘게 점유했습니다</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6가 스크립트를 중지했습니다: 메인 스레드를 %1$d초 넘게 점유했습니다 (%2$d번째 줄)</string>
+    <string name="designer_ui_interact_compile_failed">TSX 스크립트를 컴파일할 수 없습니다: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">TSX 스크립트를 컴파일할 수 없습니다 (%1$d번째 줄): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine이 TSX 스크립트를 컴파일하는 중</string>
     <string name="designer_ui_interact_confirm_message">대화형 미리보기는 이 스크립트 전체를 실행 명령과 똑같이 AutoJs6에서 실행하며, 파일, 네트워크, 기기 조작 등 모든 부작용이 그대로 발생합니다. ui.layout은 캔버스에 표시되고 문서와 파일은 바뀌지 않습니다. 스위치를 끄거나 디자이너를 떠나면 스크립트가 중지됩니다.</string>
     <string name="designer_ui_interact_confirm_message_v4">대화형 미리보기는 이 스크립트 전체를 실행 명령과 똑같이 AutoJs6에서 실행하며, 파일, 네트워크, 기기 조작 등 모든 부작용이 그대로 발생합니다. ui.layout은 캔버스에 표시되고 문서와 파일은 바뀌지 않습니다. 스위치를 끄거나 편집 화면을 닫으면 스크립트가 중지되며, 디자이너가 백그라운드에 있는 동안 스크립트는 앱처럼 pause를 받고 돌아오면 resume을 받습니다.</string>
     <string name="designer_ui_interact_confirm_title">미리보기에서 스크립트를 실행할까요?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">스크립트 실행 중. Android 15 이전에는 미리보기가 키보드 입력을 받을 수 없습니다</string>
     <string name="designer_ui_interact_running">스크립트가 AutoJs6에서 실행 중입니다</string>
     <string name="designer_ui_interact_starting">AutoJs6에서 스크립트를 시작하는 중</string>
+    <string name="designer_ui_interact_tsx_needs_engine">대화형 미리보기에서 TSX 스크립트를 실행하려면 TypeScript Engine 플러그인이 필요합니다. \"실행\"으로 AutoJs6에서 실행해 보세요</string>
     <string name="designer_ui_interact_tsx_needs_host">이 AutoJs6는 아직 대화형 미리보기에서 TSX 스크립트를 실행할 수 없습니다. \"실행\"으로 AutoJs6에서 실행해 보세요</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">스크립트 안</string>

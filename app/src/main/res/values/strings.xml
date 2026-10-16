@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">Back key</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 stopped the script: it kept the main thread busy for more than %1$d s</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 stopped the script: it kept the main thread busy for more than %1$d s (line %2$d)</string>
+    <string name="designer_ui_interact_compile_failed">The TSX script does not compile: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">The TSX script does not compile (line %1$d): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine is compiling the TSX script</string>
     <string name="designer_ui_interact_confirm_message">The interactive preview runs this whole script in AutoJs6, exactly like the Run command, with every side effect it has (files, network, device actions). Its ui.layout fills the canvas; the document and the file stay unchanged. The script stops when the switch goes off or the designer is left.</string>
     <string name="designer_ui_interact_confirm_message_v4">The interactive preview runs this whole script in AutoJs6, exactly like the Run command, with every side effect it has (files, network, device actions). Its ui.layout fills the canvas; the document and the file stay unchanged. The script stops when the switch goes off or the editor closes; while the designer is in the background the script gets pause, and resume when it comes back, like an app.</string>
     <string name="designer_ui_interact_confirm_title">Run the script in the preview?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">The script is running; before Android 15 the preview takes no keyboard input</string>
     <string name="designer_ui_interact_running">The script is running in AutoJs6</string>
     <string name="designer_ui_interact_starting">Starting the script in AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_engine">Running TSX scripts in the interactive preview needs the TypeScript Engine plugin; use Run to try the script in AutoJs6</string>
     <string name="designer_ui_interact_tsx_needs_host">This AutoJs6 cannot run TSX scripts in the interactive preview yet; use Run to try the script in AutoJs6</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">In the script</string>

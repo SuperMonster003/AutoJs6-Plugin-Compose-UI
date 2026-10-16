@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">Кнопка Назад</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 остановил скрипт: он занимал главный поток дольше %1$d с</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 остановил скрипт: он занимал главный поток дольше %1$d с (строка %2$d)</string>
+    <string name="designer_ui_interact_compile_failed">TSX-скрипт не компилируется: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">TSX-скрипт не компилируется (строка %1$d): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine компилирует TSX-скрипт</string>
     <string name="designer_ui_interact_confirm_message">Интерактивный предпросмотр запускает весь этот скрипт в AutoJs6 так же, как команда запуска, со всеми его побочными эффектами (файлы, сеть, действия с устройством). Его ui.layout заполняет холст; документ и файл не меняются. Скрипт останавливается, когда переключатель выключается или вы покидаете дизайнер.</string>
     <string name="designer_ui_interact_confirm_message_v4">Интерактивный предпросмотр запускает весь этот скрипт в AutoJs6 так же, как команда запуска, со всеми его побочными эффектами (файлы, сеть, действия с устройством). Его ui.layout заполняет холст; документ и файл не меняются. Скрипт останавливается, когда переключатель выключается или редактор закрывается; пока дизайнер в фоне, скрипт, как приложение, получает pause, а при возвращении resume.</string>
     <string name="designer_ui_interact_confirm_title">Запустить скрипт в предпросмотре?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">Скрипт выполняется; до Android 15 предпросмотр не принимает ввод с клавиатуры</string>
     <string name="designer_ui_interact_running">Скрипт выполняется в AutoJs6</string>
     <string name="designer_ui_interact_starting">Запуск скрипта в AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_engine">Для запуска TSX-скриптов в интерактивном предпросмотре нужен плагин TypeScript Engine; запустите скрипт в AutoJs6 командой запуска</string>
     <string name="designer_ui_interact_tsx_needs_host">Этот AutoJs6 пока не запускает TSX-скрипты в интерактивном предпросмотре; запустите скрипт в AutoJs6 командой запуска</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">В скрипте</string>

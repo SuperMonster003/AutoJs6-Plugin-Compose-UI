@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import io.github.supermonster003.autojs6.plugin.three.block.compose.ThreeBlockComposePlugin
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
 import org.autojs.plugin.ui.preview.IUiPreviewCallback
@@ -83,6 +84,9 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     /** The host stopped a run whose script kept its main thread busy beyond [limitMs] at [line] (-1 unknown) (contract v4). */
     data class BusyWait(val line: Int, val elapsedMs: Long, val limitMs: Long)
 
+    /** A TSX run whose text did not compile (contract v5): the first error's [message] at [line] / [column] (-1 unknown). */
+    data class CompileFailure(val line: Int, val column: Int, val message: String)
+
     /** A lifecycle event of `sendLifecycle` reached the run (contract v4); [consumed] matters for `back_pressed` only. */
     data class LifecycleHandled(val event: String, val consumed: Boolean)
 
@@ -104,6 +108,15 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     /** The host delivers pause / resume / back_pressed to `ui.emitter` of a run (contract v4). */
     val lifecycleSupported: Boolean get() = PreviewCapability.LIFECYCLE_EVENTS in capabilities
     /**
+     * The host's contract knows TSX runs (contract v5, roadmap P11.H3): whether it can run them right now is
+     * [tsxRunSupported]. Known once the handshake is done.
+     */
+    var tsxRunKnown: Boolean by mutableStateOf(false)
+        private set
+    /** The host compiles and runs TSX scripts (contract v5 with TypeScript Engine installed); known once the handshake is done. */
+    var tsxRunSupported: Boolean by mutableStateOf(false)
+        private set
+    /**
      * How long a run may keep the host's main thread busy, sent with each run to a host that takes it (contract v4);
      * the designer sets it from the settings page. Main thread.
      */
@@ -124,6 +137,15 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
      * or null; [scriptError] then holds the host's own wording, which the designer replaces with its localized one.
      */
     var busyWait: BusyWait? by mutableStateOf(null)
+        private set
+    /** Why the last TSX run did not start: its text did not compile (contract v5); [scriptError] holds the host's wording. */
+    var compileFailure: CompileFailure? by mutableStateOf(null)
+        private set
+    /**
+     * A TSX run is with the compiler (contract v5): from `runScript` until the run shows its layout, logs, fails or ends,
+     * whichever comes first; the host reports nothing in between.
+     */
+    var compiling: Boolean by mutableStateOf(false)
         private set
     /** The last lifecycle event the host delivered to the run and whether a handler or a dialog consumed it (contract v4). */
     var lastLifecycle: LifecycleHandled? by mutableStateOf(null)
@@ -212,6 +234,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 this@UiPreviewClient.bounds = received
                 if (count >= 0) elementCount = count
                 frameRevision++
+                // A run's own layout reports its bounds too: a compiled TSX run has started.
+                if (interactive) compiling = false
             }
         }
 
@@ -249,6 +273,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 if (sessionId != this@UiPreviewClient.sessionId) return@post
                 val lines = consoleLines
                 consoleLines = (if (lines.size >= MAX_CONSOLE_LINES) lines.drop(lines.size - MAX_CONSOLE_LINES + 1) else lines) + line
+                compiling = false
             }
         }
 
@@ -258,10 +283,15 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             // Contract v4: the busy-wait limit ended the run; the code says so, the time is how long the thread was busy.
             val busy = error.getString(Contract.KEY_ERROR_CODE) == Contract.ERROR_BUSY_WAIT
             val elapsed = error.getLong(Contract.KEY_ELAPSED_MS, 0L)
+            // Contract v5: a TSX text that did not compile; the line and column are those of its first error.
+            val compile = if (error.getString(Contract.KEY_ERROR_CODE) != Contract.ERROR_COMPILE_FAILED) null else
+                CompileFailure(line, error.getInt(Contract.KEY_COLUMN, -1), message)
             main.post {
                 if (sessionId != this@UiPreviewClient.sessionId) return@post
                 scriptError = if (line > 0) "$line: $message" else message
                 busyWait = if (busy) BusyWait(line, elapsed, runBusyWaitLimitMs) else null
+                compileFailure = compile
+                compiling = false
             }
         }
 
@@ -272,6 +302,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 if (sessionId != this@UiPreviewClient.sessionId) return@post
                 if (id != null && runId != null && id != runId) return@post
                 running = false
+                compiling = false
                 lastExit = reason
             }
         }
@@ -299,6 +330,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         private const val SNAPSHOT_DIRECTORY = "ui-preview"
         private const val ARCHIVE_DIRECTORY = "ui-preview-archives"
         private const val MAIN_SCRIPT = "main.js"
+        private const val MAIN_TSX_SCRIPT = "main.tsx"
 
         /** Why the host cannot preview without binding it: not installed, or without the service; null when it may. */
         fun availability(context: Context): Status.Unavailable? {
@@ -391,12 +423,13 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 return
             }
             val info = remote.previewInfo
-            // v3 (project resources, P11.H1) and v4 (lifecycle events, P11.5) are listed with their hashes; the info's own
-            // identity keys stay at v2 (runScript).
+            // v3 (project resources, P11.H1), v4 (lifecycle events, P11.5) and v5 (TSX runs, P11.H3) are listed with their
+            // hashes; the info's own identity keys stay at v2 (runScript).
             val versions = info.getIntArray(Contract.KEY_SUPPORTED_CONTRACT_VERSIONS)
             val hashes = info.getStringArray(Contract.KEY_CONTRACT_HASHES)
             fun serves(version: Int, hash: String) = versions != null && hashes != null && versions.indices.any { versions[it] == version && hashes.getOrNull(it) == hash }
-            val v4 = serves(Contract.VERSION, Contract.HASH)
+            val v5 = serves(Contract.VERSION, Contract.HASH)
+            val v4 = v5 || serves(Contract.VERSION_V4, Contract.HASH_V4)
             val v3 = v4 || serves(Contract.VERSION_V3, Contract.HASH_V3)
             val v2 = v3 || info.getInt(Contract.KEY_CONTRACT_VERSION, Contract.BASE_VERSION) >= Contract.VERSION_V2 && info.getString(Contract.KEY_CONTRACT_HASH) == Contract.HASH_V2
             val announced = if (!v4) emptySet() else capabilitiesOf(info::getBoolean)
@@ -404,7 +437,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 if (closed) return@post
                 service = remote
                 hostContractVersion = when {
-                    v4 -> Contract.VERSION
+                    v5 -> Contract.VERSION
+                    v4 -> Contract.VERSION_V4
                     v3 -> Contract.VERSION_V3
                     v2 -> Contract.VERSION_V2
                     else -> Contract.BASE_VERSION
@@ -412,6 +446,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 resourcesSupported = v3 && info.getBoolean(Contract.KEY_RESOURCES_SUPPORTED, false)
                 scriptRunSupported = v2 && info.getBoolean(Contract.KEY_SCRIPT_RUN_SUPPORTED, false) && embedded
                 capabilities = if (scriptRunSupported) announced else emptySet()
+                tsxRunKnown = v5 && scriptRunSupported
+                tsxRunSupported = tsxRunKnown && info.getBoolean(Contract.KEY_TSX_RUN_SUPPORTED, false)
                 status = Status.Ready(info.getString(Contract.KEY_HOST_VERSION_NAME), info.getLong(Contract.KEY_HOST_VERSION_CODE))
                 ensureSession()
             }
@@ -639,14 +675,19 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
 
     /**
      * Runs [text] (a whole `"ui"` mode script) in the session's root as a real host script (roadmap P10.6);
-     * a run still going is replaced. The console, errors and the end arrive as state. Main thread.
+     * a run still going is replaced. The console, errors and the end arrive as state. A [Dialect.TSX] text goes to
+     * a host that compiles it first (contract v5, roadmap P11.H3), which [compiling] reflects. Main thread.
      */
-    fun runScript(text: String, name: String, files: Map<String, String> = emptyMap()) {
+    fun runScript(text: String, name: String, files: Map<String, String> = emptyMap(), dialect: Dialect = Dialect.JS) {
         if (closed || !scriptRunSupported) return
+        val tsx = dialect == Dialect.TSX
+        if (tsx && !tsxRunSupported) return
         val id = sessionId ?: return
         consoleLines = emptyList()
         scriptError = null
         busyWait = null
+        compileFailure = null
+        compiling = tsx
         lastLifecycle = null
         lastExit = null
         running = true
@@ -658,6 +699,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             putString(Contract.KEY_SCRIPT_NAME, name)
             // Contract v4: older hosts would ignore the key, but it is only sent to a host that takes it.
             if (PreviewCapability.BUSY_WAIT_LIMIT in capabilities) putLong(Contract.KEY_BUSY_WAIT_LIMIT_MS, limit)
+            // Contract v5: the host compiles a TSX text with TypeScript Engine before it runs.
+            if (tsx) putString(Contract.KEY_SCRIPT_DIALECT, Contract.SCRIPT_DIALECT_TSX)
         }
         call(onResult = { result ->
             main.post {
@@ -666,6 +709,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                     runId = result.getString(Contract.KEY_RUN_ID)
                 } else {
                     running = false
+                    compiling = false
                     scriptError = result.getString(Contract.KEY_ERROR_MESSAGE) ?: result.getString(Contract.KEY_ERROR_CODE)
                     lastExit = Contract.EXIT_ERROR
                 }
@@ -675,7 +719,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             var project: ParcelFileDescriptor? = null
             try {
                 val root = projectRoot
-                val path = scriptPath.takeIf(ProjectArchives::isEntryPath) ?: MAIN_SCRIPT
+                val path = scriptPath.takeIf(ProjectArchives::isEntryPath) ?: if (tsx) MAIN_TSX_SCRIPT else MAIN_SCRIPT
                 if (resourcesSupported && (root != null || files.isNotEmpty())) {
                     archives.archive(ProjectArchives.PROJECT, root, files + (path to text))?.let { archive ->
                         project = ParcelFileDescriptor.open(archive.file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -709,6 +753,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         val id = sessionId ?: return
         if (!running && runId == null) return
         running = false
+        compiling = false
         runId = null
         call { remote -> remote.stopScript(id) }
     }

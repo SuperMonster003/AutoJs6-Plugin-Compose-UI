@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">返回鍵</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 已停止指令碼: 它佔用主執行緒超過 %1$d 秒</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 已停止指令碼: 它佔用主執行緒超過 %1$d 秒 (第 %2$d 行)</string>
+    <string name="designer_ui_interact_compile_failed">TSX 指令碼未通過編譯: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">TSX 指令碼未通過編譯 (第 %1$d 行): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine 正在編譯 TSX 指令碼</string>
     <string name="designer_ui_interact_confirm_message">互動預覽會在 AutoJs6 中完整執行這份指令碼, 與執行命令相同, 指令碼的全部副作用 (檔案, 網路, 裝置操作) 都會發生. 它的 ui.layout 會顯示在畫布上; 文件與檔案保持不變. 關閉開關或離開設計器時指令碼停止.</string>
     <string name="designer_ui_interact_confirm_message_v4">互動預覽會在 AutoJs6 中完整執行這份指令碼, 與執行命令相同, 指令碼的全部副作用 (檔案, 網路, 裝置操作) 都會發生. 它的 ui.layout 會顯示在畫布上; 文件與檔案保持不變. 關閉開關或關閉編輯頁時指令碼停止; 設計器在背景時指令碼會像應用程式一樣收到 pause, 回到前景時收到 resume.</string>
     <string name="designer_ui_interact_confirm_title">在預覽中執行指令碼?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">指令碼執行中; Android 15 之前預覽無法接收鍵盤輸入</string>
     <string name="designer_ui_interact_running">指令碼正在 AutoJs6 中執行</string>
     <string name="designer_ui_interact_starting">正在 AutoJs6 中啟動指令碼</string>
+    <string name="designer_ui_interact_tsx_needs_engine">互動預覽執行 TSX 指令碼需要 TypeScript Engine 外掛程式; 請用 \"執行\" 在 AutoJs6 中試執行</string>
     <string name="designer_ui_interact_tsx_needs_host">目前的 AutoJs6 還不能在互動預覽中執行 TSX 指令碼; 請用 \"執行\" 在 AutoJs6 中試執行</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">指令碼內</string>

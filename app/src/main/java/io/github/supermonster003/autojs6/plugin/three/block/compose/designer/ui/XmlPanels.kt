@@ -477,14 +477,18 @@ private fun differenceText(difference: PreviewDifference, lifecycle: Boolean): S
 }
 
 /**
- * What to show for the run's last error: the busy-wait limit in the designer's words (contract v4, roadmap P11.6),
- * otherwise the host's message with its line. Call only when [UiPreviewClient.scriptError] is set.
+ * What to show for the run's last error: the busy-wait limit (contract v4, roadmap P11.6) and a TSX text that did not
+ * compile (contract v5, roadmap P11.H3) in the designer's words, otherwise the host's message with its line. Call only
+ * when [UiPreviewClient.scriptError] is set.
  */
 @Composable
 internal fun scriptErrorText(client: UiPreviewClient): String {
     val busy = client.busyWait
     val seconds = ((busy?.limitMs ?: 0L) / 1000L).toInt()
+    val compile = client.compileFailure
     return when {
+        compile != null && compile.line > 0 -> stringResource(R.string.designer_ui_interact_compile_failed_line, compile.line, compile.message)
+        compile != null -> stringResource(R.string.designer_ui_interact_compile_failed, compile.message)
         busy == null -> stringResource(R.string.designer_sandbox_error, client.scriptError.orEmpty())
         busy.line > 0 -> stringResource(R.string.designer_ui_interact_busy_wait_line, seconds, busy.line)
         else -> stringResource(R.string.designer_ui_interact_busy_wait, seconds)

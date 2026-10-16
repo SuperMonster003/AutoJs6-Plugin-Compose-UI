@@ -205,10 +205,13 @@ internal class DesignerTsxDeviceTest {
                 assertEquals(null, client.failure)
                 assertEquals(3, client.elementCount)
                 assertEquals(listOf("title", "ok"), client.bounds.sortedBy { it.index }.mapNotNull { it.id })
-                // Until the host compiles TSX for the interactive preview (P11.H3) the switch is off with a note.
-                if (client.scriptRunSupported) {
+                // A host that compiles TSX (contract v5 with TypeScript Engine, P11.H3) offers the switch; otherwise it is
+                // off with a note that says what is missing (UiInteractiveDeviceTest runs the TSX script itself).
+                if (client.scriptRunSupported && client.tsxRunSupported) {
+                    rule.onNodeWithTag("designer-interact").assertIsDisplayed()
+                } else if (client.scriptRunSupported) {
                     assertTrue(rule.onAllNodesWithTag("designer-interact").fetchSemanticsNodes().isEmpty())
-                    val note = activity.getString(R.string.designer_ui_interact_tsx_needs_host)
+                    val note = activity.getString(if (client.tsxRunKnown) R.string.designer_ui_interact_tsx_needs_engine else R.string.designer_ui_interact_tsx_needs_host)
                     assertEquals(note, rule.onNodeWithTag("designer-ui-interact-status", useUnmergedTree = true).fetchSemanticsNode().config[SemanticsProperties.Text].joinToString { it.text })
                 }
             }

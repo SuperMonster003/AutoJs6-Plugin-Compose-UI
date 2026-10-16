@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">返回鍵</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 停止了腳本: 它佔用主線程超過 %1$d 秒</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 停止了腳本: 它佔用主線程超過 %1$d 秒 (第 %2$d 行)</string>
+    <string name="designer_ui_interact_compile_failed">TSX 腳本未通過編譯: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">TSX 腳本未通過編譯 (第 %1$d 行): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine 正在編譯 TSX 腳本</string>
     <string name="designer_ui_interact_confirm_message">互動預覽會在 AutoJs6 中完整運行這份腳本, 與運行命令相同, 腳本的全部副作用 (檔案, 網絡, 裝置操作) 都會發生. 它的 ui.layout 會顯示在畫布上; 文檔與檔案保持不變. 關閉開關或離開設計器時腳本停止.</string>
     <string name="designer_ui_interact_confirm_message_v4">互動預覽會在 AutoJs6 中完整運行這份腳本, 與運行命令相同, 腳本的全部副作用 (檔案, 網絡, 裝置操作) 都會發生. 它的 ui.layout 會顯示在畫布上; 文檔與檔案保持不變. 關閉開關或關閉編輯頁時腳本停止; 設計器在背景時腳本會像應用程式一樣收到 pause, 回到前景時收到 resume.</string>
     <string name="designer_ui_interact_confirm_title">在預覽中運行腳本?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">腳本運行中; Android 15 之前預覽不能接收鍵盤輸入</string>
     <string name="designer_ui_interact_running">腳本正在 AutoJs6 中運行</string>
     <string name="designer_ui_interact_starting">正在 AutoJs6 中啟動腳本</string>
+    <string name="designer_ui_interact_tsx_needs_engine">互動預覽運行 TSX 腳本需要 TypeScript Engine 插件; 請用 \"運行\" 在 AutoJs6 中試運行</string>
     <string name="designer_ui_interact_tsx_needs_host">目前的 AutoJs6 還不能在互動預覽中運行 TSX 腳本; 請用 \"運行\" 在 AutoJs6 中試運行</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">腳本內</string>

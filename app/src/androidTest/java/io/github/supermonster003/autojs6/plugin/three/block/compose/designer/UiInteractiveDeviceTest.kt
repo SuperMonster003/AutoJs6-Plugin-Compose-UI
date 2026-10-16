@@ -349,4 +349,77 @@ internal class UiInteractiveDeviceTest {
         }
         assertEquals(busy, store.read(name))
     }
+
+    // ------------------------------------------------------------------------------------ contract v5 (P11.H3)
+
+    /** The TypeScript Engine template's way: an inline onClick, and the ids through `as any` (roadmap D68). */
+    private val tsxCounter = "\"ui\";\n\nlet n: number = 0;\nui.layout(\n    <vertical>\n" +
+        "        <button id='b' w='*' h='*' text='count 0' onClick={() => {\n            n++;\n" +
+        "            (ui as any).b.setText('count ' + n);\n            console.log('clicked ' + n);\n        }} />\n" +
+        "    </vertical>\n);\nconsole.log('tsx started');\n"
+
+    private fun tsxProject(stem: String, script: String): String {
+        val project = store.create("ui-interactive-test-$stem", script, ProjectStore.TSX_EXTENSION)
+        created += project.name
+        return project.name
+    }
+
+    /** Waits for the v4 handshake and the parsed TSX document, then skips the test unless the host runs TSX (contract v5). */
+    private fun ActivityScenario<DesignerActivity>.tsxClient(): UiPreviewClient {
+        // TypeScript Engine parses the document first; the preview client comes with the opened document.
+        rule.waitUntil(30_000) { activity().currentPreviewClient != null }
+        val client = v4Client()
+        assumeTrue("the installed AutoJs6 does not serve preview contract v5", client.tsxRunKnown)
+        assumeTrue("TypeScript Engine is not installed, so AutoJs6 cannot compile TSX", client.tsxRunSupported)
+        rule.waitUntil(30_000) { rule.onAllNodesWithTag("designer-interact").fetchSemanticsNodes().isNotEmpty() }
+        return client
+    }
+
+    @Test
+    fun aTsxScriptIsCompiledByTheHostAndATapReachesItsInlineOnClick() {
+        val name = tsxProject("tsx", tsxCounter)
+        launch(name).use { scenario ->
+            val client = scenario.tsxClient()
+            val startedAt = SystemClock.uptimeMillis()
+            scenario.startInteractive(client)
+            waitForConsole(client, "tsx started", 30_000)
+            android.util.Log.i("UiInteractiveDeviceTest", "TSX run logged after ${SystemClock.uptimeMillis() - startedAt} ms")
+            assertFalse(client.compiling)
+            rule.waitUntil(15_000) {
+                if (client.consoleLines.none { it.text.contains("clicked") }) scenario.tapLiveSurfaceCenter()
+                SystemClock.sleep(500)
+                client.consoleLines.any { it.text.contains("clicked 1") }
+            }
+            assertEquals(null, client.scriptError)
+            rule.onNodeWithTag("designer-tab-console").performClick()
+            assertConsoleShows("clicked 1")
+            rule.onNodeWithTag("designer-interact").performClick()
+            rule.waitUntil(15_000) { !client.running && client.lastExit == UiPreviewContract.EXIT_STOPPED }
+        }
+        assertEquals(tsxCounter, store.read(name))
+        assertFalse(store.draftFile(name).exists())
+    }
+
+    @Test
+    fun aTsxScriptThatDoesNotCompileShowsItsLineAboveTheCanvas() {
+        val wrong = "\"ui\";\nui.layout(\n    <frame>\n        <text text='typed' />\n    </frame>\n);\nconst x: number = 'one';\nconsole.log('not compiled ' + x);\n"
+        val name = tsxProject("tsx-wrong", wrong)
+        launch(name).use { scenario ->
+            val client = scenario.tsxClient()
+            scenario.startInteractive(client)
+            rule.waitUntil(30_000) { client.lastExit == UiPreviewContract.EXIT_ERROR }
+            val failure = requireNotNull(client.compileFailure)
+            assertEquals(7, failure.line)
+            assertEquals(7, failure.column)
+            assertTrue(failure.message, failure.message.startsWith("TS2322: "))
+            assertFalse(client.compiling)
+            assertTrue(client.consoleLines.none { it.text.contains("not compiled") })
+            rule.waitUntil(5_000) { rule.onAllNodesWithTag("designer-ui-script-problem").fetchSemanticsNodes().isNotEmpty() }
+            assertEquals(scenario.activity().getString(R.string.designer_ui_interact_compile_failed_line, 7, failure.message), textOf("designer-ui-script-problem"))
+            // Every error diagnostic is in the console too.
+            rule.onNodeWithTag("designer-ui-script-problem").performClick()
+            assertConsoleShows("TS2322")
+        }
+        assertEquals(wrong, store.read(name))
+    }
 }

@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">戻るキー</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 がスクリプトを停止しました: メインスレッドを %1$d 秒を超えて占有しました</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 がスクリプトを停止しました: メインスレッドを %1$d 秒を超えて占有しました (%2$d 行目)</string>
+    <string name="designer_ui_interact_compile_failed">TSX スクリプトがコンパイルできません: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">TSX スクリプトがコンパイルできません (%1$d 行目): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine が TSX スクリプトをコンパイルしています</string>
     <string name="designer_ui_interact_confirm_message">インタラクティブプレビューは, このスクリプト全体を実行コマンドと同じように AutoJs6 で実行します. ファイル, ネットワーク, デバイス操作などの副作用もすべて発生します. ui.layout はキャンバスに表示され, ドキュメントとファイルは変更されません. スイッチをオフにするか, デザイナーを離れるとスクリプトは停止します.</string>
     <string name="designer_ui_interact_confirm_message_v4">インタラクティブプレビューは, このスクリプト全体を実行コマンドと同じように AutoJs6 で実行します. ファイル, ネットワーク, デバイス操作などの副作用もすべて発生します. ui.layout はキャンバスに表示され, ドキュメントとファイルは変更されません. スイッチをオフにするか編集画面を閉じるとスクリプトは停止します. デザイナーがバックグラウンドにある間, スクリプトはアプリと同じく pause を受け取り, 戻ると resume を受け取ります.</string>
     <string name="designer_ui_interact_confirm_title">プレビューでスクリプトを実行しますか?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">スクリプトは実行中です. Android 15 より前ではプレビューはキーボード入力を受け取れません</string>
     <string name="designer_ui_interact_running">スクリプトは AutoJs6 で実行中です</string>
     <string name="designer_ui_interact_starting">AutoJs6 でスクリプトを開始しています</string>
+    <string name="designer_ui_interact_tsx_needs_engine">インタラクティブプレビューで TSX スクリプトを実行するには TypeScript Engine プラグインが必要です. \"実行\" で AutoJs6 で試してください</string>
     <string name="designer_ui_interact_tsx_needs_host">この AutoJs6 はまだインタラクティブプレビューで TSX スクリプトを実行できません. \"実行\" で AutoJs6 で試してください</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">スクリプト内</string>

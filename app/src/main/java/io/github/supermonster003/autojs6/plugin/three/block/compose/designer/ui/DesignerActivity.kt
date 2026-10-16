@@ -902,16 +902,17 @@ internal class DesignerActivity : StandaloneActivity() {
         // the document, the file or the draft; the held layout is sent again when it ends.
         // Roadmap P11.6: a host that delivers lifecycle events (contract v4) keeps the run while the designer is hidden and
         // gets pause / resume instead, like an app sent to the background; older hosts stop it and run it again.
-        // Roadmap D69: a TSX script runs in the preview once the host compiles it (P11.H3); until then it runs in AutoJs6 only.
+        // Roadmap D69 / P11.H3: a TSX script runs in the preview where the host compiles it (contract v5 with TypeScript
+        // Engine); elsewhere it runs in AutoJs6 only.
         val tsxScript = session.document.dialect == Dialect.TSX
-        val interactiveSupported = client.embedded && client.scriptRunSupported && !tsxScript
+        val interactiveSupported = client.embedded && client.scriptRunSupported && (!tsxScript || client.tsxRunSupported)
         val lifecycleSupported = client.lifecycleSupported
         LaunchedEffect(session.interactive, interactiveSupported, lifecycleSupported || visible, session.revision, client.sessionRevision) {
             if (session.interactive && interactiveSupported && (lifecycleSupported || visible)) {
                 client.setInteractiveMode(true)
                 if (client.runRevision > 0) delay(SANDBOX_RESTART_DELAY_MS)
                 client.busyWaitLimitMs = UiPreviewClient.busyWaitLimitOf(InteractivePreviewSettings.busyWaitLimitSeconds(context))
-                client.runScript(session.script(), source.title, session.files())
+                client.runScript(session.script(), source.title, session.files(), session.document.dialect)
             } else {
                 client.setInteractiveMode(false)
             }
@@ -1269,7 +1270,8 @@ internal class DesignerActivity : StandaloneActivity() {
                         }
                         val rowText: String? = when {
                             !live -> when {
-                                tsxScript && ready != null && client.embedded && client.scriptRunSupported -> stringResource(R.string.designer_ui_interact_tsx_needs_host)
+                                tsxScript && !interactiveSupported && ready != null && client.embedded && client.scriptRunSupported ->
+                                    stringResource(if (client.tsxRunKnown) R.string.designer_ui_interact_tsx_needs_engine else R.string.designer_ui_interact_tsx_needs_host)
                                 interactiveSupported || ready == null -> null
                                 !client.pointerInteractiveAvailable -> stringResource(R.string.designer_ui_interact_needs_android)
                                 else -> stringResource(R.string.designer_ui_interact_needs_host, ready.hostVersionName ?: ready.hostVersionCode.toString())
@@ -1277,6 +1279,7 @@ internal class DesignerActivity : StandaloneActivity() {
                             ready == null -> statusText
                             scriptError != null -> scriptErrorText(client)
                             running && runId == null -> stringResource(R.string.designer_ui_interact_starting)
+                            running && client.compiling -> stringResource(R.string.designer_ui_interact_compiling)
                             running -> stringResource(if (client.imeAvailable) R.string.designer_ui_interact_running else R.string.designer_ui_interact_no_ime)
                             lastExit != null -> stringResource(R.string.designer_ui_interact_exited, lastExit)
                             else -> null

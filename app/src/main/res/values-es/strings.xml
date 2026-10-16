@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">Tecla Atrás</string>
     <string name="designer_ui_interact_busy_wait">AutoJs6 detuvo el script: mantuvo ocupado el hilo principal más de %1$d s</string>
     <string name="designer_ui_interact_busy_wait_line">AutoJs6 detuvo el script: mantuvo ocupado el hilo principal más de %1$d s (línea %2$d)</string>
+    <string name="designer_ui_interact_compile_failed">El script TSX no compila: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">El script TSX no compila (línea %1$d): %2$s</string>
+    <string name="designer_ui_interact_compiling">TypeScript Engine está compilando el script TSX</string>
     <string name="designer_ui_interact_confirm_message">La vista previa interactiva ejecuta todo este script en AutoJs6, igual que el comando Ejecutar, con todos sus efectos secundarios (archivos, red, acciones en el dispositivo). Su ui.layout llena el lienzo; el documento y el archivo no cambian. El script se detiene al apagar el interruptor o salir del diseñador.</string>
     <string name="designer_ui_interact_confirm_message_v4">La vista previa interactiva ejecuta todo este script en AutoJs6, igual que el comando Ejecutar, con todos sus efectos secundarios (archivos, red, acciones en el dispositivo). Su ui.layout llena el lienzo; el documento y el archivo no cambian. El script se detiene al apagar el interruptor o cerrar el editor; mientras el diseñador está en segundo plano, el script recibe pause y, al volver, resume, como una app.</string>
     <string name="designer_ui_interact_confirm_title">Ejecutar el script en la vista previa?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">El script se está ejecutando; antes de Android 15 la vista previa no recibe entrada de teclado</string>
     <string name="designer_ui_interact_running">El script se está ejecutando en AutoJs6</string>
     <string name="designer_ui_interact_starting">Iniciando el script en AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_engine">Ejecutar scripts TSX en la vista previa interactiva requiere el plugin TypeScript Engine; usa Ejecutar para probar el script en AutoJs6</string>
     <string name="designer_ui_interact_tsx_needs_host">Este AutoJs6 aún no ejecuta scripts TSX en la vista previa interactiva; usa Ejecutar para probar el script en AutoJs6</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">En el script</string>

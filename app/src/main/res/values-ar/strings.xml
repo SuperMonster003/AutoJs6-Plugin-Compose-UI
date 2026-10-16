@@ -207,6 +207,9 @@
     <string name="designer_ui_interact_back">مفتاح الرجوع</string>
     <string name="designer_ui_interact_busy_wait">أوقف AutoJs6 السكربت: شغل الخيط الرئيسي أكثر من %1$d ث</string>
     <string name="designer_ui_interact_busy_wait_line">أوقف AutoJs6 السكربت: شغل الخيط الرئيسي أكثر من %1$d ث (السطر %2$d)</string>
+    <string name="designer_ui_interact_compile_failed">لا يمكن ترجمة سكربت TSX: %1$s</string>
+    <string name="designer_ui_interact_compile_failed_line">لا يمكن ترجمة سكربت TSX (السطر %1$d): %2$s</string>
+    <string name="designer_ui_interact_compiling">يترجم TypeScript Engine سكربت TSX</string>
     <string name="designer_ui_interact_confirm_message">تشغّل المعاينة التفاعلية هذا السكربت بالكامل في AutoJs6 تماما مثل أمر التشغيل, مع كل آثاره الجانبية (الملفات, الشبكة, إجراءات الجهاز). يملأ ui.layout الخاص به اللوحة; ولا يتغير المستند ولا الملف. يتوقف السكربت عند إيقاف المفتاح أو مغادرة المصمم.</string>
     <string name="designer_ui_interact_confirm_message_v4">تشغّل المعاينة التفاعلية هذا السكربت بالكامل في AutoJs6 تماما مثل أمر التشغيل, مع كل آثاره الجانبية (الملفات, الشبكة, إجراءات الجهاز). يملأ ui.layout الخاص به اللوحة; ولا يتغير المستند ولا الملف. يتوقف السكربت عند إيقاف المفتاح أو إغلاق المحرر; وأثناء وجود المصمم في الخلفية يتلقى السكربت pause ثم resume عند العودة, مثل التطبيق.</string>
     <string name="designer_ui_interact_confirm_title">تشغيل السكربت في المعاينة?</string>
@@ -216,6 +219,7 @@
     <string name="designer_ui_interact_no_ime">السكربت قيد التشغيل; قبل Android 15 لا تستقبل المعاينة إدخال لوحة المفاتيح</string>
     <string name="designer_ui_interact_running">السكربت قيد التشغيل في AutoJs6</string>
     <string name="designer_ui_interact_starting">جار بدء السكربت في AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_engine">يتطلب تشغيل سكربتات TSX في المعاينة التفاعلية إضافة TypeScript Engine; استخدم التشغيل لتجربة السكربت في AutoJs6</string>
     <string name="designer_ui_interact_tsx_needs_host">لا يستطيع AutoJs6 هذا بعد تشغيل سكربتات TSX في المعاينة التفاعلية; استخدم التشغيل لتجربة السكربت في AutoJs6</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">داخل السكربت</string>
