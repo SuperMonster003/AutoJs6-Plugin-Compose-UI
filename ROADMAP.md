@@ -1513,3 +1513,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 设备探针 (API 33 + 宿主 debug 5439) 发现两处与 P10 路线图 3.5 节及文档站 1.7.0 段落不符: 交互预览中 `ui.emitter` 为 null (注册事件抛 TypeError, 并非 "只发 create"), 被忽略的窗口级函数的警告不回传到设计器控制台; 两处文档与说明文案已按实测更正, P11.5 / P11.6 条目补了相应前提 (v3 宿主要先提供 `ui.emitter`, `ACTIVITY_EVENTS` 的说明随之改写).
 - 验证: JVM 239 项 (新增 `PreviewDifferencesTest` 8 项), debug / androidTest 装配, lint 0 错误; emulator-5580 (API 33) `UiDesignerDeviceTest` 7 + `UiPreviewDeviceTest` 1 + `UiInteractiveDeviceTest` 3 通过, emulator-5570 (API 24, Nexus 5 尺寸) `UiDesignerDeviceTest` 7 + `UiPreviewDeviceTest` 1 通过 (首轮的模拟器 GL 中止复跑通过); 逐条证据见 `docs/dev/p11-designer-fidelity-roadmap.md` P11.2 (全部勾选). 两台模拟器使用前经 MCP Server 与 Batch Rename 会话确认空闲.
 - 下一步: P11.3 (XML 文件工程), 开始前需维护者对 Q23 (文件夹工程的导出格式) 拍板.
+
+### 2026-10-16 (续): P11.3 XML 文件工程
+
+- Q23 拍板为 D62 - D65 后, 先在宿主完成 Android XML 路线图 (R1 - R3, A1 - A9, 本地提交), 插件换用契约 v3 AAR (`b497088`, `e1ba7f2`). 新建 / 升格入口以选择题拍板为 D66 (三种入口都做) 与 D67 (模板与新建文件可选 AutoJs6 XML / Android 原生 XML).
+- 插件提交 (均已推送): `a3b2c05` 文件片段, `1727df7` 文件夹工程存储, `aa0238b` 新入口与 `project.json`, `8a5fbef` 预览交出工程文件, `8b7f9c2` zip 导出 / 导入, `a0e706e` 交给 AutoJs6, `9dfd237` 原生命名空间目录, `ce2aa73` content 文档的文件夹授权, 以及本记录所在提交 (设备测试与脚本). 宿主本地提交 `faf412ef7` (工程 zip 运行 / 导入入口) 与 `ff46ff57b` (zh-Hans 更新日志), 未推送.
+- 验证: JVM 277 项; `UiLayoutFileDeviceTest` 6 项在 AVD_API_33 / AVD_API_24 只读实例通过 (`.python/verify_layout_files.py`); `verify_designer_recovery.py --kind folder` 在 API 33 通过; 既有 UI 设备测试 21 项回归通过. content 文档的文件夹授权需在真机上人工确认 (系统选择器). 详细证据见 P11 路线图 P11.3 小节.
+- 下一步: P11.4 (1.8.0 文档, 10 语言 changelog / README, gate 与发布; 文档站本地提交 `47af615` / `22d7b1e` 届时推送).

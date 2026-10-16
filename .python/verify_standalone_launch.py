@@ -280,12 +280,13 @@ def hide_keyboard(adb: Adb) -> None:
         time.sleep(0.5)
 
 
-def create_project(adb: Adb, labels: dict[str, str], stem: str, kind: str | None = None, expect: str = TEMPLATE_TEXT) -> str:
+def create_project(adb: Adb, labels: dict[str, str], stem: str, kind: str | None = None, expect: str = TEMPLATE_TEXT, layout: str | None = None) -> str:
     """Create a project named <stem>-<time> from the home and wait until the editor shows [expect].
 
     [kind] names the label of a project kind chip to tap first (roadmap P10.4: "ui" for a ui (XML) project);
     the default chip makes a Compose JavaScript project. [expect] is the text that proves the editor read the
-    template: the Text on the Compose canvas, or an outline row of the ui project.
+    template: the Text on the Compose canvas, or an outline row of the ui project. [layout] names the label of a ui
+    layout chip (roadmap P11.3: a folder project with a layout file); the home then lists the project as `<name>/`.
     """
     project = f"{stem}-{int(time.time())}"
     new_action, _ = find_node(adb, "the new project action", lambda n: (n.get("content-desc") or "").strip() == labels["new"], clickable=True)
@@ -298,12 +299,15 @@ def create_project(adb: Adb, labels: dict[str, str], stem: str, kind: str | None
     if kind is not None:
         chip, _ = find_node(adb, f"the {kind} project kind chip", lambda n: (n.get("text") or "").strip() == labels[kind], clickable=True)
         tap(adb, chip)
+    if layout is not None:
+        chip, _ = find_node(adb, f"the {layout} layout chip", lambda n: (n.get("text") or "").strip() == labels[layout], clickable=True)
+        tap(adb, chip)
     create, _ = find_node(adb, "the create button", lambda n: (n.get("text") or "").strip() == labels["create"], clickable=True)
     tap(adb, create)
     wait_for("the designer editor", lambda: (lambda t: t if t and expand(t[0]) == expand(DESIGNER_ACTIVITY) else None)(top_activity(adb)))
     # The template must come out of the parser (and, for a Compose project, the real renderer) inside the release build.
     find_node(adb, f"the template's {expect!r} in the editor", lambda n: (n.get("text") or "").strip() == expect)
-    return f"{project}.js"
+    return f"{project}/" if layout is not None else f"{project}.js"
 
 
 def open_and_delete_project(adb: Adb, labels: dict[str, str]) -> None:

@@ -114,6 +114,21 @@ class UiCatalogAndroidTest {
         assertEquals("enum", session.nativeAttr(inserted, "android:visibility")?.type)
     }
 
+    @Test
+    fun `a view class goes into the empty root of a new native file`() {
+        val document = io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiLayoutFiles.addFile(reader.read(ProjectStore.UI_TEMPLATE), "res/layout/item.xml", native = true)
+        val session = UiDesignerSession(document)
+        session.fragment = document.fragments.indexOfFirst { it.file != null }
+        session.selectedId = document.fragments[session.fragment].root.id
+        assertTrue(session.insert("TextView"))
+        assertEquals("TextView", session.selected?.tag)
+        assertEquals(
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<LinearLayout xmlns:android=\"$NS\"\n    android:layout_width=\"match_parent\"\n    android:layout_height=\"wrap_content\"\n" +
+                "    android:orientation=\"vertical\">\n    <TextView android:layout_width=\"wrap_content\" android:layout_height=\"wrap_content\" android:text=\"Text\"/>\n</LinearLayout>\n",
+            UiScriptWriter.writeFiles(session.document).getValue("res/layout/item.xml"),
+        )
+    }
+
     private companion object {
         const val NS = "http://schemas.android.com/apk/res/android"
     }

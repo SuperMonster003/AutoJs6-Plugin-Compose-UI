@@ -187,6 +187,8 @@ internal object UiLayoutEdits {
         when {
             elementChildren.isEmpty() -> {
                 val parentIndent = indentOf(document, parentId)
+                // Only whitespace inside (`<vertical>\n</vertical>`): the new child replaces it rather than leaving a blank line.
+                if (children.all { it is XmlNode.Text && it.isBlank }) children.clear()
                 children += insertion
                 children += XmlNode.Text("\n$parentIndent")
             }

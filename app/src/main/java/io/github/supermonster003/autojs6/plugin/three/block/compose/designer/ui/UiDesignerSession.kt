@@ -285,6 +285,12 @@ internal class UiDesignerSession(
 
     /** Whether [tag] takes element children, by the catalog; registered widgets and unknown tags take none. */
     fun isContainer(element: XmlNode.Element): Boolean {
+        if (document.isNative(element.id)) {
+            // Roadmap P11.3: a native ViewGroup takes children unless it fills itself (adapters, pickers, a WebView).
+            if (element.tag == "merge") return true
+            val chain = nativeClassOf(element)?.let(android::chain).orEmpty()
+            return NATIVE_GROUP in chain && chain.none { it in NATIVE_SELF_FILLED } && element.tag.substringAfterLast('.') !in NATIVE_SELF_FILLED_TAGS
+        }
         val tag = catalog.tag(element.tag) ?: return false
         if (tag.tag == "list" || tag.tag == "grid") return element.elementChildren.isEmpty()
         return tag.container
@@ -292,6 +298,20 @@ internal class UiDesignerSession(
 
     /** The axis a container lays its children out along, for drop positions. */
     fun axisOf(element: XmlNode.Element): LayoutAxis {
+        if (document.isNative(element.id)) {
+            val chain = nativeClassOf(element)?.let(android::chain).orEmpty()
+            val orientation = element.attr("android:orientation")?.value
+            return when {
+                "android.widget.LinearLayout" in chain -> when {
+                    orientation == "vertical" -> LayoutAxis.VERTICAL
+                    orientation == null && "android.widget.RadioGroup" in chain -> LayoutAxis.VERTICAL
+                    else -> LayoutAxis.HORIZONTAL
+                }
+                "android.widget.HorizontalScrollView" in chain -> LayoutAxis.HORIZONTAL
+                "android.widget.ScrollView" in chain -> LayoutAxis.VERTICAL
+                else -> LayoutAxis.STACK
+            }
+        }
         val tag = catalog.tag(element.tag)?.tag
         val orientation = element.attr("orientation")?.value
         val verticalBare = element.attr("vertical")?.isBare == true
@@ -378,5 +398,17 @@ internal class UiDesignerSession(
             val moved = execute(UiEditCommand.MoveElement(dragged, target, (index ?: count).coerceIn(0, count)), merge = false)
             if (moved) selectedId = dragged
         }
+    }
+
+    private companion object {
+        const val NATIVE_GROUP = "android.view.ViewGroup"
+        /** Native ViewGroups that fill themselves (adapters, pickers): XML children are not theirs to take. */
+        val NATIVE_SELF_FILLED = setOf(
+            "android.widget.AbsListView", "android.widget.AbsSpinner", "android.widget.AdapterViewAnimator", "androidx.recyclerview.widget.RecyclerView",
+            "android.widget.CalendarView", "android.widget.DatePicker", "android.widget.TimePicker", "android.widget.NumberPicker",
+            "android.widget.SearchView", "androidx.appcompat.widget.SearchView",
+        )
+        /** Classes the catalog maps to plain ViewGroup although they take no children. */
+        val NATIVE_SELF_FILLED_TAGS = setOf("WebView", "ListView", "GridView", "Spinner", "ExpandableListView", "Gallery", "StackView")
     }
 }

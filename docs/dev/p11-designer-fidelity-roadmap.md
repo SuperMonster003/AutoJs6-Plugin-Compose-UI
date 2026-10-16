@@ -157,13 +157,23 @@
 
 ### P11.3 XML 文件工程 (插件, 1.8.0)
 
-- [ ] (插件) 文档模型与读取: `LayoutFile` 片段, `ui.layoutFile` / `ui.inflate(files.read(...))` 的字面量路径识别, 片段切换器的文件片段; `useAndroidLayout(true)` 标志与第二份属性目录 (`generate_ui_catalog.py --android-attrs <SDK attrs.xml>`, 目录 JSON 另存 `catalog-android.json`).
-- [ ] (插件) 外部文档的同目录 XML 读写 (SAF 树权限的一次授权与持久化; file 方案直接读写), 草稿与写回失败另存规则同 D39.
-- [ ] (插件) 私有工程升格为文件夹 (3.4 节): `ProjectStore` 的文件夹工程, 首页徽标, 草稿键 / 来源记录迁移, zip 与目录的导入 / 导出, FileProvider 路径, 运行与导入 AutoJs6 的文件夹 content Uri (核实宿主 `RunIntentActivity` / `ImportIntentActivity` 对项目文件夹 Uri 的支持, 缺失时在宿主侧补入口并记录提交).
-- [ ] (插件) 预览: 文件片段经同一 `setLayout` 路径; `androidLayout` 标志在 v3 之前的宿主上退回 "按 AutoJs6 标签解析并提示可能不一致".
-- [ ] (测试) JVM: `LayoutFileReaderTest` (路径识别, 片段引用, 无损写回), `UiCatalogAndroidTest` (第二份目录), `ProjectFolderTest` (升格, 迁移, zip 往返); 设备: `UiLayoutFileDeviceTest` (外部文档旁的 XML 文件打开 -> 编辑 -> 写回原文件; 私有工程新建 XML 文件 -> 升格 -> 导出 zip -> 重新导入一致; 运行交出文件夹 Uri 并在宿主可解析); `verify_designer_recovery.py` 对文件夹工程的分支.
+- [x] (插件) 文档模型与读取: `LayoutFile` 片段, `ui.layoutFile` / `ui.inflate(files.read(...))` 的字面量路径识别, 片段切换器的文件片段; `useAndroidLayout(true)` 标志与第二份属性目录 (`generate_ui_catalog.py --android-attrs <SDK attrs.xml>`, 目录 JSON 另存 `catalog-android.json`).
+- [x] (插件) 外部文档的同目录 XML 读写 (SAF 树权限的一次授权与持久化; file 方案直接读写), 草稿与写回失败另存规则同 D39.
+- [x] (插件) 私有工程升格为文件夹 (3.4 节): `ProjectStore` 的文件夹工程, 首页徽标, 草稿键 / 来源记录迁移, zip 与目录的导入 / 导出, FileProvider 路径, 运行与导入 AutoJs6 的文件夹 content Uri (核实宿主 `RunIntentActivity` / `ImportIntentActivity` 对项目文件夹 Uri 的支持, 缺失时在宿主侧补入口并记录提交).
+- [x] (插件) 预览: 文件片段经同一 `setLayout` 路径; `androidLayout` 标志在 v3 之前的宿主上退回 "按 AutoJs6 标签解析并提示可能不一致".
+- [x] (测试) JVM: `LayoutFileReaderTest` (路径识别, 片段引用, 无损写回), `UiCatalogAndroidTest` (第二份目录), `ProjectFolderTest` (升格, 迁移, zip 往返); 设备: `UiLayoutFileDeviceTest` (外部文档旁的 XML 文件打开 -> 编辑 -> 写回原文件; 私有工程新建 XML 文件 -> 升格 -> 导出 zip -> 重新导入一致; 运行交出文件夹 Uri 并在宿主可解析); `verify_designer_recovery.py` 对文件夹工程的分支.
 
-  进展 (2026-10-16): `a3b2c05` (文件片段的模型与读写: `XmlCst.parseFile` 保留 BOM / 声明 / 注释, 拒绝 DOCTYPE; `UiScriptReader` 识别 `ui.layoutFile("...")`, `ui.inflate(files.read("..."))` 与 `ui.useAndroidLayout(...)`, 画布根取最早的布局调用; 事件桩支持文件片段, 原生片段的 id 写作 `android:id="@+id/..."`; `UiScriptWriter.writeFiles` 无损写回并还原 CRLF; `LayoutFileReaderTest` 8 项). `1727df7` (文件夹工程存储: `ProjectStore` 的 `<stem>/main.js`, `promote` 迁移脚本 / 草稿 / 布局文件草稿 `drafts/<键>.files/` / 来源记录 / 图片目录, 布局文件路径不得越出文件夹, 原子写入; 设计器从同目录读写布局文件 (私有文件夹工程, 外部 file 方案), 会话记录每个文件的已保存文本, 保存与草稿只写改动的文件, 只读外部文档另存为工程时连同布局文件升格; 读不到的布局文件列入问题面板; 首页以 `demo/` 显示文件夹工程; `ProjectFolderTest` 6 项, JVM 共 254 项通过). 其后一个提交 "make layout files from the designer" (D66 / D67: `UiLayoutFiles` 把直接写在 `ui.layout(...)` / `ui.inflate(...)` 中的字面量移到文件, 或新建只含根容器的文件并在脚本末尾追加 `let <名称>View = ui.inflate(files.read("..."));`, 均为改写脚本后读回的整份文档 (`UiEditCommand.ReplaceDocument`, 一步撤销); 大纲片段行的菜单与路径对话框 (相对 `.xml` 路径, 已用的路径, 自动模式下可选 AutoJs6 XML / Android 原生 XML); 保存时单文件私有工程先升格, 升格写入满足宿主完整校验的 `project.json` (`org.example.<名称>` 包名), 新建工程对话框的 ui 类型可选 "脚本内" 或两种文件夹模板; 原生判断改为跟随脚本的 `useAndroidLayout` (自动时看命名空间), 与宿主 `UI.kt` 的判定一致; `UiLayoutFilesTest` 7 项, `ProjectFolderTest` 增至 9 项, JVM 共 264 项通过). 剩余: zip 导入 / 导出, content 方案的 SAF 树权限, 预览交出工程资源, 宿主 zip 入口, 原生命名空间目录, 检查器的 `android:id`, 设备测试 (含新入口), 重命名时维护 `project.json`.
+  证据 (2026-10-16, 插件提交均已推送):
+  - 文件片段: `a3b2c05` (`XmlCst.parseFile` 保留 BOM / 声明 / 注释, 拒绝 DOCTYPE; `UiScriptReader` 识别 `ui.layoutFile("...")`, `ui.inflate(files.read("..."))` 与 `ui.useAndroidLayout(...)`, 画布根取最早的布局调用; 事件桩支持文件片段; `UiScriptWriter.writeFiles` 无损写回并还原 CRLF).
+  - 文件夹工程存储: `1727df7` (`<stem>/main.js`, `promote` 迁移脚本 / 草稿 / `drafts/<键>.files/` / 来源记录 / 图片目录, 路径不越出文件夹; 设计器从同目录读写布局文件, 只保存与草稿改动的文件; 读不到的文件列入问题面板; 首页 `demo/`).
+  - 新入口 (D66 / D67): `aa0238b` (`UiLayoutFiles`: 直接写在 `ui.layout(...)` / `ui.inflate(...)` 中的字面量移到文件, 新建只含根容器的文件并在脚本末尾追加 `let <名称>View = ui.inflate(files.read(...))`, 均为改写脚本后读回的整份文档 `ReplaceDocument`, 一步撤销; 片段行菜单与路径对话框; 保存时单文件私有工程升格并写满足宿主完整校验的 `project.json`; 新建工程的 ui 类型可选 "脚本内" 或两种文件夹模板; 原生判断跟随 `useAndroidLayout`, 与宿主 `UI.kt` 一致).
+  - 预览: `8a5fbef` (契约 v3 宿主收到文档文件夹的 zip: `setLayout` 带 `resourcesFd` / `layoutPath` / `androidLayout`, `runScript` 带 `projectFd` / `scriptPath`; 文件夹工程整体, 文件 Uri 旁只取 `res/`, 设计器当前的布局文件文本替代盘上内容; 指纹不变不重写 zip; v3 之前的宿主在问题标签页提示).
+  - zip 导出 / 导入 (D62): `8b7f9c2` (导出 `main.js` 在顶层, 缺 `project.json` 时补上; 首页导入 zip 与文件夹 (`OpenDocumentTree`): 顶层或唯一外层文件夹内的 `main.js`, 或唯一顶层脚本改名为 `main.js`, 单个脚本成单文件工程; 不安全的条目名, 超限或无脚本整体拒绝).
+  - 交给 AutoJs6 (D64): 宿主本地提交 `faf412ef7` (`RunProjectIntentActivity` 解到缓存目录并以工程方式运行, 没有脚本在其中运行后删除; `ImportProjectIntentActivity` 解到脚本目录下同名文件夹, 已存在时询问覆盖 (zip 内路径替换, 其它文件保留) 或另存为 `name-2`; 只接受显式 Intent 的 content Uri; `ProjectArchiveTest` 4 项) 与 `ff46ff57b` (zh-Hans 更新日志); 插件 `a0e706e` (文档带布局文件时运行 / 导入经 `projects/.handoff/` 的 zip 交给这两个入口, 旧宿主上两个去向换成一行 "需要更新版本的 AutoJs6").
+  - 原生命名空间目录 (D65): `9dfd237` (`generate_ui_catalog.py --android <宿主> --sdk <SDK>` 由宿主属性表与设备覆盖快照生成 `catalog-android.json`: 110 个类 1314 个属性 (985 可设置, 329 不可设置), 135 个布局参数, 202 个标签; 类继承链取自 SDK 与宿主同一组 AAR; 原生片段的校验 (前缀, 未知属性 / 布局参数, 宿主不能设置, 值格式), 检查器 (`android:id` 写作 `@+id/...`, 按类与父布局列出可设置属性), 面板插入视图类).
+  - content 文档的文件夹: `ce2aa73` (读不到布局文件或使用布局文件菜单时请用户一次性选择脚本所在文件夹 (读写持久授权), 核对其中有该脚本, 之后经 DocumentsContract 读写并按需创建目录与文件).
+  - 设备 (本提交): `UiLayoutFileDeviceTest` 6 项 (提取后保存成文件夹工程, 新建 Android XML 文件并插入 TextView, 文件 Uri 旁的布局文件写回原文件且不产生私有副本, zip 往返, 交给宿主运行 (项目脚本读自身文件并写出标记) 与导入 (脚本目录出现同名文件夹), 预览解析工程 `res/` 的字符串与尺寸) 在 AVD_API_33 (嵌入, 只读实例) 与 AVD_API_24 (快照, 只读实例) 全部通过, 宿主为含 `faf412ef7` 的 debug 构建; `.python/verify_layout_files.py` 驱动安装与运行; `verify_designer_recovery.py --kind folder` (新增分支) 在 API 33 通过 (杀进程后恢复的草稿带回布局文件中插入的按钮); 回归 `UiDesignerDeviceTest` / `UiPreviewDeviceTest` / `UiInteractiveDeviceTest` / `DesignerHomeDeviceTest` / `DesignerHostDeviceTest` 共 21 项在 API 33 通过. JVM 277 项.
+  - 未经设备验证: content 文档文件夹授权要经系统文件夹选择器, 模拟器的 DocumentsUI 不响应注入输入, 需在真机上人工确认一次.
 
 ### P11.4 1.8.0 文档与发布 (文档 + 发布)
 

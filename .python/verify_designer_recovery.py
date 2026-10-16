@@ -11,8 +11,9 @@ must still be the unedited template. The edit is then discarded and the project 
 
 The check runs once for a Compose project (a Button on the real-renderer canvas) and once for a ui (XML)
 project (a `button` row in the outline, roadmap P10.4); `--kind` limits it to one of them.
+A third kind (roadmap P11.3, `--kind folder` or `all`) creates a folder project whose layout is a file, so the restored draft is the layout file's.
 
-usage: verify_designer_recovery.py --apk <apk> [--serial <serial>] [--kind compose|ui|both] [--uninstall] [--strings <values/strings.xml>]
+usage: verify_designer_recovery.py --apk <apk> [--serial <serial>] [--kind compose|ui|folder|both|all] [--uninstall] [--strings <values/strings.xml>]
 """
 import argparse
 import re
@@ -31,6 +32,8 @@ PACKAGE = launch.PACKAGE
 KINDS = {
     "compose": {"stem": "recovery-check", "inserted": "Button", "template": launch.TEMPLATE_TEXT, "chip": None},
     "ui": {"stem": "recovery-check-ui", "inserted": "button", "template": launch.UI_TEMPLATE_ROW, "chip": "ui"},
+    # Roadmap P11.3: a folder project whose layout is a file; the inserted button lives in the layout file's draft.
+    "folder": {"stem": "recovery-check-folder", "inserted": "button", "template": launch.UI_TEMPLATE_ROW, "chip": "ui", "layout": "folder"},
 }
 
 
@@ -130,7 +133,7 @@ def run_once(adb: launch.Adb, label, labels: dict[str, str], kind: str) -> dict[
     file_name = None
     try:
         start_from_launcher(adb)
-        file_name = launch.create_project(adb, labels, spec["stem"], kind=spec["chip"], expect=spec["template"])
+        file_name = launch.create_project(adb, labels, spec["stem"], kind=spec["chip"], expect=spec["template"], layout=spec.get("layout"))
         insert_from_palette(adb, label("designer_add_component"), inserted)
         # The palette sheet closes after the pick; its own entry must not count as the inserted component.
         time.sleep(1.5)
@@ -197,14 +200,15 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--apk", type=Path, required=True)
     parser.add_argument("--serial")
-    parser.add_argument("--kind", choices=["compose", "ui", "both"], default="both", help="which project kind to drive (default: both)")
+    parser.add_argument("--kind", choices=["compose", "ui", "folder", "both", "all"], default="both",
+                        help="which project kind to drive: both = compose and ui, all = also a folder project (default: both)")
     parser.add_argument("--uninstall", action="store_true", help="remove the plugin from the device afterwards")
     parser.add_argument("--strings", type=Path, default=Path(__file__).resolve().parent.parent / "app/src/main/res/values/strings.xml",
                         help="strings.xml of the language the plugin shows (it follows the AutoJs6 language by default)")
     args = parser.parse_args()
     adb = launch.Adb(args.serial)
     label = lambda name: launch.resource_string(args.strings, name)  # noqa: E731
-    labels = {"new": label("designer_new_project"), "create": label("designer_create"), "delete": label("designer_delete_project"), "ui": label("designer_ui_language_ui")}
+    labels = {"new": label("designer_new_project"), "create": label("designer_create"), "delete": label("designer_delete_project"), "ui": label("designer_ui_language_ui"), "folder": label("designer_layout_file_autojs6")}
 
     api = adb.shell("getprop ro.build.version.sdk").strip()
     install = adb.install(args.apk)
@@ -215,7 +219,7 @@ def main() -> None:
     adb.shell("wm dismiss-keyguard", check=False)
     adb.run("logcat", "-c", check=False)
 
-    kinds = ["compose", "ui"] if args.kind == "both" else [args.kind]
+    kinds = {"both": ["compose", "ui"], "all": ["compose", "ui", "folder"]}.get(args.kind, [args.kind])
     results = {}
     try:
         for kind in kinds:
