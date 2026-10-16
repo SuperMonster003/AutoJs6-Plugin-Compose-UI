@@ -108,7 +108,7 @@
 | P11.1 | 设计器性能复核线: 线文件, AGENTS 第 14 节表, `verify_designer_performance.py`, Redmi 首次比对 | 插件 | 1.8.0 | 无 |
 | P11.2 | 预览差异明示: API 扫描, 问题列表 "预览差异" 类, 文档锚点 | 插件 | 1.8.0 | 无 |
 | P11.H1 | 预览服务的 `res/` 支持: 契约 v3 的 "随布局请求交出资源目录", `androidLayout` 标志与交互预览的工程目录提前 (D65; 宿主路线图 R1 - R3; v3 经新信息键宣告, 旧键仍答 v2, 原计划的 P11.5 各项顺延为 v4) | 宿主 | 宿主本地 master | P11.2 |
-| P11.H2 | 动态布局器的 Android XML 属性集扩充: SDK 元数据表, 反射 setter 兜底, 映射表, 布局参数, 不支持属性跳过并警告一次, 资源限定符目录与 vector drawable, 文档 (D65; 宿主专门路线图 `docs/dev/android-xml-attributes-roadmap.md` 的 A1 - A8, 维护者同日拍板其 Q1 - Q3) | 宿主 | 宿主本地 master | P11.2 |
+| P11.H2 | 动态布局器的 Android XML 属性集扩充: SDK 元数据表, 反射 setter 兜底, 映射表, 布局参数, 不支持属性跳过并警告一次, 资源限定符目录与 vector drawable, 文档 (D65; 宿主专门路线图 `docs/dev/android-xml-attributes-roadmap.md` 的 A1 - A9 (A9 为覆盖矩阵发现的 ConstraintLayout 辅助类), 维护者同日拍板其 Q1 - Q3) | 宿主 | 宿主本地 master | P11.2 |
 | P11.3 | XML 文件工程: 文件片段模型与读写, 原生命名空间目录 (由宿主元数据生成), 私有工程升格为文件夹 (含 project.json), zip 导出 / 导入, 运行 / 导入 AutoJs6 的宿主 zip 入口 (D62 - D64) | 插件 + 宿主 (zip 入口) | 1.8.0 | P11.2, P11.H1, P11.H2 |
 | P11.4 | 1.8.0 文档, changelog, gate 与发布 | 文档 + 发布 | 1.8.0 | P11.1 - P11.3 |
 | P11.5 | 预览契约 v3 与宿主侧缩小项: 对话框入画布, 生命周期事件与返回键, 窗口级函数可见效果, 忙等保护, `androidLayout` 标志 | 宿主 | 宿主本地 master | P11.4 |
@@ -147,6 +147,11 @@
 
 - [x] (宿主) 预览契约 v3 (只追加, 无新事务): `setLayout` 的 `resourcesFd` / `resourcesSha256` / `layoutPath` / `androidLayout`, `runScript` 的 `projectFd` / `projectSha256` / `scriptPath`, 诊断 `ATTRIBUTE_IGNORED`; 三层身份 (Binder getter 答 v1, 信息旧键答 v2, 新键 `supportedContractVersions` / `contractHashes` 列出 1 / 2 / 3); 宿主实现归档的校验与解压, 布局按工程资源解析, 交互预览以工程副本为工作目录.
   证据 (2026-10-16): 宿主提交 `2da2d4119` (契约 v3, `HASH` `196e52cd...`, 信息旧键改答冻结的 v2, 协议文档 v3 小节), `9df0a154b` (实现), `035053bce` (测试: JVM 预览包 26 项; 设备 `UiPreviewServiceTest` 14 项在 AVD_API_33 / API 24 / AVD_API_35_16K 通过, 官方示例 "专注时光" 无资源时失败, 带 `res/` zip 时成功). 契约 AAR `ui-preview-api-release.aar` 20618 B, SHA-256 `4746f9f3...8b94`, 重建字节一致; 插件在 P11.3 换用并更新锁. 1.7.0 插件不受影响 (信息旧键仍答 v2 身份). 原计划在 P11.5 的契约升级相应顺延为 v4.
+
+### P11.H2 Android XML 属性集扩充 (宿主, 本地 master; 宿主路线图 A1 - A9)
+
+- [x] (宿主) 属性元数据表, setter 与布局参数兜底, 不支持 / 未知属性跳过并警告一次 (D7) 与预览诊断 `ATTRIBUTE_IGNORED`, 覆盖矩阵, 资源限定符目录与 vector drawable (D8), ConstraintLayout 辅助类, 文档与更新日志.
+  证据 (2026-10-16, 宿主本地提交, 未推送): `e44094af6` / `e4d1f1eb8` (A1 属性表 `app/src/main/assets/ui/android-attrs.json`: SDK API 24 - 37 与 8 个 AndroidX / Material AAR, 只收公开 View 子类), `f7e03ef7d` (A2 公开方法兜底, 书写顺序), `6f23cf745` (A3 布局参数), `eca9b0b3f` (A4 原生 XML 跳过并警告一次, 预览诊断带 `o` 字段 `unsupported` / `unknown`, AutoJs6 XML 行为不变), `d59ccab5f` (A5 设备覆盖矩阵与快照 `app/src/androidTest/assets/ui/android-attrs-coverage.json`, 及其暴露的缺口: Material 组件主题补齐, AppCompat 别名, RelativeLayout 三条规则, scrollbars 关闭语义, adjustViewBounds 顺序, 样式 / 主题带来的属性不再误报), `2b679ec0d` (A7 限定符目录, 配置取自脚本 Activity 或预览会话 (含会话尺寸)), `ee1a1456a` (A8 vector), `f9a0c859a` (A9 ConstraintLayout 容器自身属性与 Barrier / Group / Flow / Guideline), `c42bb59f1` (A6 文档页生成器), `dbbb62a44` (zh-Hans 更新日志). 覆盖 (API 37): View 属性 1314 个中可设置 985 个 (75 %), 子视图布局参数 135 个中不支持 2 个. 设备测试在 API 24 / 30 / 33 / 35 / 37 模拟器通过. 文档站本地提交 `22d7b1e` (新页面 `uiAndroidAttributes`, `ui.md` "工程资源" 一节, `uiAttributes.md` 修订), 与 `47af615` 一起随 1.8.0 发布推送. 对 P11.3 的输入: 原生命名空间属性目录可读文档页 `api/uiAndroidAttributes.md` 的生成块 (每类一张表: 属性, 格式与枚举 / 标志名, 起始 API, 设置方式), 或直接读宿主属性表与覆盖快照; 预览诊断的 `o` 字段供问题列表区分 "无法设置" 与 "未知属性".
 
 ### P11.3 XML 文件工程 (插件, 1.8.0)
 
