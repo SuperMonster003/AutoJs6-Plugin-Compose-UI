@@ -1525,4 +1525,5 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 
 - 维护者在本会话决定: 文档站 "全部推送" (含另一会话的 `c381a59` / `efe4cee`, 描述宿主 6.8.0 尚未发布的功能), 插件 1.8.0 照常独立于宿主发布 (2026-10-15 的约定).
 - 文档站 `9e3b834` (设计器页 "XML 文件与文件夹工程 (1.8.0)"), 插件 `8ea8a7f` (changelog / README 1.8.0 10 语言, 版本 1.8.0 / build 197). gate 与性能复核线全部通过, 逐项证据见 P11 路线图 P11.4. 本提交不提高 `VERSION_BUILD` (保持 197, 与 release 包一致).
-- 下一步: 推送插件与 tag `v1.8.0`, GitHub Release, 官方索引准入, 文档站与 Offline Docs 同步推送.
+- 发布 (同日): tag `v1.8.0` = `43cedbf`; GitHub Release `v1.8.0` (APK 5993742 B, SHA-256 `9ca55f7b...a250`); 官方索引 `ab8d019` 准入 (manifest 197); 文档站推送至 `ba126b3` (含另一会话的两个提交), Offline Docs `4634ab3` (build 147). 推送后 Markdown / Icon Studio 工作流通过, 插件 Build integrity 运行中. 逐项见 P11 路线图 P11.4 (已全部勾选).
+- 下一步: P11.5 (宿主侧契约 v4 与缩小项; 原计划在 v3 的项目顺延为 v4, 见 P11.H1 证据), 开始前按路线图核对其前置.
