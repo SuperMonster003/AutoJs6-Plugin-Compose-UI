@@ -48,6 +48,9 @@ class UiScriptReader {
         Session(source.replace("\r\n", "\n").replace('\r', '\n'), layoutFile).read()
 
     companion object {
+        /** How the reason starts when the layout file the script lays out cannot be read (roadmap P11.3). */
+        const val LAYOUT_FILE_UNREADABLE = "The layout file "
+
         private val DIRECTIVE = Regex("""^\s*(?:(?://[^\n]*\n|/\*.*?\*/)\s*)*(['"])ui\1\s*;""", RegexOption.DOT_MATCHES_ALL)
 
         /** A cheap test on the text: the `"ui"` directive first, a `ui.layout(` or `ui.layoutFile(` call and no compose mount. */
@@ -203,7 +206,7 @@ class UiScriptReader {
                 val layoutFileCall = fileCalls.firstOrNull { it.usage == FragmentUsage.LAYOUT }
                 when {
                     layoutFileCall?.path == null && layoutFileCall != null -> fail(layoutFileCall.call.absolutePosition, "ui.layoutFile needs a string literal path")
-                    layoutFileCall != null -> fail(layoutFileCall.call.absolutePosition, "The layout file ${layoutFileCall.path} cannot be read")
+                    layoutFileCall != null -> fail(layoutFileCall.call.absolutePosition, "$LAYOUT_FILE_UNREADABLE${layoutFileCall.path} cannot be read")
                     else -> fail(0, "The script has no ui.layout(...) or ui.layoutFile(...) call")
                 }
             }

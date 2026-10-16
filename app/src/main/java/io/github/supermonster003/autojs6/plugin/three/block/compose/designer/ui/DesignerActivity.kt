@@ -1,10 +1,11 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
 
-import android.content.Context
 import android.content.ContentResolver
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -61,14 +62,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptLauncher
@@ -85,6 +86,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.par
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DocumentReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ReadResult
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsxParserClient
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiScriptReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.CanvasBounds
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignCanvas
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DesignImages
@@ -343,6 +345,19 @@ internal class DesignerActivity : StandaloneActivity() {
 
     @Composable
     private fun ParseErrorScreen(error: DesignerParseError?, palette: StandalonePalette) {
+        val context = LocalContext.current
+        // Roadmap P11.3: a content Uri document whose layout file cannot be read gets it once its folder is granted.
+        val external = source as? DocumentSource.External
+        val needsFolder = external != null && external.writable && error?.reason?.startsWith(UiScriptReader.LAYOUT_FILE_UNREADABLE) == true && io.needsDocumentFolder(external)
+        val folderWrong = stringResource(R.string.designer_layout_file_folder_wrong)
+        val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            if (uri == null || external == null) return@rememberLauncherForActivityResult
+            if (io.grantDocumentFolder(external, uri)) {
+                io.readOrNull(external)?.let { load(it) }
+            } else {
+                Toast.makeText(context, folderWrong.format(external.displayName), Toast.LENGTH_LONG).show()
+            }
+        }
         Column(Modifier.fillMaxSize().background(Color(palette.background)).padding(24.dp)) {
             Text(source.title, color = Color(palette.text), fontSize = 18.sp)
             Text(
@@ -355,6 +370,11 @@ internal class DesignerActivity : StandaloneActivity() {
                 fontSize = 14.sp,
                 modifier = Modifier.padding(vertical = 16.dp).testTag("designer-parse-error"),
             )
+            if (needsFolder) {
+                Button(onClick = { folderPicker.launch(null) }, modifier = Modifier.padding(bottom = 8.dp).testTag("designer-parse-error-pick-folder")) {
+                    Text(stringResource(R.string.designer_layout_file_folder_pick))
+                }
+            }
             Button(onClick = { finish() }) { Text(stringResource(R.string.designer_cancel)) }
         }
     }

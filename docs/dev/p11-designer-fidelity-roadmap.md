@@ -173,7 +173,7 @@
   - 原生命名空间目录 (D65): `9dfd237` (`generate_ui_catalog.py --android <宿主> --sdk <SDK>` 由宿主属性表与设备覆盖快照生成 `catalog-android.json`: 110 个类 1314 个属性 (985 可设置, 329 不可设置), 135 个布局参数, 202 个标签; 类继承链取自 SDK 与宿主同一组 AAR; 原生片段的校验 (前缀, 未知属性 / 布局参数, 宿主不能设置, 值格式), 检查器 (`android:id` 写作 `@+id/...`, 按类与父布局列出可设置属性), 面板插入视图类).
   - content 文档的文件夹: `ce2aa73` (读不到布局文件或使用布局文件菜单时请用户一次性选择脚本所在文件夹 (读写持久授权), 核对其中有该脚本, 之后经 DocumentsContract 读写并按需创建目录与文件).
   - 设备 (本提交): `UiLayoutFileDeviceTest` 6 项 (提取后保存成文件夹工程, 新建 Android XML 文件并插入 TextView, 文件 Uri 旁的布局文件写回原文件且不产生私有副本, zip 往返, 交给宿主运行 (项目脚本读自身文件并写出标记) 与导入 (脚本目录出现同名文件夹), 预览解析工程 `res/` 的字符串与尺寸) 在 AVD_API_33 (嵌入, 只读实例) 与 AVD_API_24 (快照, 只读实例) 全部通过, 宿主为含 `faf412ef7` 的 debug 构建; `.python/verify_layout_files.py` 驱动安装与运行; `verify_designer_recovery.py --kind folder` (新增分支) 在 API 33 通过 (杀进程后恢复的草稿带回布局文件中插入的按钮); 回归 `UiDesignerDeviceTest` / `UiPreviewDeviceTest` / `UiInteractiveDeviceTest` / `DesignerHomeDeviceTest` / `DesignerHostDeviceTest` 共 21 项在 API 33 通过. JVM 277 项.
-  - 未经设备验证: content 文档文件夹授权要经系统文件夹选择器, 模拟器的 DocumentsUI 不响应注入输入, 需在真机上人工确认一次.
+  - content 文档的文件夹授权 (真机, 维护者操作系统选择器): Sony XQ-AT72 (QV710AF65F, Android 12, 宿主 debug 5451) 上 AutoJs6 编辑器 "更多 > 在 3-Block Compose 设计器中打开" 交出 `Scripts/designer-folder-check/main.js` (只以 `ui.layoutFile("layout.xml")` 布局) 的 content Uri; 布局文件读不到时报错页提供选文件夹按钮 (本次补上, 原先只在编辑页的问题标签页与布局文件菜单里有), 选定后重新读取; `.python/verify_document_folder.py check` 四项通过: 记录了文件夹, 大纲出现 `text #hello`, 选项启用的 `DocumentFolderDeviceTest` 经持久授权读回 `layout.xml` 并在新子目录写出 `res/layout/probe.xml`, 文件出现在存储上; 之后 `cleanup --uninstall` 删除测试文件夹并卸载插件与测试包 (该机原本未装).
 
 ### P11.4 1.8.0 文档与发布 (文档 + 发布)
 
