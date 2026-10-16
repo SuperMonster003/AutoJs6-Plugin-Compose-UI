@@ -1520,3 +1520,9 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 插件提交 (均已推送): `a3b2c05` 文件片段, `1727df7` 文件夹工程存储, `aa0238b` 新入口与 `project.json`, `8a5fbef` 预览交出工程文件, `8b7f9c2` zip 导出 / 导入, `a0e706e` 交给 AutoJs6, `9dfd237` 原生命名空间目录, `ce2aa73` content 文档的文件夹授权, 以及本记录所在提交 (设备测试与脚本). 宿主本地提交 `faf412ef7` (工程 zip 运行 / 导入入口) 与 `ff46ff57b` (zh-Hans 更新日志), 未推送.
 - 验证: JVM 277 项; `UiLayoutFileDeviceTest` 6 项在 AVD_API_33 / AVD_API_24 只读实例通过 (`.python/verify_layout_files.py`); `verify_designer_recovery.py --kind folder` 在 API 33 通过; 既有 UI 设备测试 21 项回归通过. content 文档的文件夹授权由维护者在 Sony XQ-AT72 上经系统选择器操作, `.python/verify_document_folder.py` 四项通过 (同时补上报错页的选文件夹按钮). 详细证据见 P11 路线图 P11.3 小节.
 - 下一步: P11.4 (1.8.0 文档, 10 语言 changelog / README, gate 与发布; 文档站本地提交 `47af615` / `22d7b1e` 届时推送).
+
+### 2026-10-16 (续): P11.4 1.8.0 文档与 gate
+
+- 维护者在本会话决定: 文档站 "全部推送" (含另一会话的 `c381a59` / `efe4cee`, 描述宿主 6.8.0 尚未发布的功能), 插件 1.8.0 照常独立于宿主发布 (2026-10-15 的约定).
+- 文档站 `9e3b834` (设计器页 "XML 文件与文件夹工程 (1.8.0)"), 插件 `8ea8a7f` (changelog / README 1.8.0 10 语言, 版本 1.8.0 / build 197). gate 与性能复核线全部通过, 逐项证据见 P11 路线图 P11.4. 本提交不提高 `VERSION_BUILD` (保持 197, 与 release 包一致).
+- 下一步: 推送插件与 tag `v1.8.0`, GitHub Release, 官方索引准入, 文档站与 Offline Docs 同步推送.

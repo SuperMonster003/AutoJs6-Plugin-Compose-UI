@@ -177,8 +177,12 @@
 
 ### P11.4 1.8.0 文档与发布 (文档 + 发布)
 
-- [ ] (文档) 文档站 `api/composeDesigner.md`: "XML 文件与文件夹工程" 小节 (识别形态, 升格规则, 导入 / 导出, 原生命名空间目录来源), "预览差异" 一段; README / changelog `v1.8.0` 10 语言; `AGENTS.md` 第 2 / 4 / 12 / 13 / 14 (复核线表与脚本) / 15 节.
+- [x] (文档) 文档站 `api/composeDesigner.md`: "XML 文件与文件夹工程" 小节 (识别形态, 升格规则, 导入 / 导出, 原生命名空间目录来源), "预览差异" 一段; README / changelog `v1.8.0` 10 语言; `AGENTS.md` 第 2 / 4 / 12 / 13 / 14 (复核线表与脚本) / 15 节.
 - [ ] (发布) 1.8.0 本地 gate (第 14 节顺序 + `verify_designer_performance.py` 在 Redmi), 推送 / Release / 索引.
+
+  证据 (2026-10-16):
+  - 文档: 文档站本地提交 `9e3b834` (`api/composeDesigner.md` 新节 "XML 文件与文件夹工程 (1.8.0)": 识别形态, 新建 XML 文件, 文件夹工程, 外部文档, 预览中的工程文件, Android 原生 XML; 用途 / 入口 / 工程与文件 / 可识别子集 / 编辑页 / 衔接 / 限制各处的 1.8.0 说明), 与此前的 `47af615` (预览差异) 和 `22d7b1e` (宿主的 Android XML 属性页与 "工程资源") 一起推送 (维护者 2026-10-16 决定文档站 "全部推送", 含 MCP Server 会话的 `c381a59` / `efe4cee`); 插件 `8ea8a7f` (changelog `v1.8.0` 10 语言: 1 提示 8 新增 2 优化 1 依赖; README 状态 / 功能 / 兼容性 / 安全 10 语言; `VERSION_NAME` 1.8.0, build 197); `AGENTS.md` (本地, 被 Git 忽略) 第 2 / 4 / 12 / 13 / 14 / 15 节.
+  - 1.8.0 本地 gate (build 197, 源码即 `8ea8a7f`): markdown / icon `--check`; JVM 277; debug / androidTest / lint (0 错误, 15 警告) / release / verifySharedClasspath; classpath debug 与 release `--shrunk` (unresolved 0); release 带摘要包 `autojs6-plugin-three-block-compose-v1.8.0-bd7dab34.apk` 5993742 B (SHA-256 `9ca55f7b...a250`), DEX 方法引用 99366, 均在复核线 6177215 B / 105804 内; `.python/tests` 通过. 全套 instrumentation 139 项 (宿主为含 `faf412ef7` 的 debug 构建): AVD_API_33 只读实例 132 通过 7 跳过, AVD_API_24 只读实例 125 通过 14 跳过, 均无失败. release 包: API 24 `verify_standalone_launch` (`ui_preview=snapshot`) 与 `verify_host_handoff` 通过; API 33 `verify_standalone_launch` (`sandbox=ran`, `ui_preview=frame`), `verify_designer_recovery --kind all` (compose / ui / folder 三类均恢复) 与 `verify_host_handoff` 通过. 设计器性能复核线 (Redmi 22120RN86C, debug build 197): 16 项全部在线内 (例: 画廊读取 p90 57.2 / 65 ms, 打开最大示例 616.5 / 1000 ms, 撤销恢复一行 323.1 / 570 ms), 记录于 `docs/dev/p8-designer-performance.md`, 之后装回 1.8.0 release 并移除测试包 (该机宿主 5352 未动). content 文档的文件夹授权的真机证据见 P11.3.
 
 ### P11.5 预览契约 v3 与宿主侧缩小项 (宿主, 本地 master)
 
