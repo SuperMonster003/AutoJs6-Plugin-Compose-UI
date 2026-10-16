@@ -6,16 +6,17 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The packaged `ui-preview-api.aar` is the v4 the designer's client is written against (roadmap P10.6, P11.H1, P11.5):
- * the frozen v1 base the handshake checks first, the frozen v2 identity the preview info still answers, the frozen v3
- * and current v4 identities listed with the served versions, the script-run keys and exit reasons the client and the
- * console rely on, the project-resource keys and the v4 lifecycle and busy-wait keys. A stale or foreign AAR in
- * `libs/` fails here before a device does.
+ * The packaged `ui-preview-api.aar` is the v5 the designer's client is written against (roadmap P10.6, P11.H1, P11.5,
+ * P11.H3): the frozen v1 base the handshake checks first, the frozen v2 identity the preview info still answers, the
+ * frozen v3 and v4 and current v5 identities listed with the served versions, the script-run keys and exit reasons the
+ * client and the console rely on, the project-resource keys, the v4 lifecycle and busy-wait keys and the v5 TSX keys. A
+ * stale or foreign AAR in `libs/` fails here before a device does.
  */
 class UiPreviewContractGuardTest {
     @Test
-    fun `the contract is v4 over the frozen v1 base and v2 and v3 identities`() {
-        assertEquals(4, UiPreviewContract.VERSION)
+    fun `the contract is v5 over the frozen v1 base and v2 v3 and v4 identities`() {
+        assertEquals(5, UiPreviewContract.VERSION)
+        assertEquals(4, UiPreviewContract.VERSION_V4)
         assertEquals(3, UiPreviewContract.VERSION_V3)
         assertEquals(2, UiPreviewContract.VERSION_V2)
         assertEquals(1, UiPreviewContract.BASE_VERSION)
@@ -25,8 +26,10 @@ class UiPreviewContractGuardTest {
         assertEquals("81f7fe8d2338eed197dcc21e3cff7007a681ea89d080b42d1ae132c94688f1bb", UiPreviewContract.HASH_V2)
         // The hash of contract v3 as shipped with 1.8.0: the version list keeps answering it.
         assertEquals("196e52cd66ff871dca8351a0e9208679ed2bf64af5f733d05312239b1f03a44b", UiPreviewContract.HASH_V3)
-        assertEquals("b7591e9ee2fe24f475db79a0186c87fd6c36d8de632c3074cc491155d2e881b2", UiPreviewContract.HASH)
-        // v2 keeps every v1 transaction in its place and appends after it; v3 adds no transaction; v4 appends one.
+        // The hash of contract v4 (host stage P11.5): the version list keeps answering it.
+        assertEquals("b7591e9ee2fe24f475db79a0186c87fd6c36d8de632c3074cc491155d2e881b2", UiPreviewContract.HASH_V4)
+        assertEquals("cd6681bb749ff99b666843911187b1783115f20022d0c043fdfe44ef57354ad0", UiPreviewContract.HASH)
+        // v2 keeps every v1 transaction in its place and appends after it; v3 adds no transaction; v4 appends one; v5 none.
         val v1Service = UiPreviewContract.HASH_INPUT_V1.substringAfter("v1|").substringBefore("|callback:")
         val v1Callbacks = UiPreviewContract.HASH_INPUT_V1.substringAfter("|callback:").substringBefore("|bundle:")
         assertTrue(UiPreviewContract.HASH_INPUT_V2.startsWith("autojs6.ui.preview.v2|$v1Service|runScript("))
@@ -34,8 +37,20 @@ class UiPreviewContractGuardTest {
         assertTrue(UiPreviewContract.HASH_INPUT_V2.contains("runScript(String,Bundle)->Bundle|stopScript(String)->Bundle"))
         val v2Service = UiPreviewContract.HASH_INPUT_V2.substringAfter("v2|").substringBefore("|callback:")
         assertTrue(UiPreviewContract.HASH_INPUT_V3.startsWith("autojs6.ui.preview.v3|$v2Service|callback:"))
-        assertTrue(UiPreviewContract.HASH_INPUT.startsWith("autojs6.ui.preview.v4|$v2Service|sendLifecycle(String,Bundle)->Bundle|callback:"))
-        assertTrue(UiPreviewContract.HASH_INPUT.contains("|onScriptExit(String,Bundle)|onLifecycleHandled(String,Bundle)|bundle:"))
+        assertTrue(UiPreviewContract.HASH_INPUT_V4.startsWith("autojs6.ui.preview.v4|$v2Service|sendLifecycle(String,Bundle)->Bundle|callback:"))
+        assertTrue(UiPreviewContract.HASH_INPUT_V4.contains("|onScriptExit(String,Bundle)|onLifecycleHandled(String,Bundle)|bundle:"))
+        val v4Body = UiPreviewContract.HASH_INPUT_V4.substringAfter("v4|")
+        assertTrue(UiPreviewContract.HASH_INPUT.startsWith("autojs6.ui.preview.v5|$v4Body|runScript:scriptDialect|"))
+    }
+
+    @Test
+    fun `TSX runs have their dialect flag and error`() {
+        assertEquals("scriptDialect", UiPreviewContract.KEY_SCRIPT_DIALECT)
+        assertEquals("tsxRunSupported", UiPreviewContract.KEY_TSX_RUN_SUPPORTED)
+        assertEquals(listOf("js", "tsx"), UiPreviewContract.SCRIPT_DIALECTS.toList())
+        assertEquals(UiPreviewContract.SCRIPT_DIALECT_TSX, "tsx")
+        assertEquals("ERR_AUTOJS6_UI_PREVIEW_COMPILE_FAILED", UiPreviewContract.ERROR_COMPILE_FAILED)
+        assertEquals("column", UiPreviewContract.KEY_COLUMN)
     }
 
     @Test

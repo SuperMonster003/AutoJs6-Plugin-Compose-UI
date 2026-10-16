@@ -11,7 +11,7 @@ Stage the audited **release** artifacts named exactly:
   `PluginCapabilityKeys`), consumed with `implementation`.
 - `typescript-parser-api.aar` (host module `plugin-api/typescript-parser-api`, P9.2): the TypeScript parser
   contract, consumed with `implementation`; see the section below.
-- `ui-preview-api.aar` (host module `plugin-api/ui-preview-api`, P10.2 / P10.3, v2 in P10.6, v4 in P11.5): the ui-mode
+- `ui-preview-api.aar` (host module `plugin-api/ui-preview-api`, P10.2 / P10.3, v2 in P10.6, v4 in P11.5, v5 in P11.H3): the ui-mode
   preview contract the designer binds the host with (layout preview and interactive script runs), consumed
   with `implementation`; see the section below.
 - `compose-ui-api.aar` (host module `plugin-api/compose-ui-api`): frozen V1 loading interfaces,
@@ -100,12 +100,17 @@ The host defines the contract but does not package the module, so the plugin con
 `org.autojs.plugin.typescript.PARSER`, PLUGIN permission); the designer binds it to read `.tsx` projects.
 The protocol is described in the host document `docs/dev/typescript-parser-plugin-protocol-v1.md`.
 
-## ui-mode preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51, v2 in P10.6, v3 in P11.H1, v4 in P11.5)
+## ui-mode preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51, v2 in P10.6, v3 in P11.H1, v4 in P11.5, v5 in P11.H3)
 
 `ui-preview-api.aar` is the release AAR of the host module `plugin-api/ui-preview-api` at host commit
-`ef88268be` (`feat(plugin-api): append ui preview contract v4 for lifecycle events and busy-wait limits`), assembled
-with `:plugin-api:ui-preview-api:assembleRelease`; a rebuild from the same commit is byte-identical.
-SHA-256 `29abeb018fc0ca9b5b72e298a2d9a9bda7ec717da4d30b5f1510a0147756d392`, MPL 2.0, 21769 bytes, 13 class files.
+`fb451f88d` (`feat(ui-preview-api): preview contract v5 runs TSX scripts`), assembled with
+`:plugin-api:ui-preview-api:assembleRelease`; a rebuild from the same commit is byte-identical.
+SHA-256 `734d47ee92a87ecba9ea8bf926cbcb256859b77c6d856cb7c187f5d998a2fec3`, MPL 2.0, 22135 bytes, 13 class files.
+Contract v5 adds no transaction: the `scriptDialect` key of `runScript` (`js` / `tsx`: the host compiles a TSX text
+with TypeScript Engine before it runs, and the lines of a TSX run are lines of its TSX text), the `COMPILE_FAILED` error
+code with the first diagnostic's line and column, and the `tsxRunSupported` info flag; it freezes the v4 identity as
+`VERSION_V4` / `HASH_V4` (`b7591e9e...`), which the version list keeps answering. Host commit `204a33ee5` and later
+serve it. The v4 artifact before it was built from host commit `ef88268be` (SHA-256 `29abeb01...`, 21769 bytes).
 Contract v4 appends `sendLifecycle` (pause / resume / back_pressed for the running script) and the
 `onLifecycleHandled` callback after the v3 surface, the `busyWaitLimitMs` key of `runScript` with the
 `BUSY_WAIT` error code, `NOT_RUNNING`, and the `dialogsInCanvas` / `lifecycleEvents` / `busyWaitLimitSupported` /
