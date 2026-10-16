@@ -4,6 +4,23 @@
 
 ******
 
+# v1.8.0
+
+###### 2026/10/16
+
+* `Aviso` Varias funciones de 1.8.0 necesitan una compilación más reciente de AutoJs6 6.8.0: las vistas previas que usan los archivos del proyecto (recursos de res/, archivos de diseño) necesitan el commit del host 9df0a154b o posterior (contrato de vista previa v3), y ejecutar o importar proyectos de carpeta en AutoJs6 necesita el commit del host faf412ef7 o posterior; con un AutoJs6 más antiguo el diseñador lo indica y mantiene el comportamiento anterior
+* `Novedad` Los proyectos UI (XML) pueden guardar sus diseños en archivos XML separados: ui.layoutFile("...") y ui.inflate(files.read("...")) con una ruta literal, en XML de AutoJs6 o XML de Android (ui.useAndroidLayout); el diseñador lee y edita esos archivos sin tocar lo que no cambia, y el selector de fragmentos los muestra por nombre de archivo
+* `Novedad` "Guardar como archivo XML" y "Nuevo archivo XML" en el menú junto al selector de fragmentos: el primero mueve a un archivo un diseño escrito directamente en ui.layout(...) o ui.inflate(...) y reescribe la llamada, el segundo añade un archivo con un contenedor raíz vacío (XML de AutoJs6 o XML de Android) y una línea ui.inflate al final del script; ambos se pueden deshacer y solo escriben archivos al guardar
+* `Novedad` Proyectos de carpeta: un proyecto privado guardado con archivos de diseño pasa a ser una carpeta con main.js, sus archivos de diseño y un project.json que AutoJs6 acepta, así que AutoJs6 puede ejecutarlo y empaquetarlo como proyecto; un proyecto UI nuevo también puede empezar así (plantilla XML de AutoJs6 o XML de Android); la lista de inicio muestra los proyectos de carpeta como "nombre/"
+* `Novedad` Los proyectos de carpeta se exportan como un solo zip, y el menú de inicio importa zip y carpetas ("Importar script o zip", "Importar carpeta")
+* `Novedad` "Ejecutar en AutoJs6" e "Importar a los scripts de AutoJs6" entregan a AutoJs6 un proyecto con archivos de diseño como zip: AutoJs6 lo ejecuta como proyecto desde una carpeta de caché que luego se elimina, o lo importa en una carpeta del mismo nombre y pregunta si sobrescribirla o guardar como carpeta nueva cuando ya existe
+* `Novedad` Los scripts abiertos desde el editor de AutoJs6 pueden leer y escribir archivos de diseño en su propia carpeta: la primera vez, elija la carpeta del script en el selector de carpetas del sistema; el acceso se conserva
+* `Novedad` Los diseños XML de Android se editan según lo que AutoJs6 realmente admite: el panel de propiedades muestra los atributos android: / app: configurables de cada clase de vista y los parámetros del diseño padre, los id se escriben como @+id/..., la paleta inserta clases de vista de Android y la pestaña de problemas señala los atributos que AutoJs6 ignora o no puede configurar
+* `Novedad` La pestaña de problemas de los proyectos UI enumera las "diferencias de vista previa": líneas del script que se comportan distinto en la vista previa que en AutoJs6 (activity, ui.emitter, funciones de ventana, diálogos, bucles infinitos en el hilo principal y más), cada una con su línea y una explicación; un toque abre la documentación; no cuentan como errores
+* `Mejora` La vista previa de diseño y la vista previa interactiva entregan a AutoJs6 los archivos del proyecto, así que los diseños pueden usar cadenas, colores, dimensiones, estilos, imágenes y diseños `<include>` de res/, y ui.layoutFile funciona en la vista previa interactiva (necesita el contrato de vista previa v3); con un AutoJs6 más antiguo la pestaña de problemas avisa de que la vista previa puede diferir de una ejecución real
+* `Mejora` Insertar un elemento en un contenedor que solo tiene espacios ya no deja una línea en blanco
+* `Dependencia` Actualizar el artefacto de contrato ui-preview-api.aar al contrato de vista previa ui v3 (añade claves de solicitud para los recursos del proyecto con un diseño y para un zip del proyecto con una ejecución; las compilaciones de AutoJs6 solo con v2 o v1 mantienen las vistas previas anteriores)
+
 # v1.7.0
 
 ###### 2026/10/15

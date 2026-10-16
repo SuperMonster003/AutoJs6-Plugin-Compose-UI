@@ -5,6 +5,29 @@
   "changelog_label_improvement": "Amelioration",
   "changelog_label_dependency": "Dependance",
   "$data": {
+    "v1.8.0": {
+      "released_date": "2026/10/16",
+      "hint": [
+        "Plusieurs fonctions de 1.8.0 demandent une version plus récente d'AutoJs6 6.8.0: les aperçus qui utilisent les fichiers du projet (ressources res/, fichiers de mise en page) nécessitent le commit hôte 9df0a154b ou ultérieur (contrat d'aperçu v3), et exécuter ou importer des projets dossier dans AutoJs6 nécessite le commit hôte faf412ef7 ou ultérieur; avec un AutoJs6 plus ancien, le concepteur le signale et garde le comportement précédent"
+      ],
+      "feature": [
+        "Les projets UI (XML) peuvent garder leurs mises en page dans des fichiers XML séparés: ui.layoutFile(\"...\") et ui.inflate(files.read(\"...\")) avec un chemin littéral, en XML AutoJs6 ou en XML Android (ui.useAndroidLayout); le concepteur lit et modifie ces fichiers en laissant intact ce qui n'est pas modifié, et le sélecteur de fragments les liste par nom de fichier",
+        "\"Enregistrer comme fichier XML\" et \"Nouveau fichier XML\" dans le menu à côté du sélecteur de fragments: le premier déplace dans un fichier une mise en page écrite directement dans ui.layout(...) ou ui.inflate(...) et réécrit l'appel, le second ajoute un fichier avec un conteneur racine vide (XML AutoJs6 ou XML Android) et une ligne ui.inflate à la fin du script; les deux s'annulent et n'écrivent les fichiers qu'à l'enregistrement",
+        "Projets dossier: un projet privé enregistré avec des fichiers de mise en page devient un dossier avec main.js, ses fichiers de mise en page et un project.json accepté par AutoJs6, qui peut donc l'exécuter et l'empaqueter comme projet; un nouveau projet UI peut aussi commencer sous cette forme (modèle XML AutoJs6 ou XML Android); la liste d'accueil affiche les projets dossier sous la forme \"nom/\"",
+        "Les projets dossier s'exportent en un seul zip, et le menu d'accueil importe des zip et des dossiers (\"Importer un script ou un zip\", \"Importer un dossier\")",
+        "\"Exécuter dans AutoJs6\" et \"Importer dans les scripts AutoJs6\" transmettent à AutoJs6 un projet avec des fichiers de mise en page sous forme de zip: AutoJs6 l'exécute comme projet depuis un dossier de cache supprimé ensuite, ou l'importe dans un dossier du même nom et demande s'il faut l'écraser ou enregistrer sous un nouveau dossier s'il existe déjà",
+        "Les scripts ouverts depuis l'éditeur AutoJs6 peuvent lire et écrire les fichiers de mise en page de leur propre dossier: la première fois, choisissez le dossier du script dans le sélecteur de dossiers du système; l'accès est conservé",
+        "Les mises en page XML Android sont modifiées selon ce qu'AutoJs6 prend réellement en charge: le panneau des propriétés liste les attributs android: / app: modifiables de chaque classe de vue et les paramètres de la mise en page parente, les id s'écrivent @+id/..., la palette insère des classes de vue Android et l'onglet des problèmes signale les attributs qu'AutoJs6 ignore ou ne peut pas définir",
+        "L'onglet des problèmes des projets UI liste les \"différences d'aperçu\": les lignes du script qui se comportent autrement dans l'aperçu que dans AutoJs6 (activity, ui.emitter, fonctions de fenêtre, boîtes de dialogue, boucles infinies sur le fil principal, etc.), chacune avec sa ligne et une explication; un appui ouvre la documentation; elles ne comptent pas comme des erreurs"
+      ],
+      "improvement": [
+        "L'aperçu de mise en page et l'aperçu interactif transmettent les fichiers du projet à AutoJs6: les mises en page peuvent utiliser les chaînes, couleurs, dimensions, styles, images et mises en page `<include>` de res/, et ui.layoutFile fonctionne dans l'aperçu interactif (contrat d'aperçu v3 requis); avec un AutoJs6 plus ancien, l'onglet des problèmes indique que l'aperçu peut différer d'une exécution réelle",
+        "Insérer un élément dans un conteneur qui ne contient que des espaces ne laisse plus de ligne vide"
+      ],
+      "dependency": [
+        "Mise à niveau de l'artefact de contrat ui-preview-api.aar vers le contrat d'aperçu ui v3 (ajoute des clés de requête pour les ressources du projet avec une mise en page et pour un zip du projet avec une exécution; les versions d'AutoJs6 avec seulement v2 ou v1 gardent les aperçus précédents)"
+      ]
+    },
     "v1.7.0": {
       "released_date": "2026/10/15",
       "hint": [

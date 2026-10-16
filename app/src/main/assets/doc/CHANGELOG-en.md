@@ -4,6 +4,23 @@
 
 ******
 
+# v1.8.0
+
+###### 2026/10/16
+
+* `Hint` Several 1.8.0 features need a newer AutoJs6 6.8.0 build: previews that use the project's files (res/ resources, layout files) need host commit 9df0a154b or later (preview contract v3), and running or importing folder projects in AutoJs6 needs host commit faf412ef7 or later; with an older AutoJs6 the designer says so and keeps the earlier behavior
+* `Feature` UI (XML) projects can keep their layouts in separate XML files: ui.layoutFile("...") and ui.inflate(files.read("...")) with a literal path, in AutoJs6 XML or Android XML (ui.useAndroidLayout); the designer reads and edits these files and leaves what is not edited untouched, and the fragment switcher lists them by file name
+* `Feature` "Save as XML file" and "New XML file" in the menu beside the fragment switcher: the first moves a layout written directly in ui.layout(...) or ui.inflate(...) into a file and rewrites the call, the second adds a file with an empty root container (AutoJs6 XML or Android XML) and a ui.inflate line at the end of the script; both can be undone and write files only when saved
+* `Feature` Folder projects: a private project saved with layout files becomes a folder with main.js, its layout files and a project.json AutoJs6 accepts, so AutoJs6 can run and package it as a project; a new UI project can also start as such a folder (AutoJs6 XML or Android XML template); the home list shows folder projects as "name/"
+* `Feature` Folder projects export as one zip, and the home menu imports zips and folders ("Import script or zip", "Import folder")
+* `Feature` "Run in AutoJs6" and "Import into AutoJs6 scripts" hand a project with layout files to AutoJs6 as a zip: AutoJs6 runs it as a project from a cache folder that is removed afterwards, or imports it into a folder of the same name and asks whether to overwrite it or save as a new folder when that exists
+* `Feature` Scripts opened from the AutoJs6 editor can read and write layout files in their own folder: the first time, choose the script's folder in the system folder picker; the access is kept
+* `Feature` Android XML layouts are edited against what AutoJs6 actually supports: the property drawer lists each view class's settable android: / app: attributes and the parent layout's parameters, ids are written as @+id/..., the palette inserts Android view classes, and the problems tab flags attributes AutoJs6 ignores or cannot set
+* `Feature` The problems tab of UI projects lists "preview differences": lines of the script that behave differently in the preview than in AutoJs6 (activity, ui.emitter, window functions, dialogs, endless loops on the main thread and more), each with its line and an explanation; a tap opens the documentation; they do not count as errors
+* `Improvement` The layout preview and the interactive preview give AutoJs6 the project's files, so layouts can use strings, colors, dimensions, styles, images and `<include>` layouts from res/, and ui.layoutFile works in the interactive preview (needs preview contract v3); with an older AutoJs6 the problems tab notes that the preview may differ from a real run
+* `Improvement` Inserting an element into a container that holds only whitespace no longer leaves a blank line
+* `Dependency` Upgrade the ui-preview-api.aar contract artifact to ui preview contract v3 (adds request keys for a project's resources with a layout and for a project zip with a run; AutoJs6 builds with v2 or v1 only keep the earlier previews)
+
 # v1.7.0
 
 ###### 2026/10/15

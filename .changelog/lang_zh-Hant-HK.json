@@ -5,6 +5,29 @@
   "changelog_label_improvement": "優化",
   "changelog_label_dependency": "依賴",
   "$data": {
+    "v1.8.0": {
+      "released_date": "2026/10/16",
+      "hint": [
+        "1.8.0 的部分功能需要更新的 AutoJs6 6.8.0 構建: 預覽使用工程檔案 (res 資源, 佈局檔案) 需要宿主提交 9df0a154b 之後 (預覽契約 v3), 在 AutoJs6 中運行或匯入文件夾工程需要宿主提交 faf412ef7 之後; AutoJs6 版本較舊時設計器會提示並退回原有行為"
+      ],
+      "feature": [
+        "UI (XML) 工程的佈局可以寫在單獨的 XML 檔案中: 以字面量路徑調用 ui.layoutFile(\"...\") 與 ui.inflate(files.read(\"...\")), 可以是 AutoJs6 XML 或 Android 原生 XML (ui.useAndroidLayout); 設計器讀取並編輯這些檔案, 未改動的內容原樣保留, 片段切換器以檔案名列出它們",
+        "片段切換器旁的選單 \"存為 XML 文件\" 與 \"新建 XML 文件\": 前者把直接寫在 ui.layout(...) 或 ui.inflate(...) 中的佈局移到檔案並改寫調用, 後者新建只含一個空容器的檔案 (AutoJs6 XML 或 Android 原生 XML) 並在腳本末尾追加 ui.inflate 一行; 兩者都可撤銷, 保存時才寫入檔案",
+        "文件夾工程: 帶佈局檔案保存的私有工程變為文件夾 (main.js, 佈局檔案與 AutoJs6 認可的 project.json), 可在 AutoJs6 中作為項目運行與打包; 新建 UI 工程時也可以直接建立這樣的文件夾 (AutoJs6 XML 或 Android 原生 XML 模板); 首頁以 \"名稱/\" 顯示文件夾工程",
+        "文件夾工程可匯出為一個 zip, 首頁選單可匯入 zip 或文件夾 (\"匯入腳本或 zip\", \"匯入文件夾\")",
+        "\"在 AutoJs6 中運行\" 與 \"匯入 AutoJs6 腳本目錄\" 把帶佈局檔案的工程以 zip 交給 AutoJs6: 運行時解壓到緩存目錄按項目運行, 結束後清理; 匯入時解壓到同名文件夾, 已存在時詢問覆蓋或另存為新文件夾",
+        "從 AutoJs6 編輯器打開的腳本可以讀寫同一文件夾中的佈局檔案: 第一次需要在系統文件夾選擇器中選擇腳本所在的文件夾, 之後保留授權",
+        "Android 原生 XML 佈局按 AutoJs6 實際支援的屬性編輯: 屬性抽屜列出各控件類可設定的 android: / app: 屬性與父佈局的參數, id 寫作 @+id/..., 組件面板插入 Android 控件類, 問題列表提示 AutoJs6 會忽略或無法設定的屬性",
+        "UI 工程的問題列表單列 \"預覽差異\": 腳本中在預覽裏與在 AutoJs6 中運行行為不同的寫法 (activity, ui.emitter, 窗口級函數, 對話框, 主線程上的無限循環等), 每條帶行號與說明, 點按打開文檔, 不計入錯誤數"
+      ],
+      "improvement": [
+        "佈局預覽與互動預覽把工程檔案交給 AutoJs6, 佈局可以引用 res 中的字串, 顏色, 尺寸, 樣式, 圖片與 `<include>` 佈局, 互動預覽中的 ui.layoutFile 也能正常運行 (需要預覽契約 v3); AutoJs6 版本較舊時問題列表提示預覽可能與實際運行不同",
+        "向只含空白的容器插入元素時不再留下空行"
+      ],
+      "dependency": [
+        "升級 ui-preview-api.aar 契約製品至 ui 預覽契約 v3 (追加隨佈局交出工程資源與隨運行交出工程 zip 的請求鍵; 只有 v2 或 v1 的 AutoJs6 構建仍提供原有預覽)"
+      ]
+    },
     "v1.7.0": {
       "released_date": "2026/10/15",
       "hint": [
