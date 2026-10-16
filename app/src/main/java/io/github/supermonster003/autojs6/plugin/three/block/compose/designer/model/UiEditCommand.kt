@@ -142,6 +142,14 @@ sealed class UiEditCommand {
             val IDENTIFIER = Regex("""[A-Za-z_$][A-Za-z0-9_$]*""")
         }
     }
+
+    /**
+     * Replaces the whole document with [document], read back from a rewritten script (roadmap P11.3 / D66: moving a
+     * literal into a layout file, adding a layout file); undo restores the previous document as it was.
+     */
+    data class ReplaceDocument(val document: UiDocument) : UiEditCommand() {
+        override fun apply(document: UiDocument): UiDocument = this.document
+    }
 }
 
 /** The whitespace bookkeeping behind insert, remove and move. */

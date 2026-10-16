@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.OpenableColumns
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiScriptReader
 import java.io.File
 import java.io.IOException
@@ -112,6 +113,7 @@ internal class ProjectStore(private val base: File) {
         check(dir.mkdirs()) { "Could not create $folder" }
         val script = file(target)
         check(file(name).renameTo(script)) { "Could not move $name into $folder" }
+        writeProjectConfig(dir, stem)
         draftFile(name).takeIf { it.exists() }?.let { draft ->
             draftFile(target).parentFile?.mkdirs()
             draft.renameTo(draftFile(target))
@@ -126,6 +128,31 @@ internal class ProjectStore(private val base: File) {
             setImageFolder(target, folderUri)
         }
         return Project(target, script, script.lastModified(), kindOf(script))
+    }
+
+    /**
+     * Creates the folder project `<stem>/main.js` (roadmap P11.3 / D66) with [script] and the layout [files] by
+     * path, and its `project.json`; a counter is added while the folder name is taken.
+     */
+    fun createFolder(baseName: String, script: String, files: Map<String, String>): Project {
+        projectsDir.mkdirs()
+        val stem = stemOf(baseName.trim().removeSuffix(EXTENSION), "untitled")
+        var folder = stem
+        var counter = 2
+        while (File(projectsDir, folder).exists()) folder = "$stem-${counter++}"
+        val name = folder + "/" + MAIN_SCRIPT
+        for (path in files.keys) require(layoutFile(name, path) != null) { "Unusable layout file path: $path" }
+        check(File(projectsDir, folder).mkdirs()) { "Could not create $folder" }
+        writeAtomically(file(name), script)
+        for ((path, text) in files) writeLayoutFile(name, path, text)
+        writeProjectConfig(File(projectsDir, folder), stem)
+        return Project(name, file(name), file(name).lastModified(), kindOf(file(name)))
+    }
+
+    /** Writes the folder's `project.json` (roadmap D63) unless it has one: what AutoJs6 needs to run it as a project and build an APK. */
+    private fun writeProjectConfig(dir: File, name: String) {
+        val config = File(dir, PROJECT_CONFIG)
+        if (!config.exists()) writeAtomically(config, projectConfigOf(name))
     }
 
     /** The drafts of the layout files of the document with draft key [key]: `drafts/<key>.files/<path>`. */
@@ -319,6 +346,8 @@ internal class ProjectStore(private val base: File) {
         const val EXTENSION = ".js"
         /** The script of a folder project (roadmap P11.3, appendix B). */
         const val MAIN_SCRIPT = "main.js"
+        /** AutoJs6's project file in a folder project (roadmap D63). */
+        const val PROJECT_CONFIG = "project.json"
         private const val LAYOUT_DRAFTS_SUFFIX = ".files"
         /** TSX projects (roadmap P9.2 / D42), read and written through the TypeScript Engine parser. */
         const val TSX_EXTENSION = ".tsx"
@@ -355,6 +384,83 @@ internal class ProjectStore(private val base: File) {
                 toast('OK');
             });
         """.trimIndent() + LINE_END
+
+        /** The folder template with an AutoJs6 XML layout file (roadmap P11.3 / D66, D67): the script and its files by path. */
+        val UI_FILE_TEMPLATE: Pair<String, Map<String, String>> = Pair(
+            """
+                "ui";
+
+                ui.layoutFile("layout.xml");
+
+                ui.ok.on('click', () => {
+                    toast('OK');
+                });
+            """.trimIndent() + LINE_END,
+            mapOf(
+                "layout.xml" to """
+                    <vertical padding="16">
+                        <text id="title" text="Hello" textSize="24sp"/>
+                        <button id="ok" text="OK"/>
+                    </vertical>
+                """.trimIndent() + LINE_END,
+            ),
+        )
+
+        /** The folder template with a native Android XML layout file (roadmap P11.3 / D67), laid out like AutoJs6's own samples. */
+        val UI_ANDROID_TEMPLATE: Pair<String, Map<String, String>> = Pair(
+            """
+                "ui";
+
+                ui.useAndroidLayout();
+                ui.layoutFile("res/layout/activity_main.xml");
+
+                ui.ok.on('click', () => {
+                    toast('OK');
+                });
+            """.trimIndent() + LINE_END,
+            mapOf(
+                "res/layout/activity_main.xml" to """
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hello"
+                            android:textSize="24sp" />
+
+                        <Button
+                            android:id="@+id/ok"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="OK" />
+                    </LinearLayout>
+                """.trimIndent() + LINE_END,
+            ),
+        )
+
+        /**
+         * The `project.json` of a folder project named [name] (roadmap D63): the fields AutoJs6's complete check needs
+         * (`name`, `main`, `packageName`, `versionName`, `versionCode`).
+         */
+        fun projectConfigOf(name: String): String = "{" + LINE_END +
+            "  \"name\": " + JsonText.quote(name) + "," + LINE_END +
+            "  \"main\": \"" + MAIN_SCRIPT + "\"," + LINE_END +
+            "  \"packageName\": \"" + packageNameOf(name) + "\"," + LINE_END +
+            "  \"versionName\": \"1.0.0\"," + LINE_END +
+            "  \"versionCode\": 1" + LINE_END +
+            "}" + LINE_END
+
+        /** `org.example.<name>` with what a package name segment cannot hold replaced (`project` when nothing remains). */
+        fun packageNameOf(name: String): String {
+            val segment = name.lowercase().replace(Regex("[^a-z0-9_]+"), "_").trim('_').ifEmpty { "project" }
+            return "org.example." + if (segment[0].isLetter()) segment else "p$segment"
+        }
 
         /** Types offered by the document picker when importing or relinking a script (any file as the last resort). */
         val SCRIPT_DOCUMENT_TYPES = arrayOf("application/javascript", "text/javascript", "application/x-javascript", "text/typescript", "text/plain", "*/*")

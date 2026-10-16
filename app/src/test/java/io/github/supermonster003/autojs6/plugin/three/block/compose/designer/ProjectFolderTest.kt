@@ -1,9 +1,12 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiScriptReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -111,6 +114,58 @@ class ProjectFolderTest {
         assertFalse(File(store.projectsDir, "other").exists())
         assertFalse(File(store.draftsDir, "other").exists())
         assertTrue(store.list().isEmpty())
+    }
+
+    @Test
+    fun `promotion writes a project json AutoJs6 accepts and keeps one already there`() {
+        val store = store()
+        val folder = store.promote(store.create("demo", ProjectStore.UI_TEMPLATE).name)
+        val config = File(store.projectDir(folder.name), ProjectStore.PROJECT_CONFIG)
+        @Suppress("UNCHECKED_CAST")
+        val json = JsonText.parse(config.readText()) as Map<String, Any?>
+        assertEquals("demo", json["name"])
+        assertEquals("main.js", json["main"])
+        assertEquals("org.example.demo", json["packageName"])
+        assertEquals("1.0.0", json["versionName"])
+        assertEquals(1L, json["versionCode"])
+        // The project file is not a layout file, and the home list still shows one project.
+        assertEquals(listOf("demo/main.js"), store.list().map { it.name })
+
+        File(store.projectsDir, "kept").mkdirs()
+        File(store.projectsDir, "kept/project.json").writeText("{\"name\": \"mine\"}")
+        val project = store.create("kept", ProjectStore.UI_TEMPLATE)
+        // The folder name is taken, so the promoted project gets its own folder and its own project file.
+        assertEquals("kept-2/main.js", store.promote(project.name).name)
+        assertEquals("{\"name\": \"mine\"}", File(store.projectsDir, "kept/project.json").readText())
+    }
+
+    @Test
+    fun `package names come from the project name`() {
+        assertEquals("org.example.my_app", ProjectStore.packageNameOf("My App"))
+        assertEquals("org.example.p2048", ProjectStore.packageNameOf("2048"))
+        assertEquals("org.example.project", ProjectStore.packageNameOf("中文"))
+        assertEquals("org.example.a_b", ProjectStore.packageNameOf("--a..b--"))
+    }
+
+    @Test
+    fun `folder templates create the script, its layout file and the project file`() {
+        val store = store()
+        for ((template, path) in listOf(ProjectStore.UI_FILE_TEMPLATE to "layout.xml", ProjectStore.UI_ANDROID_TEMPLATE to "res/layout/activity_main.xml")) {
+            val project = store.createFolder("screen", template.first, template.second)
+            assertTrue(project.folder)
+            assertEquals(ProjectStore.Kind.UI, project.kind)
+            assertEquals(template.first, store.read(project.name))
+            assertEquals(template.second.getValue(path), store.layoutFile(project.name, path)!!.readText())
+            assertTrue(File(store.projectDir(project.name), ProjectStore.PROJECT_CONFIG).isFile)
+            // The script reads back with its layout file on the canvas.
+            val document = UiScriptReader().read(store.read(project.name)) { store.layoutFile(project.name, it)?.readText() }
+            assertEquals(path, document.fragments[document.rootFragment].file?.path)
+            assertTrue(document.missingFiles.isEmpty())
+            assertEquals(path == "res/layout/activity_main.xml", document.isNative(document.files.single()))
+        }
+        assertEquals(listOf("screen-2/main.js", "screen/main.js"), store.list().map { it.name }.sorted())
+        assertThrows(IllegalArgumentException::class.java) { store.createFolder("bad", "\"ui\";\n", mapOf("../x.xml" to "<frame/>")) }
+        assertFalse(File(store.projectsDir, "bad").exists())
     }
 
     @Test

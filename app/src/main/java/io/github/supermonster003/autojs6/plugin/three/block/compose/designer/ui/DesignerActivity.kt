@@ -1,6 +1,7 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui
 
 import android.content.Context
+import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -207,7 +208,7 @@ internal class DesignerActivity : StandaloneActivity() {
                 is ReadResult.ParsedUi -> {
                     // Roadmap P10.3: a ui-mode document gets its own session and a host preview client.
                     session = null
-                    uiSession = UiDesignerSession(result.document)
+                    uiSession = UiDesignerSession(result.document).also(::configureLayoutFiles)
                     previewClient?.close()
                     previewClient = UiPreviewClient(this, source.title)
                     parseError = null
@@ -216,6 +217,23 @@ internal class DesignerActivity : StandaloneActivity() {
                 }
                 is ReadResult.Rejected -> { parseError = result.error; readOnly = null }
                 is ReadResult.Unavailable -> readOnly = ReadOnlySource(script, result)
+            }
+        }
+    }
+
+    /**
+     * Where layout files of [session] can go (roadmap P11.3 / D66): next to a private project (a single-file one becomes
+     * a folder project when saved) or a file Uri; a read-only document saved as a project takes them along.
+     */
+    private fun configureLayoutFiles(session: UiDesignerSession) {
+        when (val current = source) {
+            is DocumentSource.Local -> {
+                session.layoutFilesAvailable = true
+                session.layoutFilesPromote = !ProjectStore.isFolderName(current.name)
+            }
+            is DocumentSource.External -> {
+                session.layoutFilesAvailable = current.uri.scheme == ContentResolver.SCHEME_FILE || !current.writable
+                session.layoutFilesPromote = !current.writable
             }
         }
     }
@@ -792,6 +810,7 @@ internal class DesignerActivity : StandaloneActivity() {
         val savedText = stringResource(R.string.designer_saved)
         val savedAsProject = stringResource(R.string.designer_external_readonly_saved)
         val layoutFileSaveFailed = stringResource(R.string.designer_layout_file_save_failed)
+        val promotedText = stringResource(R.string.designer_layout_file_promoted)
         val copied = stringResource(R.string.gallery_copied)
         val missingHost = stringResource(R.string.gallery_run_missing_host)
         val runFailed = stringResource(R.string.gallery_run_failed)
@@ -925,7 +944,16 @@ internal class DesignerActivity : StandaloneActivity() {
 
         fun save(announce: Boolean = true): Boolean {
             val text = session.script()
-            val files = session.changedFiles()
+            var files = session.changedFiles()
+            // Roadmap P11.3 / D56, D63: a private single-file project that now has layout files becomes a folder project
+            // (with its project.json) before it is written; its drafts and records move along.
+            val promoted = (source as? DocumentSource.Local)?.takeIf { session.document.files.isNotEmpty() && !ProjectStore.isFolderName(it.name) }?.let { local ->
+                runCatching { store.promote(local.name).name }.getOrNull()
+            }
+            if (promoted != null) {
+                source = DocumentSource.Local(promoted)
+                files = session.files()
+            }
             val previous = source
             val result = io.write(previous, text)
             io.clearDraft(previous)
@@ -934,13 +962,15 @@ internal class DesignerActivity : StandaloneActivity() {
                 // A private copy of a read-only document keeps its layout files in a folder project (P11.3).
                 val name = if (session.document.files.isEmpty()) result.name else store.promote(result.name).name
                 source = DocumentSource.Local(name)
+                files = session.files()
                 scope.launch { snackbar.showSnackbar(savedAsProject.format(ProjectStore.displayNameOf(name))) }
             }
-            val written = if (result is DocumentIo.WriteResult.SavedAsProject) session.files() else files
-            val failed = written.keys.filterNot { path -> io.writeLayoutFile(source, path, written.getValue(path)) }
+            val failed = files.keys.filterNot { path -> io.writeLayoutFile(source, path, files.getValue(path)) }
             session.markSaved()
+            configureLayoutFiles(session)
             when {
                 failed.isNotEmpty() -> scope.launch { snackbar.showSnackbar(layoutFileSaveFailed.format(failed.joinToString(", "))) }
+                promoted != null -> scope.launch { snackbar.showSnackbar(promotedText.format(ProjectStore.displayNameOf(promoted))) }
                 result is DocumentIo.WriteResult.Saved && announce -> scope.launch { snackbar.showSnackbar(savedText) }
             }
             return true

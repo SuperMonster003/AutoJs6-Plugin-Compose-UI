@@ -20,7 +20,9 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiTemplates
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiValidator
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DesignerParseError
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.PreviewDifferenceScanner
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiLayoutFiles
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.DropPlacements
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.LayoutAxis
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.DeclarationEvaluator
@@ -84,6 +86,13 @@ internal class UiDesignerSession(
     var lastHandlerStub: UiHandler? by mutableStateOf(null)
     /** The interactive preview is on (roadmap P10.6): the host runs the script in the canvas; not part of the document. */
     var interactive: Boolean by mutableStateOf(false)
+    /**
+     * Whether layout files can be stored next to this document (roadmap P11.3 / D66): a private project or a file Uri;
+     * not a content Uri while the designer holds no access to its folder.
+     */
+    var layoutFilesAvailable: Boolean by mutableStateOf(true)
+    /** Whether saving a document with layout files makes it a folder project (a private single-file project, a read-only document). */
+    var layoutFilesPromote: Boolean by mutableStateOf(false)
 
     val canUndo: Boolean get() = history.canUndo
     val canRedo: Boolean get() = history.canRedo
@@ -202,6 +211,32 @@ internal class UiDesignerSession(
         var counter = 1
         while ("$stem$counter" in taken) counter++
         return "$stem$counter"
+    }
+
+    /**
+     * Moves the literal fragment on the canvas into the layout file [path] (roadmap P11.3 / D66) as one undo step and
+     * shows that file; it is written when the document is saved.
+     */
+    fun extractToFile(path: String): Boolean = rewrite(path) { UiLayoutFiles.extract(document, fragment, path) }
+
+    /** Adds the layout file [path] with one empty root (native Android XML when [native]) as one undo step and shows it. */
+    fun addLayoutFile(path: String, native: Boolean): Boolean = rewrite(path) { UiLayoutFiles.addFile(document, path, native) }
+
+    private fun rewrite(path: String, rewritten: () -> UiDocument): Boolean {
+        val next = try {
+            rewritten()
+        } catch (error: IllegalArgumentException) {
+            return false
+        } catch (error: DesignerParseError) {
+            return false
+        }
+        if (!execute(UiEditCommand.ReplaceDocument(next), merge = false)) return false
+        val index = document.fragments.indexOfFirst { it.file?.path == path }
+        if (index >= 0) {
+            fragment = index
+            selectedId = document.fragments[index].root.id
+        }
+        return true
     }
 
     /** Moves [id] into [containerId] as its last element child (outline drop onto a container). */

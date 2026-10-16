@@ -29,6 +29,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -69,6 +73,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Severity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.JsonText
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiLayoutFiles
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.UiPreviewClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.elementLabel
 
@@ -90,6 +95,125 @@ internal fun xmlOutlineRows(root: XmlNode.Element?, collapsed: Set<Int> = emptyS
 
 private enum class XmlDropZone { BEFORE, INTO, AFTER }
 
+/** What the layout file dialog does (roadmap P11.3 / D66). */
+private enum class LayoutFileRequest { EXTRACT, NEW }
+
+/**
+ * The layout file menu beside the fragment switcher (roadmap P11.3 / D66): move the literal on the canvas into a
+ * file, or add a new file. Why a literal cannot move is said when it is picked.
+ */
+@Composable
+private fun LayoutFileMenu(session: UiDesignerSession, palette: StandalonePalette, onRequest: (LayoutFileRequest) -> Unit) {
+    val context = LocalContext.current
+    var open by remember { mutableStateOf(false) }
+    val notInline = stringResource(R.string.designer_layout_file_not_inline)
+    val hasExpressions = stringResource(R.string.designer_layout_file_has_expressions)
+    val unavailable = stringResource(R.string.designer_layout_file_unavailable)
+    fun tell(text: String) = Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+    Box {
+        IconButton(onClick = { open = true }, modifier = Modifier.testTag("designer-layout-files")) {
+            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.designer_layout_file_menu), tint = Color(palette.muted))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            val refusal = remember(session.document, session.fragment) { UiLayoutFiles.refusalOf(session.document, session.fragment) }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.designer_layout_file_extract)) },
+                enabled = refusal != UiLayoutFiles.Refusal.NOT_A_LITERAL,
+                onClick = {
+                    open = false
+                    when {
+                        !session.layoutFilesAvailable -> tell(unavailable)
+                        refusal == UiLayoutFiles.Refusal.NOT_INLINE -> tell(notInline)
+                        refusal == UiLayoutFiles.Refusal.EXPRESSIONS -> tell(hasExpressions)
+                        else -> onRequest(LayoutFileRequest.EXTRACT)
+                    }
+                },
+                modifier = Modifier.testTag("designer-layout-file-extract"),
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.designer_layout_file_new)) },
+                onClick = {
+                    open = false
+                    if (session.layoutFilesAvailable) onRequest(LayoutFileRequest.NEW) else tell(unavailable)
+                },
+                modifier = Modifier.testTag("designer-layout-file-new"),
+            )
+        }
+    }
+}
+
+/**
+ * Asks for the path of the layout file (and, for a new file of a script whose `ui.useAndroidLayout` is automatic,
+ * its XML dialect, D67), then applies the edit as one undo step.
+ */
+@Composable
+private fun LayoutFileDialog(session: UiDesignerSession, palette: StandalonePalette, request: LayoutFileRequest, onDismiss: () -> Unit) {
+    val document = session.document
+    val fixed = UiLayoutFiles.fixedDialect(document)
+    var native by remember { mutableStateOf(fixed ?: document.fragments.any { document.isNative(it) }) }
+    var path by remember {
+        mutableStateOf(if (request == LayoutFileRequest.EXTRACT) UiLayoutFiles.suggestedPath(document, session.fragment) else UiLayoutFiles.suggestedNewPath(document, native))
+    }
+    var edited by remember { mutableStateOf(false) }
+    val problem = UiLayoutFiles.pathProblem(document, path.trim())
+    fun pick(value: Boolean) {
+        native = value
+        if (!edited) path = UiLayoutFiles.suggestedNewPath(document, value)
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(if (request == LayoutFileRequest.EXTRACT) R.string.designer_layout_file_extract else R.string.designer_layout_file_new)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = path,
+                    onValueChange = { path = it; edited = true },
+                    label = { Text(stringResource(R.string.designer_layout_file_path)) },
+                    singleLine = true,
+                    isError = problem != null,
+                    supportingText = problem?.let { reason ->
+                        {
+                            Text(stringResource(if (reason == UiLayoutFiles.PathProblem.INVALID) R.string.designer_layout_file_path_invalid else R.string.designer_layout_file_path_taken))
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("designer-layout-file-path"),
+                )
+                if (request == LayoutFileRequest.NEW && fixed == null) {
+                    Row(Modifier.padding(top = 8.dp)) {
+                        FilterChip(
+                            selected = !native,
+                            onClick = { pick(false) },
+                            label = { Text(stringResource(R.string.designer_layout_file_autojs6), fontSize = 12.sp) },
+                            modifier = Modifier.padding(end = 8.dp).testTag("designer-layout-file-autojs6"),
+                        )
+                        FilterChip(
+                            selected = native,
+                            onClick = { pick(true) },
+                            label = { Text(stringResource(R.string.designer_layout_file_android), fontSize = 12.sp) },
+                            modifier = Modifier.testTag("designer-layout-file-android"),
+                        )
+                    }
+                }
+                if (session.layoutFilesPromote) {
+                    Text(stringResource(R.string.designer_layout_file_hint), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = problem == null,
+                onClick = {
+                    val target = path.trim()
+                    val done = if (request == LayoutFileRequest.EXTRACT) session.extractToFile(target) else session.addLayoutFile(target, native)
+                    if (done) onDismiss()
+                },
+                modifier = Modifier.testTag("designer-layout-file-confirm"),
+            ) { Text(stringResource(if (request == LayoutFileRequest.EXTRACT) R.string.designer_apply else R.string.designer_create)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.designer_cancel)) } },
+    )
+}
+
 /**
  * The element tree of the fragment on the canvas (roadmap P10.3 / P10.4): a fragment switcher when the script has
  * several XML literals, rows in document order with collapse toggles, tap selection, up / down / delete on the
@@ -104,25 +228,32 @@ internal fun XmlOutlinePanel(session: UiDesignerSession, palette: StandalonePale
     var dropIndicator by remember { mutableStateOf<Pair<Int, XmlDropZone>?>(null) }
     val accent = Color(palette.accent)
     val rootId = session.root?.id
+    var fileRequest by remember { mutableStateOf<LayoutFileRequest?>(null) }
     Column(modifier.fillMaxSize()) {
         val fragments = session.document.fragments
-        if (fragments.size > 1) {
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp).testTag("designer-xml-fragments")) {
-                fragments.forEachIndexed { index, fragment ->
-                    val label = when {
-                        fragment.file != null -> fragment.file.path.substringAfterLast('/')
-                        fragment.usage == FragmentUsage.LAYOUT -> stringResource(R.string.designer_ui_fragment_root, index + 1)
-                        else -> stringResource(R.string.designer_ui_fragment, index + 1)
+        Row(Modifier.fillMaxWidth().padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (fragments.size > 1) {
+                Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()).testTag("designer-xml-fragments")) {
+                    fragments.forEachIndexed { index, fragment ->
+                        val label = when {
+                            fragment.file != null -> fragment.file.path.substringAfterLast('/')
+                            fragment.usage == FragmentUsage.LAYOUT -> stringResource(R.string.designer_ui_fragment_root, index + 1)
+                            else -> stringResource(R.string.designer_ui_fragment, index + 1)
+                        }
+                        FilterChip(
+                            selected = session.fragment == index,
+                            onClick = { session.fragment = index; session.selectedId = fragment.root.id },
+                            label = { Text(label, fontSize = 12.sp) },
+                            modifier = Modifier.padding(end = 6.dp).testTag("designer-xml-fragment-$index"),
+                        )
                     }
-                    FilterChip(
-                        selected = session.fragment == index,
-                        onClick = { session.fragment = index; session.selectedId = fragment.root.id },
-                        label = { Text(label, fontSize = 12.sp) },
-                        modifier = Modifier.padding(end = 6.dp).testTag("designer-xml-fragment-$index"),
-                    )
                 }
+            } else {
+                Spacer(Modifier.weight(1f))
             }
+            LayoutFileMenu(session, palette) { fileRequest = it }
         }
+        fileRequest?.let { request -> LayoutFileDialog(session, palette, request) { fileRequest = null } }
         LazyColumn(modifier = Modifier.fillMaxSize().testTag("designer-xml-outline"), contentPadding = PaddingValues(bottom = AddButtonClearance)) {
             items(rows, key = { it.id }) { row ->
                 val selected = row.id == session.selectedId

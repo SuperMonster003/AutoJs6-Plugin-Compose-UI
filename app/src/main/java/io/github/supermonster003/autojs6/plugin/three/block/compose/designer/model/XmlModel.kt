@@ -157,11 +157,12 @@ data class LayoutFileSource(
 )
 
 /**
- * Whether this fragment is native Android XML (roadmap P11.3): its root declares `xmlns:android` or uses `android:`
- * attributes. Ids are then written `android:id="@+id/..."` rather than AutoJs6's `id="..."`.
+ * Whether this fragment looks like native Android XML (roadmap P11.3): its root declares a namespace or uses
+ * `android:` / `app:` attributes, which is how the host tells them apart while `ui.useAndroidLayout` is automatic.
+ * [UiDocument.isNative] also follows the script's explicit mode.
  */
 val XmlFragment.isNative: Boolean
-    get() = file != null || root.attrs.any { it.name == "xmlns:android" || it.name.startsWith("android:") }
+    get() = root.attrs.any { it.name.startsWith("xmlns:") || it.name.startsWith("android:") || it.name.startsWith("app:") }
 
 /** The element's id name: the plain-text value of `id` or `android:id` without its `@+id/` / `@id/` prefix, or null. */
 fun XmlNode.Element.idName(): String? = (attr("id") ?: attr("android:id"))
@@ -199,7 +200,10 @@ data class UiDocument(
     fun elementIds(): Set<String> = elements().mapNotNull { it.idName() }.toSet()
 
     /** Whether the fragment holding element [id] is native Android XML (roadmap P11.3), where ids are `android:id="@+id/..."`. */
-    fun isNative(id: Int): Boolean = fragments.getOrNull(fragmentOf(id))?.isNative == true
+    fun isNative(id: Int): Boolean = fragments.getOrNull(fragmentOf(id))?.let(::isNative) == true
+
+    /** Whether [fragment] is native Android XML: as `ui.useAndroidLayout(true / false)` says, else as it looks ([XmlFragment.isNative]). */
+    fun isNative(fragment: XmlFragment): Boolean = androidLayout ?: fragment.isNative
 
     /** The literal fragments in script order, then the layout files ([files]). */
     val fragments: List<XmlFragment> get() = segments.filterIsInstance<UiSegment.Layout>().map { it.fragment } + files

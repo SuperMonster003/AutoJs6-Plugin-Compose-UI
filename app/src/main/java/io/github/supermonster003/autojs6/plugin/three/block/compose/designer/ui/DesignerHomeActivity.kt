@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
@@ -67,6 +69,9 @@ import kotlinx.coroutines.launch
  * The launcher entry (roadmap D38): the designer's project list with new / import actions, and the
  * gallery and settings reachable from the top bar. Projects are script files in private storage.
  */
+/** Where a new ui project keeps its layout (roadmap P11.3 / D66, D67). */
+private enum class UiLayoutChoice { SCRIPT, AUTOJS6, ANDROID }
+
 /** What the home list calls a project: the file name, or the folder's name with a trailing slash for a folder project. */
 private val ProjectStore.Project.label: String get() = if (folder) "$displayName/" else name
 
@@ -176,6 +181,8 @@ internal class DesignerHomeActivity : StandaloneActivity() {
             var name by remember { mutableStateOf("") }
             // Roadmap P9.2 / P10.4: a new project is a Compose JavaScript script, a Compose TSX script, or a ui (XML) script.
             var kind by remember { mutableStateOf(ProjectStore.Kind.JS) }
+            // Roadmap P11.3 / D66, D67: a ui project keeps its layout in the script, or starts as a folder with a layout file.
+            var uiLayout by remember { mutableStateOf(UiLayoutChoice.SCRIPT) }
             val engineMissing = remember(kind) { kind == ProjectStore.Kind.TSX && !TsxParserClient.hasParserService(context) }
             val invalid = stringResource(R.string.designer_name_invalid)
             AlertDialog(
@@ -189,6 +196,23 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                             FilterChip(selected = kind == ProjectStore.Kind.JS, onClick = { kind = ProjectStore.Kind.JS }, label = { Text(stringResource(R.string.designer_language_javascript)) }, modifier = Modifier.padding(end = 8.dp).testTag("home-language-js"))
                             FilterChip(selected = kind == ProjectStore.Kind.TSX, onClick = { kind = ProjectStore.Kind.TSX }, label = { Text(stringResource(R.string.designer_language_tsx)) }, modifier = Modifier.padding(end = 8.dp).testTag("home-language-tsx"))
                             FilterChip(selected = kind == ProjectStore.Kind.UI, onClick = { kind = ProjectStore.Kind.UI }, label = { Text(stringResource(R.string.designer_ui_language_ui)) }, modifier = Modifier.testTag("home-language-ui"))
+                        }
+                        if (kind == ProjectStore.Kind.UI) {
+                            Text(stringResource(R.string.designer_ui_layout_label), color = Color(palette.muted), fontSize = 13.sp, modifier = Modifier.padding(top = 12.dp))
+                            Row(Modifier.horizontalScroll(rememberScrollState())) {
+                                for ((choice, label) in listOf(
+                                    UiLayoutChoice.SCRIPT to R.string.designer_ui_layout_in_script,
+                                    UiLayoutChoice.AUTOJS6 to R.string.designer_layout_file_autojs6,
+                                    UiLayoutChoice.ANDROID to R.string.designer_layout_file_android,
+                                )) {
+                                    FilterChip(
+                                        selected = uiLayout == choice,
+                                        onClick = { uiLayout = choice },
+                                        label = { Text(stringResource(label)) },
+                                        modifier = Modifier.padding(end = 8.dp).testTag("home-ui-layout-${choice.name.lowercase()}"),
+                                    )
+                                }
+                            }
                         }
                         if (engineMissing) {
                             Text(stringResource(R.string.designer_tsx_needs_engine, TsxParserClient.MIN_VERSION_NAME), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.testTag("home-tsx-hint"))
@@ -206,7 +230,11 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                         creating = false
                         val project = when (kind) {
                             ProjectStore.Kind.TSX -> store.create(stem, ProjectStore.TSX_TEMPLATE, extension)
-                            ProjectStore.Kind.UI -> store.create(stem, ProjectStore.UI_TEMPLATE)
+                            ProjectStore.Kind.UI -> when (uiLayout) {
+                                UiLayoutChoice.SCRIPT -> store.create(stem, ProjectStore.UI_TEMPLATE)
+                                UiLayoutChoice.AUTOJS6 -> ProjectStore.UI_FILE_TEMPLATE.let { (script, files) -> store.createFolder(stem, script, files) }
+                                UiLayoutChoice.ANDROID -> ProjectStore.UI_ANDROID_TEMPLATE.let { (script, files) -> store.createFolder(stem, script, files) }
+                            }
                             ProjectStore.Kind.JS -> store.create(stem)
                         }
                         listRevision++
