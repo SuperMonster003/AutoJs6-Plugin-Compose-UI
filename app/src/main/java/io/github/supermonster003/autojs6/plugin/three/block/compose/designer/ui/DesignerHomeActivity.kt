@@ -32,6 +32,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
@@ -120,7 +122,8 @@ internal class DesignerHomeActivity : StandaloneActivity() {
             snackbarHost = { SnackbarHost(snackbar) },
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(R.string.app_name)) },
+                    // The Latin title keeps its order (3-...) in RTL locales.
+                    title = { Text(stringResource(R.string.app_name), style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)) },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(palette.background), titleContentColor = Color(palette.text)),
                     actions = {
                         IconButton(onClick = { context.startActivity(Intent(context, GalleryActivity::class.java)) }, modifier = Modifier.testTag("home-gallery")) {

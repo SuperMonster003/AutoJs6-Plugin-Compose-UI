@@ -261,7 +261,7 @@
     <string name="gallery_category_text">النص والأيقونات والصور</string>
     <string name="gallery_copied">تم نسخ السكربت إلى الحافظة</string>
     <string name="gallery_copy">نسخ السكربت</string>
-    <string name="gallery_note">تعمل السكربتات في AutoJs6 مع تثبيت 3-Block Compose %1$s وتفعيله, ويجب أن يكون المضيف بالإصدار %2$d أو أحدث.</string>
+    <string name="gallery_note">تعمل السكربتات في AutoJs6 مع تثبيت ⁨3-Block Compose %1$s⁩ وتفعيله, ويجب أن يكون المضيف بالإصدار %2$d أو أحدث.</string>
     <string name="gallery_run">تشغيل في AutoJs6</string>
     <string name="gallery_run_failed">تعذر على AutoJs6 تشغيل السكربت</string>
     <string name="gallery_run_missing_host">AutoJs6 غير مثبت</string>
