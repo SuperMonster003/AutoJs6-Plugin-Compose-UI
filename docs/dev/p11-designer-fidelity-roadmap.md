@@ -143,6 +143,11 @@
 - [x] (测试) JVM `PreviewDifferencesTest` (12 个 ui 示例的命中清单快照, 行列, 过滤); `UiDesignerDeviceTest` 增加一项: 含 `dialogs.alert` 与 `ui.statusBarColor` 的脚本在问题列表显示两条信息级差异且 "问题 N" 计数为 0.
   证据 (2026-10-16): `PreviewDifferencesTest` 8 项 (示例快照, 位置与每类每行一条, 自声明的同名全局, `ui.emitter` 的事件分类, 无限循环规则 (能离开的循环, switch / 内层循环的 break, 带标签的 break, return / throw, `threads.start` 内与按名交给它的函数), 解析失败为空, 能力过滤, 会话插入元素后行号后移, 设置能力后隐藏, 撤销后恢复, 差异不进 `diagnostics`); JVM 全部 239 项通过 (1 项既有跳过), `assembleDebug` / `assembleDebugAndroidTest` / `lintDebug` (0 错误). `UiDesignerDeviceTest.previewDifferencesAreListedAsInformationAndNotCounted` (两条差异的种类与行号, 菜单 "校验结果 (0 个错误)", 组首为布局预览措辞, 两条的写法与说明, 点按经 Instrumentation 监视器截住指向 `docs.autojs6.com` 的 VIEW + BROWSABLE 意图, 文档未变脏): emulator-5580 (AVD_API_33, 宿主 debug 5439) 上 `UiDesignerDeviceTest` 7 项, `UiPreviewDeviceTest` 1 项, `UiInteractiveDeviceTest` 3 项全部通过; emulator-5570 (API 24, `wm size 1080x1920` / `wm density 480`, 即 CI 的 Nexus 5 尺寸) 上 `UiDesignerDeviceTest` 7 项与 `UiPreviewDeviceTest` 1 项通过 (两次首轮遇到模拟器自身的 GL 中止 `CanvasContext.cpp:505`, SystemUI / 启动器同时崩溃, 等界面稳定后单独复跑通过). 真机未跑 (本条不涉及宿主与设备差异).
 
+### P11.H1 预览服务的 `res/` 支持 (宿主, 本地 master; 宿主路线图 R1 - R3)
+
+- [x] (宿主) 预览契约 v3 (只追加, 无新事务): `setLayout` 的 `resourcesFd` / `resourcesSha256` / `layoutPath` / `androidLayout`, `runScript` 的 `projectFd` / `projectSha256` / `scriptPath`, 诊断 `ATTRIBUTE_IGNORED`; 三层身份 (Binder getter 答 v1, 信息旧键答 v2, 新键 `supportedContractVersions` / `contractHashes` 列出 1 / 2 / 3); 宿主实现归档的校验与解压, 布局按工程资源解析, 交互预览以工程副本为工作目录.
+  证据 (2026-10-16): 宿主提交 `2da2d4119` (契约 v3, `HASH` `196e52cd...`, 信息旧键改答冻结的 v2, 协议文档 v3 小节), `9df0a154b` (实现), `035053bce` (测试: JVM 预览包 26 项; 设备 `UiPreviewServiceTest` 14 项在 AVD_API_33 / API 24 / AVD_API_35_16K 通过, 官方示例 "专注时光" 无资源时失败, 带 `res/` zip 时成功). 契约 AAR `ui-preview-api-release.aar` 20618 B, SHA-256 `4746f9f3...8b94`, 重建字节一致; 插件在 P11.3 换用并更新锁. 1.7.0 插件不受影响 (信息旧键仍答 v2 身份). 原计划在 P11.5 的契约升级相应顺延为 v4.
+
 ### P11.3 XML 文件工程 (插件, 1.8.0)
 
 - [ ] (插件) 文档模型与读取: `LayoutFile` 片段, `ui.layoutFile` / `ui.inflate(files.read(...))` 的字面量路径识别, 片段切换器的文件片段; `useAndroidLayout(true)` 标志与第二份属性目录 (`generate_ui_catalog.py --android-attrs <SDK attrs.xml>`, 目录 JSON 另存 `catalog-android.json`).
