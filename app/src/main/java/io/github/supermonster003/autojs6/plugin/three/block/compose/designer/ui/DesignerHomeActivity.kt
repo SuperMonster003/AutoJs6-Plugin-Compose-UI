@@ -70,7 +70,7 @@ import kotlinx.coroutines.launch
  * gallery and settings reachable from the top bar. Projects are script files in private storage.
  */
 /** Where a new ui project keeps its layout (roadmap P11.3 / D66, D67). */
-private enum class UiLayoutChoice { SCRIPT, AUTOJS6, ANDROID }
+private enum class UiLayoutChoice { SCRIPT, AUTOJS6, ANDROID, TSX }
 
 /** What the home list calls a project: the file name, or the folder's name with a trailing slash for a folder project. */
 private val ProjectStore.Project.label: String get() = if (folder) "$displayName/" else name
@@ -196,7 +196,9 @@ internal class DesignerHomeActivity : StandaloneActivity() {
             var kind by remember { mutableStateOf(ProjectStore.Kind.JS) }
             // Roadmap P11.3 / D66, D67: a ui project keeps its layout in the script, or starts as a folder with a layout file.
             var uiLayout by remember { mutableStateOf(UiLayoutChoice.SCRIPT) }
-            val engineMissing = remember(kind) { kind == ProjectStore.Kind.TSX && !TsxParserClient.hasParserService(context) }
+            // Roadmap P11.7: a ui project can also be a TSX script, read through the TypeScript Engine parser too.
+            val tsx = kind == ProjectStore.Kind.TSX || (kind == ProjectStore.Kind.UI && uiLayout == UiLayoutChoice.TSX)
+            val engineMissing = remember(tsx) { tsx && !TsxParserClient.hasParserService(context) }
             val invalid = stringResource(R.string.designer_name_invalid)
             AlertDialog(
                 onDismissRequest = { creating = false },
@@ -217,6 +219,7 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                                     UiLayoutChoice.SCRIPT to R.string.designer_ui_layout_in_script,
                                     UiLayoutChoice.AUTOJS6 to R.string.designer_layout_file_autojs6,
                                     UiLayoutChoice.ANDROID to R.string.designer_layout_file_android,
+                                    UiLayoutChoice.TSX to R.string.designer_ui_layout_in_tsx,
                                 )) {
                                     FilterChip(
                                         selected = uiLayout == choice,
@@ -234,7 +237,7 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                 },
                 confirmButton = {
                     TextButton(onClick = {
-                        val extension = if (kind == ProjectStore.Kind.TSX) ProjectStore.TSX_EXTENSION else ProjectStore.EXTENSION
+                        val extension = if (tsx) ProjectStore.TSX_EXTENSION else ProjectStore.EXTENSION
                         val stem = name.trim().removeSuffix(extension)
                         if (stem.isNotEmpty() && !ProjectStore.isValidName(stem + extension)) {
                             scope.launch { snackbar.showSnackbar(invalid) }
@@ -247,6 +250,7 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                                 UiLayoutChoice.SCRIPT -> store.create(stem, ProjectStore.UI_TEMPLATE)
                                 UiLayoutChoice.AUTOJS6 -> ProjectStore.UI_FILE_TEMPLATE.let { (script, files) -> store.createFolder(stem, script, files) }
                                 UiLayoutChoice.ANDROID -> ProjectStore.UI_ANDROID_TEMPLATE.let { (script, files) -> store.createFolder(stem, script, files) }
+                                UiLayoutChoice.TSX -> store.create(stem, ProjectStore.TSX_UI_TEMPLATE, extension)
                             }
                             ProjectStore.Kind.JS -> store.create(stem)
                         }

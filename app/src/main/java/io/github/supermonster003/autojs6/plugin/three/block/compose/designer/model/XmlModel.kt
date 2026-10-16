@@ -140,7 +140,16 @@ data class XmlFragment(
      */
     val file: LayoutFileSource? = null,
     val stubSegment: Int = -1,
+    /**
+     * Set for a JSX layout of a TSX script (roadmap P11.7 / D57): the fragment's original source and the tree it was
+     * read as. While [root] still equals that tree the source is written back byte for byte; once edited, the whole
+     * fragment is written in the TSX writer's format.
+     */
+    val tsx: TsxFragmentSource? = null,
 )
+
+/** The original text of a JSX layout (from `<` to the end of its root element or fragment) and its tree as read. */
+data class TsxFragmentSource(val original: String, val root: XmlNode.Element)
 
 /**
  * A layout XML file a script refers to with a literal path (roadmap P11.3 / D56): `ui.layoutFile("...")` lays it
@@ -195,6 +204,16 @@ data class UiDocument(
     val missingFiles: List<String> = emptyList(),
     /** The script's `ui.useAndroidLayout(...)` mode: true / false, or null for automatic (also when it never calls it). */
     val androidLayout: Boolean? = null,
+    /**
+     * The script's language (roadmap P11.7): [Dialect.TSX] layouts are JSX, attributes hold `{expr}` or strings, a bare
+     * attribute means `true`, text children are joined into `text` and only `onClick` binds an event.
+     */
+    val dialect: Dialect = Dialect.JS,
+    /**
+     * TSX only: the string values of the literal `{expr}`s of the layouts (`{24}`, `{'center'}`, `{true}`), by the
+     * expression text without braces, which the preview needs without running the script.
+     */
+    val literalValues: Map<String, String> = emptyMap(),
 ) {
     /** The ids (`id` or `android:id` values written as plain text) of every element, for generating a fresh one. */
     fun elementIds(): Set<String> = elements().mapNotNull { it.idName() }.toSet()

@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiAndroidCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
@@ -189,7 +190,7 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("designer-ui-event-${event.name}")) {
                 Text(event.name, color = Color(palette.text), fontSize = 13.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
                 if (event.name in handled) Text(stringResource(R.string.designer_ui_event_exists), color = Color(palette.muted), fontSize = 12.sp)
-                else TextButton(onClick = { session.addHandler(element, event) }, enabled = canAdd, modifier = Modifier.testTag("designer-ui-event-add-${event.name}")) { Text(stringResource(R.string.designer_add)) }
+                else TextButton(onClick = { session.addHandler(element, event) }, enabled = canAdd || (session.document.dialect == Dialect.TSX && event.name == "click"), modifier = Modifier.testTag("designer-ui-event-add-${event.name}")) { Text(stringResource(R.string.designer_add)) }
             }
         }
         Spacer(Modifier.height(24.dp))

@@ -98,6 +98,14 @@ sealed class UiEditCommand {
      */
     data class AddHandlerStub(val id: Int, val event: UiEvents.Event, val assignId: String? = null) : UiEditCommand() {
         override fun apply(document: UiDocument): UiDocument {
+            // Roadmap D68: a TSX click handler is the element's inline onClick, which needs neither an id nor a statement.
+            if (document.dialect == Dialect.TSX && event.name == "click") {
+                val element = document.element(id) ?: return document
+                if (element.attr(UiEvents.TSX_CLICK_ATTRIBUTE) != null) return document
+                return document.mapElement(id) {
+                    it.copy(attrs = it.attrs + XmlAttr(UiEvents.TSX_CLICK_ATTRIBUTE, listOf(AttrPart.Expr(UiEvents.TSX_CLICK_STUB))))
+                }
+            }
             val fragmentIndex = document.fragmentOf(id)
             if (document.fragments.getOrNull(fragmentIndex)?.stubOffset?.let { it < 0 } != false) return document
             val current = when {
@@ -119,7 +127,7 @@ sealed class UiEditCommand {
             val opaque = current.segments.getOrNull(segmentIndex) as? UiSegment.Opaque ?: return document
             val offset = fragment.stubOffset
             if (offset !in 0..opaque.source.length) return document
-            val stub = UiEvents.stub(elementId, event, fragment.stubIndent)
+            val stub = if (current.dialect == Dialect.TSX) UiEvents.tsxStub(elementId, event, fragment.stubIndent) else UiEvents.stub(elementId, event, fragment.stubIndent)
             return insertStub(current, segmentIndex, offset, stub).copy(handlers = current.handlers + handler)
         }
 

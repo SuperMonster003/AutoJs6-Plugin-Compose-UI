@@ -49,4 +49,21 @@ object UiEvents {
         "\n\n" + indent + "ui." + id + ".on('" + event.name + "', (" + event.params + ") => {\n" +
             indent + "    // TODO\n" +
             indent + "});"
+
+    /**
+     * The TSX form of [stub] (roadmap D68): `ui` has no member per id in the TSX declarations and the project compiles
+     * with `strict` / `noUnusedParameters`, so the receiver is `(ui as any)` and every parameter is `_name: any`.
+     */
+    fun tsxStub(id: String, event: Event, indent: String): String =
+        "\n\n" + indent + "(ui as any)." + id + ".on('" + event.name + "', (" + tsxParams(event.params) + ") => {\n" +
+            indent + "    // TODO\n" +
+            indent + "});"
+
+    /** `event, view` as `_event: any, _view: any`. */
+    fun tsxParams(params: String): String =
+        params.split(',').map { it.trim() }.filter { it.isNotEmpty() }.joinToString(", ") { "_$it: any" }
+
+    /** The inline click handler of a TSX element (roadmap D68): the value of its `onClick` attribute. */
+    const val TSX_CLICK_ATTRIBUTE = "onClick"
+    const val TSX_CLICK_STUB = "{() => {\n    // TODO\n}}"
 }

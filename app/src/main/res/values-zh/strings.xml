@@ -216,8 +216,10 @@
     <string name="designer_ui_interact_no_ime">脚本运行中; Android 15 之前预览不能接收键盘输入</string>
     <string name="designer_ui_interact_running">脚本正在 AutoJs6 中运行</string>
     <string name="designer_ui_interact_starting">正在 AutoJs6 中启动脚本</string>
+    <string name="designer_ui_interact_tsx_needs_host">当前的 AutoJs6 还不能在交互预览中运行 TSX 脚本; 请用 \"运行\" 在 AutoJs6 中试运行</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">脚本内</string>
+    <string name="designer_ui_layout_in_tsx">TSX 脚本内</string>
     <string name="designer_ui_layout_label">布局</string>
     <string name="designer_ui_preview_failed">布局在 &lt;%1$s&gt; 处失败: %2$s</string>
     <string name="designer_ui_preview_host_missing">布局预览需要 AutoJs6, 但尚未安装</string>

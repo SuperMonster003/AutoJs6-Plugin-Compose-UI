@@ -2,6 +2,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.pr
 
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.UiScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlAttr
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlEntities
@@ -67,7 +68,12 @@ internal object XmlPreviewFrames {
     )
 
     fun build(document: UiDocument, fragment: Int = document.rootFragment, values: XmlPreviewValues = XmlPreviewValues.EMPTY): XmlPreviewRequest {
-        val root = requireNotNull(document.fragments.getOrNull(fragment)?.root) { "The document has no fragment $fragment" }
+        val written = requireNotNull(document.fragments.getOrNull(fragment)?.root) { "The document has no fragment $fragment" }
+        // Roadmap P11.7: a TSX layout goes as the XML the host's TSX runtime makes of it, its literal {expr}s known.
+        val tsx = document.dialect == Dialect.TSX
+        val root = if (tsx) TsxLayoutXml.lower(written, document.literalValues) else written
+        @Suppress("NAME_SHADOWING")
+        val values = if (tsx) values.copy(expressions = document.literalValues + values.expressions) else values
         val notes = ArrayList<XmlPreviewNote>()
         val names = LinkedHashSet<String>()
         val xml = buildString { writeElement(root, values, notes, names, this) }

@@ -23,14 +23,16 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load(), private val
     fun validate(document: UiDocument): List<Diagnostic> {
         val diagnostics = ArrayList<Diagnostic>()
         val ids = HashMap<String, MutableList<Int>>()
+        val tsx = document.dialect == Dialect.TSX
         for (fragment in document.fragments) {
-            if (document.isNative(fragment)) validateNative(fragment.root, null, diagnostics, ids) else validate(fragment.root, null, diagnostics, ids, document.widgets)
+            if (document.isNative(fragment)) validateNative(fragment.root, null, diagnostics, ids) else validate(fragment.root, null, diagnostics, ids, document.widgets, tsx)
+            if (tsx) fragment.root.descendants().forEach { validateTsx(it, diagnostics) }
         }
         ids.forEach { (id, owners) -> if (owners.size > 1) owners.forEach { diagnostics += Diagnostic(it, "id", Severity.ERROR, "Duplicate id \"$id\"") } }
         return diagnostics
     }
 
-    private fun validate(element: XmlNode.Element, parent: XmlNode.Element?, out: MutableList<Diagnostic>, ids: MutableMap<String, MutableList<Int>>, widgets: Set<String>) {
+    private fun validate(element: XmlNode.Element, parent: XmlNode.Element?, out: MutableList<Diagnostic>, ids: MutableMap<String, MutableList<Int>>, widgets: Set<String>, tsx: Boolean = false) {
         val namespaced = element.attrs.any { it.name.startsWith("xmlns") || ':' in it.name }
         val widget = element.tag in widgets
         val resolved = if (widget) null else resolve(element.tag)
@@ -43,6 +45,8 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load(), private val
         if (resolved != null && !namespaced) {
             val unsupported = catalog.unsupported(resolved.viewClass)
             for (attr in element.attrs) {
+                // TSX event attributes are the runtime's business (roadmap P11.7); validateTsx checks them.
+                if (tsx && TSX_EVENT.matches(attr.name)) continue
                 val canonical = catalog.shorthands[attr.name] ?: attr.name
                 if (canonical in unsupported) {
                     out += Diagnostic(element.id, attr.name, Severity.ERROR, "${attr.name} is rejected by the host for <${element.tag}>")
@@ -69,8 +73,33 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load(), private val
                 out += Diagnostic(element.id, "children", Severity.WARNING, "<${element.tag}> does not take element children")
             }
         }
-        for (child in elementChildren) validate(child, element, out, ids, widgets)
+        for (child in elementChildren) validate(child, element, out, ids, widgets, tsx)
     }
+
+    /**
+     * The rules the host's TSX runtime enforces when it turns JSX into layout XML (roadmap P11.7): only `onClick` binds
+     * an event and it takes a function; text children only in the text-like tags, never beside element children or a
+     * `text` attribute (the runtime joins them into `text`).
+     */
+    private fun validateTsx(element: XmlNode.Element, out: MutableList<Diagnostic>) {
+        for (attr in element.attrs) {
+            if (!TSX_EVENT.matches(attr.name)) continue
+            if (attr.name != UiEvents.TSX_CLICK_ATTRIBUTE) {
+                out += Diagnostic(element.id, attr.name, Severity.ERROR, "The TSX runtime binds only onClick; register this event with (ui as any).<id>.on(...)")
+            } else if (!attr.hasExpr) {
+                out += Diagnostic(element.id, attr.name, Severity.ERROR, "onClick needs a function: onClick={() => { ... }}")
+            }
+        }
+        val text = element.children.any { (it is XmlNode.Text && !it.isBlank) || (it is XmlNode.Expr && !isComment(it.source)) }
+        if (!text) return
+        when {
+            element.tag !in TSX_TEXT_TAGS -> out += Diagnostic(element.id, "children", Severity.ERROR, "<${element.tag}> cannot hold text in TSX; use the text attribute")
+            element.elementChildren.isNotEmpty() -> out += Diagnostic(element.id, "children", Severity.ERROR, "Text and elements cannot be mixed in TSX")
+            element.attr("text") != null -> out += Diagnostic(element.id, "text", Severity.ERROR, "text is given both as an attribute and as children")
+        }
+    }
+
+    private fun isComment(source: String): Boolean = source.removePrefix("{").removeSuffix("}").trim().let { it.isEmpty() || (it.startsWith("/*") && it.endsWith("*/")) }
 
     /** The catalog class of a native element: its tag, or the `class` of a `<view>`; null for an unknown or special tag. */
     fun nativeClassOf(element: XmlNode.Element): String? =
@@ -170,6 +199,10 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load(), private val
 
     private companion object {
         const val RELATIVE_GROUP = "RelativeLayout 子视图规则"
+        /** An event attribute of a TSX element (`onClick`, `onLongClick`, ...). */
+        val TSX_EVENT = Regex("""on[A-Z][A-Za-z0-9]*""")
+        /** The tags whose text children the host's TSX runtime joins into `text`. */
+        val TSX_TEXT_TAGS = setOf("button", "checkbox", "input", "radio", "switch", "text")
         val INT = Regex("""-?\d+""")
         val NUMBER = Regex("""-?\d+(\.\d+)?""")
         val DIMENSION = Regex("""-?\d+(\.\d+)?(px|dp|dip|sp|pt|in|mm)?""")

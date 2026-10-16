@@ -528,6 +528,23 @@ internal class ProjectStore(private val base: File) {
             });
         """.trimIndent() + LINE_END
 
+        /**
+         * The starter of a TSX ui project (roadmap P11.7 / D68): the UI template as JSX in the TSX writer's format, its
+         * click handler inline, as the TypeScript Engine's own template writes one.
+         */
+        val TSX_UI_TEMPLATE: String = """
+            "ui";
+
+            ui.layout(
+                <vertical padding='16'>
+                    <text id='title' text='Hello' textSize='24sp' />
+                    <button id='ok' text='OK' onClick={() => {
+                        toast('OK');
+                    }} />
+                </vertical>
+            );
+        """.trimIndent() + LINE_END
+
         /** The folder template with an AutoJs6 XML layout file (roadmap P11.3 / D66, D67): the script and its files by path. */
         val UI_FILE_TEMPLATE: Pair<String, Map<String, String>> = Pair(
             """

@@ -58,7 +58,9 @@ internal class DocumentReader(
         val source = TsxReader.normalize(text)
         return when (val outcome = client!!.parse(TsxReader.FILE_NAME, source)) {
             is TsxParserClient.Outcome.Parsed -> try {
-                ReadResult.Parsed(TsxReader().read(source, outcome.tree))
+                // A TSX script with the "ui" directive and a ui.layout call is a TSX ui project (roadmap P11.7).
+                if (UiScriptReader.looksLikeUiScript(source)) ReadResult.ParsedUi(TsxUiReader().read(source, outcome.tree))
+                else ReadResult.Parsed(TsxReader().read(source, outcome.tree))
             } catch (error: DesignerParseError) {
                 ReadResult.Rejected(error)
             }

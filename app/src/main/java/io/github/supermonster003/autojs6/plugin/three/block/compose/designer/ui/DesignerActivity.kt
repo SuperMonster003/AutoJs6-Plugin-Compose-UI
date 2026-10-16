@@ -886,7 +886,8 @@ internal class DesignerActivity : StandaloneActivity() {
                 element.children.filterIsInstance<XmlNode.Expr>().map { XmlPreviewFrames.expressionOf(it.source) } +
                     element.attrs.flatMap { attr -> attr.parts.orEmpty().filterIsInstance<AttrPart.Expr>().map { XmlPreviewFrames.expressionOf(it.source) } }
             }?.toList().orEmpty()
-            val evaluated = if (DeclarationEvaluator.SUPPORTED) withContext(Dispatchers.Default) { evaluator.evaluate(script, expressions) } else DeclarationEvaluator.Result.EMPTY
+            // A TSX script is not JavaScript the sandbox could read; its literal {expr}s come with the document (P11.7).
+            val evaluated = if (DeclarationEvaluator.SUPPORTED && document.dialect == Dialect.JS) withContext(Dispatchers.Default) { evaluator.evaluate(script, expressions) } else DeclarationEvaluator.Result.EMPTY
             val built = XmlPreviewFrames.build(document, fragment, XmlPreviewValues(evaluated.declarations, session.bindingOverrides, evaluated.expressions))
             request = built
             session.bindingNames = built.bindingNames
@@ -901,7 +902,9 @@ internal class DesignerActivity : StandaloneActivity() {
         // the document, the file or the draft; the held layout is sent again when it ends.
         // Roadmap P11.6: a host that delivers lifecycle events (contract v4) keeps the run while the designer is hidden and
         // gets pause / resume instead, like an app sent to the background; older hosts stop it and run it again.
-        val interactiveSupported = client.embedded && client.scriptRunSupported
+        // Roadmap D69: a TSX script runs in the preview once the host compiles it (P11.H3); until then it runs in AutoJs6 only.
+        val tsxScript = session.document.dialect == Dialect.TSX
+        val interactiveSupported = client.embedded && client.scriptRunSupported && !tsxScript
         val lifecycleSupported = client.lifecycleSupported
         LaunchedEffect(session.interactive, interactiveSupported, lifecycleSupported || visible, session.revision, client.sessionRevision) {
             if (session.interactive && interactiveSupported && (lifecycleSupported || visible)) {
@@ -1113,7 +1116,9 @@ internal class DesignerActivity : StandaloneActivity() {
             }
         }
 
-        val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(ScriptLauncher.SCRIPT_MIME_TYPE)) { uri ->
+        // A TSX ui script keeps its .tsx name on export, as a TSX compose project does (roadmap P11.7).
+        val exportType = if (reader.dialect == Dialect.TSX) ScriptLauncher.TSX_EXPORT_MIME_TYPE else ScriptLauncher.SCRIPT_MIME_TYPE
+        val exporter = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(exportType)) { uri ->
             if (uri == null) return@rememberLauncherForActivityResult
             val ok = runCatching {
                 context.contentResolver.openOutputStream(uri, "wt")?.use { it.write(session.script().toByteArray(StandardCharsets.UTF_8)) } != null
@@ -1173,6 +1178,11 @@ internal class DesignerActivity : StandaloneActivity() {
                                     menuOpen = false
                                     if (project) {
                                         handOffProject(ScriptLauncher::runProjectIntent)
+                                        return@DropdownMenuItem
+                                    }
+                                    // AutoJs6 compiles a TSX script by its file name: it gets the file, not the text (P11.7).
+                                    if (reader.dialect == Dialect.TSX) {
+                                        sendToHost { uri, _ -> ScriptLauncher.runIntent(uri) }
                                         return@DropdownMenuItem
                                     }
                                     when (ScriptLauncher.run(context, session.script())) {
@@ -1259,6 +1269,7 @@ internal class DesignerActivity : StandaloneActivity() {
                         }
                         val rowText: String? = when {
                             !live -> when {
+                                tsxScript && ready != null && client.embedded && client.scriptRunSupported -> stringResource(R.string.designer_ui_interact_tsx_needs_host)
                                 interactiveSupported || ready == null -> null
                                 !client.pointerInteractiveAvailable -> stringResource(R.string.designer_ui_interact_needs_android)
                                 else -> stringResource(R.string.designer_ui_interact_needs_host, ready.hostVersionName ?: ready.hostVersionCode.toString())

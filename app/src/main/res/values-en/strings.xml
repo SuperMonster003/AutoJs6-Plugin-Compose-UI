@@ -216,8 +216,10 @@
     <string name="designer_ui_interact_no_ime">The script is running; before Android 15 the preview takes no keyboard input</string>
     <string name="designer_ui_interact_running">The script is running in AutoJs6</string>
     <string name="designer_ui_interact_starting">Starting the script in AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_host">This AutoJs6 cannot run TSX scripts in the interactive preview yet; use Run to try the script in AutoJs6</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">In the script</string>
+    <string name="designer_ui_layout_in_tsx">In a TSX script</string>
     <string name="designer_ui_layout_label">Layout</string>
     <string name="designer_ui_preview_failed">Layout failed at &lt;%1$s&gt;: %2$s</string>
     <string name="designer_ui_preview_host_missing">The layout preview needs AutoJs6, which is not installed</string>

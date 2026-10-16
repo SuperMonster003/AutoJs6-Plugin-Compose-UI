@@ -216,8 +216,10 @@
     <string name="designer_ui_interact_no_ime">Скрипт выполняется; до Android 15 предпросмотр не принимает ввод с клавиатуры</string>
     <string name="designer_ui_interact_running">Скрипт выполняется в AutoJs6</string>
     <string name="designer_ui_interact_starting">Запуск скрипта в AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_host">Этот AutoJs6 пока не запускает TSX-скрипты в интерактивном предпросмотре; запустите скрипт в AutoJs6 командой запуска</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">В скрипте</string>
+    <string name="designer_ui_layout_in_tsx">В TSX-скрипте</string>
     <string name="designer_ui_layout_label">Макет</string>
     <string name="designer_ui_preview_failed">Ошибка макета в &lt;%1$s&gt;: %2$s</string>
     <string name="designer_ui_preview_host_missing">Для предпросмотра макета нужен AutoJs6, который не установлен</string>

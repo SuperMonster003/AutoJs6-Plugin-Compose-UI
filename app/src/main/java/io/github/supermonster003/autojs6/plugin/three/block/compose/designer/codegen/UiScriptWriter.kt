@@ -1,5 +1,6 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen
 
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiSegment
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlAttr
@@ -13,7 +14,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
  */
 object UiScriptWriter {
 
-    fun write(document: UiDocument): String = buildString {
+    fun write(document: UiDocument): String = if (document.dialect == Dialect.TSX) TsxUiWriter.write(document) else buildString {
         for (segment in document.segments) when (segment) {
             is UiSegment.Opaque -> append(segment.source)
             is UiSegment.Layout -> append(write(segment.fragment.root))

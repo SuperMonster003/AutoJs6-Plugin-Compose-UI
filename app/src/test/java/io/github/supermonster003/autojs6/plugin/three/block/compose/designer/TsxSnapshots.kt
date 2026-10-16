@@ -2,7 +2,10 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryCatalog
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.TsxWriter
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.UiScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiSegment
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.ScriptReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsTree
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsTreeJson
@@ -58,6 +61,11 @@ internal class TsxSnapshots(val root: Path = defaultRoot()) {
         fun sha256(bytes: ByteArray): String = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
 
         /** The TSX form of a JavaScript compose script: its document written by the TSX writer. */
+        /** The TSX ui writer's form of [document] with every layout written whole, as if each one had been edited (P11.7). */
+        fun tsxUiCanonical(document: UiDocument): String = UiScriptWriter.write(
+            document.copy(segments = document.segments.map { segment -> if (segment is UiSegment.Layout) UiSegment.Layout(segment.fragment.copy(tsx = null)) else segment }),
+        )
+
         fun tsxForm(script: String): String = TsxWriter.write(ScriptReader().read(script).copy(dialect = Dialect.TSX))
 
         /** The bundled JavaScript examples by file name. */

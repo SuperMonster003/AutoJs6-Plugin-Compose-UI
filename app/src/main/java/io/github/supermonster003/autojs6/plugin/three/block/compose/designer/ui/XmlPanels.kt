@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.FragmentUsage
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifference
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifferenceKind
@@ -105,6 +106,8 @@ private enum class LayoutFileRequest { EXTRACT, NEW }
  */
 @Composable
 private fun LayoutFileMenu(session: UiDesignerSession, palette: StandalonePalette, onRequest: (LayoutFileRequest) -> Unit) {
+    // Layout files are read and written for JavaScript scripts only (roadmap P11.7: not yet for TSX).
+    if (session.document.dialect != Dialect.JS) return
     val context = LocalContext.current
     var open by remember { mutableStateOf(false) }
     val notInline = stringResource(R.string.designer_layout_file_not_inline)

@@ -16,6 +16,7 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.mod
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditCommand
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEditHistory
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEvents
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiTemplates
@@ -210,17 +211,22 @@ internal class UiDesignerSession(
     fun scriptIdOf(element: XmlNode.Element): String? =
         element.idName()
 
-    /** The events the script already handles for [element], by its id. */
+    /** The events the script already handles for [element], by its id, and a TSX element's inline `onClick` (roadmap D68). */
     fun handledEvents(element: XmlNode.Element): Set<String> {
-        val id = scriptIdOf(element) ?: return emptySet()
-        return document.handlers.filter { it.id == id }.map { it.event }.toSet()
+        val inline = if (document.dialect == Dialect.TSX && element.attr(UiEvents.TSX_CLICK_ATTRIBUTE) != null) setOf("click") else emptySet()
+        val id = scriptIdOf(element) ?: return inline
+        return document.handlers.filter { it.id == id }.map { it.event }.toSet() + inline
     }
 
     /**
      * Appends a `ui.<id>.on('<event>', ...)` stub for [element] (roadmap D52, option (b)), giving the element a fresh
-     * id (`<tag>1`, `<tag>2`, ...) first when it has none; one undo step.
+     * id (`<tag>1`, `<tag>2`, ...) first when it has none; one undo step. A TSX click gets an inline `onClick` instead
+     * (roadmap D68), which needs no id.
      */
     fun addHandler(element: XmlNode.Element, event: UiEvents.Event): Boolean {
+        if (document.dialect == Dialect.TSX && event.name == "click") {
+            return execute(UiEditCommand.AddHandlerStub(element.id, event), merge = false)
+        }
         if (!canAddHandlers(element)) return false
         val existing = scriptIdOf(element)
         val assign = if (existing == null) freshId(element.tag) else null

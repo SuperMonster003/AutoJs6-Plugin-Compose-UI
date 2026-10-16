@@ -216,8 +216,10 @@
     <string name="designer_ui_interact_no_ime">スクリプトは実行中です. Android 15 より前ではプレビューはキーボード入力を受け取れません</string>
     <string name="designer_ui_interact_running">スクリプトは AutoJs6 で実行中です</string>
     <string name="designer_ui_interact_starting">AutoJs6 でスクリプトを開始しています</string>
+    <string name="designer_ui_interact_tsx_needs_host">この AutoJs6 はまだインタラクティブプレビューで TSX スクリプトを実行できません. \"実行\" で AutoJs6 で試してください</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">スクリプト内</string>
+    <string name="designer_ui_layout_in_tsx">TSX スクリプト内</string>
     <string name="designer_ui_layout_label">レイアウト</string>
     <string name="designer_ui_preview_failed">&lt;%1$s&gt; でレイアウトに失敗しました: %2$s</string>
     <string name="designer_ui_preview_host_missing">レイアウトプレビューには AutoJs6 が必要ですが, インストールされていません</string>

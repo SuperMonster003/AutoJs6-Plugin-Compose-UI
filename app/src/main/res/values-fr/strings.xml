@@ -216,8 +216,10 @@
     <string name="designer_ui_interact_no_ime">Le script s\'exécute; avant Android 15, l\'aperçu ne reçoit pas la saisie au clavier</string>
     <string name="designer_ui_interact_running">Le script s\'exécute dans AutoJs6</string>
     <string name="designer_ui_interact_starting">Démarrage du script dans AutoJs6</string>
+    <string name="designer_ui_interact_tsx_needs_host">Cet AutoJs6 n\'exécute pas encore de scripts TSX dans l\'aperçu interactif; utilisez Exécuter pour essayer le script dans AutoJs6</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">Dans le script</string>
+    <string name="designer_ui_layout_in_tsx">Dans un script TSX</string>
     <string name="designer_ui_layout_label">Mise en page</string>
     <string name="designer_ui_preview_failed">La mise en page a échoué à &lt;%1$s&gt;: %2$s</string>
     <string name="designer_ui_preview_host_missing">L\'aperçu de la mise en page nécessite AutoJs6, qui n\'est pas installé</string>

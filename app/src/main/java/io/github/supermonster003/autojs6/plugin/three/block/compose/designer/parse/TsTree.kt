@@ -33,6 +33,10 @@ class TsNode(
 
     fun has(name: String): Boolean = name in fields
 
+    /** Every child node, whatever property holds it, in source order. */
+    val children: List<TsNode>
+        get() = fields.values.flatMap { member -> if (member is TsNode) listOf(member) else (member as List<*>).filterIsInstance<TsNode>() }.sortedBy { it.start }
+
     override fun toString(): String = "$kind[$start, $end)"
 }
 

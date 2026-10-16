@@ -3,6 +3,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.TsxWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.DesignerParseError
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsxReader
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsxUiReader
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import org.junit.Assume.assumeTrue
 import org.junit.Test
@@ -15,7 +16,8 @@ import java.nio.file.Paths
  * which sets TSX_SNAPSHOTS_RECORD to the snapshot root and parses the written files with the TypeScript Engine
  * parser Worker afterwards. `gallery/` and `examples/` hold the TSX form of the JavaScript scripts, `templates/` the
  * new-project template; `canonical/` holds the TSX writer's form of every hand-written source (`host/`, `cases/`)
- * whose current tree maps.
+ * whose current tree maps. Roadmap P11.7: `ui-templates/` holds the TSX ui template and `ui-canonical/` the TSX ui
+ * writer's form (every layout written whole) of each TSX ui source (`ui/`, the template, `host/legacy-xml.tsx`).
  */
 class TsxSnapshotRecorder {
 
@@ -36,6 +38,15 @@ class TsxSnapshotRecorder {
             }
             write(snapshots.root.resolve("canonical/$name"), TsxWriter.write(document))
         }
+        write(snapshots.root.resolve(UI_TEMPLATE), ProjectStore.TSX_UI_TEMPLATE)
+        (UI_SOURCES.flatMap { snapshots.sources(it) } + UI_HOST).filter { snapshots.isCurrent(it) }.forEach { name ->
+            val document = try {
+                TsxUiReader().read(snapshots.source(name), snapshots.tree(name))
+            } catch (error: DesignerParseError) {
+                return@forEach
+            }
+            write(snapshots.root.resolve("ui-canonical/$name"), TsxSnapshots.tsxUiCanonical(document))
+        }
     }
 
     private fun clear(directory: Path) {
@@ -49,8 +60,12 @@ class TsxSnapshotRecorder {
     }
 
     companion object {
-        val GENERATED = listOf("gallery", "examples", "canonical", "templates")
+        val GENERATED = listOf("gallery", "examples", "canonical", "templates", "ui-templates", "ui-canonical")
         const val TEMPLATE = "templates/new-project.tsx"
         val HAND_WRITTEN = listOf("host", "cases")
+        const val UI_TEMPLATE = "ui-templates/new-project.tsx"
+        /** The TSX ui sources whose canonical form is recorded; the template is recorded first, so it has a tree on the second pass. */
+        val UI_SOURCES = listOf("ui", "ui-templates")
+        const val UI_HOST = "host/legacy-xml.tsx"
     }
 }

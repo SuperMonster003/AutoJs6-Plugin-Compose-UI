@@ -20,9 +20,13 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.ThreeBlockComposePlugin
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptLauncher
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.TsxParserClient
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.UiPreviewClient
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.storage.ProjectStore
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.DesignerActivity
 import org.junit.After
@@ -41,7 +45,9 @@ import org.junit.runner.RunWith
  * Roadmap P9.2 / D42 device coverage. With a TypeScript Engine that has the parser service, a TSX project
  * opens through it, takes edits (a handler with TypeScript syntax is checked by the same parser), saves as TSX
  * and reopens equal. Without one (not installed, or older than 0.7.0) the project opens read-only with the
- * reason. Which half runs depends on the device; the evidence records both.
+ * reason. Which half runs depends on the device; the evidence records both. Roadmap P11.7: a TSX ui project opens in
+ * the XML editor through the same parser, gets its layout previewed by the host, takes a handler stub in the TSX
+ * form (D68) and saves as TSX that reopens and saves the same.
  */
 @RunWith(AndroidJUnit4::class)
 internal class DesignerTsxDeviceTest {
@@ -178,6 +184,57 @@ internal class DesignerTsxDeviceTest {
         }
         assertEquals(name, displayName)
         if (ScriptLauncher.isHostInstalled(context)) assertNotNull(context.packageManager.resolveActivity(run, 0))
+    }
+
+    @Test
+    fun aTsxUiProjectIsEditedInTheXmlEditorAndSavedAsTsx() {
+        assumeTrue("needs TypeScript Engine ${TsxParserClient.MIN_VERSION_NAME}+", TsxParserClient.hasParserService(context))
+        val name = project("ui", ProjectStore.TSX_UI_TEMPLATE)
+        fun awaitOutline() = rule.waitUntil(30_000) { rule.onAllNodesWithTag("designer-xml-outline").fetchSemanticsNodes().isNotEmpty() }
+        launch(name).use { scenario ->
+            awaitOutline()
+            lateinit var activity: DesignerActivity
+            scenario.onActivity { activity = it }
+            val session = requireNotNull(activity.currentUiSession)
+            assertEquals(Dialect.TSX, session.document.dialect)
+            // The host previews the layout as the XML its TSX runtime makes of it.
+            val client = requireNotNull(activity.currentPreviewClient)
+            rule.waitUntil(30_000) { client.status is UiPreviewClient.Status.Ready || client.status is UiPreviewClient.Status.Unavailable }
+            if (client.status is UiPreviewClient.Status.Ready) {
+                rule.waitUntil(60_000) { client.bounds.isNotEmpty() || client.failure != null }
+                assertEquals(null, client.failure)
+                assertEquals(3, client.elementCount)
+                assertEquals(listOf("title", "ok"), client.bounds.sortedBy { it.index }.mapNotNull { it.id })
+                // Until the host compiles TSX for the interactive preview (P11.H3) the switch is off with a note.
+                if (client.scriptRunSupported) {
+                    assertTrue(rule.onAllNodesWithTag("designer-interact").fetchSemanticsNodes().isEmpty())
+                    val note = activity.getString(R.string.designer_ui_interact_tsx_needs_host)
+                    assertEquals(note, rule.onNodeWithTag("designer-ui-interact-status", useUnmergedTree = true).fetchSemanticsNode().config[SemanticsProperties.Text].joinToString { it.text })
+                }
+            }
+            // The button's click is its inline onClick (D68); the title takes a long click stub in the TSX form.
+            rule.onNodeWithTag("designer-xml-outline-3").performClick()
+            rule.onNodeWithTag("designer-tab-inspector").performClick()
+            rule.onNodeWithTag("designer-ui-event-click").performScrollTo().assertIsDisplayed()
+            assertTrue(rule.onAllNodesWithTag("designer-ui-event-add-click").fetchSemanticsNodes().isEmpty())
+            rule.onNodeWithTag("designer-tab-outline").performClick()
+            rule.onNodeWithTag("designer-xml-outline-2").performClick()
+            rule.onNodeWithTag("designer-tab-inspector").performClick()
+            rule.onNodeWithTag("designer-ui-event-add-long_click").performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+            rule.waitUntil(5_000) { UiHandler("title", "long_click") in session.document.handlers }
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        val expected = ProjectStore.TSX_UI_TEMPLATE.trimEnd('\n') + "\n\n(ui as any).title.on('long_click', (_event: any, _view: any) => {\n    // TODO\n});\n"
+        assertEquals(expected, store.read(name))
+        assertFalse(store.draftFile(name).exists())
+        // Reopened through the parser, saving writes the same TSX.
+        launch(name).use {
+            awaitOutline()
+            rule.onNodeWithTag("designer-save").performClick()
+            rule.waitForIdle()
+        }
+        assertEquals(expected, store.read(name))
     }
 
     private companion object {

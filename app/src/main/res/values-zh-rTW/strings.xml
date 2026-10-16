@@ -216,8 +216,10 @@
     <string name="designer_ui_interact_no_ime">指令碼執行中; Android 15 之前預覽無法接收鍵盤輸入</string>
     <string name="designer_ui_interact_running">指令碼正在 AutoJs6 中執行</string>
     <string name="designer_ui_interact_starting">正在 AutoJs6 中啟動指令碼</string>
+    <string name="designer_ui_interact_tsx_needs_host">目前的 AutoJs6 還不能在互動預覽中執行 TSX 指令碼; 請用 \"執行\" 在 AutoJs6 中試執行</string>
     <string name="designer_ui_language_ui">UI (XML)</string>
     <string name="designer_ui_layout_in_script">指令碼內</string>
+    <string name="designer_ui_layout_in_tsx">TSX 指令碼內</string>
     <string name="designer_ui_layout_label">佈局</string>
     <string name="designer_ui_preview_failed">佈局在 &lt;%1$s&gt; 處失敗: %2$s</string>
     <string name="designer_ui_preview_host_missing">佈局預覽需要 AutoJs6, 但尚未安裝</string>
