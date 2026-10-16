@@ -11,7 +11,7 @@ Stage the audited **release** artifacts named exactly:
   `PluginCapabilityKeys`), consumed with `implementation`.
 - `typescript-parser-api.aar` (host module `plugin-api/typescript-parser-api`, P9.2): the TypeScript parser
   contract, consumed with `implementation`; see the section below.
-- `ui-preview-api.aar` (host module `plugin-api/ui-preview-api`, P10.2 / P10.3, v2 in P10.6): the ui-mode
+- `ui-preview-api.aar` (host module `plugin-api/ui-preview-api`, P10.2 / P10.3, v2 in P10.6, v4 in P11.5): the ui-mode
   preview contract the designer binds the host with (layout preview and interactive script runs), consumed
   with `implementation`; see the section below.
 - `compose-ui-api.aar` (host module `plugin-api/compose-ui-api`): frozen V1 loading interfaces,
@@ -100,12 +100,18 @@ The host defines the contract but does not package the module, so the plugin con
 `org.autojs.plugin.typescript.PARSER`, PLUGIN permission); the designer binds it to read `.tsx` projects.
 The protocol is described in the host document `docs/dev/typescript-parser-plugin-protocol-v1.md`.
 
-## ui-mode preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51, v2 in P10.6, v3 in P11.H1)
+## ui-mode preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51, v2 in P10.6, v3 in P11.H1, v4 in P11.5)
 
 `ui-preview-api.aar` is the release AAR of the host module `plugin-api/ui-preview-api` at host commit
-`2da2d4119` (`feat(plugin-api): append ui preview contract v3 for project resources and projects`), assembled
+`ef88268be` (`feat(plugin-api): append ui preview contract v4 for lifecycle events and busy-wait limits`), assembled
 with `:plugin-api:ui-preview-api:assembleRelease`; a rebuild from the same commit is byte-identical.
-SHA-256 `4746f9f3e817e2c634e2005635373c9f864c7a33ca7f0703ca16133911dd8b94`, MPL 2.0, 20618 bytes.
+SHA-256 `29abeb018fc0ca9b5b72e298a2d9a9bda7ec717da4d30b5f1510a0147756d392`, MPL 2.0, 21769 bytes, 13 class files.
+Contract v4 appends `sendLifecycle` (pause / resume / back_pressed for the running script) and the
+`onLifecycleHandled` callback after the v3 surface, the `busyWaitLimitMs` key of `runScript` with the
+`BUSY_WAIT` error code, `NOT_RUNNING`, and the `dialogsInCanvas` / `lifecycleEvents` / `busyWaitLimitSupported` /
+`windowFunctionsVisible` info flags; it freezes the v3 identity as `VERSION_V3` / `HASH_V3` (`196e52cd...`), which
+the version list keeps answering for 1.8.0. Host commit `2d7944d10` and later serve it. The v3 artifact before it was
+built from host commit `2da2d4119` (SHA-256 `4746f9f3...`, 20618 bytes).
 Contract v3 adds no transaction: request keys for a zip of the project's `res/` directory (`setLayout`:
 `resourcesFd` / `resourcesSha256` / `layoutPath` / `androidLayout`) and of the whole project (`runScript`:
 `projectFd` / `projectSha256` / `scriptPath`), the `ATTRIBUTE_IGNORED` diagnostic with its outcome field and the

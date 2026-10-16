@@ -13,6 +13,9 @@
 # 2026-10-16: ui-preview-api rebuilt from host commits 2da2d4119 / 9df0a154b (contract v3 appended for project resources,
 #   roadmap P11.H1): request keys for a resources / project zip, the ATTRIBUTE_IGNORED diagnostic and the version list;
 #   no transaction is added, the v1 / v2 identities are frozen (VERSION_V2 / HASH_V2).
+# 2026-10-16: ui-preview-api rebuilt from host commit ef88268be (contract v4 appended, roadmap P11.5): sendLifecycle /
+#   onLifecycleHandled, the busy-wait limit of runScript and four capability flags; the v3 identity is frozen
+#   (VERSION_V3 / HASH_V3), the v1 / v2 transactions and classes are unchanged.
 format=1
 common-plugin-api.file=common-plugin-api.aar
 common-plugin-api.sha256=ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15
@@ -21,4 +24,4 @@ compose-ui-api.sha256=557b7efc8fd7d17c2032f0a6e0ccb5f64b42d0a2f3dceabacd06c9ce89
 typescript-parser-api.file=typescript-parser-api.aar
 typescript-parser-api.sha256=c5651a0c779903bde8832af185bc63038d1706d32f3e67069fbcf0e536658519
 ui-preview-api.file=ui-preview-api.aar
-ui-preview-api.sha256=4746f9f3e817e2c634e2005635373c9f864c7a33ca7f0703ca16133911dd8b94
+ui-preview-api.sha256=29abeb018fc0ca9b5b72e298a2d9a9bda7ec717da4d30b5f1510a0147756d392
