@@ -113,8 +113,8 @@
 | P11.H2 | 动态布局器的 Android XML 属性集扩充: SDK 元数据表, 反射 setter 兜底, 映射表, 布局参数, 不支持属性跳过并警告一次, 资源限定符目录与 vector drawable, 文档 (D65; 宿主专门路线图 `docs/dev/android-xml-attributes-roadmap.md` 的 A1 - A9 (A9 为覆盖矩阵发现的 ConstraintLayout 辅助类), 维护者同日拍板其 Q1 - Q3) | 宿主 | 宿主本地 master | P11.2 |
 | P11.3 | XML 文件工程: 文件片段模型与读写, 原生命名空间目录 (由宿主元数据生成), 私有工程升格为文件夹 (含 project.json), zip 导出 / 导入, 运行 / 导入 AutoJs6 的宿主 zip 入口 (D62 - D64) | 插件 + 宿主 (zip 入口) | 1.8.0 | P11.2, P11.H1, P11.H2 |
 | P11.4 | 1.8.0 文档, changelog, gate 与发布 | 文档 + 发布 | 1.8.0 | P11.1 - P11.3 |
-| P11.5 | 预览契约 v3 与宿主侧缩小项: 对话框入画布, 生命周期事件与返回键, 窗口级函数可见效果, 忙等保护, `androidLayout` 标志 | 宿主 | 宿主本地 master | P11.4 |
-| P11.6 | 插件对接 v3: 返回键按钮, pause / resume, 忙等阈值设置项, 能力降级与差异列表联动 | 插件 | 1.9.0 | P11.5 |
+| P11.5 | 预览契约 v4 (原计划 v3, 见 P11.H1) 与宿主侧缩小项: 对话框入画布, 生命周期事件与返回键, 窗口级函数可见效果, 忙等保护 (`androidLayout` 标志已在 v3 交付) | 宿主 | 宿主本地 master | P11.4 |
+| P11.6 | 插件对接 v4: 返回键按钮, pause / resume, 忙等阈值设置项, 能力降级与差异列表联动 | 插件 | 1.9.0 | P11.5 |
 | P11.7 | TSX ui 布局: `TsxReader` 的 ui 分支, 片段范围, 规范化写回, 事件桩 | 插件 | 1.9.0 | P11.3 |
 | P11.8 | compose 联动: `compose.attach` 解析, 混合文档与子会话, 叠画与点选, 写回, 交互预览设备证据 | 插件 | 1.9.0 | P11.3 |
 | P11.9 | 1.9.0 文档, changelog, gate 与发布 | 文档 + 发布 | 1.9.0 | P11.6 - P11.8 |
@@ -185,14 +185,24 @@
   - 1.8.0 本地 gate (build 197, 源码即 `8ea8a7f`): markdown / icon `--check`; JVM 277; debug / androidTest / lint (0 错误, 15 警告) / release / verifySharedClasspath; classpath debug 与 release `--shrunk` (unresolved 0); release 带摘要包 `autojs6-plugin-three-block-compose-v1.8.0-bd7dab34.apk` 5993742 B (SHA-256 `9ca55f7b...a250`), DEX 方法引用 99366, 均在复核线 6177215 B / 105804 内; `.python/tests` 通过. 全套 instrumentation 139 项 (宿主为含 `faf412ef7` 的 debug 构建): AVD_API_33 只读实例 132 通过 7 跳过, AVD_API_24 只读实例 125 通过 14 跳过, 均无失败. release 包: API 24 `verify_standalone_launch` (`ui_preview=snapshot`) 与 `verify_host_handoff` 通过; API 33 `verify_standalone_launch` (`sandbox=ran`, `ui_preview=frame`), `verify_designer_recovery --kind all` (compose / ui / folder 三类均恢复) 与 `verify_host_handoff` 通过. 设计器性能复核线 (Redmi 22120RN86C, debug build 197): 16 项全部在线内 (例: 画廊读取 p90 57.2 / 65 ms, 打开最大示例 616.5 / 1000 ms, 撤销恢复一行 323.1 / 570 ms), 记录于 `docs/dev/p8-designer-performance.md`, 之后装回 1.8.0 release 并移除测试包 (该机宿主 5352 未动). content 文档的文件夹授权的真机证据见 P11.3.
   - 发布: 插件 `43cedbf` (tag `v1.8.0`, 应用源码与 `8ea8a7f` 相同) 推送; GitHub Release `v1.8.0` (APK `autojs6-plugin-three-block-compose-v1.8.0-bd7dab34.apk` 5993742 B, SHA-256 `9ca55f7b...a250`, 与 `SHA256SUMS`, 说明为 changelog 的中英文摘要与所需宿主提交); 官方索引 `ab8d019` 准入 3-Block Compose 1.8.0 (manifest 197, 生成器经 gh 令牌访问 GitHub API, 76 项索引测试与 Markdown 检查通过); 文档站推送至 `ba126b3` (内容 `47af615` / `22d7b1e` / `dc27392` (`9e3b834` 合入生成的 HTML / JSON 后的提交), 另一会话的 `c381a59` / `efe4cee`, 计数 119), Offline Docs `4634ab3` (同步 `dc27392`, 来源记录两处, 6.8.6 changelog 10 语言的设计器条目加 1.8.0 一句并新增 Android XML 属性条目, build 147; 另一会话的 `50a492e` 一并推送; 推送前检查 6 项通过). 推送时插件, 文档站与 Offline Docs 的 Markdown / Icon Studio 工作流通过, 插件 Build integrity (含两档模拟器 instrumentation) 运行中. 宿主 `faf412ef7` / `ff46ff57b` 等仍只在本地 master (D7).
 
-### P11.5 预览契约 v3 与宿主侧缩小项 (宿主, 本地 master)
+### P11.5 预览契约 v4 与宿主侧缩小项 (宿主, 本地 master)
 
-- [ ] (宿主) 契约 v3 只追加 (3.3 节): `getPreviewInfo()` 的四个能力标志与 v3 身份, `runScript` 的 `busyWaitLimitMs`, `sendLifecycle` / `onLifecycleHandled`, `layout` 请求的 `androidLayout`; `HASH` 更新, Binder getter 仍 v1; `UiPreviewContractTest` 覆盖 v1 / v2 前缀兼容.
-- [ ] (宿主) 对话框入画布: 预览会话实现对话框宿主, `dialogs.*` 与 `ui` 对话框挂在嵌入根上, 返回键 / 关闭 / 释放清理.
-- [ ] (宿主) 生命周期: 预览承载提供 `ui.emitter` (当前为 null), `sendLifecycle` 投递到它, `back_pressed` 未消费时以 `exit` 结束; 窗口级函数的仿状态栏 / 导航栏色条与根背景; 忙等观察器 (阈值来自请求, 缺省 5 s).
-- [ ] (测试) `UiPreviewServiceTest` 追加: v3 信息, 对话框在根内 (以 `dialogs.alert` 脚本找根下的对话框视图), `sendLifecycle` 到达 `ui.emitter` 与未消费返回键结束运行, `while (true)` 脚本在阈值内以 error 结束且主线程恢复, `statusBarColor` 色条的像素; API 33 / 35 模拟器通过.
+契约编号: 3.3 节与附录 A 写的 "v3" 在实施时为 v4 (v3 已由 P11.H1 用于工程资源); `androidLayout` 已在 v3 交付, 本阶段不再追加.
 
-### P11.6 插件对接 v3 (插件, 1.9.0)
+- [x] (宿主) 契约 v4 只追加 (3.3 节): `getPreviewInfo()` 的四个能力标志, `supportedContractVersions` 列出 1 - 4 (v3 冻结为 `VERSION_V3` / `HASH_V3`), `runScript` 的 `busyWaitLimitMs`, `sendLifecycle` / `onLifecycleHandled`; `HASH` 更新, Binder getter 仍 v1, 信息旧键仍 v2; `UiPreviewContractTest` 覆盖 v1 / v2 / v3 前缀兼容.
+- [x] (宿主) 对话框入画布: 预览会话实现对话框宿主, `dialogs.*` 与 `dialogs.build` 的对话框挂在嵌入根上, 返回键 / 关闭 / 释放清理.
+- [x] (宿主) 生命周期: 预览承载提供 `ui.emitter` (此前为 null), `sendLifecycle` 投递到它, `back_pressed` 未消费时以 `exit` 结束; 窗口级函数的仿状态栏 / 导航栏色条与根背景; 忙等观察器 (阈值来自请求, 缺省 5 s).
+- [x] (测试) `UiPreviewServiceTest` 追加: v4 信息, 对话框在根内 (以 `dialogs.alert` 脚本找根下的对话框视图), `sendLifecycle` 到达 `ui.emitter` 与未消费返回键结束运行, `while (true)` 脚本在阈值内以 error 结束且主线程恢复, `statusBarColor` 色条的像素; API 33 / 35 模拟器通过.
+
+  证据 (2026-10-16): 宿主本地提交 `ef88268be` (契约 v4: `VERSION` 4, `HASH` `b7591e9e...81b2`, 冻结 `HASH_V3` `196e52cd...`; 协议文档新节 "Runs closer to an Activity (V4)"), `2d7944d10` (实现), `418ba88a6` (测试与 `.python/ui_preview_device_tests.py`). 实现要点:
+  - 对话框: material-dialogs 分支新增 `MaterialDialogPresenter` (经 Context 链解析, 与主题委托同法): 被呈现的对话框不创建窗口, `show` / `dismiss` / `isShowing` / 取消标志由呈现者接管, 关闭监听按窗口的消息顺序投递. 宿主 `Dialogs` 先取 `UiContentHost.dialogContextOf(runtime)`, 预览运行返回会话的 `UiPreviewDialogContext` (会话配置 + Light 主题), 对话框视图移入根上的 `UiPreviewDialogLayer` (遮罩, 按会话尺寸取对话框宽度与最大高度, 点外部 / 返回键按其取消标志取消, 运行结束时全部移除).
+  - 生命周期: 运行自带 `EventEmitter` (`UiContentHost.lifecycleEmitter`, `ui.emitter` 先取它), 开始时像 `ScriptExecuteActivity` 一样在投递脚本主体后发 `create` / `resume`; `sendLifecycle` 校验后在调用返回后投递, `back_pressed` 先交给顶层对话框, 再交给 `ui.emitter`, 未消费以 `exit` 结束; `onLifecycleHandled` 回报 `consumed`.
+  - 窗口颜色: `UiContentHost.onWindowColor`, 根视图分为内容框 (`ui.root`), 两条色条 (24 / 48 dp) 与对话框层; 下一次运行和无运行时的布局回到无色条的根. 其余窗口级函数的警告改写到运行自己的控制台 (P11.2 证据中 "警告不回传" 的缺口随之修复), 每次运行每个函数一次.
+  - 忙等: `UiPreviewBusyWatch` 由 Rhino 指令观察器 (`InterruptibleAndroidContextFactory`) 调用, 以运行的全局作用域找到主线程上正在执行的运行, 心跳 (主循环每 200 ms) 过旧超过阈值即抛出脚本 `catch` 接不到的中断异常, `onScriptError` 带 `ERR_AUTOJS6_UI_PREVIEW_BUSY_WAIT`, 行号与 `elapsedMs`; `stopScript` / 替换 / 释放先中断忙碌的脚本, 阈值为 0 时也有效. 另: 事件处理函数与定时器中的未捕获错误现在也经 `onScriptError` 回报 (此前只以 `exit` 结束).
+  - 验证: JVM 契约 8 项, 预览包 28 项 (新增忙等上限与生命周期事件校验); 设备 `UiPreviewServiceTest` 20 项在 AVD_API_33 (emulator-5584) 与 AVD_API_35_16K (emulator-5590) 只读实例全部通过 (新增 4 项: 对话框入根并接管返回键, 生命周期与返回键, 色条与背景像素和运行控制台警告, 忙等在 1 s 上限内以 error 结束 (第 6 行) 且阈值为 0 时 `stopScript` 能停下忙碌的点击处理函数). 兼容: 插件 1.8.0 (v3 客户端) 对 v4 宿主跑 `UiInteractiveDeviceTest` / `UiPreviewDeviceTest` 4 项与 `verify_layout_files.py` 6 项通过. 宿主对话框相关回归 (`EditorPopupMenuThemeInstrumentationTest`, `ExplorerRenameDialogMenuInstrumentationTest`, `CircularMenuOperationDialogInstrumentationTest`, 共 8 项) 通过; `InfoDialogInstrumentationTest` 在两台模拟器上因 MainActivity 45 s 内不空闲 (主线程持续派发 vsync, 进程中没有预览运行) 而失败, 与本阶段无关, 未处理.
+  - 契约 AAR `ui-preview-api-release.aar` 21769 B, SHA-256 `29abeb01...d392`, 重建字节一致 (副本在会话 scratchpad); 插件在 P11.6 换用并更新锁. 宿主 zh-Hans changelog 条目留到 P11.6 (届时写明所需插件版本).
+
+### P11.6 插件对接 v4 (插件, 1.9.0)
 
 - [ ] (插件) `UiPreviewClient` 读 v3 能力; 画布上方行加 "返回" 按钮 (运行中可见), 不可见 / 可见时发 pause / resume 而不再重跑 (v3 宿主) 或维持现状 (旧宿主); 设置页 "交互预览忙等上限" (1 - 60 秒, 默认 5) 经 `runScript` 传给宿主; 差异列表按能力过滤 (P11.2 已备好 `UiDesignerSession.hostCapabilities` 与 `PreviewDifferences.visible`, 这里只需把 v3 宣告映射为 `PreviewCapability`; v3 宿主提供 `ui.emitter` 后 `ACTIVITY_EVENTS` 的说明要改为 "事件不会发生" 而不是 "这一行出错"); `androidLayout` 标志随片段发送.
 - [ ] (测试) `UiInteractiveDeviceTest` 追加 (v3 宿主时): 对话框脚本的对话框出现在画布内 (经 `UiAutomation` 点击其按钮), 返回键结束运行并显示 `exit`, 隐藏 / 显示发 pause / resume 而脚本不重跑 (计数器脚本的值保留), 忙等脚本在阈值内结束且设计器可用; 旧宿主上这些项按假设跳过.
@@ -225,6 +235,8 @@
 ---
 
 ## 附录 A: 预览契约 v3 草案 (只追加)
+
+实施时编号为 v4 (P11.5); 定稿见宿主 `docs/dev/ui-preview-plugin-protocol-v1.md` "Runs closer to an Activity (V4)". 与草案的差异: 不追加 `androidLayout` (v3 已有), 错误码另有 `ERR_AUTOJS6_UI_PREVIEW_NOT_RUNNING`, `onScriptError` 的忙等错误另带 `elapsedMs`, `busyWaitLimitMs` 可为 int 或 long.
 
 ```aidl
 interface IUiPreviewService {
