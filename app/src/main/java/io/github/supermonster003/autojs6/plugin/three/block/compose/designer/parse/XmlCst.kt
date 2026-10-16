@@ -23,6 +23,15 @@ internal object XmlCst {
     fun parse(text: String, exprRanges: List<ExprRange> = emptyList(), nextId: () -> Int): XmlNode.Element =
         Scanner(text, exprRanges.sortedBy { it.start }, nextId).parseDocument()
 
+    /** A layout file split around its root element: [prefix] and [suffix] are kept byte for byte. */
+    data class FileParts(val prefix: String, val root: XmlNode.Element, val suffix: String)
+
+    /**
+     * Parses a whole layout file (roadmap P11.3): an optional byte order mark, XML declaration, comments and whitespace
+     * before one root element, comments and whitespace after it. A layout file has no E4X expressions, so `{` is text.
+     */
+    fun parseFile(text: String, nextId: () -> Int): FileParts = Scanner(text, emptyList(), nextId).parseFile()
+
     private class Scanner(private val text: String, private val exprs: List<ExprRange>, private val nextId: () -> Int) {
         private var pos = 0
         private var exprCursor = 0
@@ -34,6 +43,34 @@ internal object XmlCst {
             val restStart = pos
             if (text.substring(pos).isNotBlank()) fail(restStart, "Only one root element is allowed in a layout literal")
             return root
+        }
+
+        fun parseFile(): FileParts {
+            if (text.firstOrNull()?.code == BYTE_ORDER_MARK) pos = 1
+            while (true) {
+                skipWhitespace()
+                when {
+                    pos >= text.length -> fail(pos, "The layout file has no root element")
+                    at("<?") -> readUntil("?>", "Unterminated XML declaration")
+                    at("<!--") -> readUntil("-->", "Unterminated comment")
+                    at("<!") -> fail(pos, "Document type declarations are not supported in a layout file")
+                    at("<") -> break
+                    else -> fail(pos, "Text before the root element")
+                }
+            }
+            val prefix = text.substring(0, pos)
+            val root = parseElement()
+            val suffixStart = pos
+            while (true) {
+                skipWhitespace()
+                when {
+                    pos >= text.length -> break
+                    at("<!--") -> readUntil("-->", "Unterminated comment")
+                    at("<?") -> readUntil("?>", "Unterminated processing instruction")
+                    else -> fail(pos, "Only one root element is allowed in a layout file")
+                }
+            }
+            return FileParts(prefix, root, text.substring(suffixStart))
         }
 
         private fun exprAt(offset: Int): ExprRange? {
@@ -165,4 +202,6 @@ internal object XmlCst {
 
         private fun fail(offset: Int, reason: String): Nothing = throw XmlCstError(offset, reason)
     }
+
+    private const val BYTE_ORDER_MARK = 0xFEFF
 }

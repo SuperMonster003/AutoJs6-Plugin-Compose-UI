@@ -3,6 +3,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.co
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiSegment
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlAttr
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlFragment
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 
 /**
@@ -17,6 +18,16 @@ object UiScriptWriter {
             is UiSegment.Opaque -> append(segment.source)
             is UiSegment.Layout -> append(write(segment.fragment.root))
         }
+    }
+
+    /** The text of every layout file the document refers to (roadmap P11.3), by the path the script writes. */
+    fun writeFiles(document: UiDocument): Map<String, String> = document.files.associate { it.file!!.path to writeFile(it) }
+
+    /** A layout file fragment back to its file text: prefix, root and suffix, with the file's own line breaks. */
+    fun writeFile(fragment: XmlFragment): String {
+        val file = fragment.file ?: error("not a layout file fragment")
+        val text = file.prefix + write(fragment.root) + file.suffix
+        return if (file.crlf) text.replace("\n", "\r\n") else text
     }
 
     fun write(node: XmlNode): String = when (node) {

@@ -100,25 +100,43 @@ sealed class UiEditCommand {
         override fun apply(document: UiDocument): UiDocument {
             val fragmentIndex = document.fragmentOf(id)
             if (document.fragments.getOrNull(fragmentIndex)?.stubOffset?.let { it < 0 } != false) return document
-            val current = if (assignId != null) SetAttr(id, "id", assignId).apply(document) else document
+            val current = when {
+                assignId == null -> document
+                document.isNative(id) -> SetAttr(id, "android:id", "@+id/$assignId").apply(document)
+                else -> SetAttr(id, "id", assignId).apply(document)
+            }
             val element = current.element(id) ?: return document
-            val elementId = element.attr("id")?.takeUnless { it.hasBinding || it.hasExpr }?.value
-                ?.removePrefix("@+id/")?.removePrefix("@id/")?.takeIf { IDENTIFIER.matches(it) } ?: return document
+            val elementId = element.idName()?.takeIf { IDENTIFIER.matches(it) } ?: return document
             val handler = UiHandler(elementId, event.name)
             if (handler in current.handlers) return document
-            val segmentIndex = current.segments.indexOfFirst { it is UiSegment.Layout && it.fragment.root.id == element.descendantsRootId(current) }
-            val layout = current.segments.getOrNull(segmentIndex) as? UiSegment.Layout ?: return document
-            val next = current.segments.getOrNull(segmentIndex + 1) as? UiSegment.Opaque ?: return document
-            val offset = layout.fragment.stubOffset
-            if (offset !in 0..next.source.length) return document
-            val stub = UiEvents.stub(elementId, event, layout.fragment.stubIndent)
-            val segments = current.segments.toMutableList()
-            segments[segmentIndex] = layout.copy(fragment = layout.fragment.copy(stubOffset = offset + stub.length))
-            segments[segmentIndex + 1] = UiSegment.Opaque(next.source.substring(0, offset) + stub + next.source.substring(offset))
-            return current.copy(segments = segments, handlers = current.handlers + handler)
+            val fragment = current.fragments[fragmentIndex]
+            // A literal's stubs go into the opaque text right after it; a layout file's into the text recorded with it (P11.3).
+            val segmentIndex = if (fragment.file != null) {
+                fragment.stubSegment
+            } else {
+                current.segments.indexOfFirst { it is UiSegment.Layout && it.fragment.root.id == fragment.root.id }.takeIf { it >= 0 }?.plus(1) ?: return document
+            }
+            val opaque = current.segments.getOrNull(segmentIndex) as? UiSegment.Opaque ?: return document
+            val offset = fragment.stubOffset
+            if (offset !in 0..opaque.source.length) return document
+            val stub = UiEvents.stub(elementId, event, fragment.stubIndent)
+            return insertStub(current, segmentIndex, offset, stub).copy(handlers = current.handlers + handler)
         }
 
-        private fun XmlNode.Element.descendantsRootId(document: UiDocument): Int = document.fragments[document.fragmentOf(id)].root.id
+        /** Inserts [stub] into the opaque segment [segmentIndex] at [offset]; every stub point there at or after it moves along. */
+        private fun insertStub(document: UiDocument, segmentIndex: Int, offset: Int, stub: String): UiDocument {
+            fun shifted(fragment: XmlFragment) = if (fragment.stubOffset >= offset) fragment.copy(stubOffset = fragment.stubOffset + stub.length) else fragment
+            val segments = document.segments.mapIndexed { index, segment ->
+                when {
+                    index == segmentIndex && segment is UiSegment.Opaque ->
+                        UiSegment.Opaque(segment.source.substring(0, offset) + stub + segment.source.substring(offset))
+                    index == segmentIndex - 1 && segment is UiSegment.Layout && segment.fragment.stubOffset >= 0 -> segment.copy(fragment = shifted(segment.fragment))
+                    else -> segment
+                }
+            }
+            val files = document.files.map { if (it.stubSegment == segmentIndex && it.stubOffset >= 0) shifted(it) else it }
+            return document.copy(segments = segments, files = files)
+        }
 
         private companion object {
             val IDENTIFIER = Regex("""[A-Za-z_$][A-Za-z0-9_$]*""")
@@ -137,8 +155,11 @@ internal object UiLayoutEdits {
             val parent = document.element(placement.parentId) ?: return ""
             (parent.children.getOrNull(placement.childIndex - 1) as? XmlNode.Text)?.text
         } else {
-            val index = document.segments.indexOfFirst { it is UiSegment.Layout && it.fragment.root.id == id }
-            (document.segments.getOrNull(index - 1) as? UiSegment.Opaque)?.source
+            // A layout file's root follows the file's prefix (P11.3); a literal's root follows the script text before it.
+            document.files.firstOrNull { it.root.id == id }?.file?.prefix ?: run {
+                val index = document.segments.indexOfFirst { it is UiSegment.Layout && it.fragment.root.id == id }
+                (document.segments.getOrNull(index - 1) as? UiSegment.Opaque)?.source
+            }
         } ?: return ""
         val tail = before.substring(before.lastIndexOf('\n') + 1)
         return if (tail.isBlank()) tail else ""

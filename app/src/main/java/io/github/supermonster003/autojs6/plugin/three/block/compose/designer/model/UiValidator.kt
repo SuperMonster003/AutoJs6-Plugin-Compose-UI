@@ -35,10 +35,7 @@ class UiValidator(private val catalog: UiCatalog = UiCatalog.load()) {
             resolved == null -> out += Diagnostic(element.id, null, Severity.ERROR, "Unknown tag <${element.tag}>")
             !resolved.known -> out += Diagnostic(element.id, null, Severity.WARNING, "<${element.tag}> is checked with ${resolved.viewClass} attributes only")
         }
-        element.attr("id")?.takeUnless { it.hasBinding || it.hasExpr }?.let { attr ->
-            val id = attr.value.removePrefix("@+id/").removePrefix("@id/")
-            ids.getOrPut(id) { ArrayList() } += element.id
-        }
+        element.idName()?.let { id -> ids.getOrPut(id) { ArrayList() } += element.id }
         if (resolved != null && !namespaced) {
             val unsupported = catalog.unsupported(resolved.viewClass)
             for (attr in element.attrs) {

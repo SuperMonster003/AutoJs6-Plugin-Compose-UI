@@ -134,7 +134,38 @@ data class XmlFragment(
     val layoutCallOffset: Int = -1,
     val stubOffset: Int = -1,
     val stubIndent: String = "",
+    /**
+     * Set for a layout file the script refers to (roadmap P11.3 / D56) instead of a literal in it. Its stubs go into
+     * the opaque segment [stubSegment] at [stubOffset], after the statement that loads the file.
+     */
+    val file: LayoutFileSource? = null,
+    val stubSegment: Int = -1,
 )
+
+/**
+ * A layout XML file a script refers to with a literal path (roadmap P11.3 / D56): `ui.layoutFile("...")` lays it
+ * out, `ui.inflate(files.read("..."))` inflates it. [prefix] (byte order mark, XML declaration, comments) and
+ * [suffix] around the root element are kept byte for byte; the model holds LF line breaks and [crlf] restores
+ * CRLF when the file is written.
+ */
+data class LayoutFileSource(
+    /** The path as the script writes it, relative to the script's directory unless absolute. */
+    val path: String,
+    val prefix: String,
+    val suffix: String,
+    val crlf: Boolean = false,
+)
+
+/**
+ * Whether this fragment is native Android XML (roadmap P11.3): its root declares `xmlns:android` or uses `android:`
+ * attributes. Ids are then written `android:id="@+id/..."` rather than AutoJs6's `id="..."`.
+ */
+val XmlFragment.isNative: Boolean
+    get() = file != null || root.attrs.any { it.name == "xmlns:android" || it.name.startsWith("android:") }
+
+/** The element's id name: the plain-text value of `id` or `android:id` without its `@+id/` / `@id/` prefix, or null. */
+fun XmlNode.Element.idName(): String? = (attr("id") ?: attr("android:id"))
+    ?.takeUnless { it.hasBinding || it.hasExpr }?.value?.removePrefix("@+id/")?.removePrefix("@id/")?.takeIf { it.isNotEmpty() }
 
 /** A `ui.<id>.on('<event>', ...)` (or `ui.<id>.click(...)`) registration the script already contains. */
 data class UiHandler(val id: String, val event: String)
@@ -157,11 +188,21 @@ data class UiDocument(
     val widgets: Set<String> = emptySet(),
     /** Event handlers the script registers on elements by id (roadmap P10.4 / D52), so the inspector offers no second stub. */
     val handlers: Set<UiHandler> = emptySet(),
+    /** The layout files the script refers to (roadmap P11.3), in the order of their first call; [fragments] lists them after the literals. */
+    val files: List<XmlFragment> = emptyList(),
+    /** Paths of referenced layout files that could not be read. */
+    val missingFiles: List<String> = emptyList(),
+    /** The script's `ui.useAndroidLayout(...)` mode: true / false, or null for automatic (also when it never calls it). */
+    val androidLayout: Boolean? = null,
 ) {
-    /** The ids (`id` attribute values written as plain text) of every element, for generating a fresh one. */
-    fun elementIds(): Set<String> = elements().mapNotNull { it.attr("id")?.takeUnless { attr -> attr.hasBinding || attr.hasExpr }?.value?.removePrefix("@+id/")?.removePrefix("@id/") }.toSet()
+    /** The ids (`id` or `android:id` values written as plain text) of every element, for generating a fresh one. */
+    fun elementIds(): Set<String> = elements().mapNotNull { it.idName() }.toSet()
 
-    val fragments: List<XmlFragment> get() = segments.filterIsInstance<UiSegment.Layout>().map { it.fragment }
+    /** Whether the fragment holding element [id] is native Android XML (roadmap P11.3), where ids are `android:id="@+id/..."`. */
+    fun isNative(id: Int): Boolean = fragments.getOrNull(fragmentOf(id))?.isNative == true
+
+    /** The literal fragments in script order, then the layout files ([files]). */
+    val fragments: List<XmlFragment> get() = segments.filterIsInstance<UiSegment.Layout>().map { it.fragment } + files
     val root: XmlNode.Element? get() = fragments.getOrNull(rootFragment)?.root
 
     fun elements(): Sequence<XmlNode.Element> = fragments.asSequence().flatMap { it.root.descendants() }
@@ -198,7 +239,13 @@ data class UiDocument(
             val replaced = replaceIn(segment.fragment.root, id, transform)
             if (replaced === segment.fragment.root) segment else { changed = true; segment.copy(fragment = segment.fragment.copy(root = replaced)) }
         }
-        return if (changed) copy(segments = segments) else this
+        if (changed) return copy(segments = segments)
+        val files = files.map { fragment ->
+            if (changed) return@map fragment
+            val replaced = replaceIn(fragment.root, id, transform)
+            if (replaced === fragment.root) fragment else { changed = true; fragment.copy(root = replaced) }
+        }
+        return if (changed) copy(files = files) else this
     }
 
     /** Gives [element] and its descendants fresh ids from [nextId]; returns the element and the next free id. */

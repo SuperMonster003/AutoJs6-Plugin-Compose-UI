@@ -33,6 +33,8 @@ internal class DocumentReader(
     private val client: TsxParserClient?,
     /** The message shown when a handler cannot be checked because the parser is unavailable, given the cause. */
     private val checkUnavailable: (String) -> String = { it },
+    /** The text of a layout file a `"ui"` script refers to by a literal path (roadmap P11.3), or null when unreadable. */
+    private val layoutFile: (String) -> String? = { null },
 ) : SyntaxCheck, AutoCloseable {
 
     init {
@@ -44,7 +46,7 @@ internal class DocumentReader(
         if (dialect != Dialect.JS) return null
         return try {
             // A script that starts with the "ui" directive and lays out XML is a ui-mode project (roadmap P10).
-            if (UiScriptReader.looksLikeUiScript(text)) ReadResult.ParsedUi(UiScriptReader().read(text))
+            if (UiScriptReader.looksLikeUiScript(text)) ReadResult.ParsedUi(UiScriptReader().read(text, layoutFile))
             else ReadResult.Parsed(ScriptReader().read(text))
         } catch (error: DesignerParseError) {
             ReadResult.Rejected(error)

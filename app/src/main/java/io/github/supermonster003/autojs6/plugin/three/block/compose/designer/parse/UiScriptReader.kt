@@ -1,6 +1,7 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse
 
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.FragmentUsage
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.LayoutFileSource
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiEvents
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiHandler
@@ -10,6 +11,7 @@ import org.mozilla.javascript.CompilerEnvirons
 import org.mozilla.javascript.Context
 import org.mozilla.javascript.EvaluatorException
 import org.mozilla.javascript.Parser
+import org.mozilla.javascript.Token
 import org.mozilla.javascript.ast.Assignment
 import org.mozilla.javascript.ast.AstNode
 import org.mozilla.javascript.ast.AstRoot
@@ -17,6 +19,7 @@ import org.mozilla.javascript.ast.Block
 import org.mozilla.javascript.ast.ErrorCollector
 import org.mozilla.javascript.ast.ExpressionStatement
 import org.mozilla.javascript.ast.FunctionCall
+import org.mozilla.javascript.ast.KeywordLiteral
 import org.mozilla.javascript.ast.Name
 import org.mozilla.javascript.ast.ParseProblem
 import org.mozilla.javascript.ast.PropertyGet
@@ -37,18 +40,27 @@ import org.mozilla.javascript.ast.XmlString
  */
 class UiScriptReader {
 
-    fun read(source: String): UiDocument = Session(source.replace("\r\n", "\n").replace('\r', '\n')).read()
+    /**
+     * Reads [source]; [layoutFile] returns the text of a layout file the script refers to by a literal path (roadmap
+     * P11.3: `ui.layoutFile("...")`, `ui.inflate(files.read("..."))`), or null when it cannot be read.
+     */
+    fun read(source: String, layoutFile: (String) -> String? = { null }): UiDocument =
+        Session(source.replace("\r\n", "\n").replace('\r', '\n'), layoutFile).read()
 
     companion object {
         private val DIRECTIVE = Regex("""^\s*(?:(?://[^\n]*\n|/\*.*?\*/)\s*)*(['"])ui\1\s*;""", RegexOption.DOT_MATCHES_ALL)
 
-        /** A cheap test on the text: the `"ui"` directive first, a `ui.layout(` call and no compose mount. */
+        /** A cheap test on the text: the `"ui"` directive first, a `ui.layout(` or `ui.layoutFile(` call and no compose mount. */
         fun looksLikeUiScript(source: String): Boolean =
-            DIRECTIVE.containsMatchIn(source) && source.contains("ui.layout(") && !Regex("""compose\.(mount|floaty|dialog)\(""").containsMatchIn(source)
+            DIRECTIVE.containsMatchIn(source) && (source.contains("ui.layout(") || source.contains("ui.layoutFile(")) &&
+                !Regex("""compose\.(mount|floaty|dialog)\(""").containsMatchIn(source)
     }
 
-    private class Session(private val source: String) {
+    private class Session(private val source: String, private val layoutFile: (String) -> String?) {
         private var nextId = 1
+
+        /** A call that loads a layout file; [path] is null when it is not a string literal. */
+        private class FileCall(val path: String?, val usage: FragmentUsage, val call: FunctionCall)
 
         fun read(): UiDocument {
             val root = parseAst()
@@ -60,6 +72,8 @@ class UiScriptReader {
             val initializers = HashMap<String, MutableList<Literal>>()
             val assigned = HashSet<String>()
             val layoutCalls = ArrayList<FunctionCall>()
+            val fileCalls = ArrayList<FileCall>()
+            var androidLayoutCall: FunctionCall? = null
             val widgets = LinkedHashSet<String>()
             val handlers = LinkedHashSet<UiHandler>()
             root.visitAll { node ->
@@ -68,6 +82,11 @@ class UiScriptReader {
                     is Assignment -> (node.left as? Name)?.let { assigned += it.identifier }
                     is FunctionCall -> when {
                         isUiCall(node, "layout") -> layoutCalls += node
+                        isUiCall(node, "layoutFile") -> fileCalls += FileCall((node.arguments.firstOrNull() as? StringLiteral)?.value, FragmentUsage.LAYOUT, node)
+                        isUiCall(node, "inflate") -> filesReadPath(node.arguments.firstOrNull())?.let { fileCalls += FileCall(it, FragmentUsage.OTHER, node) }
+                        isUiCall(node, "useAndroidLayout") -> {
+                            if (androidLayoutCall.let { it == null || node.absolutePosition < it.absolutePosition }) androidLayoutCall = node
+                        }
                         isUiCall(node, "registerWidget") -> (node.arguments.firstOrNull() as? StringLiteral)?.let { widgets += it.value }
                         else -> handlerOf(node)?.let { handlers += it }
                     }
@@ -76,7 +95,7 @@ class UiScriptReader {
             }
             literals.sortBy { it.start }
             literals.forEach { literal -> literal.boundTo?.let { initializers.getOrPut(it) { ArrayList() } += literal } }
-            if (layoutCalls.isEmpty()) fail(0, "The script has no ui.layout(...) call")
+            fileCalls.sortBy { it.call.absolutePosition }
 
             layoutCalls.sortBy { it.absolutePosition }
             var rootLiteral: Literal? = null
@@ -111,22 +130,103 @@ class UiScriptReader {
             }
 
             val segments = ArrayList<UiSegment>()
+            val segmentStarts = ArrayList<Int>()
             var cursor = 0
             var rootIndex = -1
             literals.forEachIndexed { index, literal ->
                 if (literal.start < cursor) fail(literal.start, "Nested XML literals are not supported")
-                if (literal.start > cursor) segments += UiSegment.Opaque(source.substring(cursor, literal.start))
+                if (literal.start > cursor) {
+                    segmentStarts += cursor
+                    segments += UiSegment.Opaque(source.substring(cursor, literal.start))
+                }
                 val element = try {
                     XmlCst.parse(literal.text, literal.exprs) { nextId++ }
                 } catch (error: XmlCstError) {
                     fail(literal.start + error.offset, error.reason)
                 }
+                segmentStarts += literal.start
                 segments += UiSegment.Layout(XmlFragment(element, literal.usage, literal.boundTo, literal.layoutCallOffset, literal.stubOffset, literal.stubIndent))
                 if (literal === rootLiteral) rootIndex = index
                 cursor = literal.end
             }
-            if (cursor < source.length) segments += UiSegment.Opaque(source.substring(cursor))
-            return UiDocument(segments, rootIndex, nextId, widgets, handlers)
+            if (cursor < source.length) {
+                segmentStarts += cursor
+                segments += UiSegment.Opaque(source.substring(cursor))
+            }
+
+            // Layout files (roadmap P11.3): one fragment per literal path, in the order of its first call; it is a
+            // layout when any call lays it out. Their elements are numbered after every literal's.
+            val files = ArrayList<XmlFragment>()
+            val missing = ArrayList<String>()
+            for ((path, calls) in fileCalls.filter { it.path != null }.groupBy { it.path!! }) {
+                val text = layoutFile(path)
+                if (text == null) {
+                    missing += path
+                    continue
+                }
+                val normalized = text.replace("\r\n", "\n")
+                val parts = try {
+                    XmlCst.parseFile(normalized) { nextId++ }
+                } catch (error: XmlCstError) {
+                    val position = "line ${SourceText.lineOf(normalized, error.offset)}, column ${SourceText.columnOf(normalized, error.offset)}"
+                    fail(calls.first().call.absolutePosition, "$path, $position: ${error.reason}")
+                }
+                val usage = if (calls.any { it.usage == FragmentUsage.LAYOUT }) FragmentUsage.LAYOUT else FragmentUsage.OTHER
+                val first = calls.firstOrNull { it.usage == usage }!!.call
+                var stubSegment = -1
+                var stubOffset = -1
+                var stubIndent = ""
+                statementOf(first)?.let { statement ->
+                    val end = handlersEndAfter(statement)
+                    // The stub stays in the opaque text that holds the call (never inside or after an XML literal).
+                    val segment = segmentStarts.indexOfLast { it <= first.absolutePosition }
+                    val start = segmentStarts.getOrNull(segment) ?: return@let
+                    val opaque = segments.getOrNull(segment) as? UiSegment.Opaque ?: return@let
+                    if (end in first.absolutePosition..start + opaque.source.length) {
+                        stubSegment = segment
+                        stubOffset = end - start
+                        stubIndent = indentOf(statement.absolutePosition)
+                    }
+                }
+                files += XmlFragment(
+                    parts.root, usage, null, first.absolutePosition, stubOffset, stubIndent,
+                    LayoutFileSource(path, parts.prefix, parts.suffix, text.contains("\r\n")), stubSegment,
+                )
+            }
+
+            // The canvas root is what the first layout call lays out: a literal or a layout file.
+            val firstFile = files.indexOfFirst { it.usage == FragmentUsage.LAYOUT }
+            if (firstFile >= 0 && (rootIndex < 0 || files[firstFile].layoutCallOffset < (rootLiteral?.layoutCallOffset ?: Int.MAX_VALUE))) {
+                rootIndex = literals.size + firstFile
+            }
+            if (rootIndex < 0) {
+                val layoutFileCall = fileCalls.firstOrNull { it.usage == FragmentUsage.LAYOUT }
+                when {
+                    layoutFileCall?.path == null && layoutFileCall != null -> fail(layoutFileCall.call.absolutePosition, "ui.layoutFile needs a string literal path")
+                    layoutFileCall != null -> fail(layoutFileCall.call.absolutePosition, "The layout file ${layoutFileCall.path} cannot be read")
+                    else -> fail(0, "The script has no ui.layout(...) or ui.layoutFile(...) call")
+                }
+            }
+            return UiDocument(segments, rootIndex, nextId, widgets, handlers, files, missing, androidLayoutOf(androidLayoutCall))
+        }
+
+        /** `ui.useAndroidLayout()` and `(true)` keep native XML, `(false)` converts it, `(null)` or anything else is automatic. */
+        private fun androidLayoutOf(call: FunctionCall?): Boolean? {
+            call ?: return null
+            val argument = call.arguments.firstOrNull() ?: return true
+            return when ((argument as? KeywordLiteral)?.type) {
+                Token.TRUE -> true
+                Token.FALSE -> false
+                else -> null
+            }
+        }
+
+        /** The literal path of `files.read("...")` (with or without an encoding), or null. */
+        private fun filesReadPath(argument: AstNode?): String? {
+            val call = argument as? FunctionCall ?: return null
+            val target = call.target as? PropertyGet ?: return null
+            if ((target.target as? Name)?.identifier != "files" || target.property.identifier != "read") return null
+            return (call.arguments.firstOrNull() as? StringLiteral)?.value
         }
 
         private class Literal(val start: Int, val end: Int, val text: String, val exprs: List<XmlCst.ExprRange>, val boundTo: String?) {

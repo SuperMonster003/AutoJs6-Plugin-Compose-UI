@@ -42,6 +42,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.idName
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.UiDesignerSession
 
@@ -225,7 +226,7 @@ internal fun XmlCanvas(
 
 /** `tag #id` for the selection label and the outline. */
 internal fun elementLabel(element: XmlNode.Element): String {
-    val id = element.attr("id")?.value?.takeIf { it.isNotEmpty() }
+    val id = element.idName()
     return if (id == null) element.tag else element.tag + " #" + id
 }
 
@@ -234,7 +235,7 @@ private fun outlineText(root: XmlNode.Element): String = buildString {
         if (depth > 0) append('\n')
         repeat(depth) { append("  ") }
         append('<').append(element.tag)
-        element.attr("id")?.value?.takeIf { it.isNotEmpty() }?.let { append(" #").append(it) }
+        element.idName()?.let { append(" #").append(it) }
         append('>')
         element.elementChildren.forEach { visit(it, depth + 1) }
     }

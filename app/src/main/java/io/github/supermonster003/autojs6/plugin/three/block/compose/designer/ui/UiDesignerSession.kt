@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.UiScriptWriter
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.idName
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Diagnostic
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewCapability
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.PreviewDifference
@@ -157,7 +158,7 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
 
     /** The plain-text id of [element] (`ui.<id>`), or null when it has none or it is bound / computed. */
     fun scriptIdOf(element: XmlNode.Element): String? =
-        element.attr("id")?.takeUnless { it.hasBinding || it.hasExpr }?.value?.removePrefix("@+id/")?.removePrefix("@id/")?.takeIf { it.isNotEmpty() }
+        element.idName()
 
     /** The events the script already handles for [element], by its id. */
     fun handledEvents(element: XmlNode.Element): Set<String> {
