@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Нативный XML-файл Android</string>
     <string name="designer_layout_file_autojs6">XML-файл AutoJs6</string>
     <string name="designer_layout_file_extract">Сохранить как XML-файл</string>
+    <string name="designer_layout_file_folder_pick">Выберите папку скрипта для его файлов макетов</string>
+    <string name="designer_layout_file_folder_set">Файлы макетов читаются и записываются в %1$s</string>
+    <string name="designer_layout_file_folder_wrong">В выбранной папке нет %1$s; выберите папку, где он находится</string>
     <string name="designer_layout_file_has_expressions">Макет с выражениями {...} нельзя сохранить как файл</string>
     <string name="designer_layout_file_hint">Файл записывается при сохранении; личный проект становится проектом-папкой</string>
     <string name="designer_layout_file_menu">Файлы макетов</string>

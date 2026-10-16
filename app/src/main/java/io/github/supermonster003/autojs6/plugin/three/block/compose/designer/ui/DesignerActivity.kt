@@ -233,7 +233,7 @@ internal class DesignerActivity : StandaloneActivity() {
                 session.layoutFilesPromote = !ProjectStore.isFolderName(current.name)
             }
             is DocumentSource.External -> {
-                session.layoutFilesAvailable = current.uri.scheme == ContentResolver.SCHEME_FILE || !current.writable
+                session.layoutFilesAvailable = current.uri.scheme == ContentResolver.SCHEME_FILE || !current.writable || io.documentFolderOf(current) != null
                 session.layoutFilesPromote = !current.writable
             }
         }
@@ -983,6 +983,33 @@ internal class DesignerActivity : StandaloneActivity() {
                 result is DocumentIo.WriteResult.Saved && announce -> scope.launch { snackbar.showSnackbar(savedText) }
             }
             return true
+        }
+
+        // Roadmap P11.3: a content Uri document reads and writes its layout files in a folder the user grants once;
+        // the document is read again with them (unsaved edits stay unsaved).
+        val folderSet = stringResource(R.string.designer_layout_file_folder_set)
+        val folderWrong = stringResource(R.string.designer_layout_file_folder_wrong)
+        val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+            val external = source as? DocumentSource.External ?: return@rememberLauncherForActivityResult
+            if (uri == null) return@rememberLauncherForActivityResult
+            if (!io.grantDocumentFolder(external, uri)) {
+                scope.launch { snackbar.showSnackbar(folderWrong.format(external.displayName)) }
+                return@rememberLauncherForActivityResult
+            }
+            configureLayoutFiles(session)
+            val dirty = session.dirty
+            read(session.script()) { result ->
+                if (result is ReadResult.ParsedUi) {
+                    val onDisk = result.document.files.associate { it.file!!.path to (io.readLayoutFile(source, it.file.path) ?: "") }
+                    session.replace(result.document, onDisk)
+                    session.dirty = dirty
+                }
+            }
+            val name = uri.lastPathSegment?.substringAfterLast(':')?.substringAfterLast('/')?.ifBlank { null } ?: uri.toString()
+            scope.launch { snackbar.showSnackbar(folderSet.format(name)) }
+        }
+        SideEffect {
+            session.requestDocumentFolder = if (io.needsDocumentFolder(source) && (source as? DocumentSource.External)?.writable == true) ({ folderPicker.launch(null) }) else null
         }
 
         // Roadmap P11.3 / D64: a document with layout files goes to the host as a project zip.

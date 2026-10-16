@@ -136,7 +136,8 @@ internal class DocumentIo(private val context: Context, private val store: Proje
      * folder, a missing file).
      */
     fun readLayoutFile(source: DocumentSource, path: String): String? = try {
-        layoutFileOf(source, path)?.takeIf { it.isFile }?.readText(StandardCharsets.UTF_8)
+        val tree = documentFolderOf(source)
+        if (tree != null) DocumentTrees.read(context.contentResolver, tree, path) else layoutFileOf(source, path)?.takeIf { it.isFile }?.readText(StandardCharsets.UTF_8)
     } catch (error: IOException) {
         null
     } catch (error: SecurityException) {
@@ -147,12 +148,40 @@ internal class DocumentIo(private val context: Context, private val store: Proje
     fun writeLayoutFile(source: DocumentSource, path: String, text: String): Boolean = try {
         when (source) {
             is DocumentSource.Local -> store.writeLayoutFile(source.name, path, text)
-            is DocumentSource.External -> layoutFileOf(source, path)?.let { file -> file.writeText(text, StandardCharsets.UTF_8); true } ?: false
+            is DocumentSource.External -> documentFolderOf(source)?.let { tree -> DocumentTrees.write(context.contentResolver, tree, path, text) }
+                ?: layoutFileOf(source, path)?.let { file -> file.writeText(text, StandardCharsets.UTF_8); true } ?: false
         }
     } catch (error: IOException) {
         false
     } catch (error: SecurityException) {
         false
+    }
+
+    /**
+     * The folder the user granted for a content Uri document's layout files (roadmap P11.3), or null: a private project
+     * or a file Uri has its folder already, and a relative path that leaves the folder is not resolved in a tree.
+     */
+    fun documentFolderOf(source: DocumentSource): Uri? =
+        (source as? DocumentSource.External)?.takeIf { it.uri.scheme == ContentResolver.SCHEME_CONTENT }?.let { store.documentFolderOf(it.draftKey) }
+
+    /** Whether layout files of [source] need a folder the user has not granted yet (a content Uri document). */
+    fun needsDocumentFolder(source: DocumentSource): Boolean =
+        source is DocumentSource.External && source.uri.scheme == ContentResolver.SCHEME_CONTENT && store.documentFolderOf(source.draftKey) == null
+
+    /**
+     * Records [tree] (picked by the user, read and write granted) as the folder of the content Uri document [source],
+     * when its top folder holds a file of the document's name; false otherwise.
+     */
+    fun grantDocumentFolder(source: DocumentSource.External, tree: Uri): Boolean {
+        val resolver = context.contentResolver
+        if (!runCatching { DocumentTrees.contains(resolver, tree, source.displayName) }.getOrDefault(false)) return false
+        try {
+            resolver.takePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        } catch (error: SecurityException) {
+            // Not persistable: the folder works until the grant lapses.
+        }
+        store.setDocumentFolder(source.draftKey, tree)
+        return true
     }
 
     /**

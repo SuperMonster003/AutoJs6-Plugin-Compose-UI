@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Android ネイティブ XML ファイル</string>
     <string name="designer_layout_file_autojs6">AutoJs6 XML ファイル</string>
     <string name="designer_layout_file_extract">XML ファイルとして保存</string>
+    <string name="designer_layout_file_folder_pick">レイアウトファイルを読み書きするためにスクリプトのフォルダを選択</string>
+    <string name="designer_layout_file_folder_set">レイアウトファイルは %1$s で読み書きされます</string>
+    <string name="designer_layout_file_folder_wrong">選択したフォルダに %1$s がありません. スクリプトのあるフォルダを選択してください</string>
     <string name="designer_layout_file_has_expressions">{...} 式を含むレイアウトはファイルとして保存できません</string>
     <string name="designer_layout_file_hint">ファイルは保存時に書き込まれ, プラグイン内のプロジェクトはフォルダプロジェクトになります</string>
     <string name="designer_layout_file_menu">レイアウトファイル</string>

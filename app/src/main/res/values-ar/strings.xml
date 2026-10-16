@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">ملف XML أصلي لـ Android</string>
     <string name="designer_layout_file_autojs6">ملف XML لـ AutoJs6</string>
     <string name="designer_layout_file_extract">حفظ كملف XML</string>
+    <string name="designer_layout_file_folder_pick">اختر مجلد السكربت لقراءة ملفات التخطيط وكتابتها</string>
+    <string name="designer_layout_file_folder_set">تُقرأ ملفات التخطيط وتُكتب في %1$s</string>
+    <string name="designer_layout_file_folder_wrong">لا يوجد %1$s في المجلد المختار, اختر المجلد الذي يحتويه</string>
     <string name="designer_layout_file_has_expressions">لا يمكن حفظ تخطيط يحتوي على تعبيرات {...} كملف</string>
     <string name="designer_layout_file_hint">يُكتب الملف عند الحفظ, ويصبح المشروع الخاص مشروع مجلد</string>
     <string name="designer_layout_file_menu">ملفات التخطيط</string>

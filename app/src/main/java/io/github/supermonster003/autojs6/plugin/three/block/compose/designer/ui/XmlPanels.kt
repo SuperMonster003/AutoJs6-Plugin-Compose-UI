@@ -122,7 +122,7 @@ private fun LayoutFileMenu(session: UiDesignerSession, palette: StandalonePalett
                 onClick = {
                     open = false
                     when {
-                        !session.layoutFilesAvailable -> tell(unavailable)
+                        !session.layoutFilesAvailable -> session.requestDocumentFolder?.invoke() ?: tell(unavailable)
                         refusal == UiLayoutFiles.Refusal.NOT_INLINE -> tell(notInline)
                         refusal == UiLayoutFiles.Refusal.EXPRESSIONS -> tell(hasExpressions)
                         else -> onRequest(LayoutFileRequest.EXTRACT)
@@ -134,7 +134,7 @@ private fun LayoutFileMenu(session: UiDesignerSession, palette: StandalonePalett
                 text = { Text(stringResource(R.string.designer_layout_file_new)) },
                 onClick = {
                     open = false
-                    if (session.layoutFilesAvailable) onRequest(LayoutFileRequest.NEW) else tell(unavailable)
+                    if (session.layoutFilesAvailable) onRequest(LayoutFileRequest.NEW) else session.requestDocumentFolder?.invoke() ?: tell(unavailable)
                 },
                 modifier = Modifier.testTag("designer-layout-file-new"),
             )
@@ -387,6 +387,13 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
                 fontSize = 12.sp,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).testTag("designer-xml-no-resources"),
             )
+        }
+        // Roadmap P11.3: the layout files of a content Uri document are read once the user grants its folder.
+        val requestFolder = session.requestDocumentFolder
+        if (missingFiles.isNotEmpty() && requestFolder != null) item {
+            TextButton(onClick = requestFolder, modifier = Modifier.padding(horizontal = 8.dp).testTag("designer-xml-pick-folder")) {
+                Text(stringResource(R.string.designer_layout_file_folder_pick))
+            }
         }
         // Roadmap P11.3: a layout file the script refers to but that cannot be read is left out of the canvas.
         items(missingFiles) { path ->

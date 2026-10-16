@@ -54,6 +54,8 @@ internal class ProjectStore(private val base: File) {
     private val sourcesFile = File(base, "sources.properties")
     /** Image folders (roadmap P9.1, D44), one `key=uri` line per document, keyed like drafts. */
     private val imageFoldersFile = File(base, "images.properties")
+    /** The folders of content Uri documents for their layout files (roadmap P11.3), one `key=tree uri` line per document. */
+    private val documentFoldersFile = File(base, "folders.properties")
 
     fun list(): List<Project> {
         projectsDir.mkdirs()
@@ -415,6 +417,17 @@ internal class ProjectStore(private val base: File) {
         if (folder == null) { if (updated.remove(key) == null) return } else updated[key] = folder.toString()
         base.mkdirs()
         imageFoldersFile.writeText(updated.entries.joinToString("") { (name, uri) -> name + "=" + uri + LINE_END }, StandardCharsets.UTF_8)
+    }
+
+    /** The document tree the user granted for the layout files of the content Uri document with draft key [key] (roadmap P11.3). */
+    fun documentFolderOf(key: String): Uri? = readMap(documentFoldersFile)[key]?.let(Uri::parse)
+
+    /** Records (or with null forgets) the folder of the document with draft key [key]. */
+    fun setDocumentFolder(key: String, folder: Uri?) {
+        val updated = readMap(documentFoldersFile).toMutableMap()
+        if (folder == null) { if (updated.remove(key) == null) return } else updated[key] = folder.toString()
+        base.mkdirs()
+        documentFoldersFile.writeText(updated.entries.joinToString("") { (name, uri) -> name + "=" + uri + LINE_END }, StandardCharsets.UTF_8)
     }
 
     private fun readMap(file: File): Map<String, String> = if (!file.isFile) emptyMap() else

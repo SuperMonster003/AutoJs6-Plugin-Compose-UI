@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Fichier XML natif Android</string>
     <string name="designer_layout_file_autojs6">Fichier XML AutoJs6</string>
     <string name="designer_layout_file_extract">Enregistrer comme fichier XML</string>
+    <string name="designer_layout_file_folder_pick">Choisir le dossier du script pour ses fichiers de mise en page</string>
+    <string name="designer_layout_file_folder_set">Les fichiers de mise en page sont lus et écrits dans %1$s</string>
+    <string name="designer_layout_file_folder_wrong">%1$s n\'est pas dans le dossier choisi; choisissez le dossier qui le contient</string>
     <string name="designer_layout_file_has_expressions">Une mise en page avec des expressions {...} ne peut pas être enregistrée comme fichier</string>
     <string name="designer_layout_file_hint">Le fichier est écrit à l\'enregistrement; un projet privé devient alors un projet dossier</string>
     <string name="designer_layout_file_menu">Fichiers de mise en page</string>

@@ -96,6 +96,11 @@ internal class UiDesignerSession(
     var layoutFilesAvailable: Boolean by mutableStateOf(true)
     /** Whether saving a document with layout files makes it a folder project (a private single-file project, a read-only document). */
     var layoutFilesPromote: Boolean by mutableStateOf(false)
+    /**
+     * Set by the editor while the document is a content Uri without a granted folder (roadmap P11.3): asks the user
+     * for the script's folder, after which its layout files can be read and written.
+     */
+    var requestDocumentFolder: (() -> Unit)? by mutableStateOf(null)
     /** False when the preview host is known not to take a project's files (before contract v3, roadmap P11.3). */
     var hostResources: Boolean by mutableStateOf(true)
 

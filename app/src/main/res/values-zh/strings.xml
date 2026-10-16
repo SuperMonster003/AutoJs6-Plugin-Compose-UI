@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Android 原生 XML 文件</string>
     <string name="designer_layout_file_autojs6">AutoJs6 XML 文件</string>
     <string name="designer_layout_file_extract">存为 XML 文件</string>
+    <string name="designer_layout_file_folder_pick">选择脚本所在的文件夹以读写布局文件</string>
+    <string name="designer_layout_file_folder_set">布局文件将在 %1$s 中读写</string>
+    <string name="designer_layout_file_folder_wrong">所选文件夹中没有 %1$s, 请选择脚本所在的文件夹</string>
     <string name="designer_layout_file_has_expressions">含 {...} 表达式的布局不能存为文件</string>
     <string name="designer_layout_file_hint">保存时才写入文件, 私有工程随之变为文件夹工程</string>
     <string name="designer_layout_file_menu">布局文件</string>

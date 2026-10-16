@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Archivo XML nativo de Android</string>
     <string name="designer_layout_file_autojs6">Archivo XML de AutoJs6</string>
     <string name="designer_layout_file_extract">Guardar como archivo XML</string>
+    <string name="designer_layout_file_folder_pick">Elegir la carpeta del script para sus archivos de diseño</string>
+    <string name="designer_layout_file_folder_set">Los archivos de diseño se leen y escriben en %1$s</string>
+    <string name="designer_layout_file_folder_wrong">%1$s no está en la carpeta elegida; elija la carpeta que lo contiene</string>
     <string name="designer_layout_file_has_expressions">Un diseño con expresiones {...} no se puede guardar como archivo</string>
     <string name="designer_layout_file_hint">El archivo se escribe al guardar; un proyecto privado pasa a ser un proyecto de carpeta</string>
     <string name="designer_layout_file_menu">Archivos de diseño</string>

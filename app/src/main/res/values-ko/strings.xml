@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Android 네이티브 XML 파일</string>
     <string name="designer_layout_file_autojs6">AutoJs6 XML 파일</string>
     <string name="designer_layout_file_extract">XML 파일로 저장</string>
+    <string name="designer_layout_file_folder_pick">레이아웃 파일을 읽고 쓰려면 스크립트가 있는 폴더를 선택하세요</string>
+    <string name="designer_layout_file_folder_set">레이아웃 파일은 %1$s 에서 읽고 씁니다</string>
+    <string name="designer_layout_file_folder_wrong">선택한 폴더에 %1$s 이(가) 없습니다. 스크립트가 있는 폴더를 선택하세요</string>
     <string name="designer_layout_file_has_expressions">{...} 식이 포함된 레이아웃은 파일로 저장할 수 없습니다</string>
     <string name="designer_layout_file_hint">파일은 저장할 때 기록되며, 플러그인 내 프로젝트는 폴더 프로젝트가 됩니다</string>
     <string name="designer_layout_file_menu">레이아웃 파일</string>

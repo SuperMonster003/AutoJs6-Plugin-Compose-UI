@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Android 原生 XML 文件</string>
     <string name="designer_layout_file_autojs6">AutoJs6 XML 文件</string>
     <string name="designer_layout_file_extract">存為 XML 文件</string>
+    <string name="designer_layout_file_folder_pick">選擇腳本所在的文件夾以讀寫佈局文件</string>
+    <string name="designer_layout_file_folder_set">佈局文件將在 %1$s 中讀寫</string>
+    <string name="designer_layout_file_folder_wrong">所選文件夾中沒有 %1$s, 請選擇腳本所在的文件夾</string>
     <string name="designer_layout_file_has_expressions">含 {...} 表達式的佈局不能存為文件</string>
     <string name="designer_layout_file_hint">保存時才寫入文件, 私有工程隨之變為文件夾工程</string>
     <string name="designer_layout_file_menu">佈局文件</string>

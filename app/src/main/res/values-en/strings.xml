@@ -83,6 +83,9 @@
     <string name="designer_layout_file_android">Android XML file</string>
     <string name="designer_layout_file_autojs6">AutoJs6 XML file</string>
     <string name="designer_layout_file_extract">Save as XML file</string>
+    <string name="designer_layout_file_folder_pick">Choose the script\'s folder for its layout files</string>
+    <string name="designer_layout_file_folder_set">Layout files are read and written in %1$s</string>
+    <string name="designer_layout_file_folder_wrong">%1$s is not in the chosen folder; choose the folder that holds it</string>
     <string name="designer_layout_file_has_expressions">A layout with {...} expressions cannot be saved as a file</string>
     <string name="designer_layout_file_hint">The file is written when you save; a private project then becomes a folder project</string>
     <string name="designer_layout_file_menu">Layout files</string>
