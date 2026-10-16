@@ -237,9 +237,22 @@
 
 ### P11.H3 预览契约 v5: TSX 运行 (宿主 + 插件, D69)
 
-- [ ] (宿主) 契约 v5 只追加: `runScript` 的请求键 `scriptDialect` (`js` / `tsx`, 缺省 `js`) 与信息标志 `tsxRunSupported` (宿主找得到 TypeScript Engine 0.7.0+ 的编译服务时为 true); `tsx` 运行先经宿主现有的 TypeScript 编译路径 (与运行 `.tsx` 文件相同的编译选项与声明), 失败时 `onScriptError` 带 `errorCode` `ERR_AUTOJS6_UI_PREVIEW_COMPILE_FAILED` 与首个诊断的行号和文字, 运行以 `error` 结束; v4 身份冻结.
-- [ ] (插件) v5 宿主上 TSX UI 工程的交互预览开关可用 (工程 zip 与脚本路径照常交出), 旧宿主上开关处说明需在 AutoJs6 中运行; 编译错误显示在画布上方与控制台.
-- [ ] (测试) 宿主 `UiPreviewServiceTest` 追加 TSX 运行与编译错误 (需安装 TypeScript Engine 0.7.0+, 否则按假设跳过); 插件 `UiInteractiveDeviceTest` 追加 TSX 工程一项.
+- [x] (宿主) 契约 v5 只追加: `runScript` 的请求键 `scriptDialect` (`js` / `tsx`, 缺省 `js`) 与信息标志 `tsxRunSupported` (宿主找得到 TypeScript Engine 0.7.0+ 的编译服务时为 true); `tsx` 运行先经宿主现有的 TypeScript 编译路径 (与运行 `.tsx` 文件相同的编译选项与声明), 失败时 `onScriptError` 带 `errorCode` `ERR_AUTOJS6_UI_PREVIEW_COMPILE_FAILED` 与首个诊断的行号和文字, 运行以 `error` 结束; v4 身份冻结.
+- [x] (插件) v5 宿主上 TSX UI 工程的交互预览开关可用 (工程 zip 与脚本路径照常交出), 旧宿主上开关处说明需在 AutoJs6 中运行; 编译错误显示在画布上方与控制台.
+- [x] (测试) 宿主 `UiPreviewServiceTest` 追加 TSX 运行与编译错误 (需安装 TypeScript Engine 0.7.0+, 否则按假设跳过); 插件 `UiInteractiveDeviceTest` 追加 TSX 工程一项.
+
+  证据 (2026-10-16): 宿主本地提交 `fb451f88d` (契约 v5: `VERSION` 5, `HASH` `cd6681bb...4ad0`, 冻结 `VERSION_V4` / `HASH_V4` `b7591e9e...81b2`; 协议文档新节 "TSX runs (V5)"), `204a33ee5` (实现), `407ba2f24` (测试), `58d7621c2` (zh-Hans changelog 的交互预览条目补上 TSX, 只暂存本条). 实现要点:
+  - 契约: 不加事务, 只加 `scriptDialect` (`SCRIPT_DIALECTS` = `js` / `tsx`), `tsxRunSupported`, `ERROR_COMPILE_FAILED` (带首个错误诊断的 `line` / `column`, 从 1 起), 以及 "TSX 运行的行号是 TSX 文本的行号" 的约定; 版本列表为 1 - 5.
+  - 编译: `UiPreviewScriptRun` 对 `tsx` 运行在工作线程以 `TypeScriptExecutionCompiler.prepare` 编译 `TypeScriptStringSource("<脚本名>.tsx")` (与运行 `.tsx` 文件相同的路径, 文件名由 `UiPreviewRequests.tsxSourceName` 从脚本名得出, 任务列表显示去掉扩展名的脚本名), 完成后在主线程以生成的 JavaScript 照常开始运行; `runScript` 先返回 `runId`, 其间的 `stopScript` / 替换 / 释放让运行在开始前以其原因结束, 编译结果丢弃. 编译失败时每个错误诊断以 level 6 经 `onConsole` 送出 (`<名>.tsx:<行>:<列> - error TS...`), 再 `onScriptError` (`TS<码>: <文字>`, 首个诊断的行列) 与 `onScriptExit` (`error`); 无诊断的失败 (未装编译器, 超时) 行列为 -1.
+  - 行号: 运行中未捕获错误与忙等的行号经引擎的源映射 (`SOURCE_MAP_ENGINE_TAG`) 换回 TSX 行. 首轮设备测试中运行期错误的行号为 -1: 引擎在错误回调之后立即销毁, 主线程上报告时源映射已不在; 改为在回调当时换算 (`errorLine`), 忙等在指令观察器中换算 (观察器回调增加源名参数).
+  - `tsxRunSupported`: 构建预览信息时在 Binder 线程以 `TypeScriptCompilerPluginClient.isAvailable()` 探测, 最多 3 秒, 主线程调用时为 false.
+  - 验证: JVM 契约 8 项, 预览包 29 项 (新增方言与编译文件名一项). 设备 `UiPreviewServiceTest` 21 项在 AVD_API_33 (emulator-5584) 与 AVD_API_35_16K (emulator-5590) 只读实例全部通过; 新增用例 (装有 TypeScript Engine 时): 内联 `onClick` 的 TSX 计数器经点击得到 `clicked 1`, 类型错误文本得到 TS2322 于第 3 行第 7 列且没有任何输出, `throw` 位于 TSX 第 10 行 (其前的 interface 被编译器擦除) 时报告第 10 行, `runScript` 后立即 `stopScript` 只结束一次. API 35 首轮在第二个用例时宿主进程 SIGSEGV (ART JIT 代码缓存中的 Rhino `EmbeddedSlotMap.modify`), 之后两轮 21 项全部通过, 未再出现, 与预览代码无关.
+  - 契约 AAR `ui-preview-api-release.aar` 22135 B, SHA-256 `734d47ee...2fec3`, 13 个类文件, 重建字节一致.
+
+  插件提交 `2086c21` (契约 AAR 换为 v5, 锁 / `libs/README.md` / `THIRD_PARTY_NOTICES.md` / `UiPreviewContractGuardTest`), `09a313e` (实现与测试). 实现要点:
+  - `UiPreviewClient` 按 v5 / v4 / v3 / v2 / v1 协商; `tsxRunKnown` (v5 宿主且可运行脚本) 与 `tsxRunSupported` (再加 `tsxRunSupported` 标志); `runScript` 收方言参数, TSX 文本带 `scriptDialect` = `tsx` 交出 (工程 zip 中的入口缺省为 `main.tsx`); `compiling` 从 TSX 的 `runScript` 起到运行回报边界, 控制台条目, 错误或结束为止; `compileFailure` 记下 `COMPILE_FAILED` 的行列与文字.
+  - 编辑页: TSX UI 工程在 `tsxRunSupported` 时提供交互预览开关; 画布上方行在编译期间显示 "TypeScript Engine 正在编译 TSX 脚本", 编译失败显示 "TSX 脚本未通过编译 (第 N 行): TS...", 点按进入控制台 (每个错误诊断一行); 不能运行时的说明分为 "需要更新的 AutoJs6" (原文案) 与 "需要 TypeScript Engine 插件" (v5 宿主未装 TypeScript Engine) 两种. 新字符串 4 个 x 11 目录.
+  - 验证: JVM 293 项 (1 项跳过; 契约守卫新增 v5 一项), lint 0 错误 15 警告. 设备 (宿主为本阶段 debug 构建, TypeScript Engine 0.7.0 debug): AVD_API_33 上 `UiInteractiveDeviceTest`, `DesignerTsxDeviceTest`, `UiDesignerDeviceTest`, `UiPreviewDeviceTest`, `UiLayoutFileDeviceTest` 共 27 项, 25 项通过 2 项按假设跳过 (v4 宿主上的 "隐藏即停止", 无解析服务的 TSX 用例); AVD_API_35_16K 上同一组 24 项通过 2 项跳过 1 项失败: P9.2 的 `aTsxProjectIsEditedThroughTheParserAndSavedAsTsx` 在等待解析服务打开文档的 30 秒内超时, 单独复跑 `DesignerTsxDeviceTest` 两轮均为 4 项通过 1 项跳过. 新增用例: TSX 计数器开启交互预览后经注入点击得到 `clicked 1`, 从开启到首条输出 API 33 约 1.4 s (宿主编译 349 ms), API 35 约 2.8 s (编译 2270 ms); 类型错误的 TSX 工程得到 `compileFailure` 第 7 行第 7 列 TS2322, 画布上方文字与本地化字符串一致, 控制台有该诊断, 脚本没有任何输出; `DesignerTsxDeviceTest` 的 P11.7 用例改为在宿主运行 TSX 时期待开关出现. 旧宿主 (v4 / v3) 上的降级路径沿用 P11.6 的协商结构, 本阶段未换装旧宿主复测 (两者都只存在于本地开发构建).
 
 ### P11.8 compose 联动 (插件, 1.9.0)
 

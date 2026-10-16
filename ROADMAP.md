@@ -1546,3 +1546,9 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 插件提交: `de7bc58` (`TsxUiReader` / `TsxUiWriter` / `TsxLayoutXml`, 校验, D68 桩, 新建 TSX ui 工程, 运行与导出, 快照与测试, `.python/verify_tsx_compile.py`), `2253cf8` (沙箱列表示例的时间上限, P11.6 推送后的 CI 偶发失败).
 - 验证: JVM 292 项 (1 项跳过), lint 0 错误; `DesignerTsxDeviceTest` 在 API 33 / 35 模拟器各 4 项通过 1 项跳过, API 33 上 UI 设计器 / 布局预览 / 交互预览 / 布局文件设备测试 20 项回归通过; 生成的 TSX 三个文件经 AutoJs6 编译通过. 逐项证据见 P11 路线图 P11.7 (已全部勾选).
 - 下一步: P11.H3 (宿主契约 v5 的 TSX 运行与插件的 TSX 交互预览) 或 P11.8 (compose 联动), 1.9.0 的 changelog / README 在 P11.9.
+
+### 2026-10-16 (续): P11.H3 预览契约 v5 (TSX 运行)
+
+- 宿主本地提交: `fb451f88d` (契约 v5: `runScript` 的 `scriptDialect`, `COMPILE_FAILED`, `tsxRunSupported`, 冻结 v4), `204a33ee5` (TSX 文本先经 TypeScript Engine 编译再在画布中运行, 错误行号换回 TSX 行), `407ba2f24` (测试), `58d7621c2` (zh-Hans changelog). 插件提交: `2086c21` (契约 AAR v5), `09a313e` (TSX UI 工程的交互预览, 编译中 / 编译失败的提示, 4 个新字符串 x 11 目录).
+- 验证: 宿主 JVM 契约 8 项与预览包 29 项, `UiPreviewServiceTest` 21 项在 API 33 / 35 模拟器通过 (API 35 首轮一次 ART JIT 崩溃后两轮全过); 插件 JVM 293 项, lint 0 错误, API 33 上交互预览 / TSX / UI 设计器 / 布局预览 / 布局文件设备测试 27 项无失败, API 35 上一项旧 TSX 解析用例首轮超时, 复跑通过. 逐项证据见 P11 路线图 P11.H3 (已全部勾选).
+- 下一步: P11.8 (compose 联动), 然后 P11.9 (1.9.0 文档, changelog, gate 与发布).
