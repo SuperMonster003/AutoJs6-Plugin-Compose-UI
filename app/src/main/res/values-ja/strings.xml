@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">自分の変更を保持</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">レイアウトファイル %1$s を読み込めません. キャンバスには表示されません</string>
+    <string name="designer_layout_file_save_failed">レイアウトファイル %1$s を保存できません</string>
     <string name="designer_modified">更新 %1$s</string>
     <string name="designer_move_down">下へ</string>
     <string name="designer_move_up">上へ</string>

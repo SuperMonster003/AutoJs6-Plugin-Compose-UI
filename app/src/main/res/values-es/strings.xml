@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">Conservar mis cambios</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">No se puede leer el archivo de diseño %1$s; no se muestra en el lienzo</string>
+    <string name="designer_layout_file_save_failed">No se pudo guardar el archivo de diseño %1$s</string>
     <string name="designer_modified">Modificado %1$s</string>
     <string name="designer_move_down">Bajar</string>
     <string name="designer_move_up">Subir</string>

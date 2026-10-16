@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">Garder mes modifications</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">Impossible de lire le fichier de mise en page %1$s; il n\'est pas affiché sur le canevas</string>
+    <string name="designer_layout_file_save_failed">Impossible d\'enregistrer le fichier de mise en page %1$s</string>
     <string name="designer_modified">Modifié %1$s</string>
     <string name="designer_move_down">Descendre</string>
     <string name="designer_move_up">Monter</string>

@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">내 변경 내용 유지</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">레이아웃 파일 %1$s 을(를) 읽을 수 없습니다. 캔버스에 표시되지 않습니다</string>
+    <string name="designer_layout_file_save_failed">레이아웃 파일 %1$s 을(를) 저장할 수 없습니다</string>
     <string name="designer_modified">수정 %1$s</string>
     <string name="designer_move_down">아래로</string>
     <string name="designer_move_up">위로</string>

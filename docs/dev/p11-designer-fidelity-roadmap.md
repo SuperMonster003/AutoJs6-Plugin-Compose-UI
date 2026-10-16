@@ -161,6 +161,8 @@
 - [ ] (插件) 预览: 文件片段经同一 `setLayout` 路径; `androidLayout` 标志在 v3 之前的宿主上退回 "按 AutoJs6 标签解析并提示可能不一致".
 - [ ] (测试) JVM: `LayoutFileReaderTest` (路径识别, 片段引用, 无损写回), `UiCatalogAndroidTest` (第二份目录), `ProjectFolderTest` (升格, 迁移, zip 往返); 设备: `UiLayoutFileDeviceTest` (外部文档旁的 XML 文件打开 -> 编辑 -> 写回原文件; 私有工程新建 XML 文件 -> 升格 -> 导出 zip -> 重新导入一致; 运行交出文件夹 Uri 并在宿主可解析); `verify_designer_recovery.py` 对文件夹工程的分支.
 
+  进展 (2026-10-16): `a3b2c05` (文件片段的模型与读写: `XmlCst.parseFile` 保留 BOM / 声明 / 注释, 拒绝 DOCTYPE; `UiScriptReader` 识别 `ui.layoutFile("...")`, `ui.inflate(files.read("..."))` 与 `ui.useAndroidLayout(...)`, 画布根取最早的布局调用; 事件桩支持文件片段, 原生片段的 id 写作 `android:id="@+id/..."`; `UiScriptWriter.writeFiles` 无损写回并还原 CRLF; `LayoutFileReaderTest` 8 项). 其后一个提交 "store folder projects..." (文件夹工程存储: `ProjectStore` 的 `<stem>/main.js`, `promote` 迁移脚本 / 草稿 / 布局文件草稿 `drafts/<键>.files/` / 来源记录 / 图片目录, 布局文件路径不得越出文件夹, 原子写入; 设计器从同目录读写布局文件 (私有文件夹工程, 外部 file 方案), 会话记录每个文件的已保存文本, 保存与草稿只写改动的文件, 只读外部文档另存为工程时连同布局文件升格; 读不到的布局文件列入问题面板; 首页以 `demo/` 显示文件夹工程; `ProjectFolderTest` 6 项, JVM 共 254 项通过). 剩余: 新建 / 升格入口与 `project.json`, zip 导入 / 导出, content 方案的 SAF 树权限, 预览交出工程资源, 宿主 zip 入口, 原生命名空间目录, 检查器的 `android:id`, 设备测试.
+
 ### P11.4 1.8.0 文档与发布 (文档 + 发布)
 
 - [ ] (文档) 文档站 `api/composeDesigner.md`: "XML 文件与文件夹工程" 小节 (识别形态, 升格规则, 导入 / 导出, 原生命名空间目录来源), "预览差异" 一段; README / changelog `v1.8.0` 10 语言; `AGENTS.md` 第 2 / 4 / 12 / 13 / 14 (复核线表与脚本) / 15 节.

@@ -67,6 +67,9 @@ import kotlinx.coroutines.launch
  * The launcher entry (roadmap D38): the designer's project list with new / import actions, and the
  * gallery and settings reachable from the top bar. Projects are script files in private storage.
  */
+/** What the home list calls a project: the file name, or the folder's name with a trailing slash for a folder project. */
+private val ProjectStore.Project.label: String get() = if (folder) "$displayName/" else name
+
 internal class DesignerHomeActivity : StandaloneActivity() {
     private lateinit var store: ProjectStore
     private var listRevision by mutableStateOf(0)
@@ -153,7 +156,8 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                                 modifier = Modifier.width(36.dp).testTag("home-kind-${project.name}"),
                             )
                             Column(Modifier.weight(1f)) {
-                                Text(project.name, color = Color(palette.text), fontSize = 16.sp)
+                                // Roadmap P11.3: a folder project shows as its folder (`demo/`), the script inside it being main.js.
+                                Text(project.label, color = Color(palette.text), fontSize = 16.sp)
                                 Text(
                                     stringResource(R.string.designer_modified, DateFormat.getMediumDateFormat(context).format(project.modifiedAt) + " " + DateFormat.getTimeFormat(context).format(project.modifiedAt)),
                                     color = Color(palette.muted), fontSize = 12.sp,
@@ -216,7 +220,7 @@ internal class DesignerHomeActivity : StandaloneActivity() {
             AlertDialog(
                 onDismissRequest = { deleting = null },
                 title = { Text(stringResource(R.string.designer_delete_project)) },
-                text = { Text(stringResource(R.string.designer_delete_project_message, project.name)) },
+                text = { Text(stringResource(R.string.designer_delete_project_message, project.label)) },
                 confirmButton = { TextButton(onClick = { store.delete(project.name); deleting = null; listRevision++ }, modifier = Modifier.testTag("home-delete-confirm")) { Text(stringResource(R.string.designer_delete_project)) } },
                 dismissButton = { TextButton(onClick = { deleting = null }) { Text(stringResource(R.string.designer_cancel)) } },
             )

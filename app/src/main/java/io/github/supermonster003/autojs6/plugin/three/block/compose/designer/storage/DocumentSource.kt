@@ -81,16 +81,80 @@ internal class DocumentIo(private val context: Context, private val store: Proje
         }
     }
 
-    fun pendingDraft(source: DocumentSource): String? = when (source) {
-        is DocumentSource.Local -> store.pendingDraft(source.name)
-        is DocumentSource.External -> {
-            val draft = store.draftFile(source.draftKey)
-            if (!draft.isFile) null else draft.readText(StandardCharsets.UTF_8).takeIf { it != readOrNull(source) }
+    /**
+     * The draft of the script when it differs from the saved document, or when drafts of layout files exist
+     * ([pendingDraftFiles]); null otherwise.
+     */
+    fun pendingDraft(source: DocumentSource): String? {
+        val files = pendingDraftFiles(source).isNotEmpty()
+        return when (source) {
+            is DocumentSource.Local -> store.pendingDraft(source.name) ?: if (files) store.draftFile(source.name).takeIf { it.isFile }?.readText(StandardCharsets.UTF_8) else null
+            is DocumentSource.External -> {
+                val draft = store.draftFile(source.draftKey)
+                if (!draft.isFile) null else draft.readText(StandardCharsets.UTF_8).takeIf { files || it != readOrNull(source) }
+            }
+        }
+    }
+
+    /** The drafts of layout files of the document (roadmap P11.3) by the path the script writes: edits not yet saved. */
+    fun pendingDraftFiles(source: DocumentSource): Map<String, String> {
+        val dir = store.layoutDraftsDir(source.draftKey)
+        if (!dir.isDirectory) return emptyMap()
+        return dir.walkTopDown().filter { it.isFile }.associate { file ->
+            file.relativeTo(dir).invariantSeparatorsPath to file.readText(StandardCharsets.UTF_8)
         }
     }
 
     fun writeDraft(source: DocumentSource, text: String) = store.writeDraft(source.draftKey, text)
+
+    /** The script's draft and the drafts of the layout files that differ from the saved ones ([files] by path). */
+    fun writeDraft(source: DocumentSource, text: String, files: Map<String, String>) {
+        store.writeDraft(source.draftKey, text)
+        val dir = store.layoutDraftsDir(source.draftKey)
+        dir.deleteRecursively()
+        for ((path, content) in files) {
+            val file = File(dir, path).canonicalFile
+            if (!file.path.startsWith(dir.canonicalPath + File.separator)) continue
+            file.parentFile?.mkdirs()
+            file.writeText(content, StandardCharsets.UTF_8)
+        }
+    }
+
     fun clearDraft(source: DocumentSource) = store.clearDraft(source.draftKey)
+
+    /**
+     * The text of the layout file at [path] next to the document (roadmap P11.3): in a folder project's folder, or
+     * beside a file Uri; null when it cannot be read (a single-file project, a content Uri without access to its
+     * folder, a missing file).
+     */
+    fun readLayoutFile(source: DocumentSource, path: String): String? = try {
+        layoutFileOf(source, path)?.takeIf { it.isFile }?.readText(StandardCharsets.UTF_8)
+    } catch (error: IOException) {
+        null
+    } catch (error: SecurityException) {
+        null
+    }
+
+    /** Writes the layout file at [path] next to the document; false when there is no such place or it cannot be written. */
+    fun writeLayoutFile(source: DocumentSource, path: String, text: String): Boolean = try {
+        when (source) {
+            is DocumentSource.Local -> store.writeLayoutFile(source.name, path, text)
+            is DocumentSource.External -> layoutFileOf(source, path)?.let { file -> file.writeText(text, StandardCharsets.UTF_8); true } ?: false
+        }
+    } catch (error: IOException) {
+        false
+    } catch (error: SecurityException) {
+        false
+    }
+
+    private fun layoutFileOf(source: DocumentSource, path: String): File? = when (source) {
+        is DocumentSource.Local -> store.layoutFile(source.name, path)
+        is DocumentSource.External -> if (source.uri.scheme == ContentResolver.SCHEME_FILE) {
+            source.uri.path?.let { File(it).parentFile }?.let { dir -> if (File(path).isAbsolute) File(path) else File(dir, path) }
+        } else {
+            null
+        }
+    }
 
     /** The Uri other apps may receive for this document, with whether a write grant makes sense. */
     fun shareUri(source: DocumentSource): Pair<Uri, Boolean> = when (source) {

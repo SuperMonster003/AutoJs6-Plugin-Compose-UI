@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">保留我的修改</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">无法读取布局文件 %1$s, 画布中不显示它</string>
+    <string name="designer_layout_file_save_failed">无法保存布局文件 %1$s</string>
     <string name="designer_modified">修改于 %1$s</string>
     <string name="designer_move_down">下移</string>
     <string name="designer_move_up">上移</string>

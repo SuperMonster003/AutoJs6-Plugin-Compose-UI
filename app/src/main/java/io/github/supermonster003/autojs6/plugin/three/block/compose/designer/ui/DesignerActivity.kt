@@ -143,6 +143,8 @@ internal class DesignerActivity : StandaloneActivity() {
     /** The text last loaded from or written to the document; the reference for external-change detection. */
     private var baseline: String? = null
     private var pendingDraft: String? by mutableStateOf(null)
+    /** Layout file texts the reader takes instead of the files next to the document: a draft being restored (P11.3). */
+    private var layoutDrafts: Map<String, String> = emptyMap()
     private var externalChange: String? by mutableStateOf(null)
 
     private data class ReadOnlySource(val text: String, val result: ReadResult.Unavailable)
@@ -159,9 +161,13 @@ internal class DesignerActivity : StandaloneActivity() {
         if (resolved == null) { finish(); super.onCreate(savedInstanceState); return }
         source = resolved
         val dialect = Dialect.of(resolved.title)
-        reader = DocumentReader(dialect, if (dialect == Dialect.TSX) TsxParserClient(this) else null) { cause ->
-            getString(R.string.designer_tsx_check_unavailable, cause)
-        }
+        reader = DocumentReader(
+            dialect,
+            if (dialect == Dialect.TSX) TsxParserClient(this) else null,
+            { cause -> getString(R.string.designer_tsx_check_unavailable, cause) },
+            // Roadmap P11.3: the layout files a "ui" script refers to are read next to the document.
+            { path -> layoutDrafts[path] ?: io.readLayoutFile(source, path) },
+        )
         val text = io.readOrNull(resolved)
         if (text == null) {
             readFailed = true
@@ -250,7 +256,7 @@ internal class DesignerActivity : StandaloneActivity() {
 
     override fun onStop() {
         session?.let { if (it.dirty) io.writeDraft(source, it.script()) }
-        uiSession?.let { if (it.dirty) io.writeDraft(source, it.script()) }
+        uiSession?.let { if (it.dirty) io.writeDraft(source, it.script(), it.changedFiles()) }
         super.onStop()
     }
 
@@ -785,6 +791,7 @@ internal class DesignerActivity : StandaloneActivity() {
         var zoom by remember { mutableStateOf(1f) }
         val savedText = stringResource(R.string.designer_saved)
         val savedAsProject = stringResource(R.string.designer_external_readonly_saved)
+        val layoutFileSaveFailed = stringResource(R.string.designer_layout_file_save_failed)
         val copied = stringResource(R.string.gallery_copied)
         val missingHost = stringResource(R.string.gallery_run_missing_host)
         val runFailed = stringResource(R.string.gallery_run_failed)
@@ -918,17 +925,23 @@ internal class DesignerActivity : StandaloneActivity() {
 
         fun save(announce: Boolean = true): Boolean {
             val text = session.script()
+            val files = session.changedFiles()
             val previous = source
             val result = io.write(previous, text)
             io.clearDraft(previous)
             baseline = text
+            if (result is DocumentIo.WriteResult.SavedAsProject) {
+                // A private copy of a read-only document keeps its layout files in a folder project (P11.3).
+                val name = if (session.document.files.isEmpty()) result.name else store.promote(result.name).name
+                source = DocumentSource.Local(name)
+                scope.launch { snackbar.showSnackbar(savedAsProject.format(ProjectStore.displayNameOf(name))) }
+            }
+            val written = if (result is DocumentIo.WriteResult.SavedAsProject) session.files() else files
+            val failed = written.keys.filterNot { path -> io.writeLayoutFile(source, path, written.getValue(path)) }
             session.markSaved()
-            when (result) {
-                is DocumentIo.WriteResult.Saved -> if (announce) scope.launch { snackbar.showSnackbar(savedText) }
-                is DocumentIo.WriteResult.SavedAsProject -> {
-                    source = DocumentSource.Local(result.name)
-                    scope.launch { snackbar.showSnackbar(savedAsProject.format(result.name)) }
-                }
+            when {
+                failed.isNotEmpty() -> scope.launch { snackbar.showSnackbar(layoutFileSaveFailed.format(failed.joinToString(", "))) }
+                result is DocumentIo.WriteResult.Saved && announce -> scope.launch { snackbar.showSnackbar(savedText) }
             }
             return true
         }
@@ -999,7 +1012,7 @@ internal class DesignerActivity : StandaloneActivity() {
         LaunchedEffect(session.revision) {
             if (session.dirty) {
                 delay(1000)
-                if (session.dirty) io.writeDraft(source, session.script())
+                if (session.dirty) io.writeDraft(source, session.script(), session.changedFiles())
             }
         }
         BackHandler(enabled = session.dirty) { exitDialog = true }
@@ -1197,10 +1210,14 @@ internal class DesignerActivity : StandaloneActivity() {
                 confirmButton = {
                     TextButton(onClick = {
                         pendingDraft = null
+                        // The draft's layout files stand in for the saved ones while it is read (P11.3).
+                        layoutDrafts = io.pendingDraftFiles(source)
                         read(draft) { result ->
+                            layoutDrafts = emptyMap()
                             when (result) {
                                 is ReadResult.ParsedUi -> {
-                                    session.replace(result.document)
+                                    val onDisk = result.document.files.associate { it.file!!.path to (io.readLayoutFile(source, it.file.path) ?: "") }
+                                    session.replace(result.document, onDisk)
                                     session.dirty = true
                                 }
                                 is ReadResult.Parsed, is ReadResult.Rejected -> io.clearDraft(source)

@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">الاحتفاظ بتغييراتي</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">تعذرت قراءة ملف التخطيط %1$s, ولن يظهر على اللوحة</string>
+    <string name="designer_layout_file_save_failed">تعذر حفظ ملف التخطيط %1$s</string>
     <string name="designer_modified">عدل في %1$s</string>
     <string name="designer_move_down">تحريك لأسفل</string>
     <string name="designer_move_up">تحريك لأعلى</string>

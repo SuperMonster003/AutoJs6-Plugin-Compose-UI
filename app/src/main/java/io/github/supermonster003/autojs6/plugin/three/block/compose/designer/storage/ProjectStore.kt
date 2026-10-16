@@ -7,6 +7,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.parse.UiScriptReader
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
@@ -14,12 +15,24 @@ import java.security.MessageDigest
  * Designer projects are script files in the plugin's private storage (roadmap D39): `projects/` holds the
  * saved scripts (`.js`, and `.tsx` since roadmap P9.2), `drafts/` the periodically written working copies that survive a killed process (D40).
  * Nothing here needs a storage permission; importing and exporting go through the system document picker.
+ *
+ * Folder projects (roadmap P11.3 / D56, appendix B): a `"ui"` project whose script refers to layout files is a
+ * folder `projects/<stem>/` with the script `main.js` next to its files; its name is `<stem>/main.js`, so its draft
+ * is `drafts/<stem>/main.js` and its source record is keyed by that name. A single-file project is promoted to one
+ * when it first needs a layout file ([promote]).
  */
-internal class ProjectStore(context: Context) {
+internal class ProjectStore(private val base: File) {
+    constructor(context: Context) : this(File(context.filesDir, "designer"))
+
     /** What a project is, for the home list and the new-project dialog (roadmap P10.4): Compose JavaScript, Compose TSX, or a `"ui";` mode script. */
     enum class Kind { JS, TSX, UI }
 
-    data class Project(val name: String, val file: File, val modifiedAt: Long, val kind: Kind = Kind.JS)
+    data class Project(val name: String, val file: File, val modifiedAt: Long, val kind: Kind = Kind.JS) {
+        /** A folder project (`<stem>/main.js`). */
+        val folder: Boolean get() = isFolderName(name)
+        /** What the home list shows: the folder's name for a folder project, the file name otherwise. */
+        val displayName: String get() = displayNameOf(name)
+    }
 
     /**
      * The document a project was imported from (roadmap P9.1, D45) and [baseline], the digest of the text both
@@ -27,7 +40,6 @@ internal class ProjectStore(context: Context) {
      */
     data class Source(val uri: Uri, val baseline: String?)
 
-    private val base = File(context.filesDir, "designer")
     val projectsDir = File(base, "projects")
     val draftsDir = File(base, "drafts")
     /** Origins of imported projects, one `name=uri` or `name=uri<TAB>baseline` line each; only read on request. */
@@ -37,10 +49,87 @@ internal class ProjectStore(context: Context) {
 
     fun list(): List<Project> {
         projectsDir.mkdirs()
-        return (projectsDir.listFiles { file -> file.isFile && isValidName(file.name) } ?: emptyArray())
+        val files = (projectsDir.listFiles { file -> file.isFile && isValidName(file.name) } ?: emptyArray())
             .map { Project(it.name, it, it.lastModified(), kindOf(it)) }
-            .sortedWith(compareByDescending<Project> { it.modifiedAt }.thenBy { it.name })
+        val folders = (projectsDir.listFiles { file -> file.isDirectory && isValidName(file.name + "/" + MAIN_SCRIPT) } ?: emptyArray())
+            .mapNotNull { dir -> File(dir, MAIN_SCRIPT).takeIf { it.isFile }?.let { Project(dir.name + "/" + MAIN_SCRIPT, it, folderModifiedAt(dir), kindOf(it)) } }
+        return (files + folders).sortedWith(compareByDescending<Project> { it.modifiedAt }.thenBy { it.name })
     }
+
+    /** The newest modification time of anything in the folder project [dir] (its script or one of its files). */
+    private fun folderModifiedAt(dir: File): Long = dir.walkTopDown().filter { it.isFile }.maxOfOrNull { it.lastModified() } ?: dir.lastModified()
+
+    /** The folder of a folder project, or null for a single-file project. */
+    fun projectDir(name: String): File? = if (isFolderName(requireValidName(name))) file(name).parentFile else null
+
+    /**
+     * The file at [path] (`layout.xml`, `res/layout/main.xml`) of the folder project [name], or null for a
+     * single-file project and for a path that leaves the folder.
+     */
+    fun layoutFile(name: String, path: String): File? {
+        val dir = projectDir(name)?.canonicalFile ?: return null
+        if (path.isEmpty() || File(path).isAbsolute || path.startsWith("/") || path.startsWith("\\")) return null
+        val file = try {
+            File(dir, path).canonicalFile
+        } catch (error: IOException) {
+            return null
+        }
+        return file.takeIf { it.path.startsWith(dir.path + File.separator) }
+    }
+
+    /** Writes [text] to [file] through a temporary file in the same folder. */
+    private fun writeAtomically(file: File, text: String) {
+        file.parentFile?.mkdirs()
+        val temp = File(file.parentFile, file.name + ".tmp")
+        temp.writeText(text, StandardCharsets.UTF_8)
+        if (!temp.renameTo(file)) {
+            file.writeText(text, StandardCharsets.UTF_8)
+            temp.delete()
+        }
+    }
+
+    /** Writes the file at [path] of the folder project [name] (see [layoutFile]); false when there is no such place. */
+    fun writeLayoutFile(name: String, path: String, text: String): Boolean {
+        val file = layoutFile(name, path) ?: return false
+        writeAtomically(file, text)
+        return true
+    }
+
+    /**
+     * Turns the single-file project [name] (`<stem>.js`) into the folder project `<stem>/main.js` (roadmap P11.3 / D56),
+     * moving its draft, source record and image folder with it; a counter is added while the folder name is taken.
+     * A folder project is returned unchanged.
+     */
+    fun promote(name: String): Project {
+        if (isFolderName(requireValidName(name))) return file(name).let { Project(name, it, it.lastModified(), kindOf(it)) }
+        require(name.endsWith(EXTENSION)) { "Only JavaScript projects become folder projects: $name" }
+        val stem = name.removeSuffix(EXTENSION)
+        var folder = stem
+        var counter = 2
+        while (File(projectsDir, folder).exists()) folder = "$stem-${counter++}"
+        val target = folder + "/" + MAIN_SCRIPT
+        val dir = File(projectsDir, folder)
+        check(dir.mkdirs()) { "Could not create $folder" }
+        val script = file(target)
+        check(file(name).renameTo(script)) { "Could not move $name into $folder" }
+        draftFile(name).takeIf { it.exists() }?.let { draft ->
+            draftFile(target).parentFile?.mkdirs()
+            draft.renameTo(draftFile(target))
+        }
+        layoutDraftsDir(name).takeIf { it.exists() }?.renameTo(layoutDraftsDir(target))
+        sourceOf(name)?.let { origin ->
+            recordSource(name, null)
+            recordSource(target, origin)
+        }
+        imageFolderOf(name)?.let { folderUri ->
+            setImageFolder(name, null)
+            setImageFolder(target, folderUri)
+        }
+        return Project(target, script, script.lastModified(), kindOf(script))
+    }
+
+    /** The drafts of the layout files of the document with draft key [key]: `drafts/<key>.files/<path>`. */
+    fun layoutDraftsDir(key: String): File = File(draftsDir, requireValidName(key) + LAYOUT_DRAFTS_SUFFIX)
 
     /** The kind of [file] by its name and, for a `.js` script, its text (the `"ui"` directive with a `ui.layout` call). */
     private fun kindOf(file: File): Kind = when {
@@ -74,28 +163,35 @@ internal class ProjectStore(context: Context) {
 
     fun write(name: String, script: String) {
         projectsDir.mkdirs()
-        val target = file(name)
-        val temp = File(projectsDir, target.name + ".tmp")
-        temp.writeText(script, StandardCharsets.UTF_8)
-        if (!temp.renameTo(target)) {
-            target.writeText(script, StandardCharsets.UTF_8)
-            temp.delete()
-        }
+        writeAtomically(file(name), script)
     }
 
     fun delete(name: String) {
-        file(name).delete()
-        draftFile(name).delete()
+        if (isFolderName(name)) {
+            projectDir(name)?.deleteRecursively()
+            draftFile(name).parentFile?.deleteRecursively()
+        } else {
+            file(name).delete()
+            draftFile(name).delete()
+        }
+        layoutDraftsDir(name).deleteRecursively()
         recordSource(name, null)
         setImageFolder(name, null)
     }
 
+    /** Renames a project: a file to another file name, a folder project to another folder (`<new stem>/main.js`). */
     fun rename(name: String, newName: String): Project {
+        require(isFolderName(name) == isFolderName(newName)) { "A project keeps its form when renamed: $name -> $newName" }
         val target = file(newName)
-        require(!target.exists()) { "A project named $newName already exists" }
-        val source = file(name)
-        check(source.renameTo(target)) { "Could not rename $name" }
-        draftFile(name).let { if (it.exists()) it.renameTo(draftFile(newName)) }
+        val moving = if (isFolderName(name)) file(name).parentFile!! to target.parentFile!! else file(name) to target
+        require(!moving.second.exists()) { "A project named $newName already exists" }
+        check(moving.first.renameTo(moving.second)) { "Could not rename $name" }
+        if (isFolderName(name)) {
+            draftFile(name).parentFile?.let { if (it.exists()) it.renameTo(draftFile(newName).parentFile!!) }
+        } else {
+            draftFile(name).let { if (it.exists()) it.renameTo(draftFile(newName)) }
+        }
+        layoutDraftsDir(name).let { if (it.exists()) it.renameTo(layoutDraftsDir(newName)) }
         sourceOf(name)?.let { origin ->
             recordSource(name, null)
             recordSource(newName, origin)
@@ -104,7 +200,7 @@ internal class ProjectStore(context: Context) {
             setImageFolder(name, null)
             setImageFolder(newName, folder)
         }
-        return Project(target.name, target, target.lastModified())
+        return Project(newName, target, target.lastModified(), kindOf(target))
     }
 
     fun draftFile(name: String): File = File(draftsDir, requireValidName(name))
@@ -119,12 +215,13 @@ internal class ProjectStore(context: Context) {
     }
 
     fun writeDraft(name: String, script: String) {
-        draftsDir.mkdirs()
+        draftFile(name).parentFile?.mkdirs()
         draftFile(name).writeText(script, StandardCharsets.UTF_8)
     }
 
     fun clearDraft(name: String) {
         draftFile(name).delete()
+        layoutDraftsDir(name).deleteRecursively()
     }
 
     /**
@@ -220,6 +317,9 @@ internal class ProjectStore(context: Context) {
 
     companion object {
         const val EXTENSION = ".js"
+        /** The script of a folder project (roadmap P11.3, appendix B). */
+        const val MAIN_SCRIPT = "main.js"
+        private const val LAYOUT_DRAFTS_SUFFIX = ".files"
         /** TSX projects (roadmap P9.2 / D42), read and written through the TypeScript Engine parser. */
         const val TSX_EXTENSION = ".tsx"
         val EXTENSIONS = listOf(EXTENSION, TSX_EXTENSION)
@@ -265,7 +365,17 @@ internal class ProjectStore(context: Context) {
         private val dots = Regex("\\.{2,}")
         private val valid = Regex("[A-Za-z0-9_\\-\\u4e00-\\u9fff][A-Za-z0-9_.\\-\\u4e00-\\u9fff]*\\.(js|tsx)")
 
-        fun isValidName(name: String): Boolean = valid.matches(name) && ".." !in name
+        fun isValidName(name: String): Boolean {
+            if (".." in name) return false
+            if (!isFolderName(name)) return valid.matches(name)
+            return valid.matches(name.substringBefore('/') + EXTENSION) && name.count { it == '/' } == 1
+        }
+
+        /** Whether [name] names a folder project (`<stem>/main.js`). */
+        fun isFolderName(name: String): Boolean = name.endsWith("/" + MAIN_SCRIPT)
+
+        /** The folder's name for a folder project, the file name otherwise. */
+        fun displayNameOf(name: String): String = if (isFolderName(name)) name.substringBefore('/') else name
 
         /** Longest stem [stemOf] keeps: 64 CJK characters with a counter and extension stay under 255 bytes. */
         const val MAX_STEM_CHARS = 64

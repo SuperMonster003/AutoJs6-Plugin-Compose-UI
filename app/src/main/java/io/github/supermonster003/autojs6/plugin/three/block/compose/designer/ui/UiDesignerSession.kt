@@ -31,9 +31,15 @@ import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.san
  * diagnostics, the preview's problems and the script's preview differences (roadmap P11.2). Views observe its
  * Compose state; all mutations go through commands.
  */
-internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = UiCatalog.load()) {
+internal class UiDesignerSession(
+    initial: UiDocument,
+    val catalog: UiCatalog = UiCatalog.load(),
+    /** The saved text of each layout file (roadmap P11.3), by path; a restored draft passes the files as they are on disk. */
+    savedFiles: Map<String, String> = UiScriptWriter.writeFiles(initial),
+) {
     private val history = UiEditHistory(initial)
     private val validator = UiValidator(catalog)
+    private var savedFiles: Map<String, String> = savedFiles
 
     var document: UiDocument by mutableStateOf(initial)
         private set
@@ -98,11 +104,21 @@ internal class UiDesignerSession(initial: UiDocument, val catalog: UiCatalog = U
 
     fun redo(): Boolean = history.redo().also { if (it) publish() }
 
-    fun markSaved() { dirty = false }
+    fun markSaved() {
+        dirty = false
+        savedFiles = files()
+    }
 
     fun script(): String = UiScriptWriter.write(document)
 
-    fun replace(document: UiDocument) {
+    /** The current text of every layout file the script refers to (roadmap P11.3), by path. */
+    fun files(): Map<String, String> = UiScriptWriter.writeFiles(document)
+
+    /** The layout files whose text differs from the saved one: what saving writes and drafts keep. */
+    fun changedFiles(): Map<String, String> = files().filter { (path, text) -> savedFiles[path] != text }
+
+    fun replace(document: UiDocument, savedFiles: Map<String, String> = UiScriptWriter.writeFiles(document)) {
+        this.savedFiles = savedFiles
         history.reset(document)
         fragment = document.rootFragment.coerceAtLeast(0)
         selectedId = document.root?.id

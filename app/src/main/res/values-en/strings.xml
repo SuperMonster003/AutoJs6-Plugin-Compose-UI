@@ -77,6 +77,8 @@
     <string name="designer_keep_mine">Keep my changes</string>
     <string name="designer_language_javascript">JavaScript</string>
     <string name="designer_language_tsx">TSX</string>
+    <string name="designer_layout_file_missing">The layout file %1$s cannot be read; it is not on the canvas</string>
+    <string name="designer_layout_file_save_failed">Could not save the layout file %1$s</string>
     <string name="designer_modified">Modified %1$s</string>
     <string name="designer_move_down">Move down</string>
     <string name="designer_move_up">Move up</string>

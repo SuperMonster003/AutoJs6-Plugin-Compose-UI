@@ -109,7 +109,11 @@ internal fun XmlOutlinePanel(session: UiDesignerSession, palette: StandalonePale
         if (fragments.size > 1) {
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 12.dp).testTag("designer-xml-fragments")) {
                 fragments.forEachIndexed { index, fragment ->
-                    val label = if (fragment.usage == FragmentUsage.LAYOUT) stringResource(R.string.designer_ui_fragment_root, index + 1) else stringResource(R.string.designer_ui_fragment, index + 1)
+                    val label = when {
+                        fragment.file != null -> fragment.file.path.substringAfterLast('/')
+                        fragment.usage == FragmentUsage.LAYOUT -> stringResource(R.string.designer_ui_fragment_root, index + 1)
+                        else -> stringResource(R.string.designer_ui_fragment, index + 1)
+                    }
                     FilterChip(
                         selected = session.fragment == index,
                         onClick = { session.fragment = index; session.selectedId = fragment.root.id },
@@ -236,11 +240,21 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
     val diagnostics = session.diagnostics
     val problems = session.previewProblems
     val differences = session.visibleDifferences
+    val missingFiles = session.document.missingFiles
     val context = LocalContext.current
     val docsUnavailable = stringResource(R.string.designer_ui_diff_docs_unavailable)
     LazyColumn(modifier = modifier.fillMaxSize().testTag("designer-xml-problems"), contentPadding = PaddingValues(bottom = AddButtonClearance)) {
-        if (diagnostics.isEmpty() && problems.isEmpty()) item {
+        if (diagnostics.isEmpty() && problems.isEmpty() && missingFiles.isEmpty()) item {
             Text(stringResource(R.string.designer_no_issues), color = Color(palette.muted), fontSize = 13.sp, modifier = Modifier.padding(16.dp))
+        }
+        // Roadmap P11.3: a layout file the script refers to but that cannot be read is left out of the canvas.
+        items(missingFiles) { path ->
+            Text(
+                "! " + stringResource(R.string.designer_layout_file_missing, path),
+                color = Color(palette.danger),
+                fontSize = 13.sp,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).testTag("designer-xml-missing-file"),
+            )
         }
         items(diagnostics) { diagnostic ->
             val label = diagnostic.nodeId?.let { id -> session.document.element(id)?.let(::elementLabel) }
