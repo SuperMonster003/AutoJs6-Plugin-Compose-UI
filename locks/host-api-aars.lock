@@ -10,6 +10,9 @@
 #   the host itself provides the service and the designer binds it for the XML canvas (P10.3, see libs/README.md).
 # 2026-10-15: ui-preview-api rebuilt from host commit 4c332c2053 (contract v2 appended for the interactive preview, roadmap
 #   P10.6): runScript / stopScript and the console / error / exit callbacks; the v1 transactions and classes are unchanged.
+# 2026-10-16: ui-preview-api rebuilt from host commits 2da2d4119 / 9df0a154b (contract v3 appended for project resources,
+#   roadmap P11.H1): request keys for a resources / project zip, the ATTRIBUTE_IGNORED diagnostic and the version list;
+#   no transaction is added, the v1 / v2 identities are frozen (VERSION_V2 / HASH_V2).
 format=1
 common-plugin-api.file=common-plugin-api.aar
 common-plugin-api.sha256=ee7eb7879a53506c4cca5e2d19d3058e28df2168fb33351a52302a3b9e532e15
@@ -18,4 +21,4 @@ compose-ui-api.sha256=557b7efc8fd7d17c2032f0a6e0ccb5f64b42d0a2f3dceabacd06c9ce89
 typescript-parser-api.file=typescript-parser-api.aar
 typescript-parser-api.sha256=c5651a0c779903bde8832af185bc63038d1706d32f3e67069fbcf0e536658519
 ui-preview-api.file=ui-preview-api.aar
-ui-preview-api.sha256=e6b56d91b5ce78eeaf919bfb7611fe130ea7d8a52a25319c80a8244c61e41f60
+ui-preview-api.sha256=4746f9f3e817e2c634e2005635373c9f864c7a33ca7f0703ca16133911dd8b94

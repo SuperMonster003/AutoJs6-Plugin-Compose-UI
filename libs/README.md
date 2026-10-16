@@ -100,12 +100,19 @@ The host defines the contract but does not package the module, so the plugin con
 `org.autojs.plugin.typescript.PARSER`, PLUGIN permission); the designer binds it to read `.tsx` projects.
 The protocol is described in the host document `docs/dev/typescript-parser-plugin-protocol-v1.md`.
 
-## ui-mode preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51, v2 in P10.6)
+## ui-mode preview contract (`ui-preview-api.aar`, roadmap P10.2 / D46 - D51, v2 in P10.6, v3 in P11.H1)
 
 `ui-preview-api.aar` is the release AAR of the host module `plugin-api/ui-preview-api` at host commit
-`4c332c2053` (`feat(plugin-api): append the ui preview contract v2 for interactive script runs`), assembled
+`2da2d4119` (`feat(plugin-api): append ui preview contract v3 for project resources and projects`), assembled
 with `:plugin-api:ui-preview-api:assembleRelease`; a rebuild from the same commit is byte-identical.
-SHA-256 `e6b56d91b5ce78eeaf919bfb7611fe130ea7d8a52a25319c80a8244c61e41f60`, MPL 2.0, 19730 bytes, 13 class files.
+SHA-256 `4746f9f3e817e2c634e2005635373c9f864c7a33ca7f0703ca16133911dd8b94`, MPL 2.0, 20618 bytes.
+Contract v3 adds no transaction: request keys for a zip of the project's `res/` directory (`setLayout`:
+`resourcesFd` / `resourcesSha256` / `layoutPath` / `androidLayout`) and of the whole project (`runScript`:
+`projectFd` / `projectSha256` / `scriptPath`), the `ATTRIBUTE_IGNORED` diagnostic with its outcome field and the
+archive limits. The preview info keeps answering `contractVersion` / `contractHash` with v2 (`VERSION_V2` /
+`HASH_V2`, which a 1.7.0 client compares strictly) and lists every served version with its hash under
+`supportedContractVersions` / `contractHashes`, plus `resourcesSupported`; host commit `9df0a154b` and later serve it.
+The v2 artifact before it was built from host commit `4c332c2053` (SHA-256 `e6b56d91...`, 19730 bytes, 13 class files).
 It holds the `IUiPreviewService` / `IUiPreviewCallback` AIDL stubs and `UiPreviewContract` (package
 `org.autojs.plugin.ui.preview`); it has no dependency. Contract v2 only appends to v1 (3-Block Compose 1.6.0,
 host commit `8c50a8fabc`, hash `680f41b5...`): `runScript` / `stopScript` and the `onConsole` / `onScriptError` /

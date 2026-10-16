@@ -82,6 +82,12 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
     /** Whether the host offers `runScript` (contract v2 on API 33+); known once the handshake is done. */
     var scriptRunSupported: Boolean by mutableStateOf(false)
         private set
+    /**
+     * Whether the host resolves a project's `res/` directory in layouts and runs a whole project (contract v3,
+     * roadmap P11.H1); known once the handshake is done.
+     */
+    var resourcesSupported: Boolean by mutableStateOf(false)
+        private set
     /** A script run is going (from `runScript` until `onScriptExit`). */
     var running: Boolean by mutableStateOf(false)
         private set
@@ -316,11 +322,20 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                 return
             }
             val info = remote.previewInfo
-            val v2 = info.getInt(Contract.KEY_CONTRACT_VERSION, Contract.BASE_VERSION) >= Contract.VERSION && info.getString(Contract.KEY_CONTRACT_HASH) == Contract.HASH
+            // v3 (project resources, P11.H1) is listed with its hash; the info's own identity keys stay at v2 (runScript).
+            val versions = info.getIntArray(Contract.KEY_SUPPORTED_CONTRACT_VERSIONS)
+            val hashes = info.getStringArray(Contract.KEY_CONTRACT_HASHES)
+            val v3 = versions != null && hashes != null && versions.indices.any { versions[it] == Contract.VERSION && hashes.getOrNull(it) == Contract.HASH }
+            val v2 = v3 || info.getInt(Contract.KEY_CONTRACT_VERSION, Contract.BASE_VERSION) >= Contract.VERSION_V2 && info.getString(Contract.KEY_CONTRACT_HASH) == Contract.HASH_V2
             main.post {
                 if (closed) return@post
                 service = remote
-                hostContractVersion = if (v2) Contract.VERSION else Contract.BASE_VERSION
+                hostContractVersion = when {
+                    v3 -> Contract.VERSION
+                    v2 -> Contract.VERSION_V2
+                    else -> Contract.BASE_VERSION
+                }
+                resourcesSupported = v3 && info.getBoolean(Contract.KEY_RESOURCES_SUPPORTED, false)
                 scriptRunSupported = v2 && info.getBoolean(Contract.KEY_SCRIPT_RUN_SUPPORTED, false) && embedded
                 status = Status.Ready(info.getString(Contract.KEY_HOST_VERSION_NAME), info.getLong(Contract.KEY_HOST_VERSION_CODE))
                 ensureSession()
