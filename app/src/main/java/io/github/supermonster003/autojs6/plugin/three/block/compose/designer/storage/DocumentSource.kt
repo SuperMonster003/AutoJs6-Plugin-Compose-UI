@@ -44,6 +44,8 @@ internal class DocumentIo(private val context: Context, private val store: Proje
     private companion object {
         const val EXPORT_DIRECTORY = "designer-export"
         const val EXPORT_ARCHIVE = "export"
+        /** Hidden inside the projects folder (never a project), so the FileProvider's one path covers it. */
+        const val HANDOFF_DIRECTORY = ".handoff"
     }
 
     sealed class WriteResult {
@@ -181,6 +183,22 @@ internal class DocumentIo(private val context: Context, private val store: Proje
         }
         if (root == null || !root.whole || !File(root.dir, ProjectStore.PROJECT_CONFIG).isFile) texts[ProjectStore.PROJECT_CONFIG] = ProjectStore.projectConfigOf(name)
         return ProjectArchives(File(context.cacheDir, EXPORT_DIRECTORY)).archive(EXPORT_ARCHIVE, root, texts)?.file
+    }
+
+    /**
+     * The zip a document with layout files is handed to the host as (roadmap P11.3 / D64): [exportArchive] copied to
+     * `projects/.handoff/<name>.zip`, where the designer's FileProvider can grant it; null when it cannot be made.
+     */
+    fun handoffArchive(source: DocumentSource, script: String, files: Map<String, String>): File? {
+        val archive = exportArchive(source, script, files) ?: return null
+        val name = when (source) {
+            is DocumentSource.Local -> ProjectStore.displayNameOf(source.name).removeSuffix(ProjectStore.EXTENSION)
+            is DocumentSource.External -> source.displayName.substringBeforeLast('.')
+        }
+        val target = File(File(store.projectsDir, HANDOFF_DIRECTORY), ProjectStore.stemOf(name, "project") + ProjectStore.ZIP_EXTENSION)
+        target.parentFile?.mkdirs()
+        archive.copyTo(target, overwrite = true)
+        return target
     }
 
     /** The script's path inside a project zip: `main.js` of a folder project, else the script's file name. */

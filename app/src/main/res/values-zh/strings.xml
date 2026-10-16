@@ -65,6 +65,7 @@
     <string name="designer_host_option_name">选项</string>
     <string name="designer_host_option_value">值</string>
     <string name="designer_host_options">承载选项</string>
+    <string name="designer_host_projects_needed">运行与导入文件夹工程需要更新版本的 AutoJs6</string>
     <string name="designer_image_folder">图片目录</string>
     <string name="designer_image_folder_set">相对图片路径现在在 %1$s 中查找</string>
     <string name="designer_import_failed">无法导入该文件.</string>

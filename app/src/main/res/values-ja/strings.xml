@@ -65,6 +65,7 @@
     <string name="designer_host_option_name">オプション</string>
     <string name="designer_host_option_value">値</string>
     <string name="designer_host_options">表示オプション</string>
+    <string name="designer_host_projects_needed">フォルダプロジェクトの実行とインポートには新しい AutoJs6 が必要です</string>
     <string name="designer_image_folder">画像フォルダー</string>
     <string name="designer_image_folder_set">相対的な画像パスは %1$s から探すようになりました</string>
     <string name="designer_import_failed">ファイルをインポートできませんでした.</string>

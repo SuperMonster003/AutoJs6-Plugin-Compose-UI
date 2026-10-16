@@ -65,6 +65,7 @@
     <string name="designer_host_option_name">Параметр</string>
     <string name="designer_host_option_value">Значение</string>
     <string name="designer_host_options">Параметры показа</string>
+    <string name="designer_host_projects_needed">Для запуска и импорта проектов-папок нужен более новый AutoJs6</string>
     <string name="designer_image_folder">Папка изображений</string>
     <string name="designer_image_folder_set">Относительные пути изображений теперь ищутся в %1$s</string>
     <string name="designer_import_failed">Не удалось импортировать файл.</string>

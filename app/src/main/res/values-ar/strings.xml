@@ -65,6 +65,7 @@
     <string name="designer_host_option_name">الخيار</string>
     <string name="designer_host_option_value">القيمة</string>
     <string name="designer_host_options">خيارات العرض</string>
+    <string name="designer_host_projects_needed">يتطلب تشغيل مشاريع المجلدات واستيرادها إصدارا أحدث من AutoJs6</string>
     <string name="designer_image_folder">مجلد الصور</string>
     <string name="designer_image_folder_set">يتم الآن البحث عن مسارات الصور النسبية في %1$s</string>
     <string name="designer_import_failed">تعذر استيراد الملف.</string>

@@ -985,6 +985,21 @@ internal class DesignerActivity : StandaloneActivity() {
             return true
         }
 
+        // Roadmap P11.3 / D64: a document with layout files goes to the host as a project zip.
+        fun handOffProject(intent: (Uri) -> Intent) {
+            if (session.dirty) save(announce = false)
+            val zip = runCatching { io.handoffArchive(source, session.script(), session.files()) }.getOrNull()
+            if (zip == null) {
+                scope.launch { snackbar.showSnackbar(hostFailed) }
+                return
+            }
+            when (ScriptLauncher.start(context, intent(ScriptLauncher.projectUri(context, zip)))) {
+                ScriptLauncher.Result.STARTED -> Unit
+                ScriptLauncher.Result.HOST_MISSING -> scope.launch { snackbar.showSnackbar(hostMissing) }
+                ScriptLauncher.Result.FAILED -> scope.launch { snackbar.showSnackbar(hostFailed) }
+            }
+        }
+
         fun sendToHost(intent: (Uri, Boolean) -> Intent) {
             if (session.dirty) save()
             val (uri, writable) = io.shareUri(source)
@@ -1094,8 +1109,14 @@ internal class DesignerActivity : StandaloneActivity() {
                                     menuOpen = false
                                     if (ScriptLauncher.copy(context, source.title, session.script())) scope.launch { snackbar.showSnackbar(copied) }
                                 }, modifier = Modifier.testTag("designer-menu-copy"))
-                                DropdownMenuItem(text = { Text(stringResource(R.string.gallery_run)) }, onClick = {
+                                val project = (source as? DocumentSource.Local)?.name?.let(ProjectStore::isFolderName) == true || session.document.files.isNotEmpty()
+                                val hostTakesProjects = remember(menuOpen) { menuOpen && ScriptLauncher.hostTakesProjects(context) }
+                                if (!project || hostTakesProjects) DropdownMenuItem(text = { Text(stringResource(R.string.gallery_run)) }, onClick = {
                                     menuOpen = false
+                                    if (project) {
+                                        handOffProject(ScriptLauncher::runProjectIntent)
+                                        return@DropdownMenuItem
+                                    }
                                     when (ScriptLauncher.run(context, session.script())) {
                                         ScriptLauncher.Result.STARTED -> Unit
                                         ScriptLauncher.Result.HOST_MISSING -> scope.launch { snackbar.showSnackbar(missingHost) }
@@ -1106,10 +1127,17 @@ internal class DesignerActivity : StandaloneActivity() {
                                     menuOpen = false
                                     sendToHost { uri, writable -> ScriptLauncher.editIntent(uri, writable) }
                                 }, modifier = Modifier.testTag("designer-menu-edit-in-host"))
-                                DropdownMenuItem(text = { Text(stringResource(R.string.designer_import_to_host)) }, onClick = {
+                                if (!project || hostTakesProjects) DropdownMenuItem(text = { Text(stringResource(R.string.designer_import_to_host)) }, onClick = {
                                     menuOpen = false
-                                    sendToHost { uri, _ -> ScriptLauncher.importIntent(uri) }
+                                    if (project) handOffProject(ScriptLauncher::importProjectIntent) else sendToHost { uri, _ -> ScriptLauncher.importIntent(uri) }
                                 }, modifier = Modifier.testTag("designer-menu-import-to-host"))
+                                // An AutoJs6 without the project zip entries (D64) cannot run or import a folder project.
+                                if (project && !hostTakesProjects) DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.designer_host_projects_needed), fontSize = 12.sp) },
+                                    onClick = {},
+                                    enabled = false,
+                                    modifier = Modifier.testTag("designer-menu-host-projects-needed"),
+                                )
                                 DropdownMenuItem(text = { Text(stringResource(R.string.designer_export)) }, onClick = {
                                     menuOpen = false
                                     val folder = (source as? DocumentSource.Local)?.name?.let(ProjectStore::isFolderName) == true

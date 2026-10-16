@@ -3,6 +3,7 @@ package io.github.supermonster003.autojs6.plugin.three.block.compose.app
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -22,6 +23,10 @@ internal object ScriptLauncher {
     const val HOST_EDIT_ACTIVITY = "org.autojs.autojs.external.open.EditIntentActivity"
     /** The host's public import entry: copies the document into the host script directory under its display name. */
     const val HOST_IMPORT_ACTIVITY = "org.autojs.autojs.external.open.ImportIntentActivity"
+    /** The host's entries for project zips (roadmap P11.3 / D64); a host without them gets no folder project destinations. */
+    const val HOST_RUN_PROJECT_ACTIVITY = "org.autojs.autojs.external.open.RunProjectIntentActivity"
+    const val HOST_IMPORT_PROJECT_ACTIVITY = "org.autojs.autojs.external.open.ImportProjectIntentActivity"
+    const val ZIP_MIME_TYPE = "application/zip"
     const val EXTRA_SCRIPT = "script"
     const val SCRIPT_MIME_TYPE = "application/x-javascript"
     /** The type the host's explorer gives TypeScript sources; TSX projects are handed over with it (roadmap P9.2). */
@@ -79,6 +84,26 @@ internal object ScriptLauncher {
         .setClassName(ThreeBlockComposePlugin.HOST_PACKAGE_NAME, HOST_IMPORT_ACTIVITY)
         .setDataAndType(uri, SCRIPT_MIME_TYPE)
         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+    /** Run a folder project in the host from its zip (roadmap P11.3 / D64): unpacked into the host's cache and run there. */
+    fun runProjectIntent(uri: Uri): Intent = Intent(Intent.ACTION_VIEW)
+        .setClassName(ThreeBlockComposePlugin.HOST_PACKAGE_NAME, HOST_RUN_PROJECT_ACTIVITY)
+        .setDataAndType(uri, ZIP_MIME_TYPE)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+    /** Import a folder project into the host script directory from its zip; the host names the folder after the zip. */
+    fun importProjectIntent(uri: Uri): Intent = Intent(Intent.ACTION_VIEW)
+        .setClassName(ThreeBlockComposePlugin.HOST_PACKAGE_NAME, HOST_IMPORT_PROJECT_ACTIVITY)
+        .setDataAndType(uri, ZIP_MIME_TYPE)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+    /** Whether the installed host takes project zips (both entries of D64 exist). */
+    fun hostTakesProjects(context: Context): Boolean = runCatching {
+        for (activity in listOf(HOST_RUN_PROJECT_ACTIVITY, HOST_IMPORT_PROJECT_ACTIVITY)) {
+            context.packageManager.getActivityInfo(ComponentName(ThreeBlockComposePlugin.HOST_PACKAGE_NAME, activity), 0)
+        }
+        true
+    }.getOrDefault(false)
 
     fun start(context: Context, intent: Intent): Result {
         if (!isHostInstalled(context)) return Result.HOST_MISSING
