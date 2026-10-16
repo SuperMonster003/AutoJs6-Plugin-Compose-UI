@@ -1533,3 +1533,9 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 宿主本地提交 (未推送, D7): `ef88268be` 契约 v4 (`sendLifecycle` / `onLifecycleHandled`, `busyWaitLimitMs`, 四个能力标志, 冻结 v3 身份), `2d7944d10` 实现 (对话框入画布, `ui.emitter` 与返回键, 窗口颜色色条, 忙等观察器), `418ba88a6` 测试. 契约 AAR 21769 B, SHA-256 `29abeb01...d392`.
 - 验证: `UiPreviewServiceTest` 20 项在 AVD_API_33 / AVD_API_35_16K 通过; 1.8.0 插件对 v4 宿主的交互预览, 布局预览与 XML 文件工程设备测试通过. 逐项证据见 P11 路线图 P11.5 (已全部勾选).
 - 下一步: P11.6 (插件 1.9.0 对接 v4: 换用 AAR, 返回键按钮, pause / resume, 忙等阈值设置, 能力映射与差异列表联动).
+
+### 2026-10-16 (续): P11.6 插件对接预览契约 v4
+
+- 插件提交: `ada93a0` (契约 AAR 换为 v4), `2c39f27` (握手协商 v4 与能力映射, 隐藏 / 显示发 pause / resume 而不重跑, 返回键按钮, 设置页 "设计器 > 主线程占用上限", 忙等结束的本地化提示, 差异说明随能力变化; 10 语言字符串; 测试). 宿主本地提交 `0ea8b114f` (zh-Hans changelog 的交互预览条目).
+- 验证: JVM 280 项, lint 0 错误; `UiInteractiveDeviceTest` 在 v4 宿主的 API 33 / 35 模拟器各 5 项通过 1 项跳过, 在 v3 宿主上 3 项通过 3 项跳过; 设置页, 布局预览与 UI 设计器设备测试回归通过. 逐项证据见 P11 路线图 P11.6 (已全部勾选).
+- 下一步: P11.7 (TSX ui 布局) 或 P11.8 (compose 联动), 1.9.0 的 changelog / README 在 P11.9.
