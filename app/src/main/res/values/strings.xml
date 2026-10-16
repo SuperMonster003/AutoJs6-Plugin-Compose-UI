@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">Layout files</string>
     <string name="designer_layout_file_missing">The layout file %1$s cannot be read; it is not on the canvas</string>
     <string name="designer_layout_file_new">New XML file</string>
+    <string name="designer_layout_file_no_resources">The installed AutoJs6 cannot take the project\'s files: res/ resources and layout files may look different from a real run</string>
     <string name="designer_layout_file_not_inline">Only a layout written directly in ui.layout(...) or ui.inflate(...) can be saved as a file</string>
     <string name="designer_layout_file_path">File path</string>
     <string name="designer_layout_file_path_invalid">Enter a relative path ending in .xml inside the script folder</string>

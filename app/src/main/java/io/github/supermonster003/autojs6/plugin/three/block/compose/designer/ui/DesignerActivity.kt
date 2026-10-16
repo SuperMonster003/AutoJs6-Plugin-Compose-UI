@@ -51,6 +51,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -833,6 +834,14 @@ internal class DesignerActivity : StandaloneActivity() {
         // The host draws the layout (D46): one client per screen, bound while the screen lives; the session follows
         // the canvas surface, and a loss is retried when the screen comes back.
         val client = requireNotNull(previewClient)
+        // Roadmap P11.3: the document's folder goes with layouts and runs (contract v3 hosts).
+        SideEffect {
+            client.projectRoot = io.projectRootOf(source)
+            client.scriptPath = io.scriptPathOf(source)
+        }
+        LaunchedEffect(client.status, client.resourcesSupported) {
+            session.hostResources = client.status !is UiPreviewClient.Status.Ready || client.resourcesSupported
+        }
         DisposableEffect(client) { client.bind(); onDispose { } }
         LaunchedEffect(appearance) { client.configure(appearance.dark, appearance.language) }
         val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -873,7 +882,7 @@ internal class DesignerActivity : StandaloneActivity() {
             if (session.interactive && interactiveSupported && visible) {
                 client.setInteractiveMode(true)
                 if (client.runRevision > 0) delay(SANDBOX_RESTART_DELAY_MS)
-                client.runScript(session.script(), source.title)
+                client.runScript(session.script(), source.title, session.files())
             } else {
                 client.setInteractiveMode(false)
             }

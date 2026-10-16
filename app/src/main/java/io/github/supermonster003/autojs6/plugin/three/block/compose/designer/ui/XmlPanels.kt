@@ -378,6 +378,16 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
         if (diagnostics.isEmpty() && problems.isEmpty() && missingFiles.isEmpty()) item {
             Text(stringResource(R.string.designer_no_issues), color = Color(palette.muted), fontSize = 13.sp, modifier = Modifier.padding(16.dp))
         }
+        // Roadmap P11.3: a host before contract v3 previews layout files and native XML without the project's files.
+        val document = session.document
+        if (!session.hostResources && (document.files.isNotEmpty() || document.fragments.any { document.isNative(it) })) item {
+            Text(
+                "i " + stringResource(R.string.designer_layout_file_no_resources),
+                color = Color(palette.muted),
+                fontSize = 12.sp,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).testTag("designer-xml-no-resources"),
+            )
+        }
         // Roadmap P11.3: a layout file the script refers to but that cannot be read is left out of the canvas.
         items(missingFiles) { path ->
             Text(

@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">ملفات التخطيط</string>
     <string name="designer_layout_file_missing">تعذرت قراءة ملف التخطيط %1$s, ولن يظهر على اللوحة</string>
     <string name="designer_layout_file_new">ملف XML جديد</string>
+    <string name="designer_layout_file_no_resources">لا يستطيع AutoJs6 المثبت استلام ملفات المشروع: قد تختلف موارد res/ وملفات التخطيط عن التشغيل الفعلي</string>
     <string name="designer_layout_file_not_inline">يمكن حفظ التخطيط كملف فقط إذا كان مكتوبا مباشرة في ui.layout(...) أو ui.inflate(...)</string>
     <string name="designer_layout_file_path">مسار الملف</string>
     <string name="designer_layout_file_path_invalid">أدخل مسارا نسبيا ينتهي بـ .xml داخل مجلد السكربت</string>

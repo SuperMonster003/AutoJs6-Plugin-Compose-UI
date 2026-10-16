@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">布局文件</string>
     <string name="designer_layout_file_missing">无法读取布局文件 %1$s, 画布中不显示它</string>
     <string name="designer_layout_file_new">新建 XML 文件</string>
+    <string name="designer_layout_file_no_resources">已安装的 AutoJs6 无法接收工程文件: res/ 资源与布局文件的预览可能与实际运行不同</string>
     <string name="designer_layout_file_not_inline">只有直接写在 ui.layout(...) 或 ui.inflate(...) 中的布局可以存为文件</string>
     <string name="designer_layout_file_path">文件路径</string>
     <string name="designer_layout_file_path_invalid">请输入脚本所在目录内以 .xml 结尾的相对路径</string>

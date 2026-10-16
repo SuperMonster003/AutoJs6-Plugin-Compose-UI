@@ -93,6 +93,8 @@ internal class UiDesignerSession(
     var layoutFilesAvailable: Boolean by mutableStateOf(true)
     /** Whether saving a document with layout files makes it a folder project (a private single-file project, a read-only document). */
     var layoutFilesPromote: Boolean by mutableStateOf(false)
+    /** False when the preview host is known not to take a project's files (before contract v3, roadmap P11.3). */
+    var hostResources: Boolean by mutableStateOf(true)
 
     val canUndo: Boolean get() = history.canUndo
     val canRedo: Boolean get() = history.canRedo

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.OpenableColumns
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview.ProjectArchives
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -145,6 +146,25 @@ internal class DocumentIo(private val context: Context, private val store: Proje
         false
     } catch (error: SecurityException) {
         false
+    }
+
+    /**
+     * Where the document's files are for the preview's zips (roadmap P11.3): the whole folder of a folder project,
+     * the `res/` directory beside a file Uri; null for a single-file private project or a content Uri.
+     */
+    fun projectRootOf(source: DocumentSource): ProjectArchives.Root? = when (source) {
+        is DocumentSource.Local -> store.projectDir(source.name)?.let { ProjectArchives.Root(it, whole = true) }
+        is DocumentSource.External -> if (source.uri.scheme == ContentResolver.SCHEME_FILE) {
+            source.uri.path?.let { File(it).parentFile }?.let { ProjectArchives.Root(it, whole = false) }
+        } else {
+            null
+        }
+    }
+
+    /** The script's path inside a project zip: `main.js` of a folder project, else the script's file name. */
+    fun scriptPathOf(source: DocumentSource): String = when (source) {
+        is DocumentSource.Local -> source.name.substringAfterLast('/')
+        is DocumentSource.External -> source.displayName.substringAfterLast('/')
     }
 
     private fun layoutFileOf(source: DocumentSource, path: String): File? = when (source) {

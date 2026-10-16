@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">레이아웃 파일</string>
     <string name="designer_layout_file_missing">레이아웃 파일 %1$s 을(를) 읽을 수 없습니다. 캔버스에 표시되지 않습니다</string>
     <string name="designer_layout_file_new">새 XML 파일</string>
+    <string name="designer_layout_file_no_resources">설치된 AutoJs6 는 프로젝트 파일을 받을 수 없습니다. res/ 리소스와 레이아웃 파일은 실제 실행과 다르게 보일 수 있습니다</string>
     <string name="designer_layout_file_not_inline">ui.layout(...) 또는 ui.inflate(...) 안에 직접 작성된 레이아웃만 파일로 저장할 수 있습니다</string>
     <string name="designer_layout_file_path">파일 경로</string>
     <string name="designer_layout_file_path_invalid">스크립트 폴더 안에서 .xml 로 끝나는 상대 경로를 입력하세요</string>

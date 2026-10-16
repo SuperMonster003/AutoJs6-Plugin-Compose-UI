@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">佈局檔案</string>
     <string name="designer_layout_file_missing">無法讀取佈局檔案 %1$s, 畫布中不顯示它</string>
     <string name="designer_layout_file_new">新增 XML 檔案</string>
+    <string name="designer_layout_file_no_resources">已安裝的 AutoJs6 無法接收專案檔案: res/ 資源與佈局檔案的預覽可能與實際執行不同</string>
     <string name="designer_layout_file_not_inline">只有直接寫在 ui.layout(...) 或 ui.inflate(...) 中的佈局可以存為檔案</string>
     <string name="designer_layout_file_path">檔案路徑</string>
     <string name="designer_layout_file_path_invalid">請輸入指令碼所在目錄內以 .xml 結尾的相對路徑</string>

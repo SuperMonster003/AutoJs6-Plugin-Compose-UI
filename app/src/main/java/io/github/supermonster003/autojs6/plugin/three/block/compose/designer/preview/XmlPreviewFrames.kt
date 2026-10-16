@@ -1,5 +1,6 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview
 
+import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.UiScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.UiDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlAttr
@@ -38,6 +39,12 @@ internal class XmlPreviewRequest(
     /** Identifiers the `{{ }}` expressions of the fragment use, in order of first use. */
     val bindingNames: List<String>,
     val notes: List<XmlPreviewNote>,
+    /** The layout file the fragment comes from (roadmap P11.3), relative to the script, or null for a literal. */
+    val layoutPath: String? = null,
+    /** The script's `ui.useAndroidLayout` mode, null when automatic. */
+    val androidLayout: Boolean? = null,
+    /** The current text of every layout file of the document, by path: the files the host resolves sit beside them. */
+    val files: Map<String, String> = emptyMap(),
 ) {
     fun elementIdAt(index: Int): Int? = elementIds.getOrNull(index)
     fun indexOf(elementId: Int): Int = elementIds.indexOf(elementId)
@@ -75,7 +82,10 @@ internal object XmlPreviewFrames {
             }
             append('}')
         }
-        return XmlPreviewRequest(xml, bindings, root.descendants().map { it.id }.toList(), names.toList(), notes)
+        return XmlPreviewRequest(
+            xml, bindings, root.descendants().map { it.id }.toList(), names.toList(), notes,
+            document.fragments[fragment].file?.path, document.androidLayout, UiScriptWriter.writeFiles(document),
+        )
     }
 
     /** The identifiers a `{{ }}` expression may resolve on the binding context, in order of first use. */

@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">Archivos de diseño</string>
     <string name="designer_layout_file_missing">No se puede leer el archivo de diseño %1$s; no se muestra en el lienzo</string>
     <string name="designer_layout_file_new">Nuevo archivo XML</string>
+    <string name="designer_layout_file_no_resources">El AutoJs6 instalado no puede recibir los archivos del proyecto: los recursos res/ y los archivos de diseño pueden verse distintos que al ejecutar</string>
     <string name="designer_layout_file_not_inline">Solo un diseño escrito directamente en ui.layout(...) o ui.inflate(...) se puede guardar como archivo</string>
     <string name="designer_layout_file_path">Ruta del archivo</string>
     <string name="designer_layout_file_path_invalid">Introduzca una ruta relativa que termine en .xml dentro de la carpeta del script</string>

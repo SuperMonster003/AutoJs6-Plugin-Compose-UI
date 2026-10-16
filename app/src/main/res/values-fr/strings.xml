@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">Fichiers de mise en page</string>
     <string name="designer_layout_file_missing">Impossible de lire le fichier de mise en page %1$s; il n\'est pas affiché sur le canevas</string>
     <string name="designer_layout_file_new">Nouveau fichier XML</string>
+    <string name="designer_layout_file_no_resources">L\'AutoJs6 installé ne peut pas recevoir les fichiers du projet: les ressources res/ et les fichiers de mise en page peuvent différer de l\'exécution réelle</string>
     <string name="designer_layout_file_not_inline">Seule une mise en page écrite directement dans ui.layout(...) ou ui.inflate(...) peut être enregistrée comme fichier</string>
     <string name="designer_layout_file_path">Chemin du fichier</string>
     <string name="designer_layout_file_path_invalid">Saisissez un chemin relatif se terminant par .xml dans le dossier du script</string>

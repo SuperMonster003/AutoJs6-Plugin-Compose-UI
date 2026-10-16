@@ -116,6 +116,14 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         private set
     /** The host's contract version from the handshake (1 for a v1 host). */
     private var hostContractVersion = Contract.BASE_VERSION
+    /**
+     * Where the document's files are (roadmap P11.3): sent with layouts and runs as zips once the host takes them
+     * (contract v3); null for a document without a folder (a single-file private project, a content Uri).
+     */
+    @Volatile var projectRoot: ProjectArchives.Root? = null
+    /** The script's path inside the project zip of a run: `main.js` of a folder project, else the script's file name. */
+    @Volatile var scriptPath: String = MAIN_SCRIPT
+    private val archives = ProjectArchives(File(context.cacheDir, ARCHIVE_DIRECTORY))
 
     val mode: String = if (Build.VERSION.SDK_INT >= Contract.MIN_API_EMBEDDED) Contract.MODE_EMBEDDED else Contract.MODE_SNAPSHOT
     val embedded: Boolean get() = mode == Contract.MODE_EMBEDDED
@@ -242,6 +250,8 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         private const val CREATE_RETRY_DELAY_MS = 500L
         private const val MAX_CONSOLE_LINES = 500
         private const val SNAPSHOT_DIRECTORY = "ui-preview"
+        private const val ARCHIVE_DIRECTORY = "ui-preview-archives"
+        private const val MAIN_SCRIPT = "main.js"
 
         /** Why the host cannot preview without binding it: not installed, or without the service; null when it may. */
         fun availability(context: Context): Status.Unavailable? {
@@ -566,7 +576,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
      * Runs [text] (a whole `"ui"` mode script) in the session's root as a real host script (roadmap P10.6);
      * a run still going is replaced. The console, errors and the end arrive as state. Main thread.
      */
-    fun runScript(text: String, name: String) {
+    fun runScript(text: String, name: String, files: Map<String, String> = emptyMap()) {
         if (closed || !scriptRunSupported) return
         val id = sessionId ?: return
         consoleLines = emptyList()
@@ -589,7 +599,25 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
                     lastExit = Contract.EXIT_ERROR
                 }
             }
-        }) { remote -> remote.runScript(id, request) }
+        }) { remote ->
+            // Roadmap P11.3: a script with a folder (or layout files) runs in its unpacked project (contract v3).
+            var project: ParcelFileDescriptor? = null
+            try {
+                val root = projectRoot
+                val path = scriptPath.takeIf(ProjectArchives::isEntryPath) ?: MAIN_SCRIPT
+                if (resourcesSupported && (root != null || files.isNotEmpty())) {
+                    archives.archive(ProjectArchives.PROJECT, root, files + (path to text))?.let { archive ->
+                        project = ParcelFileDescriptor.open(archive.file, ParcelFileDescriptor.MODE_READ_ONLY)
+                        request.putParcelable(Contract.KEY_PROJECT_FD, project)
+                        request.putString(Contract.KEY_PROJECT_SHA256, archive.sha256)
+                        request.putString(Contract.KEY_SCRIPT_PATH, path)
+                    }
+                }
+                remote.runScript(id, request)
+            } finally {
+                runCatching { project?.close() }
+            }
+        }
     }
 
     /** Stops the running script, if any; the layout preview can be sent again afterwards. Main thread. */
@@ -649,15 +677,27 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
         val layout = Bundle().apply {
             putString(Contract.KEY_XML, request.xml)
             putString(Contract.KEY_BINDINGS_JSON, request.bindingsJson)
+            // Roadmap P11.3: the script's ui.useAndroidLayout mode (contract v3); automatic when absent.
+            if (hostContractVersion >= Contract.VERSION) request.androidLayout?.let { putBoolean(Contract.KEY_ANDROID_LAYOUT, it) }
         }
-        worker.execute { apply(remote, id, myGeneration, layout, surfaceWidth, surfaceHeight) }
+        worker.execute { apply(remote, id, myGeneration, layout, request, surfaceWidth, surfaceHeight) }
     }
 
-    /** Worker thread: one setLayout round trip, with the snapshot file for the snapshot mode. */
-    private fun apply(remote: IUiPreviewService, id: String, myGeneration: Int, layout: Bundle, width: Int, height: Int) {
+    /** Worker thread: one setLayout round trip, with the project's resources (contract v3) and the snapshot file for the snapshot mode. */
+    private fun apply(remote: IUiPreviewService, id: String, myGeneration: Int, layout: Bundle, request: XmlPreviewRequest, width: Int, height: Int) {
         var file: File? = null
         var output: ParcelFileDescriptor? = null
+        var resources: ParcelFileDescriptor? = null
         val result = try {
+            val root = projectRoot
+            if (resourcesSupported && (root != null || request.files.isNotEmpty())) {
+                archives.archive(ProjectArchives.RESOURCES, root, request.files)?.let { archive ->
+                    resources = ParcelFileDescriptor.open(archive.file, ParcelFileDescriptor.MODE_READ_ONLY)
+                    layout.putParcelable(Contract.KEY_RESOURCES_FD, resources)
+                    layout.putString(Contract.KEY_RESOURCES_SHA256, archive.sha256)
+                    request.layoutPath?.takeIf { it in archive.paths }?.let { layout.putString(Contract.KEY_LAYOUT_PATH, it) }
+                }
+            }
             if (!embedded) {
                 val directory = File(context.cacheDir, SNAPSHOT_DIRECTORY).apply { mkdirs() }
                 file = File(directory, UUID.randomUUID().toString() + ".argb")
@@ -681,6 +721,7 @@ internal class UiPreviewClient(context: Context, private val label: String) : Au
             }
         } finally {
             runCatching { output?.close() }
+            runCatching { resources?.close() }
         }
         var image: ImageBitmap? = null
         if (result != null && result.getString(Contract.KEY_OUTCOME) == Contract.OUTCOME_APPLIED && file != null) {

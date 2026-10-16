@@ -85,6 +85,7 @@
     <string name="designer_layout_file_menu">レイアウトファイル</string>
     <string name="designer_layout_file_missing">レイアウトファイル %1$s を読み込めません. キャンバスには表示されません</string>
     <string name="designer_layout_file_new">新規 XML ファイル</string>
+    <string name="designer_layout_file_no_resources">インストール済みの AutoJs6 はプロジェクトのファイルを受け取れません. res/ リソースとレイアウトファイルは実際の実行と異なる場合があります</string>
     <string name="designer_layout_file_not_inline">ui.layout(...) または ui.inflate(...) に直接書かれたレイアウトのみファイルとして保存できます</string>
     <string name="designer_layout_file_path">ファイルパス</string>
     <string name="designer_layout_file_path_invalid">スクリプトのフォルダ内にある, .xml で終わる相対パスを入力してください</string>
