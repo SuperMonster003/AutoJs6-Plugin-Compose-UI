@@ -31,6 +31,8 @@
 | D66 新建 XML 文件的入口 (2026-10-16) | 三种都做: (1) 片段菜单 "存为 XML 文件": 把直接写在 `ui.layout(...)` / `ui.inflate(...)` 中的布局字面量移到文件 (脚本改为 `ui.layoutFile("...")` / `ui.inflate(files.read("..."), ...)`), 含 `{...}` 表达式或经变量传递的字面量不提供; (2) 新建工程对话框的 ui 类型可选 "脚本内布局" 或文件夹模板; (3) 片段菜单 "新建 XML 文件": 只含一个根容器的新文件, 脚本末尾追加 `let <名称>View = ui.inflate(files.read("..."));`. (1) 与 (3) 是可撤销的编辑, 保存时才写文件并把单文件私有工程升格; 只能写回同目录的外部文档 (content 方案在 SAF 树权限之前不行) 不提供 |
 | D67 新文件的 XML 写法 (2026-10-16) | 提取时原样移动; 文件夹模板与 "新建 XML 文件" 可选 AutoJs6 XML 或 Android 原生 XML (原生模板写 `ui.useAndroidLayout();`, 文件放 `res/layout/`, 根元素声明 `xmlns:android`); 脚本已写 `ui.useAndroidLayout(true / false)` 时新文件随之, 不再询问 |
 | D65 宿主先行 (2026-10-16) | 插件侧 P11.3 之前先在宿主完成: 预览服务的 `res/` 支持 (契约 v3 的资源目录一项提前) 与动态布局器的 Android XML 属性集扩充 (SDK `attrs.xml` 元数据 + 反射 setter 兜底 + 映射表 + 不支持清单与诊断), 宿主另写专门路线图; 插件原生属性目录由宿主元数据表生成 (修订 D56) |
+| D68 TSX 的事件桩 (2026-10-16, P11.7 前) | 实测 (AVD_API_33, TypeScript Engine 0.7.0, 宿主 debug): 3.5 节原定的 `ui.<id>.on('event', (event, view) => ...)` 在 TSX 中编译失败 (`strict` 下 TS2339 `ui` 上没有该 id, TS7006 参数隐式 any), `(ui as any).<id>.on(...)` 与 `ui.findView('<id>')?.click(...)` 可编译运行. 维护者选择: click 写成 JSX 内联 `onClick={() => { ... }}` (与 TypeScript Engine 模板一致, 宿主的 TSX 运行时只特殊支持 onClick), 其它事件追加 `(ui as any).<id>.on('<event>', (_event: any, _view: any) => { ... })` (参数带类型与下划线, 满足 `noImplicitAny` / `noUnusedParameters`) |
+| D69 TSX 的交互预览 (2026-10-16, P11.7 前) | 宿主的预览运行只按 JavaScript 执行脚本文本. 维护者选择由宿主支持: 预览契约再追加 v5 (`runScript` 可交 `.tsx`, 宿主先经 TypeScript Engine 编译再在会话中运行, 编译错误按行回报), 作为宿主阶段 P11.H3; 插件在 v5 宿主上为 TSX UI 工程打开交互预览, 旧宿主上开关处说明需在 AutoJs6 中运行. 1.9.0 的发布顺延到 P11.H3 之后 |
 
 ---
 
@@ -81,6 +83,8 @@
 - 事件桩: 对 TSX 工程追加 `ui.<id>.on('event', (event, view) => { ... })` 桩, 语法用 TypeScript 的箭头函数; 处理函数语法检查经解析服务 (已有).
 - 运行: TSX 的 UI 工程交出工程文件的 content Uri, 宿主经 TypeScript Engine 编译 (与 Compose TSX 相同).
 
+实现说明 (P11.7): ui 分支是独立的 `TsxUiReader` (`DocumentReader` 对 TSX 源码先判断是否 ui 脚本), 不放进 `TsxReader`; 解析服务的树已带 UTF-16 的 `start` / `end`, 解析契约不需要 v2. 事件桩按 D68 改写 (click 为 JSX 内联 `onClick`, 其它事件为 `(ui as any).<id>.on(...)`), 交互预览按 D69 等宿主契约 v5 (P11.H3).
+
 ### 3.6 compose 联动 (混合文档模型)
 
 - `UiDocument` 增加 `composeAttachments`: 由 `UiScriptReader` 找到 `compose.attach(ui.<id>, <渲染函数或节点>)` 调用, 用 `ScriptReader` 的渲染函数解析把实参读成 `DesignDocument` (复用 state 声明解析, 作用域为整个脚本), 以容器 id 关联到 `<compose id="...">` 元素; 读不出的实参保持不透明并在问题列表提示.
@@ -115,9 +119,10 @@
 | P11.4 | 1.8.0 文档, changelog, gate 与发布 | 文档 + 发布 | 1.8.0 | P11.1 - P11.3 |
 | P11.5 | 预览契约 v4 (原计划 v3, 见 P11.H1) 与宿主侧缩小项: 对话框入画布, 生命周期事件与返回键, 窗口级函数可见效果, 忙等保护 (`androidLayout` 标志已在 v3 交付) | 宿主 | 宿主本地 master | P11.4 |
 | P11.6 | 插件对接 v4: 返回键按钮, pause / resume, 忙等阈值设置项, 能力降级与差异列表联动 | 插件 | 1.9.0 | P11.5 |
-| P11.7 | TSX ui 布局: `TsxReader` 的 ui 分支, 片段范围, 规范化写回, 事件桩 | 插件 | 1.9.0 | P11.3 |
+| P11.7 | TSX ui 布局: `TsxReader` 的 ui 分支, 片段范围, 规范化写回, 事件桩 (D68) | 插件 | 1.9.0 | P11.3 |
+| P11.H3 | 预览契约 v5: `runScript` 运行 `.tsx` (宿主经 TypeScript Engine 编译, 编译错误回报), 插件为 TSX UI 工程打开交互预览 (D69) | 宿主 + 插件 | 宿主本地 master / 1.9.0 | P11.7 |
 | P11.8 | compose 联动: `compose.attach` 解析, 混合文档与子会话, 叠画与点选, 写回, 交互预览设备证据 | 插件 | 1.9.0 | P11.3 |
-| P11.9 | 1.9.0 文档, changelog, gate 与发布 | 文档 + 发布 | 1.9.0 | P11.6 - P11.8 |
+| P11.9 | 1.9.0 文档, changelog, gate 与发布 | 文档 + 发布 | 1.9.0 | P11.6 - P11.8, P11.H3 |
 | P11.10 | 宿主编辑器内布局预览面板 | 宿主 | 宿主本地 master | P11.5 |
 | P11.11 | 2.0.0 文档 (衔接小节), gate 与发布; 宿主发布配合时补真机矩阵 | 文档 + 发布 | 2.0.0 | P11.10 |
 
@@ -216,8 +221,25 @@
 
 ### P11.7 TSX ui 布局 (插件, 1.9.0)
 
-- [ ] (插件) `TsxReader` 的 ui 分支 (3.5 节): 指令识别, JSX 实参 -> `XmlNode`, 表达式容器只读, 片段源码范围 (核实解析树的偏移, 缺失时解析契约 v2 只追加偏移并换 AAR), 规范化写回, TypeScript 语法的事件桩; `Dialect.TSX` 的 UI 工程进入现有画布与面板.
-- [ ] (测试) JVM `TsxUiRoundTripTest` (宿主 TSX 示例中的 ui 布局读出, 规范化写回后再读相等, 未编辑片段字节不变), `TsxUiReaderErrorTest`; 设备 `DesignerTsxDeviceTest` 追加 ui 工程一项 (需 TypeScript Engine 0.7.0+ 的设备).
+- [x] (插件) `TsxReader` 的 ui 分支 (3.5 节): 指令识别, JSX 实参 -> `XmlNode`, 表达式容器只读, 片段源码范围 (核实解析树的偏移, 缺失时解析契约 v2 只追加偏移并换 AAR), 规范化写回, TypeScript 语法的事件桩; `Dialect.TSX` 的 UI 工程进入现有画布与面板.
+- [x] (测试) JVM `TsxUiRoundTripTest` (宿主 TSX 示例中的 ui 布局读出, 规范化写回后再读相等, 未编辑片段字节不变), `TsxUiReaderErrorTest`; 设备 `DesignerTsxDeviceTest` 追加 ui 工程一项 (需 TypeScript Engine 0.7.0+ 的设备).
+
+  证据 (2026-10-16): 插件提交 `de7bc58` (实现与测试), `2253cf8` (沙箱列表示例的时间上限, 见下). 实现要点:
+  - 读: `parse/TsxUiReader.kt` 接收解析服务的树 (偏移为 UTF-16 的 `start` / `end`, 契约 v1 已有, 不升 v2). `"ui"` 指令之后, `ui.layout(...)` / `ui.inflate(...)` 的 JSX 实参与以 `const` / `let` 声明的 JSX 变量 (`boundTo`, 经变量交给 `ui.layout` 的为画布根) 成为片段; 元素 / 属性 / 文本照 JS 的 UI 工程建模, 字符串字面量的表达式容器按字符串读, 数字 / 布尔 / 负数字面量记入 `UiDocument.literalValues` 供预览, 其它表达式容器只读. 处理函数识别 `ui.<id>.on`, `(ui as any).<id>.on`, `click` / `longClick` 简写, `ui.findView('<id>')?.click` 与内联 `onClick`; `ui.useAndroidLayout`, `ui.registerWidget` 照 JS. 宿主 TSX 运行时不接受的写法报错并给行列: `ui.layoutFile` (TSX 暂不支持), `<compose.X>` 标签, 属性展开, 同名属性两次, 片段有两个根, JSX 变量被重新赋值, `ui.layout` 的实参不是 JSX, 语法错误 (来自解析诊断), 缺指令. 桩的插入点为 `ui.layout` 语句及其后紧随的处理函数语句之后, 缩进取该语句的缩进.
+  - 写: `codegen/TsxUiWriter.kt`, 未编辑的片段原样写回 (`XmlFragment.tsx` 记原文与读出的根, 根未变即原文), 被编辑的片段整体按规范重写 (D57): 子元素各占一行缩进 4 格, 只有一段安全文本时内联, 无子元素自闭合 `<tag ... />`, 属性值为 `name='value'`, 含引号 / 换行 / 花括号等时为 `name={'...'}`, 表达式容器去掉公共缩进后按新位置缩进. 新建工程模板 (`ProjectStore.TSX_UI_TEMPLATE`) 就是规范形式.
+  - 预览: `preview/TsxLayoutXml.kt` 把 TSX 根降为宿主 TSX 运行时会交给布局器的 XML (去掉 `on[A-Z]` 属性, 无值属性为 `true`, 属性排序, 只含注释的表达式容器去掉, 文本类元素的已知文本子节点合并为 `text`, 元素间的空白文本去掉), 未知表达式照 JS 的 UI 工程提示. 校验 (`UiValidator`): TSX 中 `on[A-Z]` 属性不报未知属性, 除 `onClick` 外的事件属性报错 (宿主只绑定 onClick), `onClick` 不是函数表达式报错, 文本子节点的规则同宿主.
+  - 事件桩 (D68): click 在元素上加 `onClick={() => { // TODO }}` (已有则不加), 不需要 id; 其它事件追加 `(ui as any).<id>.on('<event>', (_event: any, _view: any) => { ... })`. 检查器的 "添加" 对 TSX 的 click 可用, 已有内联 `onClick` 时显示为已处理.
+  - 工程: 新建工程对话框的 ui 布局位置新增 "TSX 脚本内" (需要 TypeScript Engine 的提示同 Compose TSX); TSX ui 工程的运行 / 导出按 `.tsx` 文件交给 AutoJs6; 交互预览开关关闭并显示 `designer_ui_interact_tsx_needs_host` (P11.H3 前); 布局文件菜单只对 JS 方言提供. 新字符串 2 个 x 11 目录.
+  - 快照: `TsxSnapshotRecorder` 新增 ui 源码 (`tsx/ui/` 手写样例 3 个, 新建模板, 宿主 `legacy-xml.tsx`) 与其规范形式 `tsx/ui-canonical/`, 错误样例 `tsx/ui-errors/` 9 个; 树经 `.python/generate_tsx_snapshots.py --engine` (TypeScript Engine 解析 worker, typescript 6.0.3) 生成, 记录器连跑两次结果相同.
+  - 验证: JVM 292 项 (1 项跳过; 新增 `TsxUiRoundTripTest` 8 项: 五个 ui 源码未编辑字节不变, 规范形式再读形状相同且为不动点, 编辑只重写所在片段且撤销后回到原文, 字面量 / 处理函数 / 插入点, D68 桩, 预览 XML, 校验规则; `TsxUiReaderErrorTest` 4 项覆盖 9 个错误样例的消息与行列); lint 0 错误 15 警告. 设备 (宿主为 P11.5 的 debug 构建, TypeScript Engine 0.7.0 debug): `DesignerTsxDeviceTest` 在 AVD_API_33 (emulator-5584) 与 AVD_API_35_16K (emulator-5590) 只读实例各 4 项通过 1 项跳过 (无解析服务的用例按假设跳过); 新增用例新建 TSX ui 工程, 宿主预览 3 个元素且元素边界含 `title` / `ok`, 交互开关显示需新宿主的说明, 按钮的 click 显示为已处理且无 "添加", 给 `title` 加 long_click 桩后保存的文本等于模板加 `(ui as any).title.on('long_click', ...)` 桩, 重开再保存不变. 回归 (API 33): `UiDesignerDeviceTest`, `UiPreviewDeviceTest`, `UiInteractiveDeviceTest`, `UiLayoutFileDeviceTest` 共 20 项通过.
+  - 编译检查: 新增 `.python/verify_tsx_compile.py` (把 `.tsx` 推到 `Scripts/<目录>/` 经 AutoJs6 的运行入口启动, 以宿主控制台判断 TypeScript Engine 是否编译通过, 每个文件一行 PASS / FAIL); emulator-5584 上新建模板, 设备用例保存的带 long_click 桩的文本, TypeScript Engine ui 模板的规范形式三个文件均 PASS (宿主编译选项为 `strict`, `noUnusedParameters`, `noEmitOnError`). D68 之前的探针 (原定的 `ui.<id>.on(...)` 写法 TS2339 / TS7006 失败) 记在决策表.
+  - 另: P11.6 推送后的 CI 运行 (`d07d86e`) 中 `SandboxEngineTest` 的 1000 项列表示例偶发超出预览的 3 秒墙钟上限 (重跑通过); 该测试检查键与滚动引用而不是速度, `2253cf8` 把它的上限放宽到 30 秒.
+
+### P11.H3 预览契约 v5: TSX 运行 (宿主 + 插件, D69)
+
+- [ ] (宿主) 契约 v5 只追加: `runScript` 的请求键 `scriptDialect` (`js` / `tsx`, 缺省 `js`) 与信息标志 `tsxRunSupported` (宿主找得到 TypeScript Engine 0.7.0+ 的编译服务时为 true); `tsx` 运行先经宿主现有的 TypeScript 编译路径 (与运行 `.tsx` 文件相同的编译选项与声明), 失败时 `onScriptError` 带 `errorCode` `ERR_AUTOJS6_UI_PREVIEW_COMPILE_FAILED` 与首个诊断的行号和文字, 运行以 `error` 结束; v4 身份冻结.
+- [ ] (插件) v5 宿主上 TSX UI 工程的交互预览开关可用 (工程 zip 与脚本路径照常交出), 旧宿主上开关处说明需在 AutoJs6 中运行; 编译错误显示在画布上方与控制台.
+- [ ] (测试) 宿主 `UiPreviewServiceTest` 追加 TSX 运行与编译错误 (需安装 TypeScript Engine 0.7.0+, 否则按假设跳过); 插件 `UiInteractiveDeviceTest` 追加 TSX 工程一项.
 
 ### P11.8 compose 联动 (插件, 1.9.0)
 

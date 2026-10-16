@@ -1539,3 +1539,10 @@ NavigationBar / NavigationRail / NavigationDrawer / TabRow / ModalBottomSheet / 
 - 插件提交: `ada93a0` (契约 AAR 换为 v4), `2c39f27` (握手协商 v4 与能力映射, 隐藏 / 显示发 pause / resume 而不重跑, 返回键按钮, 设置页 "设计器 > 主线程占用上限", 忙等结束的本地化提示, 差异说明随能力变化; 10 语言字符串; 测试). 宿主本地提交 `0ea8b114f` (zh-Hans changelog 的交互预览条目).
 - 验证: JVM 280 项, lint 0 错误; `UiInteractiveDeviceTest` 在 v4 宿主的 API 33 / 35 模拟器各 5 项通过 1 项跳过, 在 v3 宿主上 3 项通过 3 项跳过; 设置页, 布局预览与 UI 设计器设备测试回归通过. 逐项证据见 P11 路线图 P11.6 (已全部勾选).
 - 下一步: P11.7 (TSX ui 布局) 或 P11.8 (compose 联动), 1.9.0 的 changelog / README 在 P11.9.
+
+### 2026-10-16 (续): P11.7 TSX ui 布局
+
+- 维护者决策 (依据的实测见 P11 路线图决策表): D68 TSX 的事件桩 (click 为 JSX 内联 `onClick`, 其它事件为 `(ui as any).<id>.on(...)`, 参数带类型与下划线), D69 TSX 的交互预览由宿主支持 (预览契约 v5, 新宿主阶段 P11.H3; 1.9.0 的发布顺延到 P11.H3 之后).
+- 插件提交: `de7bc58` (`TsxUiReader` / `TsxUiWriter` / `TsxLayoutXml`, 校验, D68 桩, 新建 TSX ui 工程, 运行与导出, 快照与测试, `.python/verify_tsx_compile.py`), `2253cf8` (沙箱列表示例的时间上限, P11.6 推送后的 CI 偶发失败).
+- 验证: JVM 292 项 (1 项跳过), lint 0 错误; `DesignerTsxDeviceTest` 在 API 33 / 35 模拟器各 4 项通过 1 项跳过, API 33 上 UI 设计器 / 布局预览 / 交互预览 / 布局文件设备测试 20 项回归通过; 生成的 TSX 三个文件经 AutoJs6 编译通过. 逐项证据见 P11 路线图 P11.7 (已全部勾选).
+- 下一步: P11.H3 (宿主契约 v5 的 TSX 运行与插件的 TSX 交互预览) 或 P11.8 (compose 联动), 1.9.0 的 changelog / README 在 P11.9.
