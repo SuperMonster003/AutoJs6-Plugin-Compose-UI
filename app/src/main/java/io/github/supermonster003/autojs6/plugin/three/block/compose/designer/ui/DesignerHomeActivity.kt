@@ -53,13 +53,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.LauncherIcons
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.SettingsActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandaloneActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
@@ -173,7 +173,7 @@ internal class DesignerHomeActivity : StandaloneActivity() {
                                 project.kind.name,
                                 color = Color(palette.muted),
                                 fontSize = 11.sp,
-                                fontFamily = FontFamily.Monospace,
+                                style = ScriptText.code,
                                 modifier = Modifier.width(36.dp).testTag("home-kind-${project.name}"),
                             )
                             Column(Modifier.weight(1f)) {

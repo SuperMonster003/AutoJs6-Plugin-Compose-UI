@@ -1,5 +1,6 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer.preview
 
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignNode
@@ -28,9 +29,9 @@ import org.autojs.plugin.compose.api.v2.ComposeUiV2
 /**
  * A design-time frame: the contract tree derived from a [DesignDocument] for the real renderer (roadmap
  * D34). Literal properties convert like the host's script bridge; state bindings show their initial
- * value; opaque expressions become their source text where the property is text-like and are skipped
- * elsewhere; opaque children, slots and unrenderable components become labeled placeholder texts whose
- * identities map back to the design node that owns them. Window-producing components (AlertDialog,
+ * value; opaque expressions become their source text where the property is text-like (isolated left to right, so it
+ * keeps its order on a right-to-left canvas) and are skipped elsewhere; opaque children, slots and unrenderable
+ * components become labeled placeholder texts whose identities map back to the design node that owns them. Window-producing components (AlertDialog,
  * ModalBottomSheet, DropdownMenu, Tooltip) whose `open` resolves to true reach the renderer closed, so no
  * system window opens and only what sits in place is drawn (a menu's anchor, a tooltip's anchor); their
  * window content is listed as an [Overlay] the canvas draws over the page (roadmap P9.1). A catalog component the
@@ -181,13 +182,13 @@ internal object PreviewFrames {
                 if (spec.slots.none { it.name == slot.name }) return@forEach
                 slots[slot.name] = when (val child = slot.child) {
                     is DesignChild.Node -> emit(child.node, node.type)
-                    is DesignChild.Expression -> placeholder(node.id, "{${child.source}}")
+                    is DesignChild.Expression -> placeholder(node.id, ScriptText.isolate("{${child.source}}"))
                 }
             }
             val children = node.children.map { child ->
                 when (child) {
                     is DesignChild.Node -> emit(child.node, node.type)
-                    is DesignChild.Expression -> placeholder(node.id, "{${child.source}}")
+                    is DesignChild.Expression -> placeholder(node.id, ScriptText.isolate("{${child.source}}"))
                 }
             }
             val props = (normalized?.props ?: emptyMap()).let { if (overlay != null) it + (ComposeUiProps.OPEN to UiValue.Bool(false)) else it }
@@ -232,7 +233,7 @@ internal object PreviewFrames {
                     } else literal(raw, valueType)
                 }
                 is PropValue.StateRef -> (states[propValue.name] as? PropValue.Literal)?.let { state -> literal(state.value, valueType) }
-                is PropValue.Expression -> if (ValueKind.STRING in valueType.kinds && entry.name != ComposeUiProps.SRC) UiValue.Str(propValue.source) else null
+                is PropValue.Expression -> if (ValueKind.STRING in valueType.kinds && entry.name != ComposeUiProps.SRC) UiValue.Str(ScriptText.isolate(propValue.source)) else null
             }
             if (converted == null && propValue !is PropValue.Expression) problems += "${node.type}.${entry.name}: value not previewable"
             return converted
@@ -293,7 +294,7 @@ internal object PreviewFrames {
                 // Box has no required property, so the catalog turns the shortcut into its modifier operation alone.
                 catalog.normalizeProperties(ComposeUiComponents.BOX, mapOf("padding" to UiValue.Dp(8.0)), emptyList()).modifier
             } catch (error: ComposeUiContractException) { emptyList() }
-            val label = placeholder(node.id, "[${node.type}]" + (shown?.let { " $it" } ?: ""), padding)
+            val label = placeholder(node.id, "[${node.type}]" + (shown?.let { " " + ScriptText.isolate(it) } ?: ""), padding)
             val props = raw + (ComposeUiProps.COLOR to UiValue.Color(STAND_IN_COLOR))
             val normalized = try {
                 catalog.normalizeProperties(ComposeUiComponents.SURFACE, props, operations)

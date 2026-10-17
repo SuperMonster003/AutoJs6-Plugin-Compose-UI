@@ -38,12 +38,12 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignNode
@@ -153,21 +153,21 @@ internal fun OutlinePanel(session: DesignerSession, palette: StandalonePalette, 
                         Text(
                             if (isCollapsed) "+" else "-",
                             color = Color(palette.muted),
-                            fontFamily = FontFamily.Monospace,
+                            style = ScriptText.code,
                             modifier = Modifier.width(18.dp).clickable { if (isCollapsed) collapsed.remove(row.id) else collapsed[row.id] = true },
                         )
                     } else Spacer(Modifier.width(18.dp))
-                    row.slot?.let { Text("$it:", color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(end = 4.dp)) }
+                    row.slot?.let { Text("$it:", color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.inline, modifier = Modifier.padding(end = 4.dp)) }
                     Text(
                         row.label,
                         color = Color(if (row.expression) palette.muted else palette.text),
                         fontSize = 14.sp,
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                        fontFamily = if (row.expression) FontFamily.Monospace else FontFamily.Default,
+                        style = if (row.expression) ScriptText.code else ScriptText.inline,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (row.detail.isNotEmpty()) Text(" " + row.detail, color = Color(palette.muted), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                    if (row.detail.isNotEmpty()) Text(row.detail, color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.inline, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false).padding(start = 4.dp))
                     Spacer(Modifier.weight(1f))
                     if (selected && row.id != session.document.root?.id) {
                         IconButton(onClick = { session.moveSelected(-1) }, modifier = Modifier.size(32.dp).testTag("designer-move-up")) {

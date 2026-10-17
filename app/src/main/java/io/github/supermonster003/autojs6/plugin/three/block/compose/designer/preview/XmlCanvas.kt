@@ -37,11 +37,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.LeftToRight
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.idName
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.XmlNode
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.ui.UiDesignerSession
@@ -142,14 +143,16 @@ internal fun XmlCanvas(
                 }
                 if (!hasFrame) {
                     val root = session.root
-                    Column(Modifier.fillMaxSize().background(surface).padding(12.dp).testTag("designer-xml-placeholder")) {
-                        if (root != null) androidx.compose.material3.Text(
-                            outlineText(root),
-                            color = muted,
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.Monospace,
-                            lineHeight = 16.sp,
-                        )
+                    LeftToRight {
+                        Column(Modifier.fillMaxSize().background(surface).padding(12.dp).testTag("designer-xml-placeholder")) {
+                            if (root != null) androidx.compose.material3.Text(
+                                outlineText(root),
+                                color = muted,
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp,
+                                style = ScriptText.code,
+                            )
+                        }
                     }
                 }
                 // The interactive preview has no overlay: the embedded tree owns the pointer and the surface covers the window.

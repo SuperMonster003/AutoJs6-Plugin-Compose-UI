@@ -29,12 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryCatalog
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Diagnostic
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.EditCommand
@@ -92,12 +92,12 @@ internal fun HostOptionsDialog(session: DesignerSession, palette: StandalonePale
                         FilterChip(selected = kind == candidate, onClick = { kind = candidate }, label = { Text("compose." + candidate.method) }, modifier = Modifier.padding(end = 6.dp).testTag("designer-host-" + candidate.method))
                     }
                 }
-                if (opaque != null) Text("{" + opaque.source + "}", fontFamily = FontFamily.Monospace, fontSize = 12.sp, color = Color(palette.muted))
+                if (opaque != null) Text("{" + opaque.source + "}", fontSize = 12.sp, color = Color(palette.muted), style = ScriptText.code)
                 fields.forEachIndexed { index, (name, value) ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        OutlinedTextField(value = name, onValueChange = { fields[index] = it to value }, label = { Text(stringResource(R.string.designer_host_option_name), fontSize = 11.sp) }, singleLine = true, modifier = Modifier.width(120.dp))
+                        OutlinedTextField(value = name, onValueChange = { fields[index] = it to value }, label = { Text(stringResource(R.string.designer_host_option_name), fontSize = 11.sp) }, singleLine = true, textStyle = ScriptText.inline, modifier = Modifier.width(120.dp))
                         Spacer(Modifier.width(6.dp))
-                        OutlinedTextField(value = value, onValueChange = { fields[index] = name to it }, label = { Text(stringResource(R.string.designer_host_option_value), fontSize = 11.sp) }, singleLine = true, modifier = Modifier.weight(1f))
+                        OutlinedTextField(value = value, onValueChange = { fields[index] = name to it }, label = { Text(stringResource(R.string.designer_host_option_value), fontSize = 11.sp) }, singleLine = true, textStyle = ScriptText.inline, modifier = Modifier.weight(1f))
                         TextButton(onClick = { fields.removeAt(index) }) { Text(stringResource(R.string.designer_remove)) }
                     }
                 }
@@ -147,12 +147,13 @@ internal fun IssuesDialog(diagnostics: List<Diagnostic>, problems: List<String>,
                             (if (diagnostic.severity == Severity.ERROR) "! " else "? ") + (diagnostic.nodeId?.let { "#$it " } ?: "") + (diagnostic.target?.let { "$it: " } ?: "") + diagnostic.message,
                             color = Color(if (diagnostic.severity == Severity.ERROR) palette.danger else palette.text),
                             fontSize = 13.sp,
+                            style = ScriptText.inline,
                         )
                     }
                 }
                 if (problems.isNotEmpty()) {
                     item { Text(stringResource(R.string.designer_preview_problems), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp)) }
-                    items(problems) { problem -> Text(problem, color = Color(palette.muted), fontSize = 12.sp) }
+                    items(problems) { problem -> Text(problem, color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.inline) }
                 }
             }
         },

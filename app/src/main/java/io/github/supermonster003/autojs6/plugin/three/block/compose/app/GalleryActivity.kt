@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
@@ -171,14 +170,16 @@ internal class GalleryActivity : StandaloneActivity() {
                     Box(modifier = Modifier.padding(16.dp)) { GalleryPreview(entry.component) }
                 }
                 SectionTitle(stringResource(R.string.gallery_section_code), palette)
-                Surface(color = Color(palette.surface), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        script,
-                        color = Color(palette.text),
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 13.sp,
-                        modifier = Modifier.horizontalScroll(rememberScrollState()).padding(16.dp).testTag("gallery-code"),
-                    )
+                LeftToRight {
+                    Surface(color = Color(palette.surface), shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            script,
+                            color = Color(palette.text),
+                            fontSize = 13.sp,
+                            style = ScriptText.code,
+                            modifier = Modifier.horizontalScroll(rememberScrollState()).padding(16.dp).testTag("gallery-code"),
+                        )
+                    }
                 }
                 Spacer(Modifier.height(16.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {

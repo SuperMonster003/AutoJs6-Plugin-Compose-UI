@@ -19,10 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.LeftToRight
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.sandbox.SandboxPreview
@@ -51,17 +52,20 @@ internal fun ConsolePanel(sandbox: SandboxPreview, dialect: Dialect, interactive
                 Text(stringResource(R.string.designer_console_clear))
             }
         }
-        SelectionContainer {
-            LazyColumn(state = list, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
-                itemsIndexed(lines) { _, line ->
-                    val color = when (line.level) {
-                        SandboxPreview.ERROR -> palette.danger
-                        "warn", "toast", "snackbar" -> palette.accent
-                        else -> palette.text
+        // The lines are the script's output: they start at the left edge in every locale, each in its own direction.
+        LeftToRight {
+            SelectionContainer {
+                LazyColumn(state = list, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
+                    itemsIndexed(lines) { _, line ->
+                        val color = when (line.level) {
+                            SandboxPreview.ERROR -> palette.danger
+                            "warn", "toast", "snackbar" -> palette.accent
+                            else -> palette.text
+                        }
+                        val prefix = if (line.level == "log") "" else "[${line.level}] "
+                        Text(prefix + line.text, color = Color(color), fontSize = 12.sp, style = ScriptText.output,
+                            modifier = Modifier.padding(vertical = 2.dp).testTag("designer-console-line"))
                     }
-                    val prefix = if (line.level == "log") "" else "[${line.level}] "
-                    Text(prefix + line.text, color = Color(color), fontSize = 12.sp, fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.padding(vertical = 2.dp).testTag("designer-console-line"))
                 }
             }
         }

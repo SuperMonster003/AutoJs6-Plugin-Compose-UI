@@ -1,6 +1,7 @@
 package io.github.supermonster003.autojs6.plugin.three.block.compose.designer
 
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryCatalog
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignDocument
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignNode
@@ -42,14 +43,14 @@ class PreviewFramesTest {
         val pagerNode = pager.frame!!.nodes.values.first { it.type == "HorizontalPager" }
         assertEquals(0.0, (pagerNode.props["page"] as UiValue.Num).value, 0.0)
         val status = pager.frame.nodes.values.first { it.type == "Text" && it.key == "status" }
-        assertEquals("'Page ' + (page.value + 1) + ' of 3'", (status.props["text"] as UiValue.Str).value)
+        assertEquals(ScriptText.isolate("'Page ' + (page.value + 1) + ' of 3'"), (status.props["text"] as UiValue.Str).value)
 
         val lazy = PreviewFrames.build(reader.read(GalleryCatalog.entry("LazyColumn")!!.script()), 2)
         val root = lazy.frame!!.nodes.getValue(lazy.frame.rootId)
         assertEquals(1, root.children.size)
         val placeholder = lazy.frame.nodes.getValue(root.children.single())
         assertEquals("Text", placeholder.type)
-        assertEquals("{rows}", (placeholder.props["text"] as UiValue.Str).value)
+        assertEquals(ScriptText.isolate("{rows}"), (placeholder.props["text"] as UiValue.Str).value)
         assertEquals(root.nodeId, lazy.placeholders[placeholder.nodeId])
     }
 
@@ -134,7 +135,7 @@ class PreviewFramesTest {
         assertEquals(androidView.id, preview.placeholders[standIn.nodeId])
         assertTrue(standIn.modifier.map { it.name }.toString(), standIn.modifier.any { it.name == "height" })
         val label = frame.nodes.getValue(standIn.children.single())
-        assertEquals("[AndroidView] ui.inflate('<text text=\"x\"/>')", (label.props["text"] as UiValue.Str).value)
+        assertEquals("[AndroidView] " + ScriptText.isolate("ui.inflate('<text text=\"x\"/>')"), (label.props["text"] as UiValue.Str).value)
         assertEquals("the label keeps off the stand-in's edges", listOf("padding"), label.modifier.map { it.name })
         assertTrue(preview.problems.toString(), preview.problems.any { it.contains("AndroidView") })
     }

@@ -46,11 +46,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.ScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.DesignChild
@@ -209,7 +209,7 @@ internal fun InspectorPanel(session: DesignerSession, palette: StandalonePalette
         val chain = node.modifiers
         val opaqueModifier = node.entries.filterIsInstance<NodeEntry.ModifierExpression>().firstOrNull()
         if (opaqueModifier != null) {
-            Text("modifier: ${opaqueModifier.source}", color = Color(palette.muted), fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+            Text("modifier: ${opaqueModifier.source}", color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.code)
             TextButton(onClick = { session.execute(EditCommand.SetModifiers(node.id, emptyList()), merge = false) }) { Text(stringResource(R.string.designer_value_literal)) }
         } else {
             ModifierChainEditor(chain ?: emptyList(), catalog.modifiers, parentType, palette, onSeal = { session.seal() }) { updated ->
@@ -228,7 +228,7 @@ private fun InspectorTextField(value: String, label: String, palette: Standalone
         onValueChange = { text = it; onChange(it) },
         label = { Text(label, fontSize = 12.sp) },
         singleLine = singleLine,
-        textStyle = TextStyle(fontSize = 13.sp, fontFamily = if (monospace) FontFamily.Monospace else FontFamily.Default, color = Color(palette.text)),
+        textStyle = TextStyle(fontSize = 13.sp, color = Color(palette.text)).merge(if (monospace) ScriptText.Code else null),
         modifier = modifier.fillMaxWidth().onFocusChanged { if (!it.isFocused) onSeal() },
     )
 }
@@ -346,9 +346,9 @@ private fun HandlerEditor(name: String, handler: HandlerSource?, palette: Standa
         }
         if (handler != null) {
             OutlinedTextField(value = params, onValueChange = { params = it }, label = { Text(stringResource(R.string.designer_handler_params), fontSize = 12.sp) }, singleLine = true,
-                textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = Color(palette.text)), modifier = Modifier.fillMaxWidth())
+                textStyle = ScriptText.Code.merge(TextStyle(fontSize = 13.sp, color = Color(palette.text))), modifier = Modifier.fillMaxWidth())
             OutlinedTextField(value = body, onValueChange = { body = it }, label = { Text(stringResource(R.string.designer_handler_body), fontSize = 12.sp) }, minLines = 3,
-                textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = Color(palette.text)), modifier = Modifier.fillMaxWidth().testTag("designer-handler-body"))
+                textStyle = ScriptText.Code.merge(TextStyle(fontSize = 13.sp, color = Color(palette.text))), modifier = Modifier.fillMaxWidth().testTag("designer-handler-body"))
             error?.let { Text(it, color = Color(palette.danger), fontSize = 12.sp, modifier = Modifier.testTag("designer-handler-error")) }
             Row {
                 TextButton(onClick = {
@@ -428,7 +428,7 @@ private fun ModifierChainEditor(chain: List<ModifierEntry>, specs: List<Modifier
                         }
                         .testTag("designer-modifier-handle-$index"),
                 )
-                Text(".${operation.name}", color = Color(palette.text), fontSize = 13.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+                Text(".${operation.name}", color = Color(palette.text), fontSize = 13.sp, style = ScriptText.code, modifier = Modifier.weight(1f))
                 TextButton(enabled = index > 0, onClick = { onChange(chain.toMutableList().apply { add(index - 1, removeAt(index)) }) }) { Text(stringResource(R.string.designer_move_up)) }
                 TextButton(enabled = index < chain.lastIndex, onClick = { onChange(chain.toMutableList().apply { add(index + 1, removeAt(index)) }) }) { Text(stringResource(R.string.designer_move_down)) }
                 TextButton(onClick = { onChange(chain.filterIndexed { i, _ -> i != index }) }) { Text(stringResource(R.string.designer_remove)) }

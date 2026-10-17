@@ -59,12 +59,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.LeftToRight
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.FragmentUsage
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
@@ -312,7 +313,7 @@ internal fun XmlOutlinePanel(session: UiDesignerSession, palette: StandalonePale
                             Text(
                                 if (isCollapsed) "+" else "-",
                                 color = Color(palette.muted),
-                                fontFamily = FontFamily.Monospace,
+                                style = ScriptText.code,
                                 modifier = Modifier.width(18.dp).clickable { if (isCollapsed) collapsed.remove(row.id) else collapsed[row.id] = true }.testTag("designer-xml-collapse-${row.id}"),
                             )
                         } else Spacer(Modifier.width(18.dp))
@@ -321,13 +322,13 @@ internal fun XmlOutlinePanel(session: UiDesignerSession, palette: StandalonePale
                             color = Color(if (problem) palette.danger else palette.text),
                             fontSize = 14.sp,
                             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-                            fontFamily = FontFamily.Monospace,
+                            style = ScriptText.code,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                         if (row.detail.isNotEmpty()) {
                             Spacer(Modifier.width(8.dp))
-                            Text(row.detail, color = Color(palette.muted), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                            Text(row.detail, color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.inline, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
                         }
                         Spacer(Modifier.weight(1f))
                         if (selected && row.id != rootId) {
@@ -415,6 +416,7 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
                     (if (diagnostic.severity == Severity.ERROR) "! " else "? ") + (label?.let { "<$it> " } ?: "") + (diagnostic.target?.let { "$it: " } ?: "") + diagnostic.message,
                     color = Color(if (diagnostic.severity == Severity.ERROR) palette.danger else palette.text),
                     fontSize = 13.sp,
+                    style = ScriptText.inline,
                 )
             }
         }
@@ -449,7 +451,7 @@ internal fun XmlProblemsPanel(session: UiDesignerSession, palette: StandalonePal
                         "i " + stringResource(R.string.designer_ui_diff_line, difference.line) + "  " + difference.api,
                         color = Color(palette.muted),
                         fontSize = 12.sp,
-                        fontFamily = FontFamily.Monospace,
+                        style = ScriptText.output,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -516,17 +518,17 @@ internal fun XmlBindingsPanel(session: UiDesignerSession, palette: StandalonePal
             val override = session.bindingOverrides[name]
             Column(Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("designer-ui-binding-$name")) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(name, color = Color(palette.text), fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+                    Text(name, color = Color(palette.text), fontWeight = FontWeight.SemiBold, style = ScriptText.code, modifier = Modifier.weight(1f))
                     if (override != null) TextButton(onClick = { session.setBindingOverride(name, null) }, modifier = Modifier.testTag("designer-ui-binding-reset-$name")) {
                         Text(stringResource(R.string.designer_state_reset))
                     }
                 }
                 val status = when {
-                    declared != null -> stringResource(R.string.designer_state_initial, declared)
+                    declared != null -> stringResource(R.string.designer_state_initial, ScriptText.isolate(declared))
                     failure != null -> failure
                     else -> stringResource(R.string.designer_ui_binding_undeclared)
                 }
-                Text(status, color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+                Text(status, color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.output)
                 var text by remember(name, override == null) { mutableStateOf(override ?: declared ?: "") }
                 var invalid by remember(name) { mutableStateOf(false) }
                 OutlinedTextField(
@@ -541,7 +543,7 @@ internal fun XmlBindingsPanel(session: UiDesignerSession, palette: StandalonePal
                     label = { Text(stringResource(R.string.designer_ui_binding_value), fontSize = 12.sp) },
                     isError = invalid,
                     singleLine = true,
-                    textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = Color(palette.text)),
+                    textStyle = ScriptText.Code.merge(TextStyle(fontSize = 13.sp, color = Color(palette.text))),
                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp).testTag("designer-ui-binding-value-$name"),
                 )
                 if (invalid) Text(stringResource(R.string.designer_ui_binding_invalid), color = Color(palette.danger), fontSize = 12.sp, modifier = Modifier.testTag("designer-ui-binding-invalid-$name"))
@@ -585,18 +587,21 @@ internal fun XmlConsolePanel(client: UiPreviewClient, statusText: String?, inter
                     Text(stringResource(R.string.designer_console_clear))
                 }
             }
-            SelectionContainer {
-                LazyColumn(state = list, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
-                    if (lines.isEmpty()) item {
-                        Text(stringResource(R.string.designer_ui_console_run_empty), color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-                    }
-                    items(lines) { line ->
-                        val color = when {
-                            line.level >= Log.ERROR -> palette.danger
-                            line.level == Log.WARN -> palette.accent
-                            else -> palette.text
+            // The lines are the script's output: they start at the left edge in every locale, each in its own direction.
+            LeftToRight {
+                SelectionContainer {
+                    LazyColumn(state = list, modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
+                        if (lines.isEmpty()) item {
+                            Text(stringResource(R.string.designer_ui_console_run_empty), color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.output)
                         }
-                        Text(line.text, color = Color(color), fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
+                        items(lines) { line ->
+                            val color = when {
+                                line.level >= Log.ERROR -> palette.danger
+                                line.level == Log.WARN -> palette.accent
+                                else -> palette.text
+                            }
+                            Text(line.text, color = Color(color), fontSize = 12.sp, style = ScriptText.output, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
+                        }
                     }
                 }
             }
@@ -607,17 +612,19 @@ internal fun XmlConsolePanel(client: UiPreviewClient, statusText: String?, inter
             else -> statusText ?: current.javaClass.simpleName
         }
         Text(status, color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp).testTag("designer-ui-console-status"))
-        SelectionContainer {
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
-                if (failure == null && diagnostics.isEmpty()) {
-                    Text(stringResource(R.string.designer_ui_console_empty), color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
-                }
-                failure?.let {
-                    val position = if (it.line > 0) " (${it.line}:${it.column})" else ""
-                    Text("[${it.code}] ${it.message}$position", color = Color(palette.danger), fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
-                }
-                diagnostics.forEach { diagnostic ->
-                    Text("[${diagnostic.code}] " + (diagnostic.attrName?.let { "$it: " } ?: "") + diagnostic.message, color = Color(palette.text), fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
+        LeftToRight {
+            SelectionContainer {
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = AddButtonClearance)) {
+                    if (failure == null && diagnostics.isEmpty()) {
+                        Text(stringResource(R.string.designer_ui_console_empty), color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.output)
+                    }
+                    failure?.let {
+                        val position = if (it.line > 0) " (${it.line}:${it.column})" else ""
+                        Text("[${it.code}] ${it.message}$position", color = Color(palette.danger), fontSize = 12.sp, style = ScriptText.output, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
+                    }
+                    diagnostics.forEach { diagnostic ->
+                        Text("[${diagnostic.code}] " + (diagnostic.attrName?.let { "$it: " } ?: "") + diagnostic.message, color = Color(palette.text), fontSize = 12.sp, style = ScriptText.output, modifier = Modifier.padding(vertical = 2.dp).testTag("designer-ui-console-line"))
+                    }
                 }
             }
         }

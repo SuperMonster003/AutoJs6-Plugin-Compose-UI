@@ -23,11 +23,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.codegen.ScriptWriter
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.JsLiteral
@@ -68,7 +68,7 @@ private fun StateRow(state: StateDecl, preview: JsLiteral?, palette: StandaloneP
     val current = preview ?: initial
     Column(Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("designer-state-${state.name}")) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(state.name, color = Color(palette.text), fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+            Text(state.name, color = Color(palette.text), fontWeight = FontWeight.SemiBold, style = ScriptText.code, modifier = Modifier.weight(1f))
             if (preview != null) TextButton(onClick = { onChange(null) }, modifier = Modifier.testTag("designer-state-reset-${state.name}")) {
                 Text(stringResource(R.string.designer_state_reset))
             }
@@ -78,7 +78,7 @@ private fun StateRow(state: StateDecl, preview: JsLiteral?, palette: StandaloneP
             is PropValue.Expression -> value.source
             is PropValue.StateRef -> value.name + ".value"
         }
-        Text(stringResource(R.string.designer_state_initial, initialText), color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+        Text(stringResource(R.string.designer_state_initial, ScriptText.isolate(initialText)), color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.output)
         val field = Modifier.fillMaxWidth().padding(top = 4.dp).testTag("designer-state-value-${state.name}")
         when (current) {
             is JsLiteral.Bool -> Switch(checked = current.value, onCheckedChange = { onChange(JsLiteral.Bool(it)) }, modifier = Modifier.testTag("designer-state-value-${state.name}"))
@@ -100,7 +100,7 @@ private fun ValueField(value: String, palette: StandalonePalette, modifier: Modi
         onValueChange = { text = it; onChange(it) },
         label = { Text(stringResource(R.string.designer_state_value), fontSize = 12.sp) },
         singleLine = true,
-        textStyle = TextStyle(fontSize = 13.sp, fontFamily = if (monospace) FontFamily.Monospace else FontFamily.Default, color = Color(palette.text)),
+        textStyle = TextStyle(fontSize = 13.sp, color = Color(palette.text)).merge(if (monospace) ScriptText.Code else null),
         modifier = modifier,
     )
 }

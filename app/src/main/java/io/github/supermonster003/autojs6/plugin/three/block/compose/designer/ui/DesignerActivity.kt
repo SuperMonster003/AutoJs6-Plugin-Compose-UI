@@ -64,7 +64,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -73,7 +72,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.GalleryActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.InteractivePreviewSettings
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.LeftToRight
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptLauncher
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandaloneActivity
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
@@ -332,14 +333,16 @@ internal class DesignerActivity : StandaloneActivity() {
                     }
                     TextButton(onClick = { finish() }) { Text(stringResource(R.string.designer_cancel)) }
                 }
-                SelectionContainer(Modifier.fillMaxWidth().weight(1f).background(Color(palette.surfaceVariant)).testTag("designer-readonly-source")) {
-                    Text(
-                        state.text,
-                        color = Color(palette.text),
-                        fontSize = 13.sp,
-                        fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.verticalScroll(rememberScrollState()).horizontalScroll(rememberScrollState()).padding(8.dp),
-                    )
+                LeftToRight {
+                    SelectionContainer(Modifier.fillMaxWidth().weight(1f).background(Color(palette.surfaceVariant)).testTag("designer-readonly-source")) {
+                        Text(
+                            state.text,
+                            color = Color(palette.text),
+                            fontSize = 13.sp,
+                            style = ScriptText.code,
+                            modifier = Modifier.verticalScroll(rememberScrollState()).horizontalScroll(rememberScrollState()).padding(8.dp),
+                        )
+                    }
                 }
             }
         }

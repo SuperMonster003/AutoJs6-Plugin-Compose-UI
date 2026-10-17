@@ -37,11 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.supermonster003.autojs6.plugin.three.block.compose.R
+import io.github.supermonster003.autojs6.plugin.three.block.compose.app.ScriptText
 import io.github.supermonster003.autojs6.plugin.three.block.compose.app.StandalonePalette
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.AttrPart
 import io.github.supermonster003.autojs6.plugin.three.block.compose.designer.model.Dialect
@@ -112,11 +112,11 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
         // Tag
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 12.dp)) {
             if (native) {
-                Text("<${element.tag}>", color = Color(palette.text), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f).padding(vertical = 8.dp).testTag("designer-ui-tag"))
+                Text("<${element.tag}>", color = Color(palette.text), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, style = ScriptText.code, modifier = Modifier.weight(1f).padding(vertical = 8.dp).testTag("designer-ui-tag"))
             } else {
                 TagPicker(element.tag, catalog, palette, Modifier.weight(1f)) { picked -> session.execute(UiEditCommand.SetTag(element.id, picked), merge = false) }
             }
-            Text(elementLabel(element), color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace)
+            Text(elementLabel(element), color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.code)
         }
         if (!native && tag == null && !widget && viewClass == null) {
             Text(stringResource(R.string.designer_ui_unknown_tag), color = Color(palette.danger), fontSize = 13.sp)
@@ -158,7 +158,7 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth().clickable { expanded[group.owner] = !open }.padding(top = 14.dp, bottom = 4.dp).testTag("designer-ui-group-${group.owner}"),
                 ) {
-                    Text(if (open) "-" else "+", color = Color(palette.muted), fontFamily = FontFamily.Monospace, modifier = Modifier.width(18.dp))
+                    Text(if (open) "-" else "+", color = Color(palette.muted), style = ScriptText.code, modifier = Modifier.width(18.dp))
                     Text(group.owner, color = Color(palette.muted), fontSize = 12.sp, fontWeight = FontWeight.Medium)
                     Text(" (${group.attrs.size})", color = Color(palette.muted), fontSize = 12.sp)
                 }
@@ -171,7 +171,7 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
         Row(verticalAlignment = Alignment.CenterVertically) {
             OutlinedTextField(
                 value = newName, onValueChange = { newName = it }, label = { Text(stringResource(R.string.designer_ui_attr_name), fontSize = 12.sp) }, singleLine = true,
-                textStyle = TextStyle(fontSize = 13.sp, fontFamily = FontFamily.Monospace, color = Color(palette.text)), modifier = Modifier.weight(1f).testTag("designer-ui-attr-name"),
+                textStyle = ScriptText.Code.merge(TextStyle(fontSize = 13.sp, color = Color(palette.text))), modifier = Modifier.weight(1f).testTag("designer-ui-attr-name"),
             )
             TextButton(onClick = {
                 val name = newName.trim()
@@ -188,7 +188,7 @@ internal fun UiInspectorPanel(session: UiDesignerSession, palette: StandalonePal
         val handled = session.handledEvents(element)
         UiEvents.forTag(catalog, tag).forEach { event ->
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("designer-ui-event-${event.name}")) {
-                Text(event.name, color = Color(palette.text), fontSize = 13.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.weight(1f))
+                Text(event.name, color = Color(palette.text), fontSize = 13.sp, style = ScriptText.code, modifier = Modifier.weight(1f))
                 if (event.name in handled) Text(stringResource(R.string.designer_ui_event_exists), color = Color(palette.muted), fontSize = 12.sp)
                 else TextButton(onClick = { session.addHandler(element, event) }, enabled = canAdd || (session.document.dialect == Dialect.TSX && event.name == "click"), modifier = Modifier.testTag("designer-ui-event-add-${event.name}")) { Text(stringResource(R.string.designer_add)) }
             }
@@ -218,11 +218,11 @@ private fun TagPicker(tag: String, catalog: UiCatalog, palette: StandalonePalett
     val tags = remember(catalog) { UiTemplates.insertable(catalog).sorted() }
     Box(modifier) {
         TextButton(onClick = { open = true }, modifier = Modifier.testTag("designer-ui-tag")) {
-            Text("<$tag>", color = Color(palette.text), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, fontFamily = FontFamily.Monospace)
+            Text("<$tag>", color = Color(palette.text), fontSize = 18.sp, fontWeight = FontWeight.SemiBold, style = ScriptText.code)
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             tags.forEach { candidate ->
-                DropdownMenuItem(text = { Text(candidate, fontFamily = FontFamily.Monospace) }, onClick = { open = false; if (candidate != tag) onPick(candidate) }, modifier = Modifier.testTag("designer-ui-tag-$candidate"))
+                DropdownMenuItem(text = { Text(candidate, style = ScriptText.code) }, onClick = { open = false; if (candidate != tag) onPick(candidate) }, modifier = Modifier.testTag("designer-ui-tag-$candidate"))
             }
         }
     }
@@ -245,7 +245,7 @@ internal fun UiTextField(
         onValueChange = { text = it; onChange(it) },
         label = { Text(label, fontSize = 12.sp) },
         singleLine = singleLine,
-        textStyle = TextStyle(fontSize = 13.sp, fontFamily = if (monospace) FontFamily.Monospace else FontFamily.Default, color = Color(palette.text)),
+        textStyle = TextStyle(fontSize = 13.sp, color = Color(palette.text)).merge(if (monospace) ScriptText.Code else null),
         modifier = modifier.fillMaxWidth().onFocusChanged { if (!it.isFocused) onSeal() },
     )
 }
@@ -254,7 +254,7 @@ internal fun UiTextField(
 private fun EnumPicker(value: String, options: List<String>, palette: StandalonePalette, modifier: Modifier = Modifier, onPick: (String) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box(modifier) {
-        TextButton(onClick = { open = true }) { Text(value.ifEmpty { "-" }, color = Color(palette.text), fontFamily = FontFamily.Monospace, fontSize = 13.sp) }
+        TextButton(onClick = { open = true }) { Text(value.ifEmpty { "-" }, color = Color(palette.text), fontSize = 13.sp, style = ScriptText.code) }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             options.forEach { option -> DropdownMenuItem(text = { Text(option) }, onClick = { open = false; onPick(option) }) }
         }
@@ -272,7 +272,7 @@ private fun AttrRow(session: UiDesignerSession, element: XmlNode.Element, name: 
     fun set(raw: String?, bare: Boolean = false, merge: Boolean = true) = session.execute(UiEditCommand.SetAttr(element.id, name, raw, bare), merge)
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).testTag("designer-ui-attr-$name")) {
         Column(Modifier.width(110.dp)) {
-            Text(name, color = Color(palette.text), fontSize = 13.sp, fontFamily = FontFamily.Monospace)
+            Text(name, color = Color(palette.text), fontSize = 13.sp, style = ScriptText.code)
             val hint = full ?: spec?.typeText?.takeIf { it.isNotBlank() }
             if (hint != null) Text(hint, color = Color(palette.muted), fontSize = 10.sp, maxLines = 1)
         }
@@ -281,7 +281,7 @@ private fun AttrRow(session: UiDesignerSession, element: XmlNode.Element, name: 
                 attr == null -> Text("-", color = Color(palette.muted), modifier = Modifier.padding(8.dp))
                 attr.isBare -> Text(stringResource(R.string.designer_ui_value_bare), color = Color(palette.muted), fontSize = 12.sp, modifier = Modifier.padding(8.dp))
                 attr.hasExpr -> Column {
-                    Text(attr.value, color = Color(palette.muted), fontSize = 12.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.testTag("designer-ui-attr-expr-$name"))
+                    Text(attr.value, color = Color(palette.muted), fontSize = 12.sp, style = ScriptText.code, modifier = Modifier.testTag("designer-ui-attr-expr-$name"))
                     Text(stringResource(R.string.designer_ui_value_expr), color = Color(palette.muted), fontSize = 10.sp)
                 }
                 attr.hasBinding -> BindingEditor(attr, session.declaredNames, palette, onSeal = { session.seal() }) { set(it) }
@@ -328,7 +328,7 @@ private fun BindingEditor(attr: XmlAttr, declared: List<String>, palette: Standa
         if (declared.isNotEmpty()) Box {
             TextButton(onClick = { pick = true }, modifier = Modifier.testTag("designer-ui-attr-declared-${attr.name}")) { Text("...", color = Color(palette.muted)) }
             DropdownMenu(expanded = pick, onDismissRequest = { pick = false }) {
-                declared.forEach { name -> DropdownMenuItem(text = { Text(name, fontFamily = FontFamily.Monospace) }, onClick = { pick = false; onChange("{{$name}}") }) }
+                declared.forEach { name -> DropdownMenuItem(text = { Text(name, style = ScriptText.code) }, onClick = { pick = false; onChange("{{$name}}") }) }
             }
         }
     }
